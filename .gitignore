@@ -3,3 +3,5 @@
 .web
 __pycache__/
 assets/external/
+.venv
+.DS_Store
