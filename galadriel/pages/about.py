@@ -1,6 +1,8 @@
 import reflex as rx
 from ..ui.base import base_page
 
+from .. import navigation
+
 def about_page() -> rx.Component:
     about_content = rx.vstack(
         rx.heading("About Us"),
@@ -10,7 +12,7 @@ def about_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our dicks!"),
-            href="/",
+            href=navigation.routes.HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",
