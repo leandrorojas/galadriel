@@ -1,16 +1,12 @@
 from datetime import datetime
-import reflex as rx
 import sqlalchemy as sa
-
 from sqlmodel import Field
+import reflex as rx
 
 from .. import utils
 
-class ContactModel(rx.Model, table=True):
-    first_name:str | None = None
-    last_name:str | None = None
-    email:str
-    contact_message:str
+class Suite(rx.Model, table=True):
+    name: str
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),
@@ -19,3 +15,8 @@ class ContactModel(rx.Model, table=True):
         },
         nullable=False
     )
+    deleted: datetime = Field(
+        sa_type=sa.DateTime(timezone=True),
+        nullable=True
+    )
+    #created_by

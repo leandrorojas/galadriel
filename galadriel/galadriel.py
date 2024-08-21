@@ -2,7 +2,12 @@ import reflex as rx
 from rxconfig import config
 
 from .ui.base import base_page
-from . import pages, navigation, contact
+
+#demo
+from . import blog, contact, pages, navigation
+
+#galadriel
+from . import suite
 
 class State(rx.State):
     """The app state."""
@@ -45,6 +50,19 @@ app.add_page(contact.contact_page, route=navigation.routes.CONTACT_ROUTE)
 app.add_page(
     contact.contact_entries_list_page, 
     route=navigation.routes.CONTACT_ENTRIES_ROUTE,
-    on_load=contact.ContactState.list_entries)
+    on_load=contact.ContactState.list_entries
+)
+
+app.add_page(
+    blog.blog_post_list_page,
+    route=navigation.routes.BLOG_POSTS_ROUTE,
+    on_load=blog.BlogPostState.load_posts
+)
+
+app.add_page(
+    suite.suites_list_page,
+    route=navigation.routes.SUITES_ROUTE,
+    on_load=suite.SuiteState.load_suites
+)
 
 app.add_page(pages.pricing_page, route=navigation.routes.PRICING_ROUTE)

@@ -17,7 +17,7 @@ class ContactState(rx.State):
         return self.form_data.get("email")
 
     async def handle_submit(self, form_data: dict):
-        print(form_data)
+        #print(form_data)
         self.form_data = form_data
 
         #helps to narrow the data that only has values on it. This should go to a generic function
@@ -28,7 +28,7 @@ class ContactState(rx.State):
                 continue
             clean_data[key] = value
 
-        print(clean_data)
+        #print(clean_data)
 
         with rx.session() as session:
             contact = ContactModel(**clean_data)
@@ -43,6 +43,6 @@ class ContactState(rx.State):
 
     def list_entries(self):
         with rx.session() as session:
-            entries = session.exec(select(ContactModel)).all()
+            entries = session.exec(ContactModel.select()).all()
             print(entries)
             self.entries = entries

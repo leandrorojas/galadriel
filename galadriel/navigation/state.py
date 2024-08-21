@@ -14,3 +14,9 @@ class NavigationState(rx.State):
     
     def to_contact(self):
         return rx.redirect(routes.CONTACT_ROUTE)
+    
+    def to_blog_posts(self):
+        return rx.redirect(routes.BLOG_POSTS_ROUTE)
+    
+    def to_suites(self):
+        return rx.redirect(routes.SUITES_ROUTE)

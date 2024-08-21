@@ -3,13 +3,23 @@ from ..ui.base import base_page
 
 from .. import navigation
 
-from . import form, state
+from . import form, state, model
+
+def contact_entry_list_item(contact: model.ContactModel):
+    return rx.box(
+        rx.heading(contact.email),
+        rx.text(
+            contact.contact_message
+        ),
+        padding="1em"
+    )
 
 def contact_entries_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
             rx.heading("Contact Entries"),
+            rx.foreach(state.ContactState.entries, contact_entry_list_item),
             spacing="5",
             align="center",
             min_height="85vh"
