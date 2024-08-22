@@ -1,9 +1,9 @@
 *.db
 *.py[cod]
+.DS_Store
+.venv
 .web
 __pycache__/
-assets/external/
-.venv
-.DS_Store
-alembic/
 alembic.ini
+alembic/
+assets/external/

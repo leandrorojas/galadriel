@@ -38,10 +38,11 @@ app = rx.App(
     theme = rx.theme(
         accent_color="violet"
     ),
+    stylesheets=["https://fonts.googleapis.com/css?family=Montserrat",],    
     style = {
         "font_family": "Montserrat",
         "font_size": "16px",        
-    }
+    },
 )
 app.add_page(index)
 app.add_page(pages.about_page, route=navigation.routes.ABOUT_ROUTE)
