@@ -60,9 +60,31 @@ app.add_page(
 )
 
 app.add_page(
-    suite.suites_list_page,
-    route=navigation.routes.SUITES_ROUTE,
-    on_load=suite.SuiteState.load_suites
+    blog.blog_post_add_page,
+    route=navigation.routes.BLOG_POST_ADD_ROUTE,
 )
 
+app.add_page(
+    blog.blog_post_detail_page,
+    route="/blog/[blog_id]",
+    on_load=blog.BlogPostState.get_post_detail
+)
+
+#Test Suites
+app.add_page(
+    suite.suites_list_page, 
+    route=navigation.routes.SUITES_ROUTE, 
+    on_load=suite.SuiteState.load_suites
+)
+app.add_page(
+    suite.suite_add_page, 
+    route=navigation.routes.SUITE_ADD_ROUTE
+)
+app.add_page(
+    suite.suite_detail_page, 
+    route="/suites/[id]", 
+    on_load=suite.SuiteState.get_suite_detail
+)
+
+#Pricing
 app.add_page(pages.pricing_page, route=navigation.routes.PRICING_ROUTE)

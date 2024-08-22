@@ -18,5 +18,11 @@ class NavigationState(rx.State):
     def to_blog_posts(self):
         return rx.redirect(routes.BLOG_POSTS_ROUTE)
     
+    def to_blog_post_add(self):
+        return rx.redirect(routes.BLOG_POST_ADD_ROUTE)
+    
     def to_suites(self):
         return rx.redirect(routes.SUITES_ROUTE)
+    
+    def to_suites_add(self):
+        return rx.redirect(routes.SUITE_ADD_ROUTE)

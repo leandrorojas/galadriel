@@ -2,7 +2,6 @@ import reflex as rx
 from ..ui.base import base_page
 
 from .. import navigation
-
 from . import state, model
 
 def suite_detail_link(child: rx.Component, suite: model.Suite):
@@ -36,6 +35,10 @@ def suites_list_page() -> rx.Component:
     return base_page(
         rx.vstack(
             rx.heading("Test Suites"),
+            rx.link(
+                rx.button("New Suite"),
+                href=navigation.routes.SUITE_ADD_ROUTE
+            ),            
             rx.foreach(state.SuiteState.suites, suite_list_item),
             spacing="5",
             align="center",
