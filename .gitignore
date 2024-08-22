@@ -5,3 +5,5 @@ __pycache__/
 assets/external/
 .venv
 .DS_Store
+alembic/
+alembic.ini

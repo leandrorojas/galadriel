@@ -2,7 +2,12 @@ import reflex as rx
 from rxconfig import config
 
 from .ui.base import base_page
-from . import pages
+
+#demo
+from . import blog, contact, pages, navigation
+
+#galadriel
+from . import suite
 
 class State(rx.State):
     """The app state."""
@@ -39,5 +44,47 @@ app = rx.App(
     }
 )
 app.add_page(index)
-app.add_page(pages.about_page, route='/about')
-app.add_page(pages.pricing_page, route='/pricing')
+app.add_page(pages.about_page, route=navigation.routes.ABOUT_ROUTE)
+app.add_page(contact.contact_page, route=navigation.routes.CONTACT_ROUTE)
+
+app.add_page(
+    contact.contact_entries_list_page, 
+    route=navigation.routes.CONTACT_ENTRIES_ROUTE,
+    on_load=contact.ContactState.list_entries
+)
+
+app.add_page(
+    blog.blog_post_list_page,
+    route=navigation.routes.BLOG_POSTS_ROUTE,
+    on_load=blog.BlogPostState.load_posts
+)
+
+app.add_page(
+    blog.blog_post_add_page,
+    route=navigation.routes.BLOG_POST_ADD_ROUTE,
+)
+
+app.add_page(
+    blog.blog_post_detail_page,
+    route="/blog/[blog_id]",
+    on_load=blog.BlogPostState.get_post_detail
+)
+
+#Test Suites
+app.add_page(
+    suite.suites_list_page, 
+    route=navigation.routes.SUITES_ROUTE, 
+    on_load=suite.SuiteState.load_suites
+)
+app.add_page(
+    suite.suite_add_page, 
+    route=navigation.routes.SUITE_ADD_ROUTE
+)
+app.add_page(
+    suite.suite_detail_page, 
+    route="/suites/[id]", 
+    on_load=suite.SuiteState.get_suite_detail
+)
+
+#Pricing
+app.add_page(pages.pricing_page, route=navigation.routes.PRICING_ROUTE)
