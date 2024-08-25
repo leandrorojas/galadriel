@@ -1,41 +1,17 @@
 import reflex as rx
 from ..ui.base import base_page
 
-# from . import forms
-
-class EditExampleState(rx.State):
-    def handle_submit(self, form_data):
-        print(form_data)
-
-def blog_post_edit_sample_form() -> rx.Component:
-
-    return rx.form(
-        rx.vstack(
-                rx.input(
-                    name="title",
-                    placeholder="Title",
-                    width="100%",
-                ),
-            rx.text_area(
-                name="content",
-                placeholder="que dice el post?",
-                required=True,
-                height="50vh",
-                width="100%",
-            ),
-            rx.button("Submit", type="submit", width="100%",),
-        ),
-        on_submit=EditExampleState.handle_submit,
-        reset_on_submit=True,
-    ),
+from . import forms
+from .state import BlogAEditFormState
 
 def blog_post_edit_page() -> rx.Component:
-    my_form = blog_post_edit_sample_form
+    my_form = forms.blog_post_edit_form()
+    post = BlogAEditFormState.post
 
     contact_content = rx.vstack(
-        rx.heading("Edit Blog Post"),
+        rx.heading("Editing ", post.title),
         rx.desktop_only(
-            rx.box(
+            rx.box( 
                 my_form,
                 width="50vw",
             ),
