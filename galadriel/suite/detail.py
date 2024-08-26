@@ -6,7 +6,7 @@ from . import state
 
 def suite_detail_page() -> rx.Component:
     can_edit = True
-    edit_link = rx.link("Edit", href=f"/suites/{state.SuiteState.id}/edit") #convert to button, like in line 28?
+    edit_link = rx.link("Edit", href=f"/suites/{state.SuiteState.suite_id}/edit") #convert to button, like in line 28?
 
     edit_link_element = rx.cond(
         can_edit,
@@ -14,13 +14,13 @@ def suite_detail_page() -> rx.Component:
         rx.fragment("")
     )
     
-    suite_content = rx.vstack(
+    my_child = rx.vstack(
         rx.hstack(
             rx.heading(f"Detail for suite: {state.SuiteState.suite.name}"),
             edit_link_element,
             align="center",
         ),
-        rx.text(f"[{state.SuiteState.suite.id}]"),
+        rx.text(f"[{state.SuiteState.suite_id}]"),
         rx.text(
             f"c:[{state.SuiteState.suite.created}]",
             size="5",
@@ -31,4 +31,4 @@ def suite_detail_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return base_page(suite_content)
+    return base_page(my_child)

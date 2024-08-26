@@ -1,34 +1,33 @@
 from typing import List, Optional
 import reflex as rx
-from .model import Suite
+from .model import SuiteModel
 from ..navigation import routes
 
 class SuiteState(rx.State):
-    suites: List['Suite'] = []
-    suite: Optional['Suite'] = None
-    suite_name:str = ""
+    suites: List['SuiteModel'] = []
+    suite: Optional['SuiteModel'] = None
 
     @rx.var
-    def id(self):
+    def suite_id(self):
         #print(self.router.page.params)
         return self.router.page.params.get("id", "")    
 
     def get_suite_detail(self):                
         with rx.session() as session:
-            if (self.id == ""):
+            if (self.suite_id == ""):
                 self.suite = None
                 return            
-            result = session.exec(Suite.select().where(Suite.id == self.id)).one_or_none()
+            result = session.exec(SuiteModel.select().where(SuiteModel.id == self.suite_id)).one_or_none()
             self.suite = result
 
     def load_suites(self):
         with rx.session() as session:
-            results = session.exec(Suite.select()).all()
+            results = session.exec(SuiteModel.select()).all()
             self.suites = results
 
     def add_suite(self, form_data:dict):
         with rx.session() as session:
-            post = Suite(**form_data)
+            post = SuiteModel(**form_data)
             session.add(post)
             session.commit()
             session.refresh(post)
@@ -36,7 +35,7 @@ class SuiteState(rx.State):
     
     def save_suite_edits(self, suite_id:int, updated_data:dict):
         with rx.session() as session:        
-            suite = session.exec(Suite.select().where(Suite.id == suite_id)).one_or_none()
+            suite = session.exec(SuiteModel.select().where(SuiteModel.id == suite_id)).one_or_none()
 
             if (suite is None):
                 return

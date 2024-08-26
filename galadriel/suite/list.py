@@ -4,7 +4,7 @@ from ..ui.base import base_page
 from .. import navigation
 from . import state, model
 
-def suite_detail_link(child: rx.Component, suite: model.Suite):
+def suite_detail_link(child: rx.Component, suite: model.SuiteModel):
 
     if suite is None:
         return rx.fragment(child)
@@ -21,7 +21,7 @@ def suite_detail_link(child: rx.Component, suite: model.Suite):
         href=suite_detail_url
     )
 
-def suite_list_item(suite: model.Suite):
+def suite_list_item(suite: model.SuiteModel):
     return rx.box(
         suite_detail_link(
             rx.heading(suite.name),

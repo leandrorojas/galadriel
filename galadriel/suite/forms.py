@@ -7,7 +7,7 @@ def suite_add_form() -> rx.Component:
         rx.vstack(
                 rx.input(
                     name="name",
-                    placeholder="Name",
+                    placeholder="Suite name",
                     width="100%",
                 ),
             rx.button("Submit", type="submit", width="100%",),
@@ -32,8 +32,8 @@ def suite_edit_form() -> rx.Component:
         rx.vstack(
                 rx.input(
                     default_value=suite_name,
-                    name="title",
-                    placeholder="Title",
+                    name="name",
+                    placeholder="Suite name",
                     width="100%",
                 ),
             rx.button("Submit", type="submit", width="100%",),

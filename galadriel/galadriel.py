@@ -94,7 +94,7 @@ app.add_page(
 )
 
 app.add_page(
-    suite.blog_post_edit_page, 
+    suite.suite_edit_page, 
     route="/suites/[id]/edit", 
     on_load=suite.SuiteState.get_suite_detail
 )

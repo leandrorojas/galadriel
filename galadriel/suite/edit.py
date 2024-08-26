@@ -4,7 +4,7 @@ from ..ui.base import base_page
 from . import forms
 from .state import EditSuiteState
 
-def blog_post_edit_page() -> rx.Component:
+def suite_edit_page() -> rx.Component:
     my_form = forms.suite_edit_form()
     suite = EditSuiteState.suite
 
