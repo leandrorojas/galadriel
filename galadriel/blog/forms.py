@@ -1,5 +1,5 @@
 import reflex as rx
-from .state import BlogAEditFormState, BlogAddPostFormState
+from .state import BlogEditFormState, BlogAddPostFormState
 
 def blog_post_add_form() -> rx.Component:
 
@@ -25,9 +25,9 @@ def blog_post_add_form() -> rx.Component:
 
 def blog_post_edit_form() -> rx.Component:
 
-    post = BlogAEditFormState.post
+    post = BlogEditFormState.post
     title = post.title
-    post_content = BlogAEditFormState.post_content
+    post_content = BlogEditFormState.post_content
 
     return rx.form(
         rx.box(
@@ -47,7 +47,7 @@ def blog_post_edit_form() -> rx.Component:
                 ),
             rx.text_area(
                 value=post_content,
-                on_change=BlogAEditFormState.set_post_content,
+                on_change=BlogEditFormState.set_post_content,
                 name="content",
                 placeholder="que dice el post?",
                 required=True,
@@ -56,5 +56,5 @@ def blog_post_edit_form() -> rx.Component:
             ),
             rx.button("Submit", type="submit", width="100%",),
         ),
-        on_submit=BlogAEditFormState.handle_submit,
+        on_submit=BlogEditFormState.handle_submit,
     ),

@@ -1,5 +1,5 @@
 import reflex as rx
-from . import state
+from .state import AddSuiteState, EditSuiteState
 
 def suite_add_form() -> rx.Component:
 
@@ -12,6 +12,31 @@ def suite_add_form() -> rx.Component:
                 ),
             rx.button("Submit", type="submit", width="100%",),
         ),
-        on_submit=state.AddSuiteState.handle_submit,
+        on_submit=AddSuiteState.handle_submit,
         reset_on_submit=True,
+    ),
+
+def suite_edit_form() -> rx.Component:
+    suite = EditSuiteState.suite
+    suite_name = suite.name
+
+    return rx.form(
+        rx.box(
+            rx.input(
+                type="hidden",
+                name="suite_id",
+                value=suite.id
+            ),
+            display="none",
+        ),
+        rx.vstack(
+                rx.input(
+                    default_value=suite_name,
+                    name="title",
+                    placeholder="Title",
+                    width="100%",
+                ),
+            rx.button("Submit", type="submit", width="100%",),
+        ),
+        on_submit=EditSuiteState.handle_submit,
     ),

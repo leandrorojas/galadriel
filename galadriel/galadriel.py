@@ -93,5 +93,11 @@ app.add_page(
     on_load=suite.SuiteState.get_suite_detail
 )
 
+app.add_page(
+    suite.blog_post_edit_page, 
+    route="/suites/[id]/edit", 
+    on_load=suite.SuiteState.get_suite_detail
+)
+
 #Pricing
 app.add_page(pages.pricing_page, route=navigation.routes.PRICING_ROUTE)

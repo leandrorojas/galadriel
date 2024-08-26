@@ -2,14 +2,14 @@ import reflex as rx
 from ..ui.base import base_page
 
 from . import forms
-from .state import BlogEditFormState
+from .state import EditSuiteState
 
 def blog_post_edit_page() -> rx.Component:
-    my_form = forms.blog_post_edit_form()
-    post = BlogEditFormState.post
+    my_form = forms.suite_edit_form()
+    suite = EditSuiteState.suite
 
-    contact_content = rx.vstack(
-        rx.heading("Editing ", post.title),
+    suite_content = rx.vstack(
+        rx.heading("Editing ", suite.name),
         rx.desktop_only(
             rx.box( 
                 my_form,
@@ -27,4 +27,4 @@ def blog_post_edit_page() -> rx.Component:
         min_height="95vh",
     ),
     
-    return base_page(contact_content)
+    return base_page(suite_content)
