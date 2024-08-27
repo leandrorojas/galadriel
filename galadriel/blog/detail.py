@@ -21,6 +21,7 @@ def blog_post_detail_page() -> rx.Component:
             align="center"
         ),
         rx.text(f"[{state.BlogPostState.blog_post_id}]"),
+        rx.text(f"{state.BlogPostState.post.published}"),
         rx.text(
             state.BlogPostState.post.content,
             size="5",

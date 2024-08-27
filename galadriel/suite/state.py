@@ -24,7 +24,7 @@ class SuiteState(rx.State):
     
     @rx.var
     def suite_edit_url(self):
-        if not self.post:
+        if not self.suite:
             return f"{SUITES_ROUTE}"
         return f"{SUITES_ROUTE}/{self.suite.id}/edit"
 
@@ -43,11 +43,11 @@ class SuiteState(rx.State):
 
     def add_suite(self, form_data:dict):
         with rx.session() as session:
-            post = SuiteModel(**form_data)
-            session.add(post)
+            suite = SuiteModel(**form_data)
+            session.add(suite)
             session.commit()
-            session.refresh(post)
-            self.post = post
+            session.refresh(suite)
+            self.suite = suite
     
     def save_suite_edits(self, suite_id:int, updated_data:dict):
         with rx.session() as session:        
