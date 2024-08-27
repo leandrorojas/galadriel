@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 import reflex as rx
 from .model import BlogPostModel
@@ -46,9 +47,12 @@ class BlogPostState(rx.State):
             self.post_content = self.post.content
             self.post_publish_active = self.post.publish_active
                 
-    def load_posts(self):
+    def load_posts(self, published_only=True):
+        lookup_args = ()
+        if published_only:
+            lookup_args = ((BlogPostModel.publish_active == True) & (BlogPostModel.published < datetime.now()))
         with rx.session() as session:
-            result = session.exec(BlogPostModel.select()).all()
+            result = session.exec(BlogPostModel.select().where(*lookup_args)).all()
             self.posts = result
 
     def add_post(self, form_data:dict):
@@ -92,7 +96,23 @@ class BlogAddPostFormState(BlogPostState):
 class BlogEditFormState(BlogPostState):
     form_data:dict = {}
     # post_content:str = ""
-    
+
+    @rx.var
+    def publish_display_date(self) -> str:
+        if not self.post:
+            return datetime.now().strftime("%Y-%m-%d")
+        if not self.post.published:
+            return datetime.now().strftime("%Y-%m-%d")
+        return self.post.published.strftime("%Y-%m-%d")
+
+    @rx.var
+    def publish_display_time(self) -> str:
+        if not self.post:
+            return datetime.now().strftime("%H:%M:%S")
+        if not self.post.published:
+            return datetime.now().strftime("%H:%M:%S")
+        return self.post.published.strftime("%H:%M:%S")
+        
     def handle_submit(self, form_data):
         self.form_data = form_data
         post_id = form_data.pop("post_id")
@@ -102,10 +122,18 @@ class BlogEditFormState(BlogPostState):
         publish_time = None
         if "publish_time" in form_data:
             publish_time = form_data.pop("publish_time")
+        publish_input_string = f"{publish_date} {publish_time}"
+
+        try:
+            to_db_publish_date = datetime.strptime(publish_input_string, "%Y-%m-%d %H:%M:%S")
+        except:
+            to_db_publish_date = None
+
         publish_active = False
         if "publish_active" in form_data:
             publish_active = form_data.pop("publish_active") == "on"
         updated_data = {**form_data}
         updated_data["publish_active"] = publish_active
+        updated_data["published"] = to_db_publish_date
         self.save_post_edits(post_id, updated_data)
         return self.to_blog_post()

@@ -26,3 +26,9 @@ class BlogPostModel(rx.Model, table=True):
         nullable=False
     )
     publish_active:bool = False
+    published: datetime = Field(
+        default_factory=None, 
+        sa_type=sa.DateTime(timezone=True),
+        sa_column_kwargs={},
+        nullable=True
+    )
