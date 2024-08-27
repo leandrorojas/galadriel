@@ -11,7 +11,7 @@ def about_page() -> rx.Component:
             size="5",
         ),
         rx.link(
-            rx.button("Check out our dicks!"),
+            rx.button("Check out our ducks!"),
             href=navigation.routes.HOME_ROUTE,
             is_extgsernal=True,
         ),
