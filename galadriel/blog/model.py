@@ -24,4 +24,5 @@ class BlogPostModel(rx.Model, table=True):
             'server_default': sa.func.now()
         },
         nullable=False
-    )    
+    )
+    publish_active:bool = False
