@@ -67,13 +67,13 @@ app.add_page(
 
 app.add_page(
     blog.blog_post_detail_page,
-    route="/blog/[blog_id]",
+    route=navigation.routes.BLOG_POST_DETAIL_ROUTE,
     on_load=blog.BlogPostState.get_post_detail
 )
 
 app.add_page(
     blog.blog_post_edit_page,
-    route="/blog/[blog_id]/edit",
+    route=navigation.routes.BLOG_POST_EDIT_ROUTE,
     on_load=blog.BlogPostState.get_post_detail
 )
 
@@ -89,13 +89,13 @@ app.add_page(
 )
 app.add_page(
     suite.suite_detail_page, 
-    route="/suites/[id]", 
+    route=navigation.routes.SUITE_DETAIL_ROUTE, 
     on_load=suite.SuiteState.get_suite_detail
 )
 
 app.add_page(
     suite.suite_edit_page, 
-    route="/suites/[id]/edit", 
+    route=navigation.routes.SUITE_EDIT_ROUTE, 
     on_load=suite.SuiteState.get_suite_detail
 )
 

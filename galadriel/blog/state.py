@@ -73,7 +73,7 @@ class BlogPostState(rx.State):
 
     def to_blog_post(self, edit_page=False):
         if not self.post:
-            return rx.redirect(f"{BLOG_POSTS_ROUTE}")
+            return rx.redirect(BLOG_POSTS_ROUTE)
         
         if edit_page:
             return rx.redirect(f"{self.blog_post_edit_url}")
