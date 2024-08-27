@@ -3,6 +3,10 @@ import reflex as rx
 from .model import SuiteModel
 from ..navigation import routes
 
+SUITES_ROUTE = routes.SUITES_ROUTE
+if SUITES_ROUTE.endswith("/"):
+    SUITES_ROUTE = SUITES_ROUTE[:-1]
+
 class SuiteState(rx.State):
     suites: List['SuiteModel'] = []
     suite: Optional['SuiteModel'] = None
@@ -10,7 +14,19 @@ class SuiteState(rx.State):
     @rx.var
     def suite_id(self):
         #print(self.router.page.params)
-        return self.router.page.params.get("id", "")    
+        return self.router.page.params.get("id", "")
+    
+    @rx.var
+    def suite_url(self):
+        if not self.suite:
+            return f"{SUITES_ROUTE}"
+        return f"{SUITES_ROUTE}/{self.suite.id}"
+    
+    @rx.var
+    def suite_edit_url(self):
+        if not self.post:
+            return f"{SUITES_ROUTE}"
+        return f"{SUITES_ROUTE}/{self.suite.id}/edit"
 
     def get_suite_detail(self):                
         with rx.session() as session:
@@ -47,10 +63,12 @@ class SuiteState(rx.State):
             session.refresh(suite)
             self.suite = suite
 
-    def to_suite(self):
+    def to_suite(self, edit_page=True):
         if not self.suite:
             return rx.redirect(routes.SUITES_ROUTE)
-        return rx.redirect(routes.SUITES_ROUTE + f"/{self.suite.id}/")
+        if edit_page:
+            return rx.redirect(self.suite_edit_url)
+        return rx.redirect(self.suite_url)
 
 class AddSuiteState(SuiteState):
     form_data:dict = {}

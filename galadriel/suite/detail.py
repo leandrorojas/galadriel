@@ -6,7 +6,7 @@ from . import state
 
 def suite_detail_page() -> rx.Component:
     can_edit = True
-    edit_link = rx.link("Edit", href=f"/suites/{state.SuiteState.suite_id}/edit") #convert to button, like in line 28?
+    edit_link = rx.link("Edit", href=f"{state.SuiteState.suite_edit_url}") #convert to button, like in line 28?
 
     edit_link_element = rx.cond(
         can_edit,
