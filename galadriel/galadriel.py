@@ -5,7 +5,7 @@ from rxconfig import config
 from .ui.base import base_page
 
 #demo
-from . import blog, contact, pages, navigation
+from . import auth, blog, contact, pages, navigation
 
 #galadriel
 from . import suite
@@ -49,13 +49,13 @@ app.add_page(index)
 
 #reflex_local_auth canned page
 app.add_page(
-    reflex_local_auth.pages.login_page,
+    auth.pages.my_login_page,
     route=reflex_local_auth.routes.LOGIN_ROUTE,
     title="Login",
 )
 #reflex_local_auth canned page
 app.add_page(
-    reflex_local_auth.pages.register_page,
+    auth.pages.my_signup_page,
     route=reflex_local_auth.routes.REGISTER_ROUTE,
     title="Register",
 )

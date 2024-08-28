@@ -8,5 +8,6 @@ def base_page(content: rx.Component, *args) -> rx.Component:
             content,
         ),
         rx.color_mode.button(position="bottom-left"),
+        *args,
         rx.logo(),
     )
