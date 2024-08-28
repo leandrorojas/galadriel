@@ -1,6 +1,7 @@
 import reflex as rx
 from reflex_local_auth.pages.login import LoginState, login_form
 from reflex_local_auth.pages.registration import RegistrationState, register_form
+from .forms import my_register_form
 
 from ..ui.base import base_page
 
@@ -23,7 +24,7 @@ def my_signup_page() -> rx.Component:
                 rx.vstack(
                     rx.text("Registration successful!"),
                 ),
-                rx.card(register_form()),
+                rx.card(my_register_form()),
             ),
             min_height="85vh",
         ) 
