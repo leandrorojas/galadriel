@@ -26,7 +26,7 @@ def sidebar_item(
     )
 
 
-def sidebar_items() -> rx.Component:
+def sidebar_items() -> rx.Component: 
     return rx.vstack(
         sidebar_item("Dashboard", "layout-dashboard", "/#"),
         sidebar_item("Projects", "square-library", "/#"),
