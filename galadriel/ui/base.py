@@ -20,4 +20,4 @@ def base_page(content: rx.Component, *args) -> rx.Component:
         is_logged_in,
         base_dashboard_page(content, *args),
         base_layout_component(content, *args),
-    )
+    ) 
