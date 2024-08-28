@@ -1,8 +1,8 @@
 import reflex as rx
+from .. import navigation
+from reflex.style import toggle_color_mode
 
-def sidebar_item(
-    text: str, icon: str, href: str
-) -> rx.Component:
+def sidebar_item(text: str, icon: str, href: str) -> rx.Component:
     return rx.link(
         rx.hstack(
             rx.icon(icon),
@@ -25,17 +25,51 @@ def sidebar_item(
         width="100%",
     )
 
-
-def sidebar_items() -> rx.Component: 
-    return rx.vstack(
-        sidebar_item("Dashboard", "layout-dashboard", "/#"),
-        sidebar_item("Projects", "square-library", "/#"),
-        sidebar_item("Analytics", "bar-chart-4", "/#"),
-        sidebar_item("Messages", "mail", "/#"),
-        spacing="1",
+def sidebar_color_mode_toggle_item() -> rx.Component:
+    return rx.box(
+        rx.hstack(
+            rx.color_mode_cond(
+                light=rx.icon("moon"),
+                dark=rx.icon("sun"),
+            ),
+            rx.text(
+                rx.color_mode_cond(
+                    light="Dark Mode",
+                    dark="Light Mode",
+                ),
+                size="4"),
+            width="100%",
+            padding_x="0.5rem",
+            padding_y="0.75rem",
+            align="center",
+            style={
+                "_hover": {
+                    "cursor": "pointer",
+                    "bg": rx.color("accent", 4),
+                    "color": rx.color("accent", 11),
+                },
+                "color": rx.color("accent", 11),
+                "border-radius": "0.5em",
+            },
+        ),
+        on_click=toggle_color_mode,
+        as_='button',
+        underline="none",
+        weight="medium",
         width="100%",
     )
 
+def sidebar_items() -> rx.Component: 
+    return rx.vstack(
+        sidebar_item("Dashboard", "layout-dashboard", navigation.routes.HOME_ROUTE),
+        sidebar_item("Blog", "rss", navigation.routes.BLOG_POSTS_ROUTE),
+        sidebar_item("Create Post", "sticky-note", navigation.routes.BLOG_POST_ADD_ROUTE),
+        # sidebar_item("Projects", "square-library", "/#"),
+        # sidebar_item("Analytics", "bar-chart-4", "/#"),
+        # sidebar_item("Messages", "mail", "/#"),
+        spacing="1",
+        width="100%",
+    )
 
 def sidebar() -> rx.Component:
     return rx.box(
@@ -60,12 +94,9 @@ def sidebar() -> rx.Component:
                 rx.spacer(),
                 rx.vstack(
                     rx.vstack(
-                        sidebar_item(
-                            "Settings", "settings", "/#"
-                        ),
-                        sidebar_item(
-                            "Log out", "log-out", "/#"
-                        ),
+                        #sidebar_item("Settings", "settings", "/#"),
+                        sidebar_color_mode_toggle_item(),
+                        sidebar_item("Log out", "log-out", "/#"),
                         spacing="1",
                         width="100%",
                     ),
