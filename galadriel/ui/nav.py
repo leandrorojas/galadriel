@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 
 from .. import navigation
 
@@ -39,12 +40,18 @@ def navbar() -> rx.Component:
                     spacing="5",
                 ),
                 rx.hstack(
-                    rx.button(
-                        "Sign Up",
-                        size="3",
-                        variant="outline",
+                    rx.link(
+                        rx.button(
+                            "Sign Up",
+                            size="3",
+                            variant="outline",
+                        ),
+                        href=reflex_local_auth.routes.REGISTER_ROUTE,
                     ),
-                    rx.button("Log In", size="3"),
+                    rx.link(
+                        rx.button("Log In", size="3"),
+                        href=reflex_local_auth.routes.LOGIN_ROUTE,
+                    ),
                     spacing="4",
                     justify="end",
                 ),
@@ -78,8 +85,8 @@ def navbar() -> rx.Component:
                         rx.menu.item("Contact", on_click=navigation.NavigationState.to_contact),
                         rx.menu.item("Suites", on_click=navigation.NavigationState.to_suites),
                         rx.menu.separator(),
-                        rx.menu.item("Log in"),
-                        rx.menu.item("Sign up"),
+                        rx.menu.item("Log in", on_click=navigation.NavigationState.to_login),
+                        rx.menu.item("Sign up", on_click=navigation.NavigationState.to_signup),
                     ),
                     justify="end",
                 ),

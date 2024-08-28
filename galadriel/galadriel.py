@@ -1,10 +1,11 @@
 import reflex as rx
+import reflex_local_auth
 from rxconfig import config
 
 from .ui.base import base_page
 
 #demo
-from . import blog, contact, pages, navigation
+from . import auth, blog, contact, pages, navigation
 
 #galadriel
 from . import suite
@@ -45,8 +46,25 @@ app = rx.App(
     },
 )
 app.add_page(index)
+
+#reflex_local_auth canned page
+app.add_page(
+    auth.pages.my_login_page,
+    route=reflex_local_auth.routes.LOGIN_ROUTE,
+    title="Login",
+)
+#reflex_local_auth canned page
+app.add_page(
+    auth.pages.my_signup_page,
+    route=reflex_local_auth.routes.REGISTER_ROUTE,
+    title="Register",
+)
+
+#propietary pages
 app.add_page(pages.about_page, route=navigation.routes.ABOUT_ROUTE)
 app.add_page(contact.contact_page, route=navigation.routes.CONTACT_ROUTE)
+
+app.add_page(pages.protected_page, route="/protected_page", on_load=auth.SessionState.on_load)
 
 app.add_page(
     contact.contact_entries_list_page, 

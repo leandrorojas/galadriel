@@ -53,7 +53,7 @@ def blog_post_edit_form() -> rx.Component:
                 placeholder="que dice el post?",
                 required=True,
                 height="50vh",
-                width="100%",
+                width="100%", 
             ),
             rx.flex(
                 rx.switch(
