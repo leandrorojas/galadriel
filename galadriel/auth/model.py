@@ -15,7 +15,7 @@ class UserInfo(rx.Model, table=True):
         sa_column_kwargs={
             'server_default': sa.func.now()
         },
-        nullable=True
+        nullable=False
     )
     updated: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
@@ -24,7 +24,7 @@ class UserInfo(rx.Model, table=True):
             'onupdate': sa.func.now(),
             'server_default': sa.func.now()
         },
-        nullable=True
+        nullable=False
     )
 
     #Other fields --> can_use_galadriel: bool <- self explanatory 
