@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 from . import routes
 
 class NavigationState(rx.State):
@@ -26,3 +27,9 @@ class NavigationState(rx.State):
     
     def to_suites_add(self):
         return rx.redirect(routes.SUITE_ADD_ROUTE)
+    
+    def to_login(self):
+        return rx.redirect(reflex_local_auth.routes.LOGIN_ROUTE)
+    
+    def to_signup(self):
+        return rx.redirect(reflex_local_auth.routes.REGISTER_ROUTE)
