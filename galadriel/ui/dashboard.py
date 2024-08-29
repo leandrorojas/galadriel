@@ -1,5 +1,4 @@
 import reflex as rx
-from .nav import navbar
 from .sidebar import sidebar
 
 def base_dashboard_page(content: rx.Component, *args) -> rx.Component:

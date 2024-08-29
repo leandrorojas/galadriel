@@ -59,6 +59,32 @@ def sidebar_color_mode_toggle_item() -> rx.Component:
         width="100%",
     )
 
+def sidebar_logout_item() -> rx.Component:
+    return rx.box(
+        rx.hstack(
+            rx.icon("log-out"),
+            rx.text("Logout", size="4"),
+            width="100%",
+            padding_x="0.5rem",
+            padding_y="0.75rem",
+            align="center",
+            style={
+                "_hover": {
+                    "cursor": "pointer",
+                    "bg": rx.color("accent", 4),
+                    "color": rx.color("accent", 11),
+                },
+                "color": rx.color("accent", 11),
+                "border-radius": "0.5em",
+            },
+        ),
+        on_click=navigation.NavigationState.to_logout,
+        as_='button',
+        underline="none",
+        weight="medium",
+        width="100%",
+    )
+
 def sidebar_items() -> rx.Component: 
     return rx.vstack(
         sidebar_item("Dashboard", "layout-dashboard", navigation.routes.HOME_ROUTE),
@@ -96,7 +122,7 @@ def sidebar() -> rx.Component:
                     rx.vstack(
                         #sidebar_item("Settings", "settings", "/#"),
                         sidebar_color_mode_toggle_item(),
-                        sidebar_item("Log out", "log-out", "/#"),
+                        sidebar_logout_item(),
                         spacing="1",
                         width="100%",
                     ),
@@ -167,16 +193,8 @@ def sidebar() -> rx.Component:
                             rx.spacer(),
                             rx.vstack(
                                 rx.vstack(
-                                    sidebar_item(
-                                        "Settings",
-                                        "settings",
-                                        "/#",
-                                    ),
-                                    sidebar_item(
-                                        "Log out",
-                                        "log-out",
-                                        "/#",
-                                    ),
+                                    sidebar_color_mode_toggle_item(),
+                                    sidebar_logout_item(),
                                     width="100%",
                                     spacing="1",
                                 ),

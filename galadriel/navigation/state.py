@@ -33,3 +33,6 @@ class NavigationState(rx.State):
     
     def to_signup(self):
         return rx.redirect(reflex_local_auth.routes.REGISTER_ROUTE)
+    
+    def to_logout(self):
+        return rx.redirect(routes.LOGOUT_ROUTE)
