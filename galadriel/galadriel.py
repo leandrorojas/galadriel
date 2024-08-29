@@ -3,7 +3,7 @@ import reflex_local_auth
 from rxconfig import config
 
 from .ui.base import base_page
-from .auth.pages import my_login_page, my_signup_page
+from .auth.pages import my_login_page, my_signup_page, my_logout_page
 from .auth.state import SessionState
 
 #demo
@@ -63,6 +63,7 @@ app.add_page(
 )
 
 #custom pages
+app.add_page(my_logout_page, route=navigation.routes.LOGOUT_ROUTE, title="Logout")
 app.add_page(pages.about_page, route=navigation.routes.ABOUT_ROUTE)
 app.add_page(contact.contact_page, route=navigation.routes.CONTACT_ROUTE)
 
