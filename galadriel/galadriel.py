@@ -3,9 +3,11 @@ import reflex_local_auth
 from rxconfig import config
 
 from .ui.base import base_page
+from .auth.pages import my_login_page, my_signup_page, my_logout_page
+from .auth.state import SessionState
 
 #demo
-from . import auth, blog, contact, pages, navigation
+from . import blog, contact, pages, navigation
 
 #galadriel
 from . import suite
@@ -49,22 +51,23 @@ app.add_page(index)
 
 #reflex_local_auth canned page
 app.add_page(
-    auth.pages.my_login_page,
+    my_login_page,
     route=reflex_local_auth.routes.LOGIN_ROUTE,
     title="Login",
 )
 #reflex_local_auth canned page
 app.add_page(
-    auth.pages.my_signup_page,
+    my_signup_page,
     route=reflex_local_auth.routes.REGISTER_ROUTE,
     title="Register",
 )
 
-#propietary pages
+#custom pages
+app.add_page(my_logout_page, route=navigation.routes.LOGOUT_ROUTE, title="Logout")
 app.add_page(pages.about_page, route=navigation.routes.ABOUT_ROUTE)
 app.add_page(contact.contact_page, route=navigation.routes.CONTACT_ROUTE)
 
-app.add_page(pages.protected_page, route="/protected_page", on_load=auth.SessionState.on_load)
+app.add_page(pages.protected_page, route="/protected_page", on_load=SessionState.on_load)
 
 app.add_page(
     contact.contact_entries_list_page, 
