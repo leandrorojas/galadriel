@@ -18,7 +18,13 @@ class State(rx.State):
     ...
 
 def index() -> rx.Component:
+    my_user_obj = SessionState.authenticated_user_info
+
     index_content = rx.vstack(
+        #rx.heading(State.label, size="9"),
+        rx.text(my_user_obj.to_string()),
+        rx.text(my_user_obj.auth_user.to_string()),
+        rx.text(my_user_obj.auth_user.username),
         rx.text(
             "Get started by editing ",
             rx.code(f"{config.app_name}/{config.app_name}.py"),

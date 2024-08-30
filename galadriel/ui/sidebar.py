@@ -53,7 +53,7 @@ def sidebar_item(text: str, icon: str, href: str) -> rx.Component:
                     "bg": rx.color("accent", 4),
                     "color": rx.color("accent", 11),
                 },
-                "border-radius": "0.5em",
+                "border_radius": "0.5em",
             },
         ),
         href=href,
@@ -86,7 +86,7 @@ def sidebar_color_mode_toggle_item() -> rx.Component:
                     "color": rx.color("accent", 11),
                 },
                 "color": rx.color("accent", 11),
-                "border-radius": "0.5em",
+                "border_radius": "0.5em",
             },
         ),
         on_click=toggle_color_mode,
@@ -112,7 +112,7 @@ def sidebar_logout_item() -> rx.Component:
                     "color": rx.color("accent", 11),
                 },
                 "color": rx.color("accent", 11),
-                "border-radius": "0.5em",
+                "border_radius": "0.5em",
             },
         ),
         on_click=navigation.NavigationState.to_logout,
@@ -142,13 +142,16 @@ def sidebar() -> rx.Component:
             rx.vstack(
                 rx.hstack(
                     rx.image(
-                        src="/logo.jpg",
+                        src="/galadriel.320x320.jpg",
                         width="2.25em",
                         height="auto",
                         border_radius="25%",
                     ),
-                    rx.heading(
-                        "Reflex", size="7", weight="bold"
+                    rx.link(
+                        rx.heading(
+                            "galadriel", size="7", weight="bold"
+                        ),
+                        href=navigation.routes.HOME_ROUTE,
                     ),
                     align="center",
                     justify="start",
