@@ -2,15 +2,13 @@ import reflex as rx
 from ..ui.base import base_page
 
 from .. import navigation
-
 from . import form, state, model
 
 def contact_entry_list_item(contact: model.ContactModel):
     return rx.box(
-        rx.heading(contact.email),
-        rx.text(
-            contact.contact_message
-        ),
+        rx.heading(contact.first_name, " (", contact.email, ")"),
+        rx.text("Message: ", contact.contact_message),
+        #rx.cond(contact.userid)
         padding="1em"
     )
 
@@ -27,7 +25,6 @@ def contact_entries_list_page() -> rx.Component:
     ),
 
 def contact_page() -> rx.Component:
-
     contact_content = rx.vstack(
         rx.heading("Contact Us"),
         rx.cond(state.ContactState.submitted, "Graciavóh, {email}".format(email=state.ContactState.contact_email), ""),

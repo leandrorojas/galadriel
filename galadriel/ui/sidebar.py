@@ -1,6 +1,43 @@
 import reflex as rx
-from .. import navigation
 from reflex.style import toggle_color_mode
+
+from .. import navigation
+from ..auth.state import SessionState
+
+def sidebat_user_item() -> rx.Component:
+    auth_user_info = SessionState.authenticated_user_info
+
+    return rx.hstack(
+        rx.icon_button(
+            rx.icon("user"),
+            size="3",
+            radius="full",
+        ),
+        rx.vstack(
+            rx.box(
+                rx.text(
+                    f"{SessionState.autheticated_username}",
+                    #f"{auth_localuser_info.username}",
+                    size="3",
+                    weight="bold",
+                ),
+                rx.text(
+                    f"{auth_user_info.email}",
+                    size="2",
+                    weight="medium",
+                ),
+                width="100%",
+            ),
+            spacing="0",
+            align="start",
+            justify="start",
+            width="100%",
+        ),
+        padding_x="0.5rem",
+        align="center",
+        justify="start",
+        width="100%",
+    ),    
 
 def sidebar_item(text: str, icon: str, href: str) -> rx.Component:
     return rx.link(
@@ -88,8 +125,10 @@ def sidebar_logout_item() -> rx.Component:
 def sidebar_items() -> rx.Component: 
     return rx.vstack(
         sidebar_item("Dashboard", "layout-dashboard", navigation.routes.HOME_ROUTE),
-        sidebar_item("Blog", "rss", navigation.routes.BLOG_POSTS_ROUTE),
+        sidebar_item("Blog", "newspaper", navigation.routes.BLOG_POSTS_ROUTE),
         sidebar_item("Create Post", "sticky-note", navigation.routes.BLOG_POST_ADD_ROUTE),
+        sidebar_item("Contact", "mail", navigation.routes.CONTACT_ROUTE),
+        sidebar_item("Contact History", "history", navigation.routes.CONTACT_ENTRIES_ROUTE),
         # sidebar_item("Projects", "square-library", "/#"),
         # sidebar_item("Analytics", "bar-chart-4", "/#"),
         # sidebar_item("Messages", "mail", "/#"),
@@ -127,36 +166,7 @@ def sidebar() -> rx.Component:
                         width="100%",
                     ),
                     rx.divider(),
-                    rx.hstack(
-                        rx.icon_button(
-                            rx.icon("user"),
-                            size="3",
-                            radius="full",
-                        ),
-                        rx.vstack(
-                            rx.box(
-                                rx.text(
-                                    "My account",
-                                    size="3",
-                                    weight="bold",
-                                ),
-                                rx.text(
-                                    "user@reflex.dev",
-                                    size="2",
-                                    weight="medium",
-                                ),
-                                width="100%",
-                            ),
-                            spacing="0",
-                            align="start",
-                            justify="start",
-                            width="100%",
-                        ),
-                        padding_x="0.5rem",
-                        align="center",
-                        justify="start",
-                        width="100%",
-                    ),
+                    sidebat_user_item(),
                     width="100%",
                     spacing="5",
                 ),
@@ -199,35 +209,7 @@ def sidebar() -> rx.Component:
                                     spacing="1",
                                 ),
                                 rx.divider(margin="0"),
-                                rx.hstack(
-                                    rx.icon_button(
-                                        rx.icon("user"),
-                                        size="3",
-                                        radius="full",
-                                    ),
-                                    rx.vstack(
-                                        rx.box(
-                                            rx.text(
-                                                "My account",
-                                                size="3",
-                                                weight="bold",
-                                            ),
-                                            rx.text(
-                                                "user@reflex.dev",
-                                                size="2",
-                                                weight="medium",
-                                            ),
-                                            width="100%",
-                                        ),
-                                        spacing="0",
-                                        justify="start",
-                                        width="100%",
-                                    ),
-                                    padding_x="0.5rem",
-                                    align="center",
-                                    justify="start",
-                                    width="100%",
-                                ),
+                                sidebat_user_item(),
                                 width="100%",
                                 spacing="5",
                             ),

@@ -6,6 +6,7 @@ def base_dashboard_page(content: rx.Component, *args) -> rx.Component:
         rx.hstack(
             sidebar(),
             rx.box(
+                rx.hstack(),
                 content,
                 rx.logo(),
                 width="100%",
@@ -13,6 +14,7 @@ def base_dashboard_page(content: rx.Component, *args) -> rx.Component:
                 justify="center",
                 align="center",
                 min_height="85vh",
+                justify_content = "center",
             ),
         ),
         #rx.color_mode.button(position="bottom-left"),

@@ -22,7 +22,7 @@ def suite_add_page() -> rx.Component:
         ),
         spacing="5",
         align="center",
-        min_height="95vh",
+        #min_height="95vh",
     ),
     
     return base_page(contact_content)
