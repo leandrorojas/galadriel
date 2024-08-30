@@ -6,8 +6,9 @@ from typing import List
 from sqlalchemy import select
 
 from .model import ContactModel
+from ..auth.state import SessionState
 
-class ContactState(rx.State):
+class ContactState(SessionState):
     form_data: dict = {}
     submitted: bool = False
     entries: List['ContactModel'] = []
@@ -28,6 +29,9 @@ class ContactState(rx.State):
                 continue
             clean_data[key] = value
 
+        if self.my_user_id is not None:
+            clean_data["user_id"] = self.my_user_id
+
         #print(clean_data)
 
         with rx.session() as session:
@@ -44,5 +48,5 @@ class ContactState(rx.State):
     def list_entries(self):
         with rx.session() as session:
             entries = session.exec(ContactModel.select()).all()
-            print(entries)
+            #print(entries)
             self.entries = entries

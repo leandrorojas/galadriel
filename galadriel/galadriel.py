@@ -27,7 +27,7 @@ def index() -> rx.Component:
         rx.link(
             rx.button("Check out our docs!"),
             href="https://reflex.dev/docs/getting-started/introduction/",
-            is_extgsernal=True,
+            is_external=True,
         ),
         spacing="5",
         justify="center",

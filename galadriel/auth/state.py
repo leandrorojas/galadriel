@@ -21,6 +21,19 @@ class MyRegisterState(reflex_local_auth.RegistrationState):
         return registration_result
 
 class SessionState(reflex_local_auth.LocalAuthState):
+
+    @rx.var(cache=True)
+    def my_user_id(self) -> Optional[str]:
+        if self.authenticated_user.id < 0:
+            return
+        return self.authenticated_user.id
+        
+    @rx.var(cache=True)
+    def autheticated_username(self) -> Optional[str]:
+        if self.authenticated_user.id < 0:
+            return
+        return self.authenticated_user.username
+
     @rx.var(cache=True)
     def authenticated_user_info(self) -> Optional[UserInfo]:
         if self.authenticated_user.id < 0:
