@@ -35,9 +35,10 @@ class SessionState(reflex_local_auth.LocalAuthState):
         return self.authenticated_user.username
 
     @rx.var(cache=True)
-    def authenticated_user_info(self) -> Optional[UserInfo]:
+    def authenticated_user_info(self) -> Optional[UserInfo]:        
         if self.authenticated_user.id < 0:
-            return
+            return None
+
         with rx.session() as session:
             result = session.exec(
                 sqlmodel.select(UserInfo).where(
@@ -45,13 +46,11 @@ class SessionState(reflex_local_auth.LocalAuthState):
                 ),
             ).one_or_none()
 
-            if result is None:
-                return None
-            
-            result.auth_user
-
-            return result
+        if result is None:
+            return None
         
+        result.auth_user
+        return result
         
     def on_load(self):
         if not self.is_authenticated:

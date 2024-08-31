@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from . import forms
 from .state import EditSuiteState
@@ -27,4 +27,4 @@ def suite_edit_page() -> rx.Component:
         min_height="95vh",
     ),
     
-    return base_page(suite_content)
+    return rx_tutorial_base_page(suite_content)

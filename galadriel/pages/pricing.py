@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from .. import navigation
 
@@ -12,7 +12,7 @@ def pricing_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our decks!"),
-            href=navigation.routes.HOME_ROUTE,
+            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",
@@ -21,4 +21,4 @@ def pricing_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return base_page(pricing_content)
+    return rx_tutorial_base_page(pricing_content)

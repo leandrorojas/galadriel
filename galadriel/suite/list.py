@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from .. import navigation
 from . import state, model
@@ -13,7 +13,7 @@ def suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite_id is None:
         return rx.fragment(child)
 
-    root_path = navigation.routes.SUITES_ROUTE
+    root_path = navigation.routes.RX_TUTORIAL_SUITES_ROUTE
     suite_detail_url = f"{root_path}/{suite_id}"
 
     return rx.link(
@@ -32,12 +32,12 @@ def suite_list_item(suite: model.SuiteModel):
 
 def suites_list_page() -> rx.Component:
 
-    return base_page(
+    return rx_tutorial_base_page(
         rx.vstack(
             rx.heading("Test Suites"),
             rx.link(
                 rx.button("New Suite"),
-                href=navigation.routes.SUITE_ADD_ROUTE
+                href=navigation.routes.RX_TUTORIAL_SUITE_ADD_ROUTE
             ),            
             rx.foreach(state.SuiteState.suites, suite_list_item),
             spacing="5",

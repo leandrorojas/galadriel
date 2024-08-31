@@ -8,35 +8,35 @@ def navbar_link(text: str, url: str) -> rx.Component:
         rx.text(text, size="4", weight="medium"), href=url
     )
 
-def navbar() -> rx.Component:
+def rx_tutorial_navbar() -> rx.Component:
     return rx.box(
         rx.desktop_only(
             rx.hstack(
                 rx.hstack(
                     rx.link(
                         rx.image(
-                            src="/galadriel.320x320.jpg",
+                            src="/logo.jpg",
                             width="2.25em",
                             height="auto",
                             border_radius="25%",
                         ),
-                        href=navigation.routes.HOME_ROUTE,
+                        href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     rx.link(
                         rx.heading(
                             "galadriel", size="7", weight="bold"
                         ),
-                        href=navigation.routes.HOME_ROUTE,
+                        href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     align_items="center",
                 ),
                 rx.hstack(
-                    navbar_link("Home", navigation.routes.HOME_ROUTE),
-                    navbar_link("About", navigation.routes.ABOUT_ROUTE),
-                    navbar_link("Pricing", navigation.routes.PRICING_ROUTE),
-                    navbar_link("Blog", navigation.routes.BLOG_POSTS_ROUTE),
-                    navbar_link("Contact", navigation.routes.CONTACT_ROUTE),
-                    navbar_link("Suites", navigation.routes.SUITES_ROUTE),
+                    navbar_link("Home", navigation.routes.RX_TUTORIAL_HOME_ROUTE),
+                    navbar_link("About", navigation.routes.RX_TUTORIAL_ABOUT_ROUTE),
+                    navbar_link("Pricing", navigation.routes.RX_TUTORIAL_PRICING_ROUTE),
+                    navbar_link("Blog", navigation.routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
+                    navbar_link("Contact", navigation.routes.RX_TUTORIAL_CONTACT_ROUTE),
+                    navbar_link("Suites", navigation.routes.RX_TUTORIAL_SUITES_ROUTE),
                     spacing="5",
                 ),
                 rx.hstack(
@@ -78,15 +78,15 @@ def navbar() -> rx.Component:
                         rx.icon("menu", size=30)
                     ),
                     rx.menu.content(
-                        rx.menu.item("Home", on_click=navigation.NavigationState.to_home),
-                        rx.menu.item("About", on_click=navigation.NavigationState.to_about),
-                        rx.menu.item("Pricing", on_click=navigation.NavigationState.to_pricing),
-                        rx.menu.item("Blog", on_click=navigation.NavigationState.to_blog_posts),
-                        rx.menu.item("Contact", on_click=navigation.NavigationState.to_contact),
-                        rx.menu.item("Suites", on_click=navigation.NavigationState.to_suites),
+                        rx.menu.item("Home", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_home),
+                        rx.menu.item("About", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_about),
+                        rx.menu.item("Pricing", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_pricing),
+                        rx.menu.item("Blog", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_blog_posts),
+                        rx.menu.item("Contact", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_contact),
+                        rx.menu.item("Suites", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_suites),
                         rx.menu.separator(),
-                        rx.menu.item("Log in", on_click=navigation.NavigationState.to_login),
-                        rx.menu.item("Sign up", on_click=navigation.NavigationState.to_signup),
+                        rx.menu.item("Log in", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_login),
+                        rx.menu.item("Sign up", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_signup),
                     ),
                     justify="end",
                 ),
