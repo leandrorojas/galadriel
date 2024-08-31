@@ -1,6 +1,6 @@
 import reflex as rx
 import reflex_local_auth
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from .. import navigation
 
@@ -14,7 +14,7 @@ def protected_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our ducks!"),
-            href=navigation.routes.HOME_ROUTE,
+            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",
@@ -23,4 +23,4 @@ def protected_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return base_page(about_content)
+    return rx_tutorial_base_page(about_content)

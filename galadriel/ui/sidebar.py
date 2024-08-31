@@ -53,7 +53,7 @@ def sidebar_item(text: str, icon: str, href: str) -> rx.Component:
                     "bg": rx.color("accent", 4),
                     "color": rx.color("accent", 11),
                 },
-                "border-radius": "0.5em",
+                "border_radius": "0.5em",
             },
         ),
         href=href,
@@ -86,7 +86,7 @@ def sidebar_color_mode_toggle_item() -> rx.Component:
                     "color": rx.color("accent", 11),
                 },
                 "color": rx.color("accent", 11),
-                "border-radius": "0.5em",
+                "border_radius": "0.5em",
             },
         ),
         on_click=toggle_color_mode,
@@ -112,10 +112,10 @@ def sidebar_logout_item() -> rx.Component:
                     "color": rx.color("accent", 11),
                 },
                 "color": rx.color("accent", 11),
-                "border-radius": "0.5em",
+                "border_radius": "0.5em",
             },
         ),
-        on_click=navigation.NavigationState.to_logout,
+        on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_logout,
         as_='button',
         underline="none",
         weight="medium",
@@ -124,11 +124,11 @@ def sidebar_logout_item() -> rx.Component:
 
 def sidebar_items() -> rx.Component: 
     return rx.vstack(
-        sidebar_item("Dashboard", "layout-dashboard", navigation.routes.HOME_ROUTE),
-        sidebar_item("Blog", "newspaper", navigation.routes.BLOG_POSTS_ROUTE),
-        sidebar_item("Create Post", "sticky-note", navigation.routes.BLOG_POST_ADD_ROUTE),
-        sidebar_item("Contact", "mail", navigation.routes.CONTACT_ROUTE),
-        sidebar_item("Contact History", "history", navigation.routes.CONTACT_ENTRIES_ROUTE),
+        sidebar_item("Dashboard", "layout-dashboard", navigation.routes.RX_TUTORIAL_HOME_ROUTE),
+        sidebar_item("Blog", "newspaper", navigation.routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
+        sidebar_item("Create Post", "sticky-note", navigation.routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE),
+        sidebar_item("Contact", "mail", navigation.routes.RX_TUTORIAL_CONTACT_ROUTE),
+        sidebar_item("Contact History", "history", navigation.routes.RX_TUTORIAL_CONTACT_ENTRIES_ROUTE),
         # sidebar_item("Projects", "square-library", "/#"),
         # sidebar_item("Analytics", "bar-chart-4", "/#"),
         # sidebar_item("Messages", "mail", "/#"),
@@ -142,13 +142,16 @@ def sidebar() -> rx.Component:
             rx.vstack(
                 rx.hstack(
                     rx.image(
-                        src="/logo.jpg",
+                        src="/galadriel.320x320.jpg",
                         width="2.25em",
                         height="auto",
                         border_radius="25%",
                     ),
-                    rx.heading(
-                        "Reflex", size="7", weight="bold"
+                    rx.link(
+                        rx.heading(
+                            "galadriel", size="7", weight="bold"
+                        ),
+                        href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     align="center",
                     justify="start",

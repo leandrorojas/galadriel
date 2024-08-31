@@ -4,7 +4,7 @@ import reflex as rx
 from .model import BlogPostModel
 from ..navigation import routes
 
-BLOG_POSTS_ROUTE = routes.BLOG_POSTS_ROUTE
+BLOG_POSTS_ROUTE = routes.RX_TUTORIAL_BLOG_POSTS_ROUTE
 if BLOG_POSTS_ROUTE.endswith("/"):
     BLOG_POSTS_ROUTE = BLOG_POSTS_ROUTE[:-1]
 

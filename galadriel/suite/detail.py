@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from .. import navigation
 from . import state
@@ -31,4 +31,4 @@ def suite_detail_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return base_page(my_child)
+    return rx_tutorial_base_page(my_child)

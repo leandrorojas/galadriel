@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from .. import navigation
 from . import state
@@ -29,7 +29,7 @@ def blog_post_detail_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our ducks!"),
-            href=navigation.routes.HOME_ROUTE,
+            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",
@@ -37,4 +37,4 @@ def blog_post_detail_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return base_page(my_child)
+    return rx_tutorial_base_page(my_child)

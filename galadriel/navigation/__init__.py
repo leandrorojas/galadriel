@@ -1,7 +1,8 @@
 from . import routes
-from .state import NavigationState
+from .state import RxTutorialNavigationState, NavigationState
 
 __all__ = [
     'routes',
-    'NavigationState',
+    'RxTutorialNavigationState',
+    'NavigationState'
 ]

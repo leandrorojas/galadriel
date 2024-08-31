@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from . import forms
 
@@ -25,4 +25,4 @@ def suite_add_page() -> rx.Component:
         #min_height="95vh",
     ),
     
-    return base_page(contact_content)
+    return rx_tutorial_base_page(contact_content)

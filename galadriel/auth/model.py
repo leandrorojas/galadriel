@@ -2,13 +2,16 @@ import reflex as rx
 import sqlalchemy as sa
 
 from datetime import datetime
-from sqlmodel import Field
+from sqlmodel import Field, Relationship
+
+from reflex_local_auth import LocalUser
 
 from .. import utils
 
 class UserInfo(rx.Model, table=True):
     email:str
     user_id:int = Field(foreign_key="localuser.id")
+    auth_user: LocalUser = Relationship()
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),

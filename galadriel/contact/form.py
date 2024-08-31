@@ -3,7 +3,6 @@ from .state import ContactState
 from ..auth.state import SessionState
 
 def contact_form() -> rx.Component:
-    user_id = SessionState.my_user_id
 
     return rx.form(
         rx.cond(
@@ -17,7 +16,7 @@ def contact_form() -> rx.Component:
             #     display="none",
             # ),
             rx.fragment(),
-        ),
+        ), 
         rx.vstack(
             rx.hstack(
                 rx.input(

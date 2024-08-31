@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import base_page
+from ..ui.base import rx_tutorial_base_page
 
 from .. import navigation
 from . import form, state, model
@@ -14,7 +14,7 @@ def contact_entry_list_item(contact: model.ContactModel):
 
 def contact_entries_list_page() -> rx.Component:
 
-    return base_page(
+    return rx_tutorial_base_page(
         rx.vstack(
             rx.heading("Contact Entries"),
             rx.foreach(state.ContactState.entries, contact_entry_list_item),
@@ -42,7 +42,7 @@ def contact_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our ducks!"),
-            href=navigation.routes.HOME_ROUTE,
+            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",
@@ -51,4 +51,4 @@ def contact_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return base_page(contact_content)
+    return rx_tutorial_base_page(contact_content)
