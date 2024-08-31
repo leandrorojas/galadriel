@@ -22,7 +22,7 @@ class State(rx.State):
     ...
 
 def index() -> rx.Component:
-    galadriel_enabled = True
+    galadriel_enabled = False
 
     if galadriel_enabled:
         index_content = rx.fragment()
