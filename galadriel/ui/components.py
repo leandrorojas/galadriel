@@ -16,20 +16,19 @@ class TopNavBar():
                                 height="auto",
                                 border_radius="25%",
                             ),
-                            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
+                            href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                         ),
                         rx.link(
                             rx.heading(
                                 "galadriel", size="7", weight="bold"
                             ),
-                            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
+                            href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                         ),
                         align_items="center",
                     ),
                     rx.hstack(
                         self.__navbar_link("Home", navigation.routes.HOME),
                         self.__navbar_link("About", navigation.routes.ABOUT),
-                        self.__navbar_link("Contact", navigation.routes.CONTACT),
                         spacing="5",
                     ),
                     rx.hstack(
@@ -73,7 +72,6 @@ class TopNavBar():
                         rx.menu.content(
                             rx.menu.item("Home", on_click=navigation.NavigationState.to_home),
                             rx.menu.item("About", on_click=navigation.NavigationState.to_about),
-                            rx.menu.item("Contact", on_click=navigation.NavigationState.to_contact),
                             rx.menu.separator(),
                             rx.menu.item("Log in", on_click=navigation.NavigationState.to_login),
                             rx.menu.item("Sign up", on_click=navigation.NavigationState.to_signup),

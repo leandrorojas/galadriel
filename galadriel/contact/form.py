@@ -1,12 +1,12 @@
 import reflex as rx
 from .state import ContactState
-from ..auth.state import SessionState
+from ..auth.state import RxTutorialSessionState
 
 def contact_form() -> rx.Component:
 
     return rx.form(
         rx.cond(
-            SessionState.my_user_id,
+            RxTutorialSessionState.my_user_id,
             # rx.box(
             #     rx.input(
             #         type="hidden",

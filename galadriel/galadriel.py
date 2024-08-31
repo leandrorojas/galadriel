@@ -3,15 +3,18 @@ import reflex_local_auth
 from rxconfig import config
 
 from .ui.base import rx_tutorial_base_page
-from .ui.pages import base_page
-from .auth.pages import my_login_page, my_signup_page, my_logout_page
-from .auth.state import SessionState
+from .auth.pages import rx_tutorial_login_page, rx_tutorial_signup_page, rx_tutorial_logout_page
+from .auth.state import RxTutorialSessionState
 
 #demo
 from . import blog, contact, pages, navigation
 
-#galadriel
+#old.galadriel
 from . import suite
+
+#galadriel
+from .pages.base import base_page
+from .pages import about
 
 class State(rx.State):
     """The app state."""
@@ -19,13 +22,13 @@ class State(rx.State):
     ...
 
 def index() -> rx.Component:
-    galadriel_enabled = False
+    galadriel_enabled = True
 
     if galadriel_enabled:
         index_content = rx.fragment()
         return base_page(index_content)
     else:        
-        my_user_obj = SessionState.authenticated_user_info
+        my_user_obj = RxTutorialSessionState.authenticated_user_info
 
         index_content = rx.vstack(
             #rx.heading(State.label, size="9"),
@@ -60,78 +63,73 @@ app = rx.App(
         "font_size": "16px",        
     },
 )
+
 app.add_page(index)
 
-#reflex_local_auth canned page
-app.add_page(
-    my_login_page,
-    route=reflex_local_auth.routes.LOGIN_ROUTE,
-    title="Login",
-)
-#reflex_local_auth canned page
-app.add_page(
-    my_signup_page,
-    route=reflex_local_auth.routes.REGISTER_ROUTE,
-    title="Register",
-)
+#reflex_local_auth canned pages
+app.add_page(rx_tutorial_login_page, route=reflex_local_auth.routes.LOGIN_ROUTE, title="Login")
+app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
 
-#custom pages
-app.add_page(my_logout_page, route=navigation.routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
-app.add_page(pages.about_page, route=navigation.routes.RX_TUTORIAL_ABOUT_ROUTE)
-app.add_page(contact.contact_page, route=navigation.routes.RX_TUTORIAL_CONTACT_ROUTE)
+#galadriel pages
+app.add_page(about.about_page, route=navigation.routes.ABOUT, title="About galadriel")
 
-app.add_page(pages.protected_page, route="/protected_page", on_load=SessionState.on_load)
+#rx tutorial custom pages
+app.add_page(rx_tutorial_logout_page, route=navigation.rx_routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
+app.add_page(pages.rx_tutorial_about_page, route=navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE)
+app.add_page(contact.contact_page, route=navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE)
+
+app.add_page(pages.rx_tutorial_protected_page, route="/protected_page", on_load=RxTutorialSessionState.on_load)
 
 app.add_page(
     contact.contact_entries_list_page, 
-    route=navigation.routes.RX_TUTORIAL_CONTACT_ENTRIES_ROUTE,
+    route=navigation.rx_routes.RX_TUTORIAL_CONTACT_ENTRIES_ROUTE,
     on_load=contact.ContactState.list_entries
 )
 
 app.add_page(
     blog.blog_post_list_page,
-    route=navigation.routes.RX_TUTORIAL_BLOG_POSTS_ROUTE,
+    route=navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE,
     on_load=blog.BlogPostState.load_posts
 )
 
 app.add_page(
     blog.blog_post_add_page,
-    route=navigation.routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE,
+    route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE,
 )
 
 app.add_page(
     blog.blog_post_detail_page,
-    route=navigation.routes.RX_TUTORIAL_BLOG_POST_DETAIL_ROUTE,
+    route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_DETAIL_ROUTE,
     on_load=blog.BlogPostState.get_post_detail
 )
 
 app.add_page(
     blog.blog_post_edit_page,
-    route=navigation.routes.RX_TUTORIAL_BLOG_POST_EDIT_ROUTE,
+    route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_EDIT_ROUTE,
     on_load=blog.BlogPostState.get_post_detail
 )
 
 #Test Suites
 app.add_page(
     suite.suites_list_page, 
-    route=navigation.routes.RX_TUTORIAL_SUITES_ROUTE, 
+    route=navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE, 
     on_load=suite.SuiteState.load_suites
 )
 app.add_page(
     suite.suite_add_page, 
-    route=navigation.routes.RX_TUTORIAL_SUITE_ADD_ROUTE
+    route=navigation.rx_routes.RX_TUTORIAL_SUITE_ADD_ROUTE
 )
 app.add_page(
     suite.suite_detail_page, 
-    route=navigation.routes.RX_TUTORIAL_SUITE_DETAIL_ROUTE, 
+    route=navigation.rx_routes.RX_TUTORIAL_SUITE_DETAIL_ROUTE, 
     on_load=suite.SuiteState.get_suite_detail
 )
 
 app.add_page(
     suite.suite_edit_page, 
-    route=navigation.routes.RX_TUTORIAL_SUITE_EDIT_ROUTE, 
+    route=navigation.rx_routes.RX_TUTORIAL_SUITE_EDIT_ROUTE, 
     on_load=suite.SuiteState.get_suite_detail
 )
 
 #Pricing
-app.add_page(pages.pricing_page, route=navigation.routes.RX_TUTORIAL_PRICING_ROUTE)
+app.add_page(pages.rx_tutorial_pricing_page, route=navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE)

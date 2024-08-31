@@ -42,7 +42,7 @@ def contact_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our ducks!"),
-            href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
+            href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",
