@@ -3,7 +3,6 @@ import reflex as rx
 from .. import navigation
 
 class TopNavBar():
-
     def navbar(self) -> rx.Component:
         buttons = Buttons()
 

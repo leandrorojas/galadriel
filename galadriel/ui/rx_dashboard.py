@@ -1,5 +1,5 @@
 import reflex as rx
-from .sidebar import sidebar
+from .rx_sidebar import sidebar
 
 def rx_tutorial_base_dashboard_page(content: rx.Component, *args) -> rx.Component:
     return rx.fragment(

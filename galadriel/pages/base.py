@@ -13,19 +13,19 @@ def public_page(content: rx.Component, *args) -> rx.Component:
         *args,
     )
 
-def pivate_page(content: rx.Component, *args) -> rx.Component:
+def private_page(content: rx.Component, *args) -> rx.Component:
     return rx.fragment(
         rx.text("auth"),
     )    
 
 #galadriel home page
 def base_page(content: rx.Component, *args) -> rx.Component:
-    #TODO: validate all params...always
+    #TODO: validate all params...always, in every def and class
     # if not isinstance(content, rx.Component):
     #     content = rx.heading("this is not a valid content element")
 
     return rx.cond(
         RxTutorialSessionState.is_authenticated,
-        pivate_page(content, *args),
+        private_page(content, *args),
         public_page(content, *args)
     )

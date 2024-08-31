@@ -2,7 +2,7 @@ import reflex as rx
 import reflex_local_auth
 from rxconfig import config
 
-from .ui.base import rx_tutorial_base_page
+from .ui.rx_base import rx_tutorial_base_page
 from .auth.pages import rx_tutorial_login_page, rx_tutorial_signup_page, rx_tutorial_logout_page
 from .auth.state import RxTutorialSessionState
 
@@ -75,17 +75,20 @@ app = rx.App(
     },
 )
 
-app.add_page(index)
-
-#reflex_local_auth canned pages
-app.add_page(rx_tutorial_login_page, route=reflex_local_auth.routes.LOGIN_ROUTE, title="Login")
-app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
+app.add_page(index, title="galadriel")
 
 #galadriel pages
 app.add_page(about.about_page, route=navigation.routes.ABOUT, title="About galadriel")
+app.add_page(pages.login, route=navigation.routes.LOGIN, title="Login")
+app.add_page(pages.signup, route=navigation.routes.SIGNUP, title="Sign up")
+app.add_page(pages.logout, route=navigation.routes.LOGOUT, title="Logout")
+
+#reflex_local_auth canned pages
+#app.add_page(rx_tutorial_login_page, route=reflex_local_auth.routes.LOGIN_ROUTE, title="Login")
+#app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
 
 #rx tutorial custom pages
-app.add_page(rx_tutorial_logout_page, route=navigation.rx_routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
+#app.add_page(rx_tutorial_logout_page, route=navigation.rx_routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
 app.add_page(pages.rx_tutorial_about_page, route=navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE)
 app.add_page(contact.contact_page, route=navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE)
 

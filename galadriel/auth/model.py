@@ -29,5 +29,3 @@ class RxTutorialUserInfo(rx.Model, table=True):
         },
         nullable=False
     )
-
-    #Other fields --> can_use_galadriel: bool <- self explanatory 
