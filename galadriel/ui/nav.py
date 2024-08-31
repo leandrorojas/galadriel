@@ -20,23 +20,23 @@ def rx_tutorial_navbar() -> rx.Component:
                             height="auto",
                             border_radius="25%",
                         ),
-                        href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     rx.link(
                         rx.heading(
                             "galadriel", size="7", weight="bold"
                         ),
-                        href=navigation.routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     align_items="center",
                 ),
                 rx.hstack(
-                    navbar_link("Home", navigation.routes.RX_TUTORIAL_HOME_ROUTE),
-                    navbar_link("About", navigation.routes.RX_TUTORIAL_ABOUT_ROUTE),
-                    navbar_link("Pricing", navigation.routes.RX_TUTORIAL_PRICING_ROUTE),
-                    navbar_link("Blog", navigation.routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
-                    navbar_link("Contact", navigation.routes.RX_TUTORIAL_CONTACT_ROUTE),
-                    navbar_link("Suites", navigation.routes.RX_TUTORIAL_SUITES_ROUTE),
+                    navbar_link("Home", navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE),
+                    navbar_link("About", navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE),
+                    navbar_link("Pricing", navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE),
+                    navbar_link("Blog", navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
+                    navbar_link("Contact", navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE),
+                    navbar_link("Suites", navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE),
                     spacing="5",
                 ),
                 rx.hstack(

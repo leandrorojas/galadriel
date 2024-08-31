@@ -13,7 +13,7 @@ def blog_post_detail_link(child: rx.Component, post: model.BlogPostModel):
     if post_id is None:
         return rx.fragment(child)
 
-    root_path = navigation.routes.RX_TUTORIAL_BLOG_POSTS_ROUTE
+    root_path = navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE
     post_detail_url = f"{root_path}/{post_id}"
 
     return rx.link(
@@ -37,7 +37,7 @@ def blog_post_list_page() -> rx.Component:
             rx.heading("Blog Posts"),
             rx.link(
                 rx.button("New Post"),
-                href=navigation.routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE
+                href=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE
             ),
             rx.foreach(state.BlogPostState.posts, blog_post_list_item),
             spacing="5",

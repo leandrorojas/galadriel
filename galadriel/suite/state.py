@@ -1,11 +1,10 @@
 from typing import List, Optional
 import reflex as rx
 from .model import SuiteModel
-from ..navigation import routes
+from ..navigation import rx_routes
 
-SUITES_ROUTE = routes.RX_TUTORIAL_SUITES_ROUTE
-if SUITES_ROUTE.endswith("/"):
-    SUITES_ROUTE = SUITES_ROUTE[:-1]
+SUITES_ROUTE = rx_routes.RX_TUTORIAL_SUITES_ROUTE
+if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
 
 class SuiteState(rx.State):
     suites: List['SuiteModel'] = []

@@ -1,5 +1,5 @@
-from .model import UserInfo
+from .model import RxTutorialUserInfo
 
 __all__ = [
-    'UserInfo',
+    'RxTutorialUserInfo',
 ]

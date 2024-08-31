@@ -1,7 +1,7 @@
 import reflex as rx
 from .nav import rx_tutorial_navbar
 from .dashboard import rx_tutorial_base_dashboard_page
-from ..auth.state import SessionState
+from ..auth.state import RxTutorialSessionState
 
 def rx_tutorial_base_layout_component(content: rx.Component, *args) -> rx.Component:
     return rx.fragment(
@@ -19,7 +19,7 @@ def rx_tutorial_base_page(content: rx.Component, *args) -> rx.Component:
     #     content = rx.heading("this is not a valid content element")
 
     return rx.cond(
-        SessionState.is_authenticated,
+        RxTutorialSessionState.is_authenticated,
         rx_tutorial_base_dashboard_page(content, *args),
         rx_tutorial_base_layout_component(content, *args),
     )

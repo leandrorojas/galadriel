@@ -8,7 +8,7 @@ from reflex_local_auth import LocalUser
 
 from .. import utils
 
-class UserInfo(rx.Model, table=True):
+class RxTutorialUserInfo(rx.Model, table=True):
     email:str
     user_id:int = Field(foreign_key="localuser.id")
     auth_user: LocalUser = Relationship()

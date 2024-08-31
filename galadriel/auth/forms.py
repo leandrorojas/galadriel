@@ -2,9 +2,9 @@ import reflex as rx
 import reflex_local_auth
 
 from reflex_local_auth.pages.components import input_100w, MIN_WIDTH
-from .state import MyRegisterState
+from .state import RxTutorialMyRegisterState
 
-def register_error() -> rx.Component:
+def rx_tutorial_register_error() -> rx.Component:
     """Render the registration error message."""
     return rx.cond(
         reflex_local_auth.RegistrationState.error_message != "",
@@ -17,12 +17,12 @@ def register_error() -> rx.Component:
         ),
     )
 
-def my_register_form() -> rx.Component:
+def rx_tutorial_register_form() -> rx.Component:
     """Render the registration form."""
     return rx.form(
         rx.vstack(
             rx.heading("Create an account", size="7"),
-            register_error(),
+            rx_tutorial_register_error(),
             rx.text("Username"),
             input_100w("username"),
             rx.text("Email"),
@@ -38,5 +38,5 @@ def my_register_form() -> rx.Component:
             ),
             min_width=MIN_WIDTH,
         ),
-        on_submit=MyRegisterState.handle_registration_email,
+        on_submit=RxTutorialMyRegisterState.rx_tutorial_handle_registration_email,
     )

@@ -1,11 +1,11 @@
-from .about import about_page
-from .pricing import pricing_page
+from .rx_about import rx_tutorial_about_page
+from .pricing import rx_tutorial_pricing_page
 #from .contact import contact_page
-from .protected import protected_page
+from .protected import rx_tutorial_protected_page
 
 __all__ = [
-    'about_page',
+    'rx_tutorial_about_page',
     #'contact_page',
-    'pricing_page',
-    'protected_page'
+    'rx_tutorial_pricing_page',
+    'rx_tutorial_protected_page'
 ]

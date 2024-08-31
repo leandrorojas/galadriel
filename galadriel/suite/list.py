@@ -13,7 +13,7 @@ def suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite_id is None:
         return rx.fragment(child)
 
-    root_path = navigation.routes.RX_TUTORIAL_SUITES_ROUTE
+    root_path = navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE
     suite_detail_url = f"{root_path}/{suite_id}"
 
     return rx.link(
@@ -37,7 +37,7 @@ def suites_list_page() -> rx.Component:
             rx.heading("Test Suites"),
             rx.link(
                 rx.button("New Suite"),
-                href=navigation.routes.RX_TUTORIAL_SUITE_ADD_ROUTE
+                href=navigation.rx_routes.RX_TUTORIAL_SUITE_ADD_ROUTE
             ),            
             rx.foreach(state.SuiteState.suites, suite_list_item),
             spacing="5",
