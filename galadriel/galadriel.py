@@ -15,6 +15,7 @@ from . import suite
 #galadriel
 from .pages.base import base_page
 from .pages import about
+from .ui.components import Buttons
 
 class State(rx.State):
     """The app state."""
@@ -22,10 +23,20 @@ class State(rx.State):
     ...
 
 def index() -> rx.Component:
-    galadriel_enabled = False
+    galadriel_enabled = True
 
     if galadriel_enabled:
-        index_content = rx.fragment()
+        buttons = Buttons()
+        
+        index_content = rx.vstack(
+            rx.heading("Welcome to galadriel", size="9"),
+            buttons.signup_and_login(),
+            spacing="5",
+            justify="center",
+            align="center",
+            min_height="85vh",
+        ),
+    
         return base_page(index_content)
     else:        
         my_user_obj = RxTutorialSessionState.authenticated_user_info

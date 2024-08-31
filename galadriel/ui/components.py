@@ -5,6 +5,8 @@ from .. import navigation
 class TopNavBar():
 
     def navbar(self) -> rx.Component:
+        buttons = Buttons()
+
         return rx.box(
             rx.desktop_only(
                 rx.hstack(
@@ -29,24 +31,11 @@ class TopNavBar():
                     rx.hstack(
                         self.__navbar_link("Home", navigation.routes.HOME),
                         self.__navbar_link("About", navigation.routes.ABOUT),
+                        justify="between",
+                        align_items="center",                        
                         spacing="5",
                     ),
-                    rx.hstack(
-                        rx.link(
-                            rx.button(
-                                "Sign Up",
-                                size="3",
-                                variant="outline",
-                            ),
-                            href=navigation.routes.SIGNUP,
-                        ),
-                        rx.link(
-                            rx.button("Log In", size="3"),
-                            href=navigation.routes.LOGIN,
-                        ),
-                        spacing="4",
-                        justify="end",
-                    ),
+                    buttons.signup_and_login(),
                     justify="between",
                     align_items="center",
                 ),
@@ -94,3 +83,12 @@ class TopNavBar():
         return rx.link(
             rx.text(text, size="4", weight="medium"), href=url
         )
+    
+class Buttons():
+    def signup_and_login(self):
+        return rx.hstack(
+            rx.link(rx.button("Sign Up", size="3", variant="outline",), href=navigation.routes.SIGNUP,),
+            rx.link(rx.button("Log In", size="3"), href=navigation.routes.LOGIN,),
+            spacing="4",
+            justify="end",
+        ),
