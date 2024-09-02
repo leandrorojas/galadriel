@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.components import TopNavBar
+from ..ui.components import TopNavBar, SideBar
 from ..auth.state import RxTutorialSessionState
 
 def public_page(content: rx.Component, *args) -> rx.Component:
@@ -14,9 +14,15 @@ def public_page(content: rx.Component, *args) -> rx.Component:
     )
 
 def private_page(content: rx.Component, *args) -> rx.Component:
+    left_sidebar = SideBar()
     return rx.fragment(
-        rx.text("auth"),
-    )    
+        left_sidebar.sidebar(),
+        rx.box( 
+            content,
+        ),
+        rx.color_mode.button(position="bottom-left"),
+        *args,
+    )
 
 #galadriel home page
 def base_page(content: rx.Component, *args) -> rx.Component:

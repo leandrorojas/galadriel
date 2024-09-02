@@ -15,8 +15,8 @@ def rx_tutorial_base_layout_component(content: rx.Component, *args) -> rx.Compon
     )
 
 def rx_tutorial_base_page(content: rx.Component, *args) -> rx.Component:
-    # if not isinstance(content, rx.Component):
-    #     content = rx.heading("this is not a valid content element")
+    if not isinstance(content, rx.Component):
+        content = rx.heading("this is not a valid content element")
 
     return rx.cond(
         RxTutorialSessionState.is_authenticated,
