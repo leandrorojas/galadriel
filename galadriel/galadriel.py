@@ -26,7 +26,7 @@ class State(rx.State):
     ...
 
 def index() -> rx.Component:
-    galadriel_enabled = False
+    galadriel_enabled = True
 
     if galadriel_enabled:
         buttons = Buttons()
@@ -81,19 +81,19 @@ app = rx.App(
 app.add_page(index, title="galadriel")
 
 #galadriel pages
-# app.add_page(about_page, route=navigation.routes.ABOUT, title="About galadriel")
-# app.add_page(login_page, route=navigation.routes.LOGIN, title="Login")
-# app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up")
-# app.add_page(logout_page, route=navigation.routes.LOGOUT, title="Logout")
+app.add_page(about_page, route=navigation.routes.ABOUT, title="About galadriel")
+app.add_page(login_page, route=navigation.routes.LOGIN, title="Login")
+app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up")
+app.add_page(logout_page, route=navigation.routes.LOGOUT, title="Logout")
 
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 
-#reflex_local_auth canned pages
-app.add_page(rx_tutorial_login_page, route=reflex_local_auth.routes.LOGIN_ROUTE, title="Login")
-app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
+# reflex_local_auth canned pages
+# app.add_page(rx_tutorial_login_page, route=reflex_local_auth.routes.LOGIN_ROUTE, title="Login")
+# app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
 
 # rx tutorial custom pages
-app.add_page(rx_tutorial_logout_page, route=navigation.rx_routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
+# app.add_page(rx_tutorial_logout_page, route=navigation.rx_routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
 app.add_page(pages.rx_tutorial_about_page, route=navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE)
 app.add_page(contact.contact_page, route=navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE)
 

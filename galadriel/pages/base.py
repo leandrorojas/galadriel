@@ -16,11 +16,18 @@ def public_page(content: rx.Component, *args) -> rx.Component:
 def private_page(content: rx.Component, *args) -> rx.Component:
     left_sidebar = SideBar()
     return rx.fragment(
-        left_sidebar.sidebar(),
-        rx.box( 
-            content,
+        rx.hstack(
+            left_sidebar.sidebar(),
+            rx.box( 
+                content,
+                width="100%",
+                spacing="5",
+                justify="center",
+                align="center",
+                min_height="85vh",
+                justify_content = "center",            
+            ),
         ),
-        rx.color_mode.button(position="bottom-left"),
         *args,
     )
 
