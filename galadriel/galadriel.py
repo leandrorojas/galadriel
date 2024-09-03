@@ -86,6 +86,12 @@ app.add_page(login_page, route=navigation.routes.LOGIN, title="Login")
 app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up")
 app.add_page(logout_page, route=navigation.routes.LOGOUT, title="Logout")
 
+#Test Suites
+app.add_page(suite.suites_list_page, route=navigation.routes.SUITES, on_load=suite.SuiteState.load_suites)
+app.add_page(suite.suite_add_page, route=navigation.routes.SUITE_ADD)
+app.add_page(suite.suite_detail_page, route=navigation.routes.SUITE_DETAIL, on_load=suite.SuiteState.get_suite_detail)
+app.add_page(suite.suite_edit_page, route=navigation.routes.SUITE_EDIT, on_load=suite.SuiteState.get_suite_detail)
+
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 
 # reflex_local_auth canned pages
@@ -105,12 +111,6 @@ app.add_page(blog.blog_post_list_page, route=navigation.rx_routes.RX_TUTORIAL_BL
 app.add_page(blog.blog_post_add_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE)
 app.add_page(blog.blog_post_detail_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_DETAIL_ROUTE, on_load=blog.BlogPostState.get_post_detail)
 app.add_page(blog.blog_post_edit_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_EDIT_ROUTE, on_load=blog.BlogPostState.get_post_detail)
-
-#Test Suites
-app.add_page(suite.suites_list_page, route=navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE, on_load=suite.SuiteState.load_suites)
-app.add_page(suite.suite_add_page, route=navigation.rx_routes.RX_TUTORIAL_SUITE_ADD_ROUTE)
-app.add_page(suite.suite_detail_page, route=navigation.rx_routes.RX_TUTORIAL_SUITE_DETAIL_ROUTE, on_load=suite.SuiteState.get_suite_detail)
-app.add_page(suite.suite_edit_page, route=navigation.rx_routes.RX_TUTORIAL_SUITE_EDIT_ROUTE, on_load=suite.SuiteState.get_suite_detail)
 
 #Pricing
 app.add_page(pages.rx_tutorial_pricing_page, route=navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE)
