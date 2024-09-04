@@ -2,14 +2,13 @@ import reflex as rx
 from .state import AddSuiteState, EditSuiteState
 
 def suite_add_form() -> rx.Component:
-
     return rx.form(
         rx.vstack(
-                rx.input(
-                    name="name",
-                    placeholder="Suite name",
-                    width="100%",
-                ),
+            rx.input(
+                name="name",
+                placeholder="Suite name",
+                width="100%",
+            ),
             rx.button("Submit", type="submit", width="100%",),
         ),
         on_submit=AddSuiteState.handle_submit,

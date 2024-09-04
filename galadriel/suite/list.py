@@ -4,7 +4,7 @@ import reflex as rx
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui import components
+from ..ui.components import Badge
 
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
 
@@ -65,7 +65,7 @@ def __table() -> rx.Component:
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("name", "beaker"),
+                    __header_cell("name", "fingerprint"),
                     __header_cell("created", "calendar-check-2"),
                 ),
             ),
@@ -78,7 +78,7 @@ def __table() -> rx.Component:
     )
 
 def suites_list_page() -> rx.Component:
-    title_badge = components.Badge()
+    title_badge = Badge()
 
     return base_page(
         rx.vstack(

@@ -75,6 +75,7 @@ class AddSuiteState(SuiteState):
     def handle_submit(self, form_data):
         self.form_data = form_data
         self.add_suite(form_data)
+        return rx.redirect(routes.SUITES)
 
 class EditSuiteState(SuiteState):
     form_data:dict = {}
