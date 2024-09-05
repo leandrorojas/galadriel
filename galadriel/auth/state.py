@@ -12,12 +12,10 @@ from ..utils import debug
 class RxTutorialMyRegisterState(reflex_local_auth.RegistrationState):
     # This event handler must be named something besides `handle_registration`!!!
     def rx_tutorial_handle_registration_email(self, form_data):
-    def rx_tutorial_handle_registration_email(self, form_data):
         registration_result = self.handle_registration(form_data)
         if self.new_user_id >= 0:
             with rx.session() as session:
                 session.add(
-                    RxTutorialUserInfo(
                     RxTutorialUserInfo(
                         email=form_data["email"],
                         user_id=self.new_user_id,
@@ -26,7 +24,6 @@ class RxTutorialMyRegisterState(reflex_local_auth.RegistrationState):
                 session.commit()
         return registration_result
 
-class RxTutorialSessionState(reflex_local_auth.LocalAuthState):
 class RxTutorialSessionState(reflex_local_auth.LocalAuthState):
 
     @rx.var(cache=True)
@@ -43,14 +40,11 @@ class RxTutorialSessionState(reflex_local_auth.LocalAuthState):
 
     @rx.var(cache=True)
     def authenticated_user_info(self) -> Optional[RxTutorialUserInfo]:        
-    def authenticated_user_info(self) -> Optional[RxTutorialUserInfo]:        
         if self.authenticated_user.id < 0:
             return None
 
         with rx.session() as session:
             result = session.exec(
-                sqlmodel.select(RxTutorialUserInfo).where(
-                    RxTutorialUserInfo.user_id == self.authenticated_user.id
                 sqlmodel.select(RxTutorialUserInfo).where(
                     RxTutorialUserInfo.user_id == self.authenticated_user.id
                 ),

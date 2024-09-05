@@ -6,5 +6,6 @@ a simple, badly-designed, extremelly code-inefficient and unoptimized Test Manag
 
 requirements:
 * reflex 0.5.9+
+* reflex-local-auth 0.2.2+
 
 If you want to contribute, let me know

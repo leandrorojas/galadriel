@@ -21,13 +21,11 @@ def rx_tutorial_navbar() -> rx.Component:
                             border_radius="25%",
                         ),
                         href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
-                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     rx.link(
                         rx.heading(
                             "galadriel", size="7", weight="bold"
                         ),
-                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                         href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     align_items="center",
