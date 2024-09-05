@@ -1,13 +1,38 @@
 import reflex as rx
-#from ..ui.rx_base import rx_tutorial_base_page
 
-from .. import navigation
+from ..navigation import routes
 from . import state
 from .. pages import base_page
+from ..ui.components import Badge
+
+def __suite_list_button():
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("chevron-left", size=26), 
+                rx.text("to Suites", size="4", display=["none", "none", "block"]), 
+                size="3", 
+            ),
+            href=routes.SUITES
+        ), 
+    )
+
+def __suite_edit_button():
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("pencil", size=26), 
+                rx.text("Edit", size="4", display=["none", "none", "block"]), 
+                size="3", 
+            ),
+            href=routes.SUITE_EDIT
+        ), 
+    )   
 
 def suite_detail_page() -> rx.Component:
-    can_edit = True
-    edit_link = rx.link("Edit", href=f"{state.SuiteState.suite_edit_url}") #convert to button, like in line 28?
+    title_badge = Badge()
+    can_edit = True #TODO: add roles and privileges
+    edit_link = __suite_edit_button()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -15,21 +40,30 @@ def suite_detail_page() -> rx.Component:
         rx.fragment("")
     )
     
-    my_child = rx.vstack(
-        rx.hstack(
-            rx.heading(f"Detail for suite: {state.SuiteState.suite.name}"),
-            edit_link_element,
+    suite_detail_content = rx.vstack(
+        rx.flex(
+            title_badge.title("beaker", "Test Suite Detail"),
+            rx.spacer(),
+            rx.hstack(__suite_list_button(), edit_link_element),
+            spacing="2",
+            flex_direction=["column", "column", "row"],
             align="center",
+            width="100%",
+            top="0px",
+            padding_top="2em",       
         ),
-        rx.text(f"[{state.SuiteState.suite_id}]"),
+        rx.text(            
+            f"name: {state.SuiteState.suite.name}",
+            size="5",
+            white_space='pre-wrap',),
         rx.text(
-            f"c:[{state.SuiteState.suite.created}]",
+            f"created: {state.SuiteState.suite.created}",
             size="5",
             white_space='pre-wrap',
         ),
         spacing="5",
-        align="center",
+        align="left",
         min_height="85vh",
     ),
     
-    return base_page(my_child)
+    return base_page(suite_detail_content)
