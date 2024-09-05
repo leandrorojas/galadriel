@@ -37,5 +37,5 @@ def suite_edit_form() -> rx.Component:
                 ),
             rx.button("Save Suite", type="submit", width="100%",),
         ),
-        on_submit=EditSuiteState.handle_submit,
+        on_submit=EditSuiteState.handle_submit, 
     ),
