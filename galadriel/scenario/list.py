@@ -4,7 +4,7 @@ import reflex as rx
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge
+from ..ui.components import Badge, Tooltip
 
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
 
@@ -43,7 +43,7 @@ def __add_scenario_button() -> rx.Component:
         rx.link(
             rx.button(
                 rx.icon("plus", size=26), 
-                rx.text("Add scenario", size="4", display=["none", "none", "block"]), 
+                rx.text("Add Scenario", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
             href=navigation.routes.SCENARIO_ADD
@@ -79,11 +79,13 @@ def __table() -> rx.Component:
 
 def scenarios_list_page() -> rx.Component:
     title_badge = Badge()
+    title_tooltip = Tooltip()
 
     return base_page(
         rx.vstack(
             rx.flex(
                 title_badge.title("route", "Test Scenarios"),
+                title_tooltip.info("Group of Test Cases executed in a specific order"),
                 rx.spacer(),
                 rx.hstack(__add_scenario_button(),),
                 spacing="2",

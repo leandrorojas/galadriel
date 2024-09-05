@@ -4,7 +4,7 @@ import reflex as rx
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge
+from ..ui.components import Badge, Tooltip
 
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
 
@@ -79,11 +79,13 @@ def __table() -> rx.Component:
 
 def suites_list_page() -> rx.Component:
     title_badge = Badge()
+    title_tooltip = Tooltip()
 
     return base_page(
         rx.vstack(
             rx.flex(
                 title_badge.title("beaker", "Test Suites"),
+                title_tooltip.info("Label for a group of Test Cases based on some criteria (i.e.: project)"),
                 rx.spacer(),
                 rx.hstack(__add_suite_button(),),
                 spacing="2",

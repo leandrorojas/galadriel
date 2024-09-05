@@ -38,9 +38,9 @@ class ScenarioState(rx.State):
     def load_scenarios(self):
         with rx.session() as session:
             results = session.exec(ScenarioModel.select()).all()
-            self.scenario = results
+            self.scenarios = results
 
-    def add_scenarioe(self, form_data:dict):
+    def add_scenario(self, form_data:dict):
         with rx.session() as session:
             scenario = ScenarioModel(**form_data)
             session.add(scenario)
@@ -85,4 +85,4 @@ class EditScenarioState(ScenarioState):
         scenario_id = form_data.pop("scenario_id")
         updated_data = {**form_data}
         self.save_scenario_edits(scenario_id, updated_data)
-        return self.to_scenario()
+        return rx.redirect(routes.SCENARIOS) # self.to_scenario()

@@ -3,6 +3,7 @@ import reflex as rx
 from .. import navigation
 
 from reflex.style import toggle_color_mode
+from reflex.components.radix.themes.base import (LiteralAccentColor,)
 
 from .. import navigation
 from ..auth.state import Session
@@ -219,8 +220,8 @@ class SideBar():
         return rx.vstack(
             self.__sidebar_item("[to do] Dashboard", "layout-dashboard", navigation.routes.HOME),
             self.__sidebar_item("[to do] Cycles", "flask-round", navigation.routes.HOME),
-            self.__sidebar_item("[to do] Cases", "test-tubes", navigation.routes.HOME),
-            self.__sidebar_item("[wip] Scenarios", "route", navigation.routes.SCENARIOS),            
+            self.__sidebar_item("[wip] Cases", "test-tubes", navigation.routes.HOME),
+            self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),            
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.HOME),
             self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.HOME),
@@ -331,7 +332,11 @@ class Badge():
             variant="surface",
             padding="0.65rem",
         ),
-        
+    
+class Tooltip():
+    def info(self, legend:str) -> rx.Component:
+        return rx.tooltip(rx.icon("info", size=18, color="gray"), content=legend, side="right", **{"accent_color":"gray"})    
+
 # class Table(): #this should be on each form with a "TODO: get tables to a component"
     # def __badge(self, icon: str, text: str, color_scheme: str):
     #     return rx.badge(rx.icon(icon, size=16), text, color_scheme=color_scheme, radius="full", variant="soft", size="3")
