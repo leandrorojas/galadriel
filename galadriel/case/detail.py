@@ -53,11 +53,11 @@ def scenario_detail_page() -> rx.Component:
             padding_top="2em",       
         ),
         rx.text(            
-            f"name: {state.ScenarioState.scenario.name}",
+            f"name: {state.CaseState.case.name}",
             size="5",
             white_space='pre-wrap',),
         rx.text(
-            f"created: {state.ScenarioState.scenario.created}",
+            f"created: {state.CaseState.case.created}",
             size="5",
             white_space='pre-wrap',
         ),

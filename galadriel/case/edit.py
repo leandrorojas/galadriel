@@ -2,7 +2,7 @@ import reflex as rx
 #from ..ui.rx_base import rx_tutorial_base_page
 
 from . import forms
-from .state import EditScenarioState
+from .state import EditCaseState
 from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge
@@ -21,7 +21,7 @@ def __scenario_list_button() -> rx.Component:
 
 def scenario_edit_page() -> rx.Component:
     my_form = forms.scenario_edit_form()
-    scenario = EditScenarioState.scenario
+    scenario = EditCaseState.case
     title_badge = Badge()
 
     scenario_edit_content = rx.vstack(

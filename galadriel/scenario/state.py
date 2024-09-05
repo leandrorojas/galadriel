@@ -64,7 +64,7 @@ class ScenarioState(rx.State):
 
     def to_scenario(self, edit_page=True):
         if not self.scenario:
-            return rx.redirect(routes)
+            return rx.redirect(routes.SCENARIOS)
         if edit_page:
             return rx.redirect(self.scenario_edit_url)
         return rx.redirect(self.scenario_url)

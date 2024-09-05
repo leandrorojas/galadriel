@@ -64,7 +64,7 @@ class SuiteState(rx.State):
 
     def to_suite(self, edit_page=True):
         if not self.suite:
-            return rx.redirect(routes)
+            return rx.redirect(routes.SUITES)
         if edit_page:
             return rx.redirect(self.suite_edit_url)
         return rx.redirect(self.suite_url)

@@ -1,5 +1,5 @@
 import reflex as rx
-from .state import AddScenarioState, EditScenarioState
+from .state import AddCaseState, EditCaseState
 
 def scenario_add_form() -> rx.Component:
     return rx.form(
@@ -11,12 +11,12 @@ def scenario_add_form() -> rx.Component:
             ),
             rx.button("Add Scenario", type="submit", width="100%",),
         ),
-        on_submit=AddScenarioState.handle_submit,
+        on_submit=AddCaseState.handle_submit,
         reset_on_submit=True,
     ),
 
 def scenario_edit_form() -> rx.Component:
-    scenario = EditScenarioState.scenario
+    scenario = EditCaseState.case
     scenario_name = scenario.name
 
     return rx.form(
@@ -37,5 +37,5 @@ def scenario_edit_form() -> rx.Component:
                 ),
             rx.button("Save Scenario", type="submit", width="100%",),
         ),
-        on_submit=EditScenarioState.handle_submit,
+        on_submit=EditCaseState.handle_submit,
     ),
