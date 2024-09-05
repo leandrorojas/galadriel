@@ -7,28 +7,28 @@ from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge
 
-def __suite_list_button() -> rx.Component:
+def __scenario_list_button() -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
                 rx.icon("chevron-left", size=26), 
-                rx.text("to Suites", size="4", display=["none", "none", "block"]), 
+                rx.text("to Scenarios", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=routes.SUITES
+            href=routes.SCENARIOS
         ), 
     )
 
-def suite_edit_page() -> rx.Component:
-    my_form = forms.suite_edit_form()
-    suite = EditScenarioState.suite
+def scenario_edit_page() -> rx.Component:
+    my_form = forms.scenario_edit_form()
+    scenario = EditScenarioState.scenario
     title_badge = Badge()
 
-    suite_edit_content = rx.vstack(
+    scenario_edit_content = rx.vstack(
         rx.flex(
-            title_badge.title("route", "Edit Test Suite"),
+            title_badge.title("route", "Edit Test Scenario"),
             rx.spacer(),
-            rx.hstack(__suite_list_button(),),            
+            rx.hstack(__scenario_list_button(),),            
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
@@ -53,4 +53,4 @@ def suite_edit_page() -> rx.Component:
         min_height="95vh",
     ),
     
-    return base_page(suite_edit_content)
+    return base_page(scenario_edit_content)

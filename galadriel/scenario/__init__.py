@@ -1,15 +1,15 @@
-from .add import suite_add_page
-from .edit import suite_edit_page
+from .add import scenario_add_page
+from .edit import scenario_edit_page
 from .model import ScenarioModel
 from .list import scenarios_list_page
 from .state import ScenarioState
-from .detail import suite_detail_page
+from .detail import scenario_detail_page
 
 __all__ = [
-    'suite_add_page',
+    'scenario_add_page',
     'ScenarioModel',
     'scenarios_list_page',
     'ScenarioState',
-    'suite_detail_page',
-    'suite_edit_page'
+    'scenario_detail_page',
+    'scenario_edit_page'
 ]

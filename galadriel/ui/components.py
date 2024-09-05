@@ -334,38 +334,8 @@ class Badge():
         ),
     
 class Tooltip():
-# status_chip_props = {
-#     "radius": "full",
-#     "variant": "outline",
-#     "size": "3",
-# }
-
     def info(self, legend:str) -> rx.Component:
-        return rx.tooltip(rx.icon("info", size=18, color="gray"), content=legend, side="right", **{"accent_color":"gray"})
-        # return rx.badge(
-        #     rx.icon("info", size=18),
-        #     color_scheme="gray",
-        #     **{"radius": "full", "variant": "outline", "size": "3",},
-        # )
-
-    def status_chip(self, status: str, icon: str, color: LiteralAccentColor) -> rx.Component:
-        return rx.badge(
-            rx.icon(icon, size=18),
-            status,
-            color_scheme=color,
-            **{"radius": "full", "variant": "outline", "size": "3",},
-        )
-
-    def status_chips_group(self) -> rx.Component:
-        return rx.hstack(
-            self.status_chip("Info", "info", "blue"),
-            self.status_chip("Success", "circle-check", "green"),
-            self.status_chip("Warning", "circle-alert", "yellow"),
-            self.status_chip("Error", "circle-x", "red"),
-            wrap="wrap",
-            spacing="2",
-        )
-    
+        return rx.tooltip(rx.icon("info", size=18, color="gray"), content=legend, side="right", **{"accent_color":"gray"})    
 
 # class Table(): #this should be on each form with a "TODO: get tables to a component"
     # def __badge(self, icon: str, text: str, color_scheme: str):

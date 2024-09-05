@@ -40,7 +40,7 @@ class ScenarioState(rx.State):
             results = session.exec(ScenarioModel.select()).all()
             self.scenario = results
 
-    def add_scenarioe(self, form_data:dict):
+    def add_scenario(self, form_data:dict):
         with rx.session() as session:
             scenario = ScenarioModel(**form_data)
             session.add(scenario)

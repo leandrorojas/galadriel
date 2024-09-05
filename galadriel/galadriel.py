@@ -95,8 +95,10 @@ app.add_page(suite.suite_detail_page, route=navigation.routes.SUITE_DETAIL, on_l
 app.add_page(suite.suite_edit_page, route=navigation.routes.SUITE_EDIT, on_load=suite.SuiteState.get_suite_detail)
 
 #Test Scenarios
-app.add_page(scenario.scenarios_list_page, route=navigation.routes.SCENARIOS, on_load=scenario.ScenarioState.load_scenarios) 
-
+app.add_page(scenario.scenarios_list_page, route=navigation.routes.SCENARIOS, on_load=scenario.ScenarioState.load_scenarios)
+app.add_page(scenario.scenario_add_page, route=navigation.routes.SCENARIO_ADD)
+app.add_page(scenario.scenario_detail_page, route=navigation.routes.SCENARIO_DETAIL, on_load=scenario.ScenarioState.get_scenario_detail)
+app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT, on_load=scenario.ScenarioState.get_scenario_detail)
 
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 
