@@ -14,4 +14,6 @@ __all__ = [
     #'contact_page',
     'rx_tutorial_pricing_page',
     'rx_tutorial_protected_page'
+    'rx_tutorial_pricing_page',
+    'rx_tutorial_protected_page'
 ]

@@ -12,6 +12,7 @@ from .state import RxTutorialSessionState
 from ..ui.rx_base import rx_tutorial_base_page
 
 def rx_tutorial_login_page() -> rx.Component:
+def rx_tutorial_login_page() -> rx.Component:
     return rx_tutorial_base_page(
         rx.center(
             rx.cond(
@@ -23,6 +24,7 @@ def rx_tutorial_login_page() -> rx.Component:
     )
 
 def rx_tutorial_signup_page() -> rx.Component:
+def rx_tutorial_signup_page() -> rx.Component:
     return rx_tutorial_base_page(
         rx.center(
             rx.cond(
@@ -31,11 +33,13 @@ def rx_tutorial_signup_page() -> rx.Component:
                     rx.text("Registration successful!"),
                 ),
                 rx.card(rx_tutorial_register_form()),
+                rx.card(rx_tutorial_register_form()),
             ),
             min_height="85vh",
         ) 
     )
 
+def rx_tutorial_logout_page() -> rx.Component:
 def rx_tutorial_logout_page() -> rx.Component:
     index_content = rx.vstack(
         rx.heading("Are you sure you want to logout?", size="7"),

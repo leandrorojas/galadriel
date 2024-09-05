@@ -1,7 +1,7 @@
 from typing import List, Optional
 import reflex as rx
 from .model import SuiteModel
-from ..navigation import routes
+from ..navigation import rx_routes
 
 SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]

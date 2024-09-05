@@ -10,6 +10,7 @@ from .auth.state import RxTutorialSessionState
 from . import blog, contact, pages, navigation
 
 #old.galadriel
+#old.galadriel
 from . import suite
 
 #galadriel
@@ -26,6 +27,7 @@ class State(rx.State):
     ...
 
 def index() -> rx.Component:
+    galadriel_enabled = True
     galadriel_enabled = True
 
     if galadriel_enabled:
@@ -113,4 +115,5 @@ app.add_page(blog.blog_post_detail_page, route=navigation.rx_routes.RX_TUTORIAL_
 app.add_page(blog.blog_post_edit_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_EDIT_ROUTE, on_load=blog.BlogPostState.get_post_detail)
 
 #Pricing
+app.add_page(pages.rx_tutorial_pricing_page, route=navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE)
 app.add_page(pages.rx_tutorial_pricing_page, route=navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE)
