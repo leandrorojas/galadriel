@@ -220,8 +220,8 @@ class SideBar():
         return rx.vstack(
             self.__sidebar_item("[to do] Dashboard", "layout-dashboard", navigation.routes.HOME),
             self.__sidebar_item("[to do] Cycles", "flask-round", navigation.routes.HOME),
-            self.__sidebar_item("[to do] Cases", "test-tubes", navigation.routes.HOME),
-            self.__sidebar_item("[wip] Scenarios", "route", navigation.routes.SCENARIOS),            
+            self.__sidebar_item("[wip] Cases", "test-tubes", navigation.routes.HOME),
+            self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),            
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.HOME),
             self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.HOME),

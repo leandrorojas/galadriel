@@ -43,7 +43,7 @@ def __add_scenario_button() -> rx.Component:
         rx.link(
             rx.button(
                 rx.icon("plus", size=26), 
-                rx.text("Add scenario", size="4", display=["none", "none", "block"]), 
+                rx.text("Add Scenario", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
             href=navigation.routes.SCENARIO_ADD

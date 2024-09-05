@@ -10,7 +10,7 @@ def __scenario_list_button() -> rx.Component:
         rx.link(
             rx.button(
                 rx.icon("chevron-left", size=26), 
-                rx.text("to Scenario", size="4", display=["none", "none", "block"]), 
+                rx.text("to Scenarios", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
             href=routes.SCENARIOS
