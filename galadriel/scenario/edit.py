@@ -2,7 +2,7 @@ import reflex as rx
 #from ..ui.rx_base import rx_tutorial_base_page
 
 from . import forms
-from .state import EditSuiteState
+from .state import EditScenarioState
 from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge
@@ -21,12 +21,12 @@ def __suite_list_button() -> rx.Component:
 
 def suite_edit_page() -> rx.Component:
     my_form = forms.suite_edit_form()
-    suite = EditSuiteState.suite
+    suite = EditScenarioState.suite
     title_badge = Badge()
 
     suite_edit_content = rx.vstack(
         rx.flex(
-            title_badge.title("beaker", "Edit Test Suite"),
+            title_badge.title("route", "Edit Test Suite"),
             rx.spacer(),
             rx.hstack(__suite_list_button(),),            
             spacing="2",

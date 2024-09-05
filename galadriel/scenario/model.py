@@ -5,8 +5,9 @@ import reflex as rx
 
 from .. import utils
 
-class SuiteModel(rx.Model, table=True):
+class ScenarioModel(rx.Model, table=True):
     name: str
+    suite_id:int = Field(foreign_key="suitemodel.id")
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),

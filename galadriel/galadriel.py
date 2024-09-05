@@ -10,8 +10,8 @@ from .auth.state import RxTutorialSessionState
 from . import blog, contact, pages, navigation
 
 #old.galadriel
-#old.galadriel
 from . import suite
+from . import scenario
 
 #galadriel
 from .pages import base_page, about_page
@@ -93,6 +93,10 @@ app.add_page(suite.suites_list_page, route=navigation.routes.SUITES, on_load=sui
 app.add_page(suite.suite_add_page, route=navigation.routes.SUITE_ADD)
 app.add_page(suite.suite_detail_page, route=navigation.routes.SUITE_DETAIL, on_load=suite.SuiteState.get_suite_detail)
 app.add_page(suite.suite_edit_page, route=navigation.routes.SUITE_EDIT, on_load=suite.SuiteState.get_suite_detail)
+
+#Test Scenarios
+app.add_page(scenario.scenarios_list_page, route=navigation.routes.SCENARIOS, on_load=scenario.ScenarioState.load_scenarios)
+
 
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 

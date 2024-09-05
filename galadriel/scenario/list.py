@@ -6,47 +6,47 @@ from . import state, model
 from ..pages import base_page
 from ..ui.components import Badge
 
-def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
+def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
 
-    if suite is None:
+    if scenario is None:
         return rx.fragment(child)
     
-    suite_id = suite.id
-    if suite_id is None:
+    scenario_id = scenario.id
+    if scenario_id is None:
         return rx.fragment(child)
 
-    root_path = navigation.routes.SUITES
-    suite_detail_url = f"{root_path}/{suite_id}"
+    root_path = navigation.routes.SCENARIOS
+    scenario_detail_url = f"{root_path}/{scenario_id}"
 
     return rx.link(
         child,
-        href=suite_detail_url
+        href=scenario_detail_url
     )
 
-def __suite_list_item(suite: model.SuiteModel):
+def __scenario_list_item(scenario: model.ScenarioModel):
     return rx.box(
-        __suite_detail_link(
-            rx.heading(suite.name),
-            suite
+        __scenario_detail_link(
+            rx.heading(scenario.name),
+            scenario
         ),
         padding="1em"
     )
 
-def __show_suite(suite:model.SuiteModel):
+def __show_scenario(scenario:model.ScenarioModel):
     return rx.table.row(
-         rx.table.cell(__suite_detail_link(suite.name, suite)),
-         rx.table.cell(suite.created),
+         rx.table.cell(__scenario_detail_link(scenario.name, scenario)),
+         rx.table.cell(scenario.created),
     )
 
-def __add_suite_button() -> rx.Component:
+def __add_scenario_button() -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
                 rx.icon("plus", size=26), 
-                rx.text("Add Suite", size="4", display=["none", "none", "block"]), 
+                rx.text("Add scenario", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=navigation.routes.SUITE_ADD
+            href=navigation.routes.SCENARIO_ADD
         ), 
     )
 
@@ -69,23 +69,23 @@ def __table() -> rx.Component:
                     __header_cell("created", "calendar-check-2"),
                 ),
             ),
-            rx.table.body(rx.foreach(state.SuiteState.suites, __show_suite)),
+            rx.table.body(rx.foreach(state.ScenarioState.scenarios, __show_scenario)),
             variant="surface",
             size="3",
             width="100%",
-            on_mount=state.SuiteState.load_suites,
+            on_mount=state.ScenarioState.load_scenarios,
         ),
     )
 
-def suites_list_page() -> rx.Component:
+def scenarios_list_page() -> rx.Component:
     title_badge = Badge()
 
     return base_page(
         rx.vstack(
             rx.flex(
-                title_badge.title("beaker", "Test Suites"),
+                title_badge.title("route", "Test Scenarios"),
                 rx.spacer(),
-                rx.hstack(__add_suite_button(),),
+                rx.hstack(__add_scenario_button(),),
                 spacing="2",
                 flex_direction=["column", "column", "row"],
                 align="center",

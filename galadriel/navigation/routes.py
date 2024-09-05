@@ -14,3 +14,9 @@ SUITES = "/suites"
 SUITE_ADD = "/suites/add"
 SUITE_DETAIL = "/suites/[id]"
 SUITE_EDIT = "/suites/[id]/edit"
+
+#scenarios
+SCENARIOS = "/scenarios"
+SCENARIO_ADD = "/scenarios/add"
+SCENARIO_DETAIL = "/scenarios/[id]"
+SCENARIO_EDIT = "/scenarios/[id]/edit"

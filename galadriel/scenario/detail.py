@@ -53,11 +53,11 @@ def suite_detail_page() -> rx.Component:
             padding_top="2em",       
         ),
         rx.text(            
-            f"name: {state.SuiteState.suite.name}",
+            f"name: {state.SuitScenarioStateeState.suite.name}",
             size="5",
             white_space='pre-wrap',),
         rx.text(
-            f"created: {state.SuiteState.suite.created}",
+            f"created: {state.ScenarioState.suite.created}",
             size="5",
             white_space='pre-wrap',
         ),

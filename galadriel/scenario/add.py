@@ -23,7 +23,7 @@ def suite_add_page() -> rx.Component:
 
     suite_add_content = rx.vstack(
         rx.flex(
-            title_badge.title("beaker", "New Test Suite"),
+            title_badge.title("route", "New Test Suite"),
             rx.spacer(),
             rx.hstack(__suite_list_button(),),            
             spacing="2",
