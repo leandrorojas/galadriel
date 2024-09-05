@@ -10,7 +10,7 @@ def suite_edit_page() -> rx.Component:
     suite = EditSuiteState.suite
 
     suite_content = rx.vstack(
-        rx.heading("Editing ", suite.name),
+        rx.heading("Editing ", suite.name), 
         rx.desktop_only(
             rx.box( 
                 my_form,
