@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from .. import navigation
 
-def navbar_link(text: str, url: str) -> rx.Component:
+def rx_navbar_link(text: str, url: str) -> rx.Component:
     return rx.link(
         rx.text(text, size="4", weight="medium"), href=url
     )
@@ -21,22 +21,24 @@ def rx_tutorial_navbar() -> rx.Component:
                             border_radius="25%",
                         ),
                         href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     rx.link(
                         rx.heading(
                             "galadriel", size="7", weight="bold"
                         ),
                         href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
                     ),
                     align_items="center",
                 ),
                 rx.hstack(
-                    navbar_link("Home", navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE),
-                    navbar_link("About", navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE),
-                    navbar_link("Pricing", navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE),
-                    navbar_link("Blog", navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
-                    navbar_link("Contact", navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE),
-                    navbar_link("Suites", navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE),
+                    rx_navbar_link("Home", navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE),
+                    rx_navbar_link("About", navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE),
+                    rx_navbar_link("Pricing", navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE),
+                    rx_navbar_link("Blog", navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
+                    rx_navbar_link("Contact", navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE),
+                    rx_navbar_link("Suites", navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE),
                     spacing="5",
                 ),
                 rx.hstack(

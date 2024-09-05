@@ -1,8 +1,9 @@
 import reflex as rx
-from ..ui.base import rx_tutorial_base_page
+#from ..ui.rx_base import rx_tutorial_base_page
 
 from .. import navigation
 from . import state
+from .. pages import base_page
 
 def suite_detail_page() -> rx.Component:
     can_edit = True
@@ -31,4 +32,4 @@ def suite_detail_page() -> rx.Component:
         min_height="85vh",
     ),
     
-    return rx_tutorial_base_page(my_child)
+    return base_page(my_child)

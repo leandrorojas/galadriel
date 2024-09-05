@@ -1,5 +1,5 @@
 import reflex as rx
-from ..ui.base import rx_tutorial_base_page
+from ..ui.rx_base import rx_tutorial_base_page
 
 from . import forms
 from .state import BlogEditFormState

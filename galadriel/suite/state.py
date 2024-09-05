@@ -3,7 +3,7 @@ import reflex as rx
 from .model import SuiteModel
 from ..navigation import rx_routes
 
-SUITES_ROUTE = rx_routes.RX_TUTORIAL_SUITES_ROUTE
+SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
 
 class SuiteState(rx.State):
@@ -64,7 +64,7 @@ class SuiteState(rx.State):
 
     def to_suite(self, edit_page=True):
         if not self.suite:
-            return rx.redirect(routes.RX_TUTORIAL_SUITES_ROUTE)
+            return rx.redirect(routes)
         if edit_page:
             return rx.redirect(self.suite_edit_url)
         return rx.redirect(self.suite_url)
@@ -75,6 +75,7 @@ class AddSuiteState(SuiteState):
     def handle_submit(self, form_data):
         self.form_data = form_data
         self.add_suite(form_data)
+        return rx.redirect(routes.SUITES)
 
 class EditSuiteState(SuiteState):
     form_data:dict = {}
