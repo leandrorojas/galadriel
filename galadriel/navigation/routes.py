@@ -20,3 +20,9 @@ SCENARIOS = "/scenarios"
 SCENARIO_ADD = "/scenarios/add"
 SCENARIO_DETAIL = "/scenarios/[id]"
 SCENARIO_EDIT = "/scenarios/[id]/edit"
+
+#cases
+CASES = "/scenarios"
+CASE_ADD = "/scenarios/add"
+CASE_DETAIL = "/scenarios/[id]"
+CASE_EDIT = "/scenarios/[id]/edit"
