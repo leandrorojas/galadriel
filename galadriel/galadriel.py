@@ -23,7 +23,7 @@ from .auth.state import Session
 
 class State(rx.State):
     """The app state."""
-
+ 
     ...
 
 def index() -> rx.Component:
