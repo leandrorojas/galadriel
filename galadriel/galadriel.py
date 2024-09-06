@@ -121,6 +121,6 @@ app.add_page(rx_blog.blog_post_add_page, route=rx_navigation.routes.BLOG_POST_AD
 app.add_page(rx_blog.blog_post_detail_page, route=rx_navigation.routes.BLOG_POST_DETAIL_ROUTE, on_load=rx_blog.RxTutorialBlogPostState.get_post_detail)
 app.add_page(rx_blog.blog_post_edit_page, route=rx_navigation.routes.BLOG_POST_EDIT_ROUTE, on_load=rx_blog.RxTutorialBlogPostState.get_post_detail)
 
-#Pricing
+#Pricing 
 app.add_page(rx_pages.rx_tutorial_pricing_page, route=rx_navigation.routes.PRICING_ROUTE)
 app.add_page(rx_pages.rx_tutorial_pricing_page, route=rx_navigation.routes.PRICING_ROUTE)
