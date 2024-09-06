@@ -71,7 +71,7 @@ def index() -> rx.Component:
 
 app = rx.App(
     theme = rx.theme(
-        accent_color="violet"
+        accent_color="violet",
     ),
     stylesheets=["https://fonts.googleapis.com/css?family=Montserrat",],    
     style = {

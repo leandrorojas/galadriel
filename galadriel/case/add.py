@@ -5,27 +5,27 @@ from ..navigation import routes
 
 from . import forms
 
-def __scenario_list_button() -> rx.Component:
+def __case_list_button() -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
                 rx.icon("chevron-left", size=26), 
-                rx.text("to Scenarios", size="4", display=["none", "none", "block"]), 
+                rx.text("to Cases", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=routes.SCENARIOS
+            href=routes.CASES
         ), 
     )
 
-def scenario_add_page() -> rx.Component:
+def case_add_page() -> rx.Component:
     title_badge = Badge()
-    my_form = forms.scenario_add_form()
+    my_form = forms.case_add_form()
 
-    scenario_add_content = rx.vstack(
+    case_add_content = rx.vstack(
         rx.flex(
-            title_badge.title("route", "New Test Scenario"),
+            title_badge.title("route", "New Test Case"),
             rx.spacer(),
-            rx.hstack(__scenario_list_button(),),            
+            rx.hstack(__case_list_button(),),            
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
@@ -49,4 +49,4 @@ def scenario_add_page() -> rx.Component:
         align="center",
     ),
     
-    return base_page(scenario_add_content)
+    return base_page(case_add_content)

@@ -335,7 +335,7 @@ class Badge():
     
 class Tooltip():
     def info(self, legend:str) -> rx.Component:
-        return rx.tooltip(rx.icon("info", size=18, color="gray"), content=legend, side="right", **{"accent_color":"gray"})    
+        return rx.tooltip(rx.icon("info", size=18, color=rx.color("gray", 10)), content=legend, side="right")    
 
 # class Table(): #this should be on each form with a "TODO: get tables to a component"
     # def __badge(self, icon: str, text: str, color_scheme: str):
