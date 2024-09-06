@@ -1,8 +1,8 @@
 import reflex as rx
 from reflex.style import toggle_color_mode
 
-from .. import navigation
-from ..auth.state import RxTutorialSessionState
+from .. import rx_navigation
+from ..rx_auth.state import RxTutorialSessionState
 
 def sidebat_user_item() -> rx.Component:
     auth_user_info = RxTutorialSessionState.authenticated_user_info
@@ -115,7 +115,7 @@ def sidebar_logout_item() -> rx.Component:
                 "border_radius": "0.5em",
             },
         ),
-        on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_logout,
+        on_click=rx_navigation.RxTutorialNavigationState.to_logout,
         as_='button',
         underline="none",
         weight="medium",
@@ -124,11 +124,11 @@ def sidebar_logout_item() -> rx.Component:
 
 def sidebar_items() -> rx.Component: 
     return rx.vstack(
-        sidebar_item("Dashboard", "layout-dashboard", navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE),
-        sidebar_item("Blog", "newspaper", navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
-        sidebar_item("Create Post", "sticky-note", navigation.rx_routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE),
-        sidebar_item("Contact", "mail", navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE),
-        sidebar_item("Contact History", "history", navigation.rx_routes.RX_TUTORIAL_CONTACT_ENTRIES_ROUTE),
+        sidebar_item("Dashboard", "layout-dashboard", rx_navigation.routes.HOME_ROUTE),
+        sidebar_item("Blog", "newspaper", rx_navigation.routes.BLOG_POSTS_ROUTE),
+        sidebar_item("Create Post", "sticky-note", rx_navigation.routes.BLOG_POST_ADD_ROUTE),
+        sidebar_item("Contact", "mail", rx_navigation.routes.CONTACT_ROUTE),
+        sidebar_item("Contact History", "history", rx_navigation.routes.CONTACT_ENTRIES_ROUTE),
         # sidebar_item("Projects", "square-library", "/#"),
         # sidebar_item("Analytics", "bar-chart-4", "/#"),
         # sidebar_item("Messages", "mail", "/#"),
@@ -151,7 +151,7 @@ def sidebar() -> rx.Component:
                         rx.heading(
                             "galadriel", size="7", weight="bold"
                         ),
-                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=rx_navigation.routes.HOME_ROUTE,
                     ),
                     align="center",
                     justify="start",

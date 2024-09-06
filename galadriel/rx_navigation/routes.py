@@ -1,0 +1,11 @@
+#rx tutorial
+HOME_ROUTE = "/"
+ABOUT_ROUTE = "/rx_about"
+CONTACT_ROUTE = "/rx_contact"
+CONTACT_ENTRIES_ROUTE = "/rx_contact/entries"
+PRICING_ROUTE = "/pricing"
+BLOG_POSTS_ROUTE = "/rx_blog"
+BLOG_POST_ADD_ROUTE = "/rx_blog/add"
+BLOG_POST_DETAIL_ROUTE = "/rx_blog/[blog_id]"
+BLOG_POST_EDIT_ROUTE = "/rx_blog/[blog_id]/edit"
+LOGOUT_ROUTE = "/rx_logout"

@@ -3,35 +3,25 @@ import reflex_local_auth
 import sqlmodel
 
 from typing import Optional
-from .model import GaladrielUser
 
-from ..utils import debug
+from .model import RxTutorialUserInfo
 
-class Register(reflex_local_auth.RegistrationState):
+class RxTutorialMyRegisterState(reflex_local_auth.RegistrationState):
     # This event handler must be named something besides `handle_registration`!!!
-    def handle_registration_email(self, form_data):
-        debug.set_log(False)
-        debug.set_module("Register.handle_registration_email")
-        
-        debug.log("init")
+    def rx_tutorial_handle_registration_email(self, form_data):
         registration_result = self.handle_registration(form_data)
-        debug.log("registration_result")
         if self.new_user_id >= 0:
-            debug.log("self.new_user_id")
             with rx.session() as session:
                 session.add(
-                    GaladrielUser(
+                    RxTutorialUserInfo(
                         email=form_data["email"],
                         user_id=self.new_user_id,
                     )
                 )
                 session.commit()
-                debug.log("self.session.commit")
-
-        debug.log(f"{registration_result}", True)
         return registration_result
-    
-class Session(reflex_local_auth.LocalAuthState):
+
+class RxTutorialSessionState(reflex_local_auth.LocalAuthState):
 
     @rx.var(cache=True)
     def my_user_id(self) -> Optional[str]:
@@ -46,21 +36,21 @@ class Session(reflex_local_auth.LocalAuthState):
         return self.authenticated_user.username
 
     @rx.var(cache=True)
-    def authenticated_user_info(self) -> Optional[GaladrielUser]:
+    def authenticated_user_info(self) -> Optional[RxTutorialUserInfo]:        
         if self.authenticated_user.id < 0:
             return None
 
         with rx.session() as session:
             result = session.exec(
-                sqlmodel.select(GaladrielUser).where(
-                    GaladrielUser.user_id == self.authenticated_user.id
+                sqlmodel.select(RxTutorialUserInfo).where(
+                    RxTutorialUserInfo.user_id == self.authenticated_user.id
                 ),
             ).one_or_none()
 
         if result is None:
             return None
         
-        #result.auth_user
+        result.auth_user
         return result
         
     def on_load(self):
@@ -69,4 +59,4 @@ class Session(reflex_local_auth.LocalAuthState):
         
     def perform_logout(self):
         self.do_logout()
-        return rx.redirect("/")    
+        return rx.redirect("/")

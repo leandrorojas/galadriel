@@ -1,6 +1,5 @@
 import reflex as rx
 from .base import base_page
-from .base import base_page
 
 from .. import navigation
 

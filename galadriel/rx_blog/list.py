@@ -1,10 +1,10 @@
 import reflex as rx
-from ..ui.rx_base import rx_tutorial_base_page
+from ..rx_ui.base import rx_tutorial_base_page
 
-from .. import navigation
+from .. import rx_navigation
 from . import state, model
 
-def blog_post_detail_link(child: rx.Component, post: model.BlogPostModel):
+def blog_post_detail_link(child: rx.Component, post: model.RxTutorialBlogPostModel):
 
     if post is None:
         return rx.fragment(child)
@@ -13,7 +13,7 @@ def blog_post_detail_link(child: rx.Component, post: model.BlogPostModel):
     if post_id is None:
         return rx.fragment(child)
 
-    root_path = navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE
+    root_path = rx_navigation.routes.BLOG_POSTS_ROUTE
     post_detail_url = f"{root_path}/{post_id}"
 
     return rx.link(
@@ -21,7 +21,7 @@ def blog_post_detail_link(child: rx.Component, post: model.BlogPostModel):
         href=post_detail_url
     )
 
-def blog_post_list_item(post: model.BlogPostModel):
+def blog_post_list_item(post: model.RxTutorialBlogPostModel):
     return rx.box(
         blog_post_detail_link(
             rx.heading(post.title),
@@ -37,9 +37,9 @@ def blog_post_list_page() -> rx.Component:
             rx.heading("Blog Posts"),
             rx.link(
                 rx.button("New Post"),
-                href=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE
+                href=rx_navigation.routes.BLOG_POST_ADD_ROUTE
             ),
-            rx.foreach(state.BlogPostState.posts, blog_post_list_item),
+            rx.foreach(state.RxTutorialBlogPostState.posts, blog_post_list_item),
             spacing="5",
             align="center",
             min_height="85vh"

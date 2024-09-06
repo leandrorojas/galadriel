@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import List, Optional
 import reflex as rx
-from .model import BlogPostModel
-from ..navigation import rx_routes
+from .model import RxTutorialBlogPostModel
+from ..rx_navigation import routes
 
-BLOG_POSTS_ROUTE = rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE
+BLOG_POSTS_ROUTE = routes.BLOG_POSTS_ROUTE
 if BLOG_POSTS_ROUTE.endswith("/"): BLOG_POSTS_ROUTE = BLOG_POSTS_ROUTE[:-1]
  
-class BlogPostState(rx.State):
-    posts: List['BlogPostModel'] = []
-    post: Optional['BlogPostModel'] = None
+class RxTutorialBlogPostState(rx.State):
+    posts: List['RxTutorialBlogPostModel'] = []
+    post: Optional['RxTutorialBlogPostModel'] = None
     post_content:str = ""
     post_publish_active:bool = False
 
@@ -36,7 +36,7 @@ class BlogPostState(rx.State):
             if (self.blog_post_id == ""):
                 self.post = None
                 return            
-            result = session.exec(BlogPostModel.select().where(BlogPostModel.id == self.blog_post_id)).one_or_none()
+            result = session.exec(RxTutorialBlogPostModel.select().where(RxTutorialBlogPostModel.id == self.blog_post_id)).one_or_none()
             
             self.post = result
             if (result is None):
@@ -49,14 +49,14 @@ class BlogPostState(rx.State):
     def load_posts(self, published_only=True):
         lookup_args = ()
         if published_only:
-            lookup_args = ((BlogPostModel.publish_active == True) & (BlogPostModel.published < datetime.now()))
+            lookup_args = ((RxTutorialBlogPostModel.publish_active == True) & (RxTutorialBlogPostModel.published < datetime.now()))
         with rx.session() as session:
-            result = session.exec(BlogPostModel.select().where(*lookup_args)).all()
+            result = session.exec(RxTutorialBlogPostModel.select().where(*lookup_args)).all()
             self.posts = result
 
     def add_post(self, form_data:dict):
         with rx.session() as session:
-            post = BlogPostModel(**form_data)
+            post = RxTutorialBlogPostModel(**form_data)
             session.add(post)
             session.commit()
             session.refresh(post)
@@ -64,7 +64,7 @@ class BlogPostState(rx.State):
 
     def save_post_edits(self, post_id:int, updated_data:dict):
         with rx.session() as session:        
-            post = session.exec(BlogPostModel.select().where(BlogPostModel.id == post_id)).one_or_none()
+            post = session.exec(RxTutorialBlogPostModel.select().where(RxTutorialBlogPostModel.id == post_id)).one_or_none()
 
             if (post is None):
                 return
@@ -84,7 +84,7 @@ class BlogPostState(rx.State):
             return rx.redirect(f"{self.blog_post_edit_url}")
         return rx.redirect(f"{self.blog_post_url}")
 
-class BlogAddPostFormState(BlogPostState):
+class RxTutorialBlogAddPostFormState(RxTutorialBlogPostState):
     form_data:dict = {}
     
     def handle_submit(self, form_data):
@@ -92,7 +92,7 @@ class BlogAddPostFormState(BlogPostState):
         self.add_post(form_data)
         return self.to_blog_post(edit_page=True)
 
-class BlogEditFormState(BlogPostState):
+class RxTutorialBlogEditFormState(RxTutorialBlogPostState):
     form_data:dict = {}
     # post_content:str = ""
 

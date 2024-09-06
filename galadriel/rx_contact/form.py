@@ -1,6 +1,6 @@
 import reflex as rx
-from .state import ContactState
-from ..auth.state import RxTutorialSessionState
+from .state import RxTutorialContactState
+from ..rx_auth.state import RxTutorialSessionState
 
 def contact_form() -> rx.Component:
 
@@ -46,6 +46,6 @@ def contact_form() -> rx.Component:
             ),
             rx.button("Submit", type="submit", width="100%",),
         ),
-        on_submit=ContactState.handle_submit,
+        on_submit=RxTutorialContactState.handle_submit,
         reset_on_submit=True,
     ),

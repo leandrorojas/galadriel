@@ -1,17 +1,13 @@
-import reflex as rx
-import sqlalchemy as sa
-
 from datetime import datetime
-from sqlmodel import Field, Relationship
-
-from reflex_local_auth import LocalUser
+import sqlalchemy as sa
+from sqlmodel import Field
+import reflex as rx
 
 from .. import utils
 
-class GaladrielUser(rx.Model, table=True):
-    email:str
-    user_id:int = Field(foreign_key="localuser.id")
-    #auth_user: LocalUser = Relationship()
+class RxTutorialBlogPostModel(rx.Model, table=True):
+    title: str
+    content: str
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),
@@ -28,4 +24,11 @@ class GaladrielUser(rx.Model, table=True):
             'server_default': sa.func.now()
         },
         nullable=False
+    )
+    publish_active:bool = False
+    published: datetime = Field(
+        default_factory=None, 
+        sa_type=sa.DateTime(timezone=True),
+        sa_column_kwargs={},
+        nullable=True
     )

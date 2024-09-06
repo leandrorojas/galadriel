@@ -1,12 +1,12 @@
 import reflex as rx
-from ..ui.rx_base import rx_tutorial_base_page
+from ..rx_ui.base import rx_tutorial_base_page
 
 from . import forms
-from .state import BlogEditFormState
+from .state import RxTutorialBlogEditFormState
 
 def blog_post_edit_page() -> rx.Component:
     my_form = forms.blog_post_edit_form()
-    post = BlogEditFormState.post
+    post = RxTutorialBlogEditFormState.post
 
     contact_content = rx.vstack(
         rx.heading("Editing ", post.title),

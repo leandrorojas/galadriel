@@ -1,7 +1,7 @@
 import reflex as rx
-from ..ui.rx_base import rx_tutorial_base_page
+from ..rx_ui.base import rx_tutorial_base_page
 
-from .. import navigation
+from .. import rx_navigation
 
 def rx_tutorial_pricing_page() -> rx.Component:
     pricing_content = rx.vstack(
@@ -12,7 +12,7 @@ def rx_tutorial_pricing_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our decks!"),
-            href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+            href=rx_navigation.routes.HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",

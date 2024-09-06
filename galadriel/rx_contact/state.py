@@ -5,13 +5,13 @@ import reflex as rx
 from typing import List
 from sqlalchemy import select
 
-from .model import ContactModel
-from ..auth.state import RxTutorialSessionState
+from .model import RxTutorialContactModel
+from ..rx_auth.state import RxTutorialSessionState
 
-class ContactState(RxTutorialSessionState):
+class RxTutorialContactState(RxTutorialSessionState):
     form_data: dict = {}
     submitted: bool = False
-    entries: List['ContactModel'] = []
+    entries: List['RxTutorialContactModel'] = []
 
     @rx.var
     def contact_email(self):
@@ -35,7 +35,7 @@ class ContactState(RxTutorialSessionState):
         #print(clean_data)
 
         with rx.session() as session:
-            contact = ContactModel(**clean_data)
+            contact = RxTutorialContactModel(**clean_data)
             session.add(contact)
             session.commit()            
             self.submitted = True
@@ -47,6 +47,6 @@ class ContactState(RxTutorialSessionState):
 
     def list_entries(self):
         with rx.session() as session:
-            entries = session.exec(ContactModel.select()).all()
+            entries = session.exec(RxTutorialContactModel.select()).all()
             #print(entries)
             self.entries = entries
