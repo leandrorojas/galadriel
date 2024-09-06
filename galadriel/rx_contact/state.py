@@ -6,7 +6,7 @@ from typing import List
 from sqlalchemy import select
 
 from .model import ContactModel
-from ..auth.state import RxTutorialSessionState
+from ..rx_auth.state import RxTutorialSessionState
 
 class ContactState(RxTutorialSessionState):
     form_data: dict = {}

@@ -1,6 +1,6 @@
 import reflex as rx
 from ..ui.components import TopNavBar, SideBar
-from ..auth.state import RxTutorialSessionState
+from ..auth.state import Session
 
 def public_page(content: rx.Component, *args) -> rx.Component:
     top_navbar = TopNavBar()
@@ -21,7 +21,6 @@ def private_page(content: rx.Component, *args) -> rx.Component:
             rx.box( 
                 content,
                 width="100%",
-                #spacing="5",
                 justify="center",
                 align="center",
                 min_height="85vh",
@@ -40,7 +39,7 @@ def base_page(content: rx.Component, *args) -> rx.Component:
     #     content = rx.heading("this is not a valid content element")
 
     return rx.cond(
-        RxTutorialSessionState.is_authenticated,
+        Session.is_authenticated,
         private_page(content, *args),
         public_page(content, *args)
     )

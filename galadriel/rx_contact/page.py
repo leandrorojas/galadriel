@@ -1,7 +1,7 @@
 import reflex as rx
-from ..ui.rx_base import rx_tutorial_base_page
+from ..rx_ui.base import rx_tutorial_base_page
 
-from .. import navigation
+from .. import rx_navigation
 from . import form, state, model
 
 def contact_entry_list_item(contact: model.ContactModel):
@@ -42,7 +42,7 @@ def contact_page() -> rx.Component:
         ),
         rx.link(
             rx.button("Check out our ducks!"),
-            href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+            href=rx_navigation.routes.HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",

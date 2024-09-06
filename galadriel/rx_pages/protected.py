@@ -1,18 +1,20 @@
 import reflex as rx
-from ..ui.rx_base import rx_tutorial_base_page
+import reflex_local_auth
+from ..rx_ui.base import rx_tutorial_base_page
 
-from .. import navigation
+from .. import rx_navigation
 
-def rx_tutorial_about_page() -> rx.Component:
+@reflex_local_auth.require_login
+def rx_tutorial_protected_page() -> rx.Component:
     about_content = rx.vstack(
-        rx.heading("About Us"),
+        rx.heading("Protected Page"),
         rx.text(
             "Somos los más grandes del mundo",
             size="5",
         ),
         rx.link(
             rx.button("Check out our ducks!"),
-            href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+            href=rx_navigation.routes.HOME_ROUTE,
             is_extgsernal=True,
         ),
         spacing="5",

@@ -1,7 +1,7 @@
 import reflex as rx
 import reflex_local_auth
 
-from .. import navigation
+from .. import rx_navigation
 
 def rx_navbar_link(text: str, url: str) -> rx.Component:
     return rx.link(
@@ -20,23 +20,23 @@ def rx_tutorial_navbar() -> rx.Component:
                             height="auto",
                             border_radius="25%",
                         ),
-                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=rx_navigation.routes.HOME_ROUTE,
                     ),
                     rx.link(
                         rx.heading(
                             "galadriel", size="7", weight="bold"
                         ),
-                        href=navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE,
+                        href=rx_navigation.routes.HOME_ROUTE,
                     ),
                     align_items="center",
                 ),
                 rx.hstack(
-                    rx_navbar_link("Home", navigation.rx_routes.RX_TUTORIAL_HOME_ROUTE),
-                    rx_navbar_link("About", navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE),
-                    rx_navbar_link("Pricing", navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE),
-                    rx_navbar_link("Blog", navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE),
-                    rx_navbar_link("Contact", navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE),
-                    rx_navbar_link("Suites", navigation.rx_routes.RX_TUTORIAL_SUITES_ROUTE),
+                    rx_navbar_link("Home", rx_navigation.routes.HOME_ROUTE),
+                    rx_navbar_link("About", rx_navigation.routes.ABOUT_ROUTE),
+                    rx_navbar_link("Pricing", rx_navigation.routes.PRICING_ROUTE),
+                    rx_navbar_link("Blog", rx_navigation.routes.BLOG_POSTS_ROUTE),
+                    rx_navbar_link("Contact", rx_navigation.routes.CONTACT_ROUTE),
+                    #rx_navbar_link("Suites", rx_navigation.routes.SUITES_ROUTE),
                     spacing="5",
                 ),
                 rx.hstack(
@@ -78,15 +78,15 @@ def rx_tutorial_navbar() -> rx.Component:
                         rx.icon("menu", size=30)
                     ),
                     rx.menu.content(
-                        rx.menu.item("Home", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_home),
-                        rx.menu.item("About", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_about),
-                        rx.menu.item("Pricing", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_pricing),
-                        rx.menu.item("Blog", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_blog_posts),
-                        rx.menu.item("Contact", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_contact),
-                        rx.menu.item("Suites", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_suites),
+                        rx.menu.item("Home", on_click=rx_navigation.RxTutorialNavigationState.to_home),
+                        rx.menu.item("About", on_click=rx_navigation.RxTutorialNavigationState.to_about),
+                        rx.menu.item("Pricing", on_click=rx_navigation.RxTutorialNavigationState.to_pricing),
+                        rx.menu.item("Blog", on_click=rx_navigation.RxTutorialNavigationState.to_blog_posts),
+                        rx.menu.item("Contact", on_click=rx_navigation.RxTutorialNavigationState.to_contact),
+                        #rx.menu.item("Suites", on_click=rx_navigation.RxTutorialNavigationState.to_suites),
                         rx.menu.separator(),
-                        rx.menu.item("Log in", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_login),
-                        rx.menu.item("Sign up", on_click=navigation.RxTutorialNavigationState.rx_tutorial_to_signup),
+                        rx.menu.item("Log in", on_click=rx_navigation.RxTutorialNavigationState.to_login),
+                        rx.menu.item("Sign up", on_click=rx_navigation.RxTutorialNavigationState.to_signup),
                     ),
                     justify="end",
                 ),

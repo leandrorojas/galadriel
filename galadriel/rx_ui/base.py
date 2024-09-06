@@ -1,7 +1,7 @@
 import reflex as rx
-from .rx_nav import rx_tutorial_navbar
-from .rx_dashboard import rx_tutorial_base_dashboard_page
-from ..auth.state import RxTutorialSessionState
+from .nav import rx_tutorial_navbar
+from .dashboard import rx_tutorial_base_dashboard_page
+from ..rx_auth.state import RxTutorialSessionState
 
 def rx_tutorial_base_layout_component(content: rx.Component, *args) -> rx.Component:
     return rx.fragment(

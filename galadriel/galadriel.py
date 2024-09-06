@@ -2,14 +2,15 @@ import reflex as rx
 import reflex_local_auth
 from rxconfig import config
 
-from .ui.rx_base import rx_tutorial_base_page
-from .auth.pages import rx_tutorial_login_page, rx_tutorial_signup_page, rx_tutorial_logout_page
-from .auth.state import RxTutorialSessionState
+from .rx_ui.base import rx_tutorial_base_page
+from .rx_auth.pages import rx_tutorial_login_page, rx_tutorial_signup_page, rx_tutorial_logout_page
+from .rx_auth.state import RxTutorialSessionState
 
 #demo
-from . import rx_blog, rx_contact, pages, navigation
+from . import rx_blog, rx_contact, rx_pages, rx_navigation
 
 #old.galadriel
+from . import navigation
 from . import suite
 from . import scenario
 
@@ -107,19 +108,19 @@ app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 # app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
 
 # rx tutorial custom pages
-# app.add_page(rx_tutorial_logout_page, route=navigation.rx_routes.RX_TUTORIAL_LOGOUT_ROUTE, title="Logout")
-app.add_page(pages.rx_tutorial_about_page, route=navigation.rx_routes.RX_TUTORIAL_ABOUT_ROUTE)
-app.add_page(rx_contact.contact_page, route=navigation.rx_routes.RX_TUTORIAL_CONTACT_ROUTE)
+# app.add_page(rx_tutorial_logout_page, route=navigation.routes.LOGOUT_ROUTE, title="Logout")
+app.add_page(rx_pages.rx_tutorial_about_page, route=rx_navigation.routes.ABOUT_ROUTE)
+app.add_page(rx_contact.contact_page, route=rx_navigation.routes.CONTACT_ROUTE)
 
-#app.add_page(pages.rx_tutorial_protected_page, route="/protected_page", on_load=RxTutorialSessionState.on_load)
+#app.add_page(pages.protected_page, route="/protected_page", on_load=RxTutorialSessionState.on_load)
 
-app.add_page(rx_contact.contact_entries_list_page, route=navigation.rx_routes.RX_TUTORIAL_CONTACT_ENTRIES_ROUTE, on_load=rx_contact.ContactState.list_entries)
+app.add_page(rx_contact.contact_entries_list_page, route=rx_navigation.routes.CONTACT_ENTRIES_ROUTE, on_load=rx_contact.ContactState.list_entries)
 
-app.add_page(rx_blog.blog_post_list_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POSTS_ROUTE, on_load=rx_blog.BlogPostState.load_posts)
-app.add_page(rx_blog.blog_post_add_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_ADD_ROUTE)
-app.add_page(rx_blog.blog_post_detail_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_DETAIL_ROUTE, on_load=rx_blog.BlogPostState.get_post_detail)
-app.add_page(rx_blog.blog_post_edit_page, route=navigation.rx_routes.RX_TUTORIAL_BLOG_POST_EDIT_ROUTE, on_load=rx_blog.BlogPostState.get_post_detail)
+app.add_page(rx_blog.blog_post_list_page, route=rx_navigation.routes.BLOG_POSTS_ROUTE, on_load=rx_blog.BlogPostState.load_posts)
+app.add_page(rx_blog.blog_post_add_page, route=rx_navigation.routes.BLOG_POST_ADD_ROUTE)
+app.add_page(rx_blog.blog_post_detail_page, route=rx_navigation.routes.BLOG_POST_DETAIL_ROUTE, on_load=rx_blog.BlogPostState.get_post_detail)
+app.add_page(rx_blog.blog_post_edit_page, route=rx_navigation.routes.BLOG_POST_EDIT_ROUTE, on_load=rx_blog.BlogPostState.get_post_detail)
 
 #Pricing
-app.add_page(pages.rx_tutorial_pricing_page, route=navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE)
-app.add_page(pages.rx_tutorial_pricing_page, route=navigation.rx_routes.RX_TUTORIAL_PRICING_ROUTE)
+app.add_page(rx_pages.rx_tutorial_pricing_page, route=rx_navigation.routes.PRICING_ROUTE)
+app.add_page(rx_pages.rx_tutorial_pricing_page, route=rx_navigation.routes.PRICING_ROUTE)

@@ -1,6 +1,6 @@
 import reflex as rx
 from .state import ContactState
-from ..auth.state import RxTutorialSessionState
+from ..rx_auth.state import RxTutorialSessionState
 
 def contact_form() -> rx.Component:
 
