@@ -4,7 +4,7 @@ from ..rx_ui.base import rx_tutorial_base_page
 from .. import rx_navigation
 from . import state, model
 
-def blog_post_detail_link(child: rx.Component, post: model.BlogPostModel):
+def blog_post_detail_link(child: rx.Component, post: model.RxTutorialBlogPostModel):
 
     if post is None:
         return rx.fragment(child)
@@ -21,7 +21,7 @@ def blog_post_detail_link(child: rx.Component, post: model.BlogPostModel):
         href=post_detail_url
     )
 
-def blog_post_list_item(post: model.BlogPostModel):
+def blog_post_list_item(post: model.RxTutorialBlogPostModel):
     return rx.box(
         blog_post_detail_link(
             rx.heading(post.title),
@@ -39,7 +39,7 @@ def blog_post_list_page() -> rx.Component:
                 rx.button("New Post"),
                 href=rx_navigation.routes.BLOG_POST_ADD_ROUTE
             ),
-            rx.foreach(state.BlogPostState.posts, blog_post_list_item),
+            rx.foreach(state.RxTutorialBlogPostState.posts, blog_post_list_item),
             spacing="5",
             align="center",
             min_height="85vh"

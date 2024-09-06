@@ -4,7 +4,7 @@ from ..rx_ui.base import rx_tutorial_base_page
 from .. import rx_navigation
 from . import form, state, model
 
-def contact_entry_list_item(contact: model.ContactModel):
+def contact_entry_list_item(contact: model.RxTutorialContactModel):
     return rx.box(
         rx.heading(contact.first_name, " (", contact.email, ")"),
         rx.text("Message: ", contact.contact_message),
@@ -17,7 +17,7 @@ def contact_entries_list_page() -> rx.Component:
     return rx_tutorial_base_page(
         rx.vstack(
             rx.heading("Contact Entries"),
-            rx.foreach(state.ContactState.entries, contact_entry_list_item),
+            rx.foreach(state.RxTutorialContactState.entries, contact_entry_list_item),
             spacing="5",
             align="center",
             min_height="85vh"
@@ -27,7 +27,7 @@ def contact_entries_list_page() -> rx.Component:
 def contact_page() -> rx.Component:
     contact_content = rx.vstack(
         rx.heading("Contact Us"),
-        rx.cond(state.ContactState.submitted, "Graciavóh, {email}".format(email=state.ContactState.contact_email), ""),
+        rx.cond(state.RxTutorialContactState.submitted, "Graciavóh, {email}".format(email=state.RxTutorialContactState.contact_email), ""),
         rx.desktop_only(
             rx.box(
                 form.contact_form(),

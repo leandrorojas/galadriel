@@ -5,7 +5,7 @@ import reflex as rx
 
 from .. import utils
 
-class BlogPostModel(rx.Model, table=True):
+class RxTutorialBlogPostModel(rx.Model, table=True):
     title: str
     content: str
     created: datetime = Field(

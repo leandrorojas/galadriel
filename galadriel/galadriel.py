@@ -114,12 +114,12 @@ app.add_page(rx_contact.contact_page, route=rx_navigation.routes.CONTACT_ROUTE)
 
 #app.add_page(pages.protected_page, route="/protected_page", on_load=RxTutorialSessionState.on_load)
 
-app.add_page(rx_contact.contact_entries_list_page, route=rx_navigation.routes.CONTACT_ENTRIES_ROUTE, on_load=rx_contact.ContactState.list_entries)
+app.add_page(rx_contact.contact_entries_list_page, route=rx_navigation.routes.CONTACT_ENTRIES_ROUTE, on_load=rx_contact.RxTutorialContactState.list_entries)
 
-app.add_page(rx_blog.blog_post_list_page, route=rx_navigation.routes.BLOG_POSTS_ROUTE, on_load=rx_blog.BlogPostState.load_posts)
+app.add_page(rx_blog.blog_post_list_page, route=rx_navigation.routes.BLOG_POSTS_ROUTE, on_load=rx_blog.RxTutorialBlogPostState.load_posts)
 app.add_page(rx_blog.blog_post_add_page, route=rx_navigation.routes.BLOG_POST_ADD_ROUTE)
-app.add_page(rx_blog.blog_post_detail_page, route=rx_navigation.routes.BLOG_POST_DETAIL_ROUTE, on_load=rx_blog.BlogPostState.get_post_detail)
-app.add_page(rx_blog.blog_post_edit_page, route=rx_navigation.routes.BLOG_POST_EDIT_ROUTE, on_load=rx_blog.BlogPostState.get_post_detail)
+app.add_page(rx_blog.blog_post_detail_page, route=rx_navigation.routes.BLOG_POST_DETAIL_ROUTE, on_load=rx_blog.RxTutorialBlogPostState.get_post_detail)
+app.add_page(rx_blog.blog_post_edit_page, route=rx_navigation.routes.BLOG_POST_EDIT_ROUTE, on_load=rx_blog.RxTutorialBlogPostState.get_post_detail)
 
 #Pricing
 app.add_page(rx_pages.rx_tutorial_pricing_page, route=rx_navigation.routes.PRICING_ROUTE)

@@ -6,7 +6,7 @@ from sqlmodel import Field
 
 from .. import utils
 
-class ContactModel(rx.Model, table=True):
+class RxTutorialContactModel(rx.Model, table=True):
     first_name:str | None = None
     last_name:str | None = None
     email:str
