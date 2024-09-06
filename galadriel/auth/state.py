@@ -11,11 +11,13 @@ class Register(reflex_local_auth.RegistrationState):
     # This event handler must be named something besides `handle_registration`!!!
     def handle_registration_email(self, form_data):
         debug.set_log(False)
-        debug.log("init", "Register.handle_registration_email")
+        debug.set_module("Register.handle_registration_email")
+        
+        debug.log("init")
         registration_result = self.handle_registration(form_data)
-        debug.log("registration_result", "Register.handle_registration_email")
+        debug.log("registration_result")
         if self.new_user_id >= 0:
-            debug.log("self.new_user_id", "Register.handle_registration_email")
+            debug.log("self.new_user_id")
             with rx.session() as session:
                 session.add(
                     GaladrielUser(
@@ -24,9 +26,9 @@ class Register(reflex_local_auth.RegistrationState):
                     )
                 )
                 session.commit()
-                debug.log("self.session.commit", "Register.handle_registration_email")
+                debug.log("self.session.commit")
 
-        debug.log(f"{registration_result}", "Register.handle_registration_email", True)
+        debug.log(f"{registration_result}", True)
         return registration_result
     
 class Session(reflex_local_auth.LocalAuthState):
