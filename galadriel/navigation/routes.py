@@ -22,7 +22,7 @@ SCENARIO_DETAIL = "/scenarios/[id]"
 SCENARIO_EDIT = "/scenarios/[id]/edit"
 
 #cases
-CASES = "/scenarios"
-CASE_ADD = "/scenarios/add"
-CASE_DETAIL = "/scenarios/[id]"
-CASE_EDIT = "/scenarios/[id]/edit"
+CASES = "/cases"
+CASE_ADD = "/cases/add"
+CASE_DETAIL = "/cases/[id]"
+CASE_EDIT = "/cases/[id]/edit"
