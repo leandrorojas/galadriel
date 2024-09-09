@@ -5,7 +5,7 @@ import reflex as rx
 
 from .. import utils
 
-class CaseModel(rx.Model, table=True):
+class CaseModel(rx.Model, table=True): 
     name: str
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
