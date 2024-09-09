@@ -22,3 +22,15 @@ class NavigationState(rx.State):
     
     def to_suites_add(self):
         return rx.redirect(routes.SUITE_ADD)
+    
+    def to_scenarios(self):
+        return rx.redirect(routes.SCENARIOS)
+    
+    def to_scenarios_add(self):
+        return rx.redirect(routes.SCENARIO_ADD)
+    
+    def to_cases(self):
+        return rx.redirect(routes.CASES)
+    
+    def to_cases_add(self):
+        return rx.redirect(routes.CASE_ADD)

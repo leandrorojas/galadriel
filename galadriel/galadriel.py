@@ -101,6 +101,7 @@ app.add_page(scenario.scenario_add_page, route=navigation.routes.SCENARIO_ADD)
 app.add_page(scenario.scenario_detail_page, route=navigation.routes.SCENARIO_DETAIL, on_load=scenario.ScenarioState.get_scenario_detail)
 app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT, on_load=scenario.ScenarioState.get_scenario_detail)
 
+
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 
 # reflex_local_auth canned pages
