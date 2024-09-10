@@ -13,6 +13,7 @@ from . import rx_blog, rx_contact, rx_pages, rx_navigation
 from . import navigation
 from . import suite
 from . import scenario
+from . import case
 
 #galadriel
 from .pages import base_page, about_page
@@ -101,6 +102,11 @@ app.add_page(scenario.scenario_add_page, route=navigation.routes.SCENARIO_ADD)
 app.add_page(scenario.scenario_detail_page, route=navigation.routes.SCENARIO_DETAIL, on_load=scenario.ScenarioState.get_scenario_detail)
 app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT, on_load=scenario.ScenarioState.get_scenario_detail)
 
+#Test Cases
+app.add_page(case.cases_list_page, route=navigation.routes.CASES, on_load=case.CaseState.load_cases)
+app.add_page(scenario.scenario_add_page, route=navigation.routes.CASE_ADD)
+app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=case.CaseState.get_case_detail)
+app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=case.CaseState.get_case_detail)
 
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 

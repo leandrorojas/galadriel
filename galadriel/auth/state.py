@@ -69,4 +69,4 @@ class Session(reflex_local_auth.LocalAuthState):
         
     def perform_logout(self):
         self.do_logout()
-        return rx.redirect("/")    
+        return rx.redirect("/")
