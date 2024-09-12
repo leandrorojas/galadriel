@@ -96,7 +96,6 @@ def cases_list_page() -> rx.Component:
                 padding_top="2em",       
             ),
             __table(),
-            #rx.text("compiles?"),
             spacing="5",
             align="center",
             min_height="85vh"
