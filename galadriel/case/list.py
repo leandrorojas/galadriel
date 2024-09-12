@@ -69,7 +69,7 @@ def __table() -> rx.Component:
                     __header_cell("created", "calendar-check-2"),
                 ),
             ),
-            rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),
+            #rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),
             variant="surface",
             size="3",
             width="100%",
@@ -96,6 +96,7 @@ def cases_list_page() -> rx.Component:
                 padding_top="2em",       
             ),
             __table(),
+            #rx.text("compiles?"),
             spacing="5",
             align="center",
             min_height="85vh"
