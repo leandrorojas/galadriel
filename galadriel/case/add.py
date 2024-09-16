@@ -49,4 +49,4 @@ def case_add_page() -> rx.Component:
         align="center",
     ),
     
-    return base_page(case_add_content)
+    return base_page(case_add_content) 
