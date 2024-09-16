@@ -7,8 +7,8 @@ from .. import utils
 
 class CaseModel(rx.Model, table=True): 
     name: str
-    suite_id:int = Field(foreign_key="suitemodel.id")
-    scenario_id:int = Field(foreign_key="scenariomodel.id")
+    suite_id:int = Field(foreign_key="suitemodel.id", nullable=True)
+    scenario_id:int = Field(foreign_key="scenariomodel.id", nullable=True)
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),

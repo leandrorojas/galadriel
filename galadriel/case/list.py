@@ -6,12 +6,12 @@ from . import state, model
 from ..pages import base_page
 from ..ui.components import Badge, Tooltip
 
-def __case_detail_link(child: rx.Component, case: model.CaseModel):
+def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
 
-    if case is None:
+    if test_case is None:
         return rx.fragment(child)
     
-    case_id = case.id
+    case_id = test_case.id
     if case_id is None:
         return rx.fragment(child)
 
@@ -23,19 +23,19 @@ def __case_detail_link(child: rx.Component, case: model.CaseModel):
         href=case_detail_url
     )
 
-def __case_list_item(case: model.CaseModel):
+def __case_list_item(test_case: model.CaseModel):
     return rx.box(
         __case_detail_link(
-            rx.heading(case.name),
-            case
+            rx.heading(test_case.name),
+            test_case
         ),
         padding="1em"
     )
 
-def __show_case(case:model.CaseModel):
+def __show_case(test_case:model.CaseModel):
     return rx.table.row(
-         rx.table.cell(__case_detail_link(case.name, case)),
-         rx.table.cell(case.created),
+         rx.table.cell(__case_detail_link(test_case.name, test_case)),
+         rx.table.cell(test_case.created),
     )
 
 def __add_case_button() -> rx.Component:
@@ -69,7 +69,7 @@ def __table() -> rx.Component:
                     __header_cell("created", "calendar-check-2"),
                 ),
             ),
-            #rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),
+            rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),
             variant="surface",
             size="3",
             width="100%",
