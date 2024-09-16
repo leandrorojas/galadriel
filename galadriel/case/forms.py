@@ -2,11 +2,18 @@ import reflex as rx
 from .state import AddCaseState, EditCaseState
 
 def case_add_form() -> rx.Component:
+    tmp_suites = {"oc":"1", "mmc":2, "None":-1}
+    tmp_scenarios = {"check-in new member":"1", "check-in existing memeber":2, "None":-1}
     return rx.form(
         rx.vstack(
             rx.input(
                 name="name",
                 placeholder="Case name",
+                width="100%",
+            ),
+            rx.hstack(
+                rx.select(tmp_suites, placeholder="Select Suite"),
+                rx.select(tmp_scenarios, placeholder="Select Scenario"),
                 width="100%",
             ),
             rx.button("Add Case", type="submit", width="100%",),

@@ -13,7 +13,7 @@ class CaseState(rx.State):
     @rx.var
     def case_id(self):
         #print(self.router.page.params)
-        return self.router.page.params.get("id", "")
+        return self.router.page.params.get("id", "") 
     
     @rx.var
     def case_url(self):

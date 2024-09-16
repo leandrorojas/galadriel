@@ -104,7 +104,7 @@ app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT,
 
 #Test Cases
 app.add_page(case.cases_list_page, route=navigation.routes.CASES, on_load=case.CaseState.load_cases)
-app.add_page(scenario.scenario_add_page, route=navigation.routes.CASE_ADD)
+app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD)
 app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=case.CaseState.get_case_detail)
 app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=case.CaseState.get_case_detail)
 
