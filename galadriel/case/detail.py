@@ -4,6 +4,8 @@ from ..navigation import routes
 from . import state
 from .. pages import base_page
 from ..ui.components import Badge
+from .. import navigation
+from . import model, state
 
 def __case_list_button():
     return rx.fragment(
@@ -27,7 +29,58 @@ def __case_edit_button():
             ),
             href=routes.CASE_EDIT
         ), 
-    )   
+    )
+
+def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
+
+    if test_case is None:
+        return rx.fragment(child)
+    
+    case_id = test_case.id
+    if case_id is None:
+        return rx.fragment(child)
+
+    root_path = navigation.routes.CASES
+    case_detail_url = f"{root_path}/{case_id}"
+
+    return rx.link(
+        child,
+        href=case_detail_url
+    )
+
+def __show_step(test_case:model.CaseModel):
+    return rx.table.row(
+         rx.table.cell(__case_detail_link(test_case.name, test_case)),
+         rx.table.cell(test_case.created),
+    )
+
+def __header_cell(text: str, icon: str):
+    return rx.table.column_header_cell(
+        rx.hstack(
+            rx.icon(icon, size=18),
+            rx.text(text),
+            align="center",
+            spacing="2",
+        ),
+    ) 
+
+def __table() -> rx.Component:
+    return rx.fragment(
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    __header_cell("action", "pickaxe"),
+                    __header_cell("expected", "gem"),
+                    __header_cell("", "ellipsis"),
+                ),
+            ),
+            rx.table.body(rx.foreach(state.CaseState.cases, __show_step)),
+            variant="surface",
+            size="3",
+            width="100%",
+            on_mount=state.CaseState.load_cases,
+        ),
+    )
 
 def case_detail_page() -> rx.Component:
     title_badge = Badge()
@@ -59,6 +112,16 @@ def case_detail_page() -> rx.Component:
             ),
             rx.badge(f"{state.CaseState.case.created}", variant="outline"),
             align="center",
+        ),
+        rx.vstack(
+            rx.heading("Steps", size="7",),
+            rx.hstack(
+                rx.input(placeholder="action"),
+                rx.input(placeholder="expected"),
+                rx.button(rx.icon("plus", size=26), ),
+                width="100%",
+            ),
+            __table(),
         ),
         spacing="5",
         align="left",
