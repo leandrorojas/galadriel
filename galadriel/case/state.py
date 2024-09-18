@@ -91,5 +91,8 @@ class EditCaseState(CaseState):
         case_id = form_data.pop("case_id")
         updated_data = {**form_data}
         self.save_case_edits(case_id, updated_data)
-        return rx.redirect(routes.CASES) # self.to_scenario()
+        #return rx.redirect(routes.CASES) # self.to_scenario()
+        return rx.redirect(self.case_url)
     
+    def get_detail_url(self, id:int):
+        return f"{CASE_ROUTE}/{id}"
