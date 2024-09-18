@@ -108,7 +108,7 @@ def __show_prerequisite(test_case:model.CaseModel):
         ),
     )
 
-def __prerequisites_table() -> rx.Component:
+def __prerequisites_table() -> rx.Component: 
     return rx.fragment(
         rx.table.root(
             rx.table.header(
