@@ -20,3 +20,9 @@ class CaseModel(rx.Model, table=True):
         nullable=True
     )
     #created_by
+
+class StepCaseModel(rx.Model, table=True):
+    case_id:int = Field(foreign_key="casemodel.id")
+    order:int
+    action:str
+    expected:str

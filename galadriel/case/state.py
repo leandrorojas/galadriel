@@ -1,6 +1,6 @@
 from typing import List, Optional
 import reflex as rx
-from .model import CaseModel
+from .model import CaseModel, StepCaseModel
 from ..navigation import routes
 
 CASE_ROUTE = routes.CASES
@@ -68,6 +68,12 @@ class CaseState(rx.State):
         if edit_page:
             return rx.redirect(self.case_edit_url)
         return rx.redirect(self.case_url)
+    
+    def load_steps(self):
+        pass
+
+    def load_prerequisites(self):
+        pass
 
 class AddCaseState(CaseState):
     form_data:dict = {}
@@ -86,3 +92,4 @@ class EditCaseState(CaseState):
         updated_data = {**form_data}
         self.save_case_edits(case_id, updated_data)
         return rx.redirect(routes.CASES) # self.to_scenario()
+    
