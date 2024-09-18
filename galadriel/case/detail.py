@@ -50,8 +50,18 @@ def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
 
 def __show_step(test_case:model.CaseModel):
     return rx.table.row(
-         rx.table.cell(__case_detail_link(test_case.name, test_case)),
-         rx.table.cell(test_case.created),
+        rx.table.cell("0"),
+        rx.table.cell(__case_detail_link(test_case.name, test_case)),
+        rx.table.cell("some result"),
+        rx.table.cell(
+            rx.flex(
+                rx.button(rx.icon("arrow-big-up")), 
+                rx.button(rx.icon("arrow-big-down")), 
+                rx.button(rx.icon("pencil")), 
+                rx.button(rx.icon("trash-2")),
+                spacing="2",
+            )
+        ),
     )
 
 def __header_cell(text: str, icon: str):
@@ -64,11 +74,12 @@ def __header_cell(text: str, icon: str):
         ),
     ) 
 
-def __table() -> rx.Component:
+def __cases_table() -> rx.Component:
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
+                    __header_cell("order", "list-ordered"),
                     __header_cell("action", "pickaxe"),
                     __header_cell("expected", "gem"),
                     __header_cell("", "ellipsis"),
@@ -78,7 +89,40 @@ def __table() -> rx.Component:
             variant="surface",
             size="3",
             width="100%",
-            on_mount=state.CaseState.load_cases,
+            on_mount=state.CaseState.load_steps,
+        ),
+    )
+
+def __show_prerequisite(test_case:model.CaseModel):
+    return rx.table.row(
+        rx.table.cell("0"),
+        rx.table.cell(__case_detail_link(test_case.name, test_case)),
+        rx.table.cell(
+            rx.flex(
+                rx.button(rx.icon("arrow-big-up")), 
+                rx.button(rx.icon("arrow-big-down")), 
+                rx.button(rx.icon("pencil")), 
+                rx.button(rx.icon("trash-2")),
+                spacing="2",
+            )
+        ),
+    )
+
+def __prerequisites_table() -> rx.Component:
+    return rx.fragment(
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    __header_cell("order", "list-ordered"),
+                    __header_cell("test case", "pickaxe"),
+                    __header_cell("", "ellipsis"),
+                ),
+            ),
+            rx.table.body(rx.foreach(state.CaseState.cases, __show_prerequisite)),
+            variant="surface",
+            size="3",
+            width="100%",
+            on_mount=state.CaseState.load_prerequisites,
         ),
     )
 
@@ -114,14 +158,23 @@ def case_detail_page() -> rx.Component:
             align="center",
         ),
         rx.vstack(
-            rx.heading("Steps", size="7",),
             rx.hstack(
+                rx.heading("Prerequisites", size="7",),
+                rx.button(rx.icon("plus", size=26),),
+            ),
+            __prerequisites_table(),
+        ),        
+        rx.vstack(
+            rx.heading("Steps", size="7",),
+            rx.flex(
                 rx.input(placeholder="action"),
                 rx.input(placeholder="expected"),
-                rx.button(rx.icon("plus", size=26), ),
+                rx.input(placeholder="order"),
+                rx.button(rx.icon("plus", size=26),),
+                spacing="2",
                 width="100%",
             ),
-            __table(),
+            __cases_table(),
         ),
         spacing="5",
         align="left",

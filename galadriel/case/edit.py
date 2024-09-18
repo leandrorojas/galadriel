@@ -11,12 +11,20 @@ def __case_list_button() -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
-                rx.icon("chevron-left", size=26), 
-                rx.text("to Cases", size="4", display=["none", "none", "block"]), 
+                rx.icon("chevrons-left", size=26), 
+                rx.text("to List", size="4", display=["none", "none", "block"]), 
                 size="3", 
-            ),
+            ),            
             href=routes.CASES
         ), 
+        rx.link(
+            rx.button(
+                rx.icon("chevron-left", size=26), 
+                rx.text("to Case Detal", size="4", display=["none", "none", "block"]), 
+                size="3", 
+            ),
+            href=routes.CASE_EDIT
+        )
     )
 
 def case_edit_page() -> rx.Component:
