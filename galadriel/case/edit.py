@@ -1,5 +1,4 @@
 import reflex as rx
-#from ..ui.rx_base import rx_tutorial_base_page
 
 from . import forms
 from .state import EditCaseState
@@ -17,19 +16,19 @@ def __case_list_button() -> rx.Component:
             ),            
             href=routes.CASES
         ), 
-        rx.link(
-            rx.button(
-                rx.icon("chevron-left", size=26), 
-                rx.text("to Case Detal", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=routes.CASE_EDIT
-        )
+        # rx.link(
+        #     rx.button(
+        #         rx.icon("chevron-left", size=26), 
+        #         rx.text("to Case Detal", size="4", display=["none", "none", "block"]), 
+        #         size="3", 
+        #     ),
+        #     href=routes.CASES
+        # )
     )
 
 def case_edit_page() -> rx.Component:
     my_form = forms.case_edit_form()
-    case = EditCaseState.case
+    test_case = EditCaseState.case
     title_badge = Badge()
 
     case_edit_content = rx.vstack(
