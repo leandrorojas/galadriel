@@ -1,6 +1,6 @@
 from typing import List, Optional
 import reflex as rx
-from .model import CaseModel, StepCaseModel
+from .model import CaseModel, StepModel
 from ..navigation import routes
 
 CASE_ROUTE = routes.CASES
@@ -9,6 +9,9 @@ if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
 class CaseState(rx.State):
     cases: List['CaseModel'] = []
     case: Optional['CaseModel'] = None
+
+    steps: List['StepModel'] = []
+    step: Optional['StepModel'] = None
 
     @rx.var
     def case_id(self):
@@ -70,7 +73,23 @@ class CaseState(rx.State):
         return rx.redirect(self.case_url)
     
     def load_steps(self):
-        pass
+        with rx.session() as session:
+            results = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+            self.steps = results
+
+    def add_step(self, case_id:int, form_data:dict):
+        #form_data["case_id"] = str(case_id)
+        form_data.update({"case_id":case_id})
+        form_data.update({"order":0})
+        #print(form_data)
+
+        with rx.session() as session:
+            step_to_add = StepModel(**form_data)
+            session.add(step_to_add)
+            session.commit()
+            session.refresh(step_to_add)
+            self.step = step_to_add
+        self.load_steps()
 
     def load_prerequisites(self):
         pass
@@ -96,3 +115,14 @@ class EditCaseState(CaseState):
     
     def get_detail_url(self, id:int):
         return f"{CASE_ROUTE}/{id}"
+    
+class AddStepState(CaseState):
+    form_data:dict = {}
+    
+    def handle_submit(self, form_data):
+        self.form_data = form_data
+        case_id = form_data.pop("case_id")
+        updated_data = {**form_data}
+        self.add_step(case_id, updated_data)
+        #return rx.redirect(routes.CASES) # self.to_scenario()
+        return rx.redirect(self.case_url)

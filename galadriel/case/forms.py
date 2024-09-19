@@ -1,5 +1,5 @@
 import reflex as rx
-from .state import AddCaseState, EditCaseState
+from .state import AddCaseState, EditCaseState, AddStepState
 
 def case_add_form() -> rx.Component:
     return rx.form(
@@ -38,4 +38,28 @@ def case_edit_form() -> rx.Component:
             rx.button("Save Case", type="submit", width="100%",),
         ),
         on_submit=EditCaseState.handle_submit,
+    ),
+
+def step_add_form() -> rx.Component:
+    test_case = AddStepState.case
+
+    return rx.form(
+        rx.box(
+            rx.input(
+                type="hidden",
+                name="case_id",
+                value=test_case.id
+            ),
+            display="none",
+        ),        
+        rx.hstack(
+            rx.input(name="action", placeholder="action"),
+            rx.input(name="expected", placeholder="expected"),
+            rx.input(name="order", placeholder="order"),
+            rx.button(rx.icon("plus", size=26), type="submit",),
+            spacing="2",
+            width="100%",
+        ),
+        on_submit=AddStepState.handle_submit,
+        reset_on_submit=True,
     ),
