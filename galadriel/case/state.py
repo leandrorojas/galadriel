@@ -78,9 +78,17 @@ class CaseState(rx.State):
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
+        step_order = 1
+        
+        if (form_data["order"] != ""):
+            #print("order NOT empty")
+            ...
+        else:
+            #print("order empty")
+            ...
+        
         form_data.update({"case_id":case_id})
-        form_data.update({"order":0})
-        #print(form_data)
+        form_data.update({"order":step_order})
 
         with rx.session() as session:
             step_to_add = StepModel(**form_data)
@@ -123,5 +131,4 @@ class AddStepState(CaseState):
         case_id = form_data.pop("case_id")
         updated_data = {**form_data}
         self.add_step(case_id, updated_data)
-        #return rx.redirect(routes.CASES) # self.to_scenario()
         return rx.redirect(self.case_url)
