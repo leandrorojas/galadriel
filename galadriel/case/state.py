@@ -78,7 +78,6 @@ class CaseState(rx.State):
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
-        #form_data["case_id"] = str(case_id)
         form_data.update({"case_id":case_id})
         form_data.update({"order":0})
         #print(form_data)
