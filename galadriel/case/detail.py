@@ -6,7 +6,10 @@ from ..ui.components import Badge
 from .. import navigation
 from . import model, state
 #from .. import step
-from .forms import step_add_form
+from .forms import step_add_form    
+
+first_row = True
+last_row = False
 
 def __header_cell(text: str, icon: str):
     return rx.table.column_header_cell(
@@ -118,10 +121,10 @@ def __show_step(test_step:model.StepModel):
         rx.table.cell(test_step.expected),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up")), 
-                rx.button(rx.icon("arrow-big-down")), 
-                rx.button(rx.icon("pencil")), 
-                rx.button(rx.icon("trash-2")),
+                rx.button(rx.icon("arrow-big-up"), disabled=True), 
+                rx.button(rx.icon("arrow-big-down"), disabled=True), 
+                rx.button(rx.icon("pencil"), disabled=True), 
+                rx.button(rx.icon("trash-2"), disabled=True),
                 spacing="2",
             )
         ),
@@ -188,7 +191,8 @@ def case_detail_page() -> rx.Component:
         ),        
         rx.vstack(
             rx.heading("Steps", size="5",),
-            rx.hstack(step_add_form()),
+            #rx.hstack(step_add_form()),
+            step_add_form(),
             __steps_table(),
         ),
         spacing="5",

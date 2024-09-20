@@ -3,6 +3,8 @@ import reflex as rx
 from .model import CaseModel, StepModel
 from ..navigation import routes
 
+from sqlalchemy import func
+
 CASE_ROUTE = routes.CASES
 if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
 
@@ -74,22 +76,46 @@ class CaseState(rx.State):
     
     def load_steps(self):
         with rx.session() as session:
-            results = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+            results = session.exec(StepModel.select().where(StepModel.case_id == self.case_id).order_by(StepModel.order)).all()
             self.steps = results
 
-    def add_step(self, case_id:int, form_data:dict):
-        #form_data["case_id"] = str(case_id)
-        form_data.update({"case_id":case_id})
-        form_data.update({"order":0})
-        #print(form_data)
+    def gat_max_order():
+        pass
 
-        with rx.session() as session:
-            step_to_add = StepModel(**form_data)
-            session.add(step_to_add)
-            session.commit()
-            session.refresh(step_to_add)
-            self.step = step_to_add
-        self.load_steps()
+    def add_step(self, case_id:int, form_data:dict) -> str:
+
+        if (form_data["action"] != ""):
+            if (form_data["expected"] != ""):
+                step_order = 1
+                if (len(self.steps) > 0):
+                    with rx.session() as session:
+                        steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                        max_order = 0
+
+                        for step_order in steps_order:
+                            if step_order.order > max_order:
+                                max_order = step_order.order
+
+                        step_order = max_order + 1
+                else:
+                    form_data["order"] = 1
+                    
+                form_data.update({"case_id":case_id})
+                form_data.update({"order":step_order})
+
+                with rx.session() as session:
+                    step_to_add = StepModel(**form_data)
+                    session.add(step_to_add)
+                    session.commit()
+                    session.refresh(step_to_add)
+                    self.step = step_to_add
+                self.load_steps()
+
+                return rx.toast.success("step added!")
+            else:
+                return rx.toast.error("expected cannot be empty")
+        else:
+            return rx.toast.error("action cannot be empty")
 
     def load_prerequisites(self):
         pass
@@ -110,7 +136,6 @@ class EditCaseState(CaseState):
         case_id = form_data.pop("case_id")
         updated_data = {**form_data}
         self.save_case_edits(case_id, updated_data)
-        #return rx.redirect(routes.CASES) # self.to_scenario()
         return rx.redirect(self.case_url)
     
     def get_detail_url(self, id:int):
@@ -123,6 +148,6 @@ class AddStepState(CaseState):
         self.form_data = form_data
         case_id = form_data.pop("case_id")
         updated_data = {**form_data}
-        self.add_step(case_id, updated_data)
-        #return rx.redirect(routes.CASES) # self.to_scenario()
-        return rx.redirect(self.case_url)
+        result = self.add_step(case_id, updated_data)
+        #check if step is None
+        return result #rx.toast.success("step added")
