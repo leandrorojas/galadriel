@@ -1,15 +1,14 @@
 import reflex as rx
 
 from ..navigation import routes
-from .. pages import base_page
+from ..pages import base_page
 from ..ui.components import Badge
 from .. import navigation
 from . import model, state
-#from .. import step
 from .forms import step_add_form    
 
-first_row = True
-last_row = False
+first_row:bool = True
+last_row:bool = False
 
 def __header_cell(text: str, icon: str):
     return rx.table.column_header_cell(
@@ -115,14 +114,15 @@ def __step_detail_link(child: rx.Component, test_case: model.CaseModel):
     )
 
 def __show_step(test_step:model.StepModel):
+
     return rx.table.row(
         rx.table.cell(test_step.order),
         rx.table.cell(test_step.action),
         rx.table.cell(test_step.expected),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=True), 
-                rx.button(rx.icon("arrow-big-down"), disabled=True), 
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, "id"))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, "id"))), 
                 rx.button(rx.icon("pencil"), disabled=True), 
                 rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, "id"))),
                 spacing="2",
