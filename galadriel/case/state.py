@@ -82,7 +82,7 @@ class CaseState(rx.State):
     def gat_max_order():
         pass
 
-    def add_step(self, case_id:int, form_data:dict) -> str:
+    def add_step(self, case_id:int, form_data:dict):
 
         if (form_data["action"] != ""):
             if (form_data["expected"] != ""):
@@ -116,6 +116,18 @@ class CaseState(rx.State):
                 return rx.toast.error("expected cannot be empty")
         else:
             return rx.toast.error("action cannot be empty")
+        
+    def delete_step(self, step_id:int):
+        with rx.session() as session:
+            step_to_delete = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            order_to_update = step_to_delete.order
+            session.delete(step_to_delete)
+            session.commit()
+            #select all with order > order_to_update
+            #go through the list, and update order = order - 1
+            #commit
+        self.load_steps()
+        return rx.toast.info("The step has been deleted.")
 
     def load_prerequisites(self):
         pass
@@ -149,5 +161,4 @@ class AddStepState(CaseState):
         case_id = form_data.pop("case_id")
         updated_data = {**form_data}
         result = self.add_step(case_id, updated_data)
-        #check if step is None
-        return result #rx.toast.success("step added")
+        return result
