@@ -88,24 +88,15 @@ class CaseState(rx.State):
             if (form_data["expected"] != ""):
                 step_order = 1
                 if (len(self.steps) > 0):
-                    if (form_data["order"] != ""):
-                        step_order = form_data["order"]
-                        with rx.session() as session:
-                            existing_step = session.exec(StepModel.select().where(StepModel.case_id == self.case_id & StepModel.order == form_data["order"])).all()
+                    with rx.session() as session:
+                        steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                        max_order = 0
 
-                            if (existing_step is None):
-                                pass
+                        for step_order in steps_order:
+                            if step_order.order > max_order:
+                                max_order = step_order.order
 
-                    else:
-                        with rx.session() as session:
-                            steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
-                            max_order = 0
-
-                            for step_order in steps_order:
-                                if step_order.order > max_order:
-                                    max_order = step_order.order
-
-                            step_order = max_order + 1
+                        step_order = max_order + 1
                 else:
                     form_data["order"] = 1
                     

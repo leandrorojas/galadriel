@@ -51,14 +51,12 @@ def step_add_form() -> rx.Component:
                 value=test_case.id
             ),
             display="none",
-        ),        
+        ),
         rx.hstack(
-            rx.input(name="action", placeholder="action"),
-            rx.input(name="expected", placeholder="expected"),
-            rx.input(name="order", placeholder="order", type="number"),
+            rx.input(name="action", placeholder="action", width="50%"),
+            rx.input(name="expected", placeholder="expected", width="50%"),
             rx.button(rx.icon("plus", size=26), type="submit",),
             spacing="2",
-            width="100%",
         ),
         on_submit=AddStepState.handle_submit,
         reset_on_submit=True,
