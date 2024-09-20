@@ -79,9 +79,6 @@ class CaseState(rx.State):
             results = session.exec(StepModel.select().where(StepModel.case_id == self.case_id).order_by(StepModel.order)).all()
             self.steps = results
 
-    def gat_max_order():
-        pass
-
     def add_step(self, case_id:int, form_data:dict):
 
         if (form_data["action"] != ""):
@@ -123,6 +120,14 @@ class CaseState(rx.State):
             order_to_update = step_to_delete.order
             session.delete(step_to_delete)
             session.commit()
+
+            steps_to_update = session.exec(StepModel.select().where(StepModel.order > order_to_update)).all()
+            for step in steps_to_update:
+                step.order = step.order - 1
+                session.add(step)
+                session.commit()
+                session.refresh(step)
+
             #select all with order > order_to_update
             #go through the list, and update order = order - 1
             #commit
