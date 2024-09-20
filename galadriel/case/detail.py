@@ -123,7 +123,7 @@ def __show_step(test_step:model.StepModel):
             rx.flex(
                 rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, "id"))), 
                 rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, "id"))), 
-                rx.button(rx.icon("pencil"), disabled=True), 
+                #rx.button(rx.icon("pencil"), disabled=True), 
                 rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, "id"))),
                 spacing="2",
             )
