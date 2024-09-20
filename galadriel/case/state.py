@@ -1,6 +1,6 @@
 from typing import List, Optional
 import reflex as rx
-from .model import CaseModel, StepModel
+from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 
 from sqlalchemy import func
@@ -14,6 +14,9 @@ class CaseState(rx.State):
 
     steps: List['StepModel'] = []
     step: Optional['StepModel'] = None
+
+    prerequisites: List['PrerequisiteModel'] = []
+    prerequisite: Optional['PrerequisiteModel'] = None
 
     @rx.var
     def case_id(self):
@@ -176,7 +179,9 @@ class CaseState(rx.State):
                 return rx.toast.warning("The step has reached max.")
 
     def load_prerequisites(self):
-        pass
+        with rx.session() as session:
+            results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
+            self.prerequisites = results
 
 class AddCaseState(CaseState):
     form_data:dict = {}

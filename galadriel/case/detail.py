@@ -38,10 +38,10 @@ def __prerequisite_detail_link(child: rx.Component, test_case: model.CaseModel):
         href=case_detail_url
     )
 
-def __show_prerequisite(test_case:model.CaseModel):
+def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     return rx.table.row(
-        rx.table.cell("0"),
-        rx.table.cell(__prerequisite_detail_link(test_case.name, test_case)),
+        rx.table.cell("0"), #rx.table.cell(prerequisite.order),
+        rx.table.cell(prerequisite.prerequisite_id),
         rx.table.cell(
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")), 
