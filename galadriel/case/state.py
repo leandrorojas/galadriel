@@ -131,7 +131,7 @@ class CaseState(rx.State):
             #select all with order > order_to_update
             #go through the list, and update order = order - 1
             #commit
-        self.load_steps()
+        self.load_steps() 
         return rx.toast.info("The step has been deleted.")
 
     def load_prerequisites(self):
