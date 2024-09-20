@@ -55,7 +55,7 @@ def step_add_form() -> rx.Component:
         rx.hstack(
             rx.input(name="action", placeholder="action"),
             rx.input(name="expected", placeholder="expected"),
-            rx.input(name="order", placeholder="order"),
+            rx.input(name="order", placeholder="order", type="number"),
             rx.button(rx.icon("plus", size=26), type="submit",),
             spacing="2",
             width="100%",
