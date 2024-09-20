@@ -127,12 +127,53 @@ class CaseState(rx.State):
                 session.add(step)
                 session.commit()
                 session.refresh(step)
-
-            #select all with order > order_to_update
-            #go through the list, and update order = order - 1
-            #commit
-        self.load_steps() 
+        self.load_steps()
         return rx.toast.info("The step has been deleted.")
+    
+    def move_step_up(self, step_id:int):
+        with rx.session() as session:
+            step_going_up = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            old_order = step_going_up.order
+            if (old_order != 1):
+                step_going_down = session.exec(StepModel.select().where(StepModel.order == (old_order -1) and StepModel.case_id == self.case_id)).first()
+                new_order = step_going_down.order
+
+                step_going_up.order = new_order
+                session.add(step_going_up)
+                session.commit()
+                session.refresh(step_going_up)
+
+                step_going_down.order = old_order
+                session.add(step_going_down)
+                session.commit()
+                session.refresh(step_going_down)
+
+                self.load_steps()
+            else:
+                return rx.toast.warning("The step has reached min.")
+            
+    def move_step_down(self, step_id:int):
+        with rx.session() as session:
+            step_going_down = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            old_order = step_going_down.order
+            step_going_up = session.exec(StepModel.select().where(StepModel.order == (old_order +1) and StepModel.case_id == self.case_id)).first()
+
+            if (step_going_up is not None):
+                new_order = step_going_up.order
+
+                step_going_down.order = new_order
+                session.add(step_going_down)
+                session.commit()
+                session.refresh(step_going_down)
+
+                step_going_up.order = old_order
+                session.add(step_going_up)
+                session.commit()
+                session.refresh(step_going_up)
+
+                self.load_steps()
+            else:
+                return rx.toast.warning("The step has reached max.")
 
     def load_prerequisites(self):
         pass
