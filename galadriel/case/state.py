@@ -151,7 +151,7 @@ class CaseState(rx.State):
                 self.load_steps()
             else:
                 return rx.toast.warning("The step has reached min.")
-            
+
     def move_step_down(self, step_id:int):
         with rx.session() as session:
             step_going_down = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
