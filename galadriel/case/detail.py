@@ -124,7 +124,7 @@ def __show_step(test_step:model.StepModel):
                 rx.button(rx.icon("arrow-big-up"), disabled=True), 
                 rx.button(rx.icon("arrow-big-down"), disabled=True), 
                 rx.button(rx.icon("pencil"), disabled=True), 
-                rx.button(rx.icon("trash-2"), disabled=True),
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, "id"))),
                 spacing="2",
             )
         ),
