@@ -82,7 +82,7 @@ def __case_list_button():
             ),
             href=routes.CASES
         ), 
-    )
+    ) 
 
 def __search_prerequisite_button():
     return rx.fragment(
