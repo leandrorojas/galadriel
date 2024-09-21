@@ -1,6 +1,6 @@
 from typing import List, Optional
 import reflex as rx
-from .model import CaseModel, StepModel
+from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 
 from sqlalchemy import func
@@ -14,6 +14,9 @@ class CaseState(rx.State):
 
     steps: List['StepModel'] = []
     step: Optional['StepModel'] = None
+
+    prerequisites: List['PrerequisiteModel'] = []
+    prerequisite: Optional['PrerequisiteModel'] = None
 
     @rx.var
     def case_id(self):
@@ -80,7 +83,6 @@ class CaseState(rx.State):
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
-
         if (form_data["action"] != ""):
             if (form_data["expected"] != ""):
                 step_order = 1
@@ -88,11 +90,9 @@ class CaseState(rx.State):
                     with rx.session() as session:
                         steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
                         max_order = 0
-
                         for step_order in steps_order:
                             if step_order.order > max_order:
                                 max_order = step_order.order
-
                         step_order = max_order + 1
                 else:
                     form_data["order"] = 1
@@ -107,7 +107,7 @@ class CaseState(rx.State):
                     session.refresh(step_to_add)
                     self.step = step_to_add
                 self.load_steps()
-
+                
                 return rx.toast.success("step added!")
             else:
                 return rx.toast.error("expected cannot be empty")
@@ -176,7 +176,9 @@ class CaseState(rx.State):
                 return rx.toast.warning("The step has reached max.")
 
     def load_prerequisites(self):
-        pass
+        with rx.session() as session:
+            results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
+            self.prerequisites = results
 
 class AddCaseState(CaseState):
     form_data:dict = {}

@@ -38,10 +38,10 @@ def __prerequisite_detail_link(child: rx.Component, test_case: model.CaseModel):
         href=case_detail_url
     )
 
-def __show_prerequisite(test_case:model.CaseModel):
+def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     return rx.table.row(
-        rx.table.cell("0"),
-        rx.table.cell(__prerequisite_detail_link(test_case.name, test_case)),
+        rx.table.cell(prerequisite.order),
+        rx.table.cell(prerequisite.prerequisite_id),
         rx.table.cell(
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")), 
@@ -63,7 +63,7 @@ def __prerequisites_table() -> rx.Component:
                     __header_cell("", "ellipsis"),
                 ),
             ),
-            rx.table.body(rx.foreach(state.CaseState.cases, __show_prerequisite)),
+            rx.table.body(rx.foreach(state.CaseState.prerequisites, __show_prerequisite)),
             variant="surface",
             size="3",
             width="100%",
@@ -71,6 +71,7 @@ def __prerequisites_table() -> rx.Component:
         ),
     )
 
+#cases
 def __case_list_button():
     return rx.fragment(
         rx.link(
@@ -83,7 +84,7 @@ def __case_list_button():
         ), 
     )
 
-def __case_edit_button():
+def __search_prerequisite_button():
     return rx.fragment(
         rx.link(
             rx.button(
@@ -96,23 +97,6 @@ def __case_edit_button():
     )
 
 #steps
-def __step_detail_link(child: rx.Component, test_case: model.CaseModel):
-
-    if test_case is None:
-        return rx.fragment(child)
-    
-    case_id = test_case.id
-    if case_id is None:
-        return rx.fragment(child)
-
-    root_path = navigation.routes.CASES
-    case_detail_url = f"{root_path}/{case_id}"
-
-    return rx.link(
-        child,
-        href=case_detail_url
-    )
-
 def __show_step(test_step:model.StepModel):
 
     return rx.table.row(
@@ -154,7 +138,7 @@ def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
     can_edit = True #TODO: add roles and privileges
-    edit_link = __case_edit_button()
+    edit_link = __search_prerequisite_button()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -185,13 +169,12 @@ def case_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("plus", size=26),),
+                rx.button(rx.icon("search", size=26),),
             ),
             __prerequisites_table(),
         ),        
         rx.vstack(
             rx.heading("Steps", size="5",),
-            #rx.hstack(step_add_form()),
             step_add_form(),
             __steps_table(),
         ),
