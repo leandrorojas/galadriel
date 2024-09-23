@@ -106,6 +106,7 @@ app.add_page(case.cases_list_page, route=navigation.routes.CASES, on_load=case.C
 app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD)
 app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=case.CaseState.get_case_detail)
 app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=case.CaseState.get_case_detail)
+app.add_page(case.case_prerequisite_search_page, route=navigation.routes.CASE_PREREQUISITES_SEARCH, on_load=case.CaseState.get_case_detail)
 
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 

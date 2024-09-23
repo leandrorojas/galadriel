@@ -15,7 +15,7 @@ def case_add_form() -> rx.Component:
         reset_on_submit=True,
     ),
 
-def case_prerequisirte_search_form() -> rx.Component:
+def case_edit_form() -> rx.Component:
     case = EditCaseState.case
     case_name = case.name
 

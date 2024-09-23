@@ -27,13 +27,13 @@ def __case_list_button() -> rx.Component:
     )
 
 def case_edit_page() -> rx.Component:
-    my_form = forms.case_prerequisirte_search_form()
+    my_form = forms.case_edit_form()
     test_case = EditCaseState.case
     title_badge = Badge() 
 
     case_edit_content = rx.vstack(
         rx.flex(
-            title_badge.title("route", "Edit Test Case"),
+            title_badge.title("test-tubes", "Edit Test Case"),
             rx.spacer(),
             rx.hstack(__case_list_button(),),            
             spacing="2",

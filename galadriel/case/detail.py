@@ -148,7 +148,7 @@ def case_detail_page() -> rx.Component:
 
     case_detail_content = rx.vstack(
         rx.flex(
-            title_badge.title("beaker", "Test Case Detail"),
+            title_badge.title("test-tubes", "Test Case Detail"),
             rx.spacer(),
             rx.hstack(__case_list_button(), edit_link_element),
             spacing="2",
@@ -169,7 +169,7 @@ def case_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("plus", size=18)),
+                rx.link(rx.button(rx.icon("plus", size=18)), href=routes.CASE_PREREQUISITES_SEARCH),
                 align="center"
             ),
             __prerequisites_table(),
