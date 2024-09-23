@@ -27,7 +27,7 @@ def __case_list_button() -> rx.Component:
     )
 
 def case_edit_page() -> rx.Component:
-    my_form = forms.case_edit_form()
+    my_form = forms.case_prerequisirte_search_form()
     test_case = EditCaseState.case
     title_badge = Badge() 
 

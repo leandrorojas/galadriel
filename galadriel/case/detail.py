@@ -169,7 +169,7 @@ def case_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("plus", size=18), href=routes.CASES_EDIT_PREREQUISITES_SEARCH),
+                rx.button(rx.icon("plus", size=18)),
                 align="center"
             ),
             __prerequisites_table(),

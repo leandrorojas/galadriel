@@ -15,7 +15,7 @@ def case_add_form() -> rx.Component:
         reset_on_submit=True,
     ),
 
-def case_edit_form() -> rx.Component:
+def case_prerequisirte_search_form() -> rx.Component:
     case = EditCaseState.case
     case_name = case.name
 
@@ -53,7 +53,7 @@ def step_add_form() -> rx.Component:
             display="none",
         ),
         rx.hstack(
-            rx.input(name="action", placeholder="action", width="50%"), #rx.text_area() for multiline
+            rx.input(name="action", placeholder="action", width="50%"), #rx.text_area() for multiline GAL-79
             rx.input(name="expected", placeholder="expected", width="50%"),
             rx.button(rx.icon("plus", size=26), type="submit",),
             spacing="2",
