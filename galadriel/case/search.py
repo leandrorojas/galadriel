@@ -39,9 +39,9 @@ def __header_cell(text: str, icon: str):
 
 def __show_case(test_case:CaseModel):
     return rx.table.row(
-         rx.table.cell(test_case.name),
-         rx.table.cell(test_case.created),
-         rx.table.cell(rx.button(rx.icon("plus"))),
+        rx.table.cell(rx.button(rx.icon("plus"))),
+        rx.table.cell(test_case.name),
+        rx.table.cell(test_case.created),
     )
 
 def __table() -> rx.Component:
@@ -49,9 +49,9 @@ def __table() -> rx.Component:
         rx.table.root(
             rx.table.header(
                 rx.table.row(
+                    __header_cell("", "ellipsis"),
                     __header_cell("name", "fingerprint"),
                     __header_cell("created", "calendar-check-2"),
-                    __header_cell("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(CaseState.cases, __show_case)),

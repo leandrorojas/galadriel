@@ -181,12 +181,6 @@ class CaseState(rx.State):
             results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
             self.prerequisites = results
 
-    # def load_all_prerequisites(self):
-    #     with rx.session() as session:
-    #         results = session.exec(CaseModel.select()).all()
-    #         #results = session.exec(PrerequisiteModel.select().order_by(PrerequisiteModel.order)).all()
-    #         self.prerequisites = results        
-
 class AddCaseState(CaseState):
     form_data:dict = {}
 
@@ -217,21 +211,3 @@ class AddStepState(CaseState):
         updated_data = {**form_data}
         result = self.add_step(case_id, updated_data)
         return result
-    
-
-class PrerequisiteState(CaseState):
-    form_data:dict = {}
-
-    child_prerequisites: List['PrerequisiteModel'] = []
-    
-    def handle_submit(self, form_data):
-        self.form_data = form_data
-        case_id = form_data.pop("case_id")
-        updated_data = {**form_data}
-        result = self.add_step(case_id, updated_data)
-        return result
-
-    def load_child_prerequisites(self):
-        with rx.session() as session:
-            results = session.exec(CaseModel.select()).all()
-            self.child_prerequisites = results
