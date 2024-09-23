@@ -1,7 +1,7 @@
 import reflex as rx
 
 from . import forms
-from .state import CaseState
+from .state import CaseState, AddPrerequisiteState
 from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge
@@ -27,7 +27,7 @@ def __case_prerequisite_list_button() -> rx.Component:
         # )
     )
 
-def __header_cell(text: str, icon: str):
+def __header_cell(text: str, icon: str, hide_column:bool = False):
     return rx.table.column_header_cell(
         rx.hstack(
             rx.icon(icon, size=18),
@@ -35,6 +35,7 @@ def __header_cell(text: str, icon: str):
             align="center",
             spacing="2",
         ),
+        hidden=hide_column,
     )
 
 def __show_case(test_case:CaseModel):
@@ -42,6 +43,7 @@ def __show_case(test_case:CaseModel):
         rx.table.cell(rx.button(rx.icon("plus"))),
         rx.table.cell(test_case.name),
         rx.table.cell(test_case.created),
+        rx.table.cell(value=test_case.id, hidden=True),
     )
 
 def __table() -> rx.Component:
@@ -52,6 +54,7 @@ def __table() -> rx.Component:
                     __header_cell("", "ellipsis"),
                     __header_cell("name", "fingerprint"),
                     __header_cell("created", "calendar-check-2"),
+                    __header_cell("selected_id", "search", True),
                 ),
             ),
             rx.table.body(rx.foreach(CaseState.cases, __show_case)),
