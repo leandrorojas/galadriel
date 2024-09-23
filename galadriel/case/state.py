@@ -83,36 +83,37 @@ class CaseState(rx.State):
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
-        if (form_data["action"] != ""):
-            if (form_data["expected"] != ""):
-                step_order = 1
-                if (len(self.steps) > 0):
-                    with rx.session() as session:
-                        steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
-                        max_order = 0
-                        for step_order in steps_order:
-                            if step_order.order > max_order:
-                                max_order = step_order.order
-                        step_order = max_order + 1
-                else:
-                    form_data["order"] = 1
-                    
-                form_data.update({"case_id":case_id})
-                form_data.update({"order":step_order})
-
-                with rx.session() as session:
-                    step_to_add = StepModel(**form_data)
-                    session.add(step_to_add)
-                    session.commit()
-                    session.refresh(step_to_add)
-                    self.step = step_to_add
-                self.load_steps()
-                
-                return rx.toast.success("step added!")
-            else:
-                return rx.toast.error("expected cannot be empty")
-        else:
+        if (form_data["action"] == ""): 
             return rx.toast.error("action cannot be empty")
+
+        if (form_data["expected"] != ""):
+            return rx.toast.error("expected cannot be empty")
+        
+        step_order = 1
+
+        if (len(self.steps) > 0):
+            with rx.session() as session:
+                steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                max_order = 0
+                for step_order in steps_order:
+                    if step_order.order > max_order:
+                        max_order = step_order.order
+                step_order = max_order + 1
+        else:
+            form_data["order"] = 1
+            
+        form_data.update({"case_id":case_id})
+        form_data.update({"order":step_order})
+
+        with rx.session() as session:
+            step_to_add = StepModel(**form_data)
+            session.add(step_to_add)
+            session.commit()
+            session.refresh(step_to_add)
+            self.step = step_to_add
+        self.load_steps()
+        
+        return rx.toast.success("step added!")
         
     def delete_step(self, step_id:int):
         with rx.session() as session:

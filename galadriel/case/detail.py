@@ -82,9 +82,9 @@ def __case_list_button():
             ),
             href=routes.CASES
         ), 
-    ) 
+    )
 
-def __search_prerequisite_button():
+def __case_edit_button():
     return rx.fragment(
         rx.link(
             rx.button(
@@ -138,14 +138,14 @@ def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
     can_edit = True #TODO: add roles and privileges
-    edit_link = __search_prerequisite_button()
+    edit_link = __case_edit_button()
 
     edit_link_element = rx.cond(
         can_edit,
         edit_link,
         rx.fragment("")
     )
-    
+
     case_detail_content = rx.vstack(
         rx.flex(
             title_badge.title("beaker", "Test Case Detail"),
@@ -169,7 +169,7 @@ def case_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("search", size=18),rx.text("search Case")),
+                rx.button(rx.icon("plus", size=18), href=routes.CASES_EDIT_PREREQUISITES_SEARCH),
                 align="center"
             ),
             __prerequisites_table(),
