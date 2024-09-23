@@ -70,10 +70,7 @@ def case_prerequisite_search_page() -> rx.Component:
     my_form = rx.box(
         rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
         rx.vstack(
-            rx.hstack(
-                rx.input(placeholder="search Test Case"),
-                rx.button(rx.icon("search", size=18)),
-            ),
+            rx.input(placeholder="start typing to search a Test Case", on_change=lambda value: CaseState.filter_cases(value), width="77vw"),
             __table(),
         ),
     ),

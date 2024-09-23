@@ -61,3 +61,6 @@ def step_add_form() -> rx.Component:
         on_submit=AddStepState.handle_submit,
         reset_on_submit=True,
     ),
+
+def prerequisite_search_form() -> rx.Component:
+    ...

@@ -3,7 +3,7 @@ import reflex as rx
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 
-from sqlalchemy import func
+from sqlmodel import select, asc, or_, func, cast, String
 
 CASE_ROUTE = routes.CASES
 if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
@@ -17,6 +17,8 @@ class CaseState(rx.State):
 
     prerequisites: List['PrerequisiteModel'] = []
     prerequisite: Optional['PrerequisiteModel'] = None
+
+    search_value: str = ""
 
     @rx.var
     def case_id(self):
@@ -44,9 +46,36 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-        with rx.session() as session:
-            results = session.exec(CaseModel.select()).all()
+
+      with rx.session() as session:
+            query = select(CaseModel)
+            if self.search_value:
+                search_value = (
+                    f"%{str(self.search_value).lower()}%"
+                )
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(CaseModel, field).ilike(
+                                search_value
+                            )
+                            for field in CaseModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            CaseModel.name, String
+                        ).ilike(search_value),
+                    )
+                )
+
+            results = session.exec(query).all()
             self.cases = results
+
+        # with rx.session() as session:
+        #     results = session.exec(CaseModel.select()).all()
+        #     self.cases = results
 
     def add_case(self, form_data:dict):
         with rx.session() as session:
@@ -180,6 +209,11 @@ class CaseState(rx.State):
         with rx.session() as session:
             results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
             self.prerequisites = results
+
+    def filter_cases(self, search_value):
+        self.search_value = search_value
+        self.load_cases()
+
 
 class AddCaseState(CaseState):
     form_data:dict = {}
