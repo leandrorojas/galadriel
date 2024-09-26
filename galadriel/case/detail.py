@@ -58,7 +58,7 @@ def __prerequisites_table() -> rx.Component:
 def __show_case_as_prerequisite(prerequisite:model.CaseModel):
 
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(prerequisite.id))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, "id")))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(prerequisite.created),
             rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id)), hidden=True),
