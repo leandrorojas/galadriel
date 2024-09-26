@@ -230,7 +230,7 @@ class CaseState(rx.State):
         print(prerequisite_data)
 
         with rx.session() as session:
-            prerequisite_to_add = PrerequisiteModel(**prerequisite_data)
+            prerequisite_to_add = PrerequisiteModel(**prerequisite_data) 
             session.add(prerequisite_to_add)
             session.commit()
             session.refresh(prerequisite_to_add)
