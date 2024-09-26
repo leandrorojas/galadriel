@@ -58,7 +58,7 @@ def __prerequisites_table() -> rx.Component:
 def __show_case_as_prerequisite(prerequisite:model.CaseModel):
 
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), type="submit", on_click=lambda: state.CaseState.add_prerequisite(prerequisite.id))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(prerequisite.id))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(prerequisite.created),
             rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id)), hidden=True),
@@ -82,7 +82,7 @@ def __search_prerequisites_table() -> rx.Component:
                 width="100%",
                 on_mount=state.CaseState.load_cases,
             ),
-            on_submit=state.AddPrerequisiteState.handle_submit
+            #on_submit=state.AddPrerequisiteState.handle_submit
         ),
     )
 
@@ -184,18 +184,20 @@ def case_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("search", size=18)),
-                #cond to show search         
+                rx.button(rx.icon("search", size=18), on_click=state.CaseState.toggle_search),
                 align="center"
             ),
-            rx.box(
-                    rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
-                    rx.vstack(
-                        rx.input(placeholder="start typing to search a Test Case as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
-                        __search_prerequisites_table(),
-                    ),
-                ),                   
-            __prerequisites_table(),
+            rx.cond(
+                state.CaseState.show_search,
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Test Case as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
+                            __search_prerequisites_table(),
+                        ),
+                    ),                   
+                __prerequisites_table()
+            ),
         ),        
         rx.vstack(
             rx.heading("Steps", size="5",),

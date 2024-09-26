@@ -19,6 +19,7 @@ class CaseState(rx.State):
     prerequisite: Optional['PrerequisiteModel'] = None
 
     search_value: str = ""
+    show_search:bool = False
 
     @rx.var
     def case_id(self):
@@ -37,7 +38,8 @@ class CaseState(rx.State):
             return f"{CASE_ROUTE}"
         return f"{CASE_ROUTE}/{self.case.id}/edit"
 
-    def get_case_detail(self):                
+    def get_case_detail(self):
+        self.show_search = False
         with rx.session() as session:
             if (self.case_id == ""):
                 self.case = None
@@ -234,6 +236,9 @@ class CaseState(rx.State):
         self.load_prerequisites()
         
         return rx.toast.success("prerequisite added!")
+
+    def toggle_search(self):
+        self.show_search = not(self.show_search)
 
 class AddCaseState(CaseState):
     form_data:dict = {}
