@@ -39,29 +39,33 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
     )
 
 def __show_case(test_case:CaseModel):
+
     return rx.table.row(
-        rx.table.cell(rx.button(rx.icon("plus"))),
-        rx.table.cell(test_case.name),
-        rx.table.cell(test_case.created),
-        rx.table.cell(value=test_case.id, hidden=True),
+            rx.table.cell(rx.button(rx.icon("plus"), type="submit")),
+            rx.table.cell(test_case.name),
+            rx.table.cell(test_case.created),
+            rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=test_case.id)), hidden=True),
     )
 
 def __table() -> rx.Component:
     return rx.fragment(
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    __header_cell("", "ellipsis"),
-                    __header_cell("name", "fingerprint"),
-                    __header_cell("created", "calendar-check-2"),
-                    __header_cell("selected_id", "search", True),
+        rx.form(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        __header_cell("", "ellipsis"),
+                        __header_cell("name", "fingerprint"),
+                        __header_cell("created", "calendar-check-2"),
+                        __header_cell("selected_id", "search", True),
+                    ),
                 ),
+                rx.table.body(rx.foreach(CaseState.cases, __show_case)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=CaseState.load_cases,
             ),
-            rx.table.body(rx.foreach(CaseState.cases, __show_case)),
-            variant="surface",
-            size="3",
-            width="100%",
-            on_mount=CaseState.load_cases,
+            on_submit=AddPrerequisiteState.handle_submit
         ),
     )
 

@@ -73,10 +73,6 @@ class CaseState(rx.State):
             results = session.exec(query).all()
             self.cases = results
 
-        # with rx.session() as session:
-        #     results = session.exec(CaseModel.select()).all()
-        #     self.cases = results
-
     def add_case(self, form_data:dict):
         with rx.session() as session:
             case = CaseModel(**form_data)
@@ -118,7 +114,7 @@ class CaseState(rx.State):
         if (form_data["expected"] == ""):
             return rx.toast.error("expected cannot be empty")
         
-        step_order = 1
+        new_step_order = 1
 
         if (len(self.steps) > 0):
             with rx.session() as session:
@@ -127,12 +123,10 @@ class CaseState(rx.State):
                 for step_order in steps_order:
                     if step_order.order > max_order:
                         max_order = step_order.order
-                step_order = max_order + 1
-        else:
-            form_data["order"] = 1
+                new_step_order = max_order + 1
             
         form_data.update({"case_id":case_id})
-        form_data.update({"order":step_order})
+        form_data.update({"order":new_step_order})
 
         with rx.session() as session:
             step_to_add = StepModel(**form_data)
@@ -214,39 +208,32 @@ class CaseState(rx.State):
         self.search_value = search_value
         self.load_cases()
 
-    def add_prerequisite(self, id):
-        ...
-    #     if (form_data["action"] == ""): 
-    #         return rx.toast.error("action cannot be empty")
+    def add_prerequisite(self, prerequisite_id:int):
+        prerequisite_data:dict = Optional[dict]
+        new_prerequisite_order = 1
 
-    #     if (form_data["expected"] == ""):
-    #         return rx.toast.error("expected cannot be empty")
+        if (len(self.prerequisites) > 0):
+            with rx.session() as session:
+                prerequisites_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                max_order = 0
+                for prerequisite_order in prerequisites_order:
+                    if prerequisite_order.order > max_order:
+                        max_order = prerequisite_order.order
+                new_prerequisite_order = max_order + 1
+
+        prerequisite_data.update({"case_id":self.case_id})
+        prerequisite_data.update({"prerequisite_id":prerequisite_id})
+        prerequisite_data.update({"order":new_prerequisite_order})
+
+        with rx.session() as session:
+            step_to_add = StepModel(**prerequisite_data)
+            session.add(step_to_add)
+            session.commit()
+            session.refresh(step_to_add)
+            self.step = step_to_add
+        self.load_prerequisites()
         
-    #     step_order = 1
-
-    #     if (len(self.steps) > 0):
-    #         with rx.session() as session:
-    #             steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
-    #             max_order = 0
-    #             for step_order in steps_order:
-    #                 if step_order.order > max_order:
-    #                     max_order = step_order.order
-    #             step_order = max_order + 1
-    #     else:
-    #         form_data["order"] = 1
-            
-    #     form_data.update({"case_id":case_id})
-    #     form_data.update({"order":step_order})
-
-    #     with rx.session() as session:
-    #         step_to_add = StepModel(**form_data)
-    #         session.add(step_to_add)
-    #         session.commit()
-    #         session.refresh(step_to_add)
-    #         self.step = step_to_add
-    #     self.load_steps()
-        
-    #     return rx.toast.success("step added!")
+        return rx.toast.success("prerequisite added!")
 
 class AddCaseState(CaseState):
     form_data:dict = {}
@@ -283,4 +270,8 @@ class AddPrerequisiteState(CaseState):
     form_data:dict = {}
     
     def handle_submit(self, form_data):
-        ...
+        self.form_data = form_data
+        case_id = form_data.pop("case_id")
+        updated_data = {**form_data}
+        result = self.add_step(case_id, updated_data)
+        return result
