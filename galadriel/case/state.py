@@ -211,7 +211,7 @@ class CaseState(rx.State):
         self.load_cases()
 
     def add_prerequisite(self, prerequisite_id:int):
-        prerequisite_data:dict = Optional[dict]
+        prerequisite_data:dict = {"case_id":""}
         new_prerequisite_order = 1
 
         if (len(self.prerequisites) > 0):
@@ -227,12 +227,14 @@ class CaseState(rx.State):
         prerequisite_data.update({"prerequisite_id":prerequisite_id})
         prerequisite_data.update({"order":new_prerequisite_order})
 
+        print(prerequisite_data)
+
         with rx.session() as session:
-            step_to_add = StepModel(**prerequisite_data)
-            session.add(step_to_add)
+            prerequisite_to_add = PrerequisiteModel(**prerequisite_data)
+            session.add(prerequisite_to_add)
             session.commit()
-            session.refresh(step_to_add)
-            self.step = step_to_add
+            session.refresh(prerequisite_to_add)
+            self.step = prerequisite_to_add
         self.load_prerequisites()
         
         return rx.toast.success("prerequisite added!")
