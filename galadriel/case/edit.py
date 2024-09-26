@@ -33,7 +33,7 @@ def case_edit_page() -> rx.Component:
 
     case_edit_content = rx.vstack(
         rx.flex(
-            title_badge.title("route", "Edit Test Case"),
+            title_badge.title("test-tubes", "Edit Test Case"),
             rx.spacer(),
             rx.hstack(__case_list_button(),),            
             spacing="2",

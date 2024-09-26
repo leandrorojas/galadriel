@@ -3,7 +3,7 @@ import reflex as rx
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 
-from sqlalchemy import func
+from sqlmodel import select, asc, or_, func, cast, String
 
 CASE_ROUTE = routes.CASES
 if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
@@ -17,6 +17,9 @@ class CaseState(rx.State):
 
     prerequisites: List['PrerequisiteModel'] = []
     prerequisite: Optional['PrerequisiteModel'] = None
+
+    search_value: str = ""
+    show_search:bool = False
 
     @rx.var
     def case_id(self):
@@ -35,7 +38,8 @@ class CaseState(rx.State):
             return f"{CASE_ROUTE}"
         return f"{CASE_ROUTE}/{self.case.id}/edit"
 
-    def get_case_detail(self):                
+    def get_case_detail(self):
+        self.show_search = False
         with rx.session() as session:
             if (self.case_id == ""):
                 self.case = None
@@ -44,8 +48,31 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-        with rx.session() as session:
-            results = session.exec(CaseModel.select()).all()
+
+      with rx.session() as session:
+            query = select(CaseModel)
+            if self.search_value:
+                search_value = (
+                    f"%{str(self.search_value).lower()}%"
+                )
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(CaseModel, field).ilike(
+                                search_value
+                            )
+                            for field in CaseModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            CaseModel.name, String
+                        ).ilike(search_value),
+                    )
+                )
+
+            results = session.exec(query).all()
             self.cases = results
 
     def add_case(self, form_data:dict):
@@ -83,36 +110,35 @@ class CaseState(rx.State):
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
-        if (form_data["action"] != ""):
-            if (form_data["expected"] != ""):
-                step_order = 1
-                if (len(self.steps) > 0):
-                    with rx.session() as session:
-                        steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
-                        max_order = 0
-                        for step_order in steps_order:
-                            if step_order.order > max_order:
-                                max_order = step_order.order
-                        step_order = max_order + 1
-                else:
-                    form_data["order"] = 1
-                    
-                form_data.update({"case_id":case_id})
-                form_data.update({"order":step_order})
-
-                with rx.session() as session:
-                    step_to_add = StepModel(**form_data)
-                    session.add(step_to_add)
-                    session.commit()
-                    session.refresh(step_to_add)
-                    self.step = step_to_add
-                self.load_steps()
-                
-                return rx.toast.success("step added!")
-            else:
-                return rx.toast.error("expected cannot be empty")
-        else:
+        if (form_data["action"] == ""): 
             return rx.toast.error("action cannot be empty")
+
+        if (form_data["expected"] == ""):
+            return rx.toast.error("expected cannot be empty")
+        
+        new_step_order = 1
+
+        if (len(self.steps) > 0):
+            with rx.session() as session:
+                steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                max_order = 0
+                for step_order in steps_order:
+                    if step_order.order > max_order:
+                        max_order = step_order.order
+                new_step_order = max_order + 1
+            
+        form_data.update({"case_id":case_id})
+        form_data.update({"order":new_step_order})
+
+        with rx.session() as session:
+            step_to_add = StepModel(**form_data)
+            session.add(step_to_add)
+            session.commit()
+            session.refresh(step_to_add)
+            self.step = step_to_add
+        self.load_steps()
+        
+        return rx.toast.success("step added!")
         
     def delete_step(self, step_id:int):
         with rx.session() as session:
@@ -180,6 +206,42 @@ class CaseState(rx.State):
             results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
             self.prerequisites = results
 
+    def filter_cases(self, search_value):
+        self.search_value = search_value
+        self.load_cases()
+
+    def add_prerequisite(self, prerequisite_id:int):
+        prerequisite_data:dict = {"case_id":""}
+        new_prerequisite_order = 1
+
+        if (len(self.prerequisites) > 0):
+            with rx.session() as session:
+                prerequisites_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                max_order = 0
+                for prerequisite_order in prerequisites_order:
+                    if prerequisite_order.order > max_order:
+                        max_order = prerequisite_order.order
+                new_prerequisite_order = max_order + 1
+
+        prerequisite_data.update({"case_id":self.case_id})
+        prerequisite_data.update({"prerequisite_id":prerequisite_id})
+        prerequisite_data.update({"order":new_prerequisite_order})
+
+        print(prerequisite_data)
+
+        with rx.session() as session:
+            prerequisite_to_add = PrerequisiteModel(**prerequisite_data)
+            session.add(prerequisite_to_add)
+            session.commit()
+            session.refresh(prerequisite_to_add)
+            self.step = prerequisite_to_add
+        self.load_prerequisites()
+        
+        return rx.toast.success("prerequisite added!")
+
+    def toggle_search(self):
+        self.show_search = not(self.show_search)
+
 class AddCaseState(CaseState):
     form_data:dict = {}
 
@@ -202,6 +264,16 @@ class EditCaseState(CaseState):
         return f"{CASE_ROUTE}/{id}"
     
 class AddStepState(CaseState):
+    form_data:dict = {}
+    
+    def handle_submit(self, form_data):
+        self.form_data = form_data
+        case_id = form_data.pop("case_id")
+        updated_data = {**form_data}
+        result = self.add_step(case_id, updated_data)
+        return result
+
+class AddPrerequisiteState(CaseState):
     form_data:dict = {}
     
     def handle_submit(self, form_data):

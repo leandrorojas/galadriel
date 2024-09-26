@@ -23,7 +23,7 @@ def case_add_page() -> rx.Component:
 
     case_add_content = rx.vstack(
         rx.flex(
-            title_badge.title("route", "New Test Case"),
+            title_badge.title("test-tubes", "New Test Case"),
             rx.spacer(),
             rx.hstack(__case_list_button(),),            
             spacing="2",

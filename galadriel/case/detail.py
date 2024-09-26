@@ -10,7 +10,7 @@ from .forms import step_add_form
 first_row:bool = True
 last_row:bool = False
 
-def __header_cell(text: str, icon: str):
+def __header_cell(text: str, icon: str, hide_column:bool = False):
     return rx.table.column_header_cell(
         rx.hstack(
             rx.icon(icon, size=18),
@@ -18,26 +18,10 @@ def __header_cell(text: str, icon: str):
             align="center",
             spacing="2",
         ),
+        hidden=hide_column,
     )
 
 #prerequisites
-def __prerequisite_detail_link(child: rx.Component, test_case: model.CaseModel):
-
-    if test_case is None:
-        return rx.fragment(child)
-    
-    case_id = test_case.id
-    if case_id is None:
-        return rx.fragment(child)
-
-    root_path = navigation.routes.CASES
-    case_detail_url = f"{root_path}/{case_id}"
-
-    return rx.link(
-        child,
-        href=case_detail_url
-    )
-
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     return rx.table.row(
         rx.table.cell(prerequisite.order),
@@ -71,6 +55,37 @@ def __prerequisites_table() -> rx.Component:
         ),
     )
 
+def __show_case_as_prerequisite(prerequisite:model.CaseModel):
+
+    return rx.table.row(
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, "id")))),
+            rx.table.cell(prerequisite.name),
+            rx.table.cell(prerequisite.created),
+            rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id)), hidden=True),
+    )
+
+def __search_prerequisites_table() -> rx.Component:
+    return rx.fragment(
+        rx.form(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        __header_cell("", "ellipsis"),
+                        __header_cell("name", "fingerprint"),
+                        __header_cell("created", "calendar-check-2"),
+                        __header_cell("selected_id", "search", True),
+                    ),
+                ),
+                rx.table.body(rx.foreach(state.CaseState.cases, __show_case_as_prerequisite)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=state.CaseState.load_cases,
+            ),
+            #on_submit=state.AddPrerequisiteState.handle_submit
+        ),
+    )
+
 #cases
 def __case_list_button():
     return rx.fragment(
@@ -84,7 +99,7 @@ def __case_list_button():
         ), 
     )
 
-def __search_prerequisite_button():
+def __case_edit_button():
     return rx.fragment(
         rx.link(
             rx.button(
@@ -138,17 +153,17 @@ def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
     can_edit = True #TODO: add roles and privileges
-    edit_link = __search_prerequisite_button()
+    edit_link = __case_edit_button()
 
     edit_link_element = rx.cond(
         can_edit,
         edit_link,
         rx.fragment("")
     )
-    
+
     case_detail_content = rx.vstack(
         rx.flex(
-            title_badge.title("beaker", "Test Case Detail"),
+            title_badge.title("test-tubes", "Test Case Detail"),
             rx.spacer(),
             rx.hstack(__case_list_button(), edit_link_element),
             spacing="2",
@@ -169,9 +184,20 @@ def case_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("search", size=26),),
+                rx.button(rx.icon("search", size=18), on_click=state.CaseState.toggle_search),
+                align="center"
             ),
-            __prerequisites_table(),
+            rx.cond(
+                state.CaseState.show_search,
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Test Case as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
+                            __search_prerequisites_table(),
+                        ),
+                    ),                   
+                __prerequisites_table()
+            ),
         ),        
         rx.vstack(
             rx.heading("Steps", size="5",),

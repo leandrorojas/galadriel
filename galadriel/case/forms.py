@@ -53,7 +53,7 @@ def step_add_form() -> rx.Component:
             display="none",
         ),
         rx.hstack(
-            rx.input(name="action", placeholder="action", width="50%"), #rx.text_area() for multiline
+            rx.input(name="action", placeholder="action", width="50%"), #rx.text_area() for multiline GAL-79
             rx.input(name="expected", placeholder="expected", width="50%"),
             rx.button(rx.icon("plus", size=26), type="submit",),
             spacing="2",
