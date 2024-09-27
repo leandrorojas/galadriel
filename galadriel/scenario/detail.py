@@ -22,7 +22,7 @@ def __scenario_edit_button():
         rx.link(
             rx.button(
                 rx.icon("pencil", size=26), 
-                rx.text("Edit", size="4", display=["none", "none", "block"]), 
+                rx.text("Edit", size="4", display=["none", "none", "block"]),
                 size="3", 
             ),
             href=routes.SCENARIO_EDIT
@@ -37,7 +37,7 @@ def scenario_detail_page() -> rx.Component:
     edit_link_element = rx.cond(
         can_edit,
         edit_link,
-        rx.fragment("")
+        rx.fragment("") 
     )
     
     scenario_detail_content = rx.vstack(
@@ -59,16 +59,7 @@ def scenario_detail_page() -> rx.Component:
             ),
             rx.badge(f"{state.ScenarioState.scenario.created}", variant="outline"),
             align="center",
-        ),        
-        # rx.text(            
-        #     f"name: {state.ScenarioState.scenario.name}",
-        #     size="5",
-        #     white_space='pre-wrap',),
-        # rx.text(
-        #     f"created: {state.ScenarioState.scenario.created}",
-        #     size="5",
-        #     white_space='pre-wrap',
-        # ),
+        ),
         spacing="5",
         align="left",
         min_height="85vh",
