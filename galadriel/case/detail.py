@@ -25,7 +25,7 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     return rx.table.row(
         rx.table.cell(prerequisite.order),
-        rx.table.cell(prerequisite.prerequisite_name),
+        rx.table.cell(prerequisite.prerequisite_name), 
         rx.table.cell(
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")), 
