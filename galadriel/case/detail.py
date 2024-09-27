@@ -28,9 +28,9 @@ def __show_prerequisite(prerequisite:model.PrerequisiteModel):
         rx.table.cell(prerequisite.prerequisite_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up")), 
-                rx.button(rx.icon("arrow-big-down")), 
-                rx.button(rx.icon("trash-2"), on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, "id"))),
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, "id"))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, "id"))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, "id"))),
                 spacing="2",
             )
         ),
@@ -81,7 +81,6 @@ def __search_prerequisites_table() -> rx.Component:
                 width="100%",
                 on_mount=state.CaseState.load_cases,
             ),
-            #on_submit=state.AddPrerequisiteState.handle_submit
         ),
     )
 
