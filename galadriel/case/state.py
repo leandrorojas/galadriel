@@ -215,6 +215,9 @@ class CaseState(rx.State):
         self.load_cases()
 
     def add_prerequisite(self, prerequisite_id:int):
+        if (int(self.case_id) == prerequisite_id):
+            return rx.toast.error("self cannot be prerequisite")
+        
         prerequisite_data:dict = {"case_id":""}
         new_prerequisite_order = 1
 
@@ -262,7 +265,52 @@ class CaseState(rx.State):
                 session.commit()
                 session.refresh(prerequisite)
         self.load_prerequisites()
-        return rx.toast.info("The prerequisite has been deleted.")    
+        return rx.toast.info("The prerequisite has been deleted.")
+
+    def move_prerequisite_up(self, prerequisite_id:int):
+        with rx.session() as session:
+            prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
+            old_order = prerequisite_going_up.order
+            if (old_order != 1):
+                prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order -1) and PrerequisiteModel.case_id == self.case_id)).first()
+                new_order = prerequisite_going_down.order
+
+                prerequisite_going_up.order = new_order
+                session.add(prerequisite_going_up)
+                session.commit()
+                session.refresh(prerequisite_going_up)
+
+                prerequisite_going_down.order = old_order
+                session.add(prerequisite_going_down)
+                session.commit()
+                session.refresh(prerequisite_going_down)
+
+                self.load_prerequisites()
+            else:
+                return rx.toast.warning("The prerequisite has reached min.")
+
+    def move_prerequisite_down(self, prerequisite_id:int):
+        with rx.session() as session:
+            prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
+            old_order = prerequisite_going_down.order
+            prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order +1) and PrerequisiteModel.case_id == self.case_id)).first()
+
+            if (prerequisite_going_up is not None):
+                new_order = prerequisite_going_up.order
+
+                prerequisite_going_down.order = new_order
+                session.add(prerequisite_going_down)
+                session.commit()
+                session.refresh(prerequisite_going_down)
+
+                prerequisite_going_up.order = old_order
+                session.add(prerequisite_going_up)
+                session.commit()
+                session.refresh(prerequisite_going_up)
+
+                self.load_prerequisites()
+            else:
+                return rx.toast.warning("The prerequisite has reached max.")
 
 class AddCaseState(CaseState):
     form_data:dict = {}
@@ -286,16 +334,6 @@ class EditCaseState(CaseState):
         return f"{CASE_ROUTE}/{id}"
     
 class AddStepState(CaseState):
-    form_data:dict = {}
-    
-    def handle_submit(self, form_data):
-        self.form_data = form_data
-        case_id = form_data.pop("case_id")
-        updated_data = {**form_data}
-        result = self.add_step(case_id, updated_data)
-        return result
-
-class AddPrerequisiteState(CaseState):
     form_data:dict = {}
     
     def handle_submit(self, form_data):
