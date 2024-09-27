@@ -204,7 +204,7 @@ class CaseState(rx.State):
     def load_prerequisites(self):
         with rx.session() as session:
             results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
-            self.prerequisites = results
+            self.prerequisites = results 
 
     def filter_cases(self, search_value):
         self.search_value = search_value
