@@ -39,6 +39,7 @@ class PrerequisiteModel(rx.Model, table=True):
     case_id:int = Field(foreign_key="casemodel.id")
     prerequisite_id:int = Field(foreign_key="casemodel.id")
     order:int
+    prerequisite_name:str = Field(nullable=True)
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),
