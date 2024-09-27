@@ -42,7 +42,7 @@ def scenario_detail_page() -> rx.Component:
     
     scenario_detail_content = rx.vstack(
         rx.flex(
-            title_badge.title("beaker", "Test Scenario Detail"),
+            title_badge.title("route", "Test Scenario Detail"),
             rx.spacer(),
             rx.hstack(__scenario_list_button(), edit_link_element),
             spacing="2",
@@ -52,15 +52,23 @@ def scenario_detail_page() -> rx.Component:
             top="0px",
             padding_top="2em",       
         ),
-        rx.text(            
-            f"name: {state.ScenarioState.scenario.name}",
-            size="5",
-            white_space='pre-wrap',),
-        rx.text(
-            f"created: {state.ScenarioState.scenario.created}",
-            size="5",
-            white_space='pre-wrap',
-        ),
+        rx.hstack(
+            rx.heading(
+                f"{state.ScenarioState.scenario.name}",
+                size="7",
+            ),
+            rx.badge(f"{state.ScenarioState.scenario.created}", variant="outline"),
+            align="center",
+        ),        
+        # rx.text(            
+        #     f"name: {state.ScenarioState.scenario.name}",
+        #     size="5",
+        #     white_space='pre-wrap',),
+        # rx.text(
+        #     f"created: {state.ScenarioState.scenario.created}",
+        #     size="5",
+        #     white_space='pre-wrap',
+        # ),
         spacing="5",
         align="left",
         min_height="85vh",
