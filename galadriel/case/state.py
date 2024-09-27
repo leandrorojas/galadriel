@@ -216,7 +216,7 @@ class CaseState(rx.State):
 
         if (len(self.prerequisites) > 0):
             with rx.session() as session:
-                prerequisites_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+                prerequisites_order:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
                 max_order = 0
                 for prerequisite_order in prerequisites_order:
                     if prerequisite_order.order > max_order:
@@ -227,20 +227,35 @@ class CaseState(rx.State):
         prerequisite_data.update({"prerequisite_id":prerequisite_id})
         prerequisite_data.update({"order":new_prerequisite_order})
 
-        print(prerequisite_data)
-
         with rx.session() as session:
-            prerequisite_to_add = PrerequisiteModel(**prerequisite_data) 
+            prerequisite_to_add = PrerequisiteModel(**prerequisite_data)
             session.add(prerequisite_to_add)
             session.commit()
             session.refresh(prerequisite_to_add)
             self.step = prerequisite_to_add
+        self.search_value = ""
         self.load_prerequisites()
         
         return rx.toast.success("prerequisite added!")
 
     def toggle_search(self):
         self.show_search = not(self.show_search)
+
+    def delete_prerequisite(self, prerequisite_id:int):
+        with rx.session() as session:
+            prerequisite_to_delete = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
+            order_to_update = prerequisite_to_delete.order
+            session.delete(prerequisite_to_delete)
+            session.commit()
+
+            prerequisites_to_update = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order > order_to_update)).all()
+            for prerequisite in prerequisites_to_update:
+                prerequisite.order = prerequisite.order - 1
+                session.add(prerequisite)
+                session.commit()
+                session.refresh(prerequisite)
+        self.load_prerequisites()
+        return rx.toast.info("The prerequisite has been deleted.")    
 
 class AddCaseState(CaseState):
     form_data:dict = {}
