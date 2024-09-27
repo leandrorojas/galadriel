@@ -204,6 +204,10 @@ class CaseState(rx.State):
     def load_prerequisites(self):
         with rx.session() as session:
             results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
+            if (len(results) > 0):
+                for single_result in results:
+                    case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.prerequisite_id)).first()
+                    setattr(single_result, "prerequisite_name", case_name.name)
             self.prerequisites = results 
 
     def filter_cases(self, search_value):
@@ -223,9 +227,12 @@ class CaseState(rx.State):
                         max_order = prerequisite_order.order
                 new_prerequisite_order = max_order + 1
 
+                #TODO: if failes in othe add name of the Test Case here?
+
         prerequisite_data.update({"case_id":self.case_id})
         prerequisite_data.update({"prerequisite_id":prerequisite_id})
         prerequisite_data.update({"order":new_prerequisite_order})
+        prerequisite_data.update({"prerequisite_name":""})
 
         with rx.session() as session:
             prerequisite_to_add = PrerequisiteModel(**prerequisite_data)
