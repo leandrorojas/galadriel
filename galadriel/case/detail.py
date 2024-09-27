@@ -30,8 +30,7 @@ def __show_prerequisite(prerequisite:model.PrerequisiteModel):
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")), 
                 rx.button(rx.icon("arrow-big-down")), 
-                rx.button(rx.icon("pencil")), 
-                rx.button(rx.icon("trash-2")),
+                rx.button(rx.icon("trash-2"), on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, "id"))),
                 spacing="2",
             )
         ),
