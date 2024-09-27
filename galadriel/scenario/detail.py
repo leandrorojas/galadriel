@@ -17,7 +17,7 @@ def __scenario_list_button():
         ), 
     )
 
-def __scenario_edit_button():
+def __scenario_edit_button(): 
     return rx.fragment(
         rx.link(
             rx.button(
