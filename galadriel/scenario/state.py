@@ -1,6 +1,6 @@
 from typing import List, Optional
 import reflex as rx
-from .model import ScenarioModel
+from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
 
 SCENARIO_ROUTE = routes.SCENARIOS
@@ -9,6 +9,9 @@ if SCENARIO_ROUTE.endswith("/"): SCENARIO_ROUTE = SCENARIO_ROUTE[:-1]
 class ScenarioState(rx.State):
     scenarios: List['ScenarioModel'] = []
     scenario: Optional['ScenarioModel'] = None
+
+    test_cases: List['ScenarioCaseModel'] = []
+    test_case: Optional['ScenarioCaseModel'] = None
 
     show_search:bool = False
 
@@ -73,7 +76,16 @@ class ScenarioState(rx.State):
         return rx.redirect(self.scenario_url)
     
     def toggle_search(self):
-        self.show_search = not(self.show_search)    
+        self.show_search = not(self.show_search)
+
+    def load_test_cases(self):
+        with rx.session() as session:
+            results = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id).order_by(ScenarioCaseModel.order)).all()
+            # if (len(results) > 0):
+            #     for single_result in results:
+            #         case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.prerequisite_id)).first()
+            #         setattr(single_result, "prerequisite_name", case_name.name)
+            self.test_cases = results
 
 class AddScenarioState(ScenarioState):
     form_data:dict = {}

@@ -20,3 +20,17 @@ class ScenarioModel(rx.Model, table=True):
         nullable=True
     )
     #created_by
+
+class ScenarioCaseModel(rx.Model, table=True):
+    scenario_id:int = Field(foreign_key="scenariomodel.id")    
+    case_id:int = Field(foreign_key="casemodel.id")
+    order:int
+    case_name:str = Field(nullable=True)
+    created: datetime = Field(
+        default_factory=utils.timing.get_utc_now, 
+        sa_type=sa.DateTime(timezone=True),
+        sa_column_kwargs={
+            'server_default': sa.func.now()
+        },
+        nullable=False
+    )

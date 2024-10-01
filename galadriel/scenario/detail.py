@@ -4,6 +4,7 @@ from ..navigation import routes
 from . import state
 from .. pages import base_page
 from ..ui.components import Badge
+from . import model
 
 def __scenario_list_button():
     return rx.fragment(
@@ -27,7 +28,50 @@ def __scenario_edit_button():
             ),
             href=routes.SCENARIO_EDIT
         ), 
-    )   
+    )
+
+def __header_cell(text: str, icon: str, hide_column:bool = False):
+    return rx.table.column_header_cell(
+        rx.hstack(
+            rx.icon(icon, size=18),
+            rx.text(text),
+            align="center",
+            spacing="2",
+        ),
+        hidden=hide_column,
+    )
+
+def __show_test_cases(test_cases:model.ScenarioCaseModel):
+    return rx.table.row(
+        rx.table.cell(test_cases.order),
+        rx.table.cell(test_cases.case_name),
+        rx.table.cell(
+            rx.flex(
+                rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.CaseState.move_prerequisite_up(getattr(test_cases, "id"))), 
+                rx.button(rx.icon("arrow-big-down")),#, on_click=lambda: state.CaseState.move_prerequisite_down(getattr(test_cases, "id"))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red"),#, on_click=lambda: state.CaseState.delete_prerequisite(getattr(test_cases, "id"))),
+                spacing="2",
+            )
+        ),
+    )
+
+def __cases_table() -> rx.Component:
+    return rx.fragment(
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    __header_cell("order", "list-ordered"),
+                    __header_cell("test case", "pickaxe"),
+                    __header_cell("", "ellipsis"),
+                ),
+            ),
+            rx.table.body(rx.foreach(state.ScenarioState.test_cases, __show_test_cases)),
+            variant="surface",
+            size="3",
+            width="100%",
+            on_mount=state.ScenarioState.load_test_cases,
+        ),
+    )
 
 def scenario_detail_page() -> rx.Component:
     title_badge = Badge()
@@ -63,11 +107,12 @@ def scenario_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Cases", size="5",),
-                rx.button(rx.icon("search", size=18)),#, on_click=state.CaseState.toggle_search),
+                rx.button(rx.icon("search", size=18), on_click=state.ScenarioState.toggle_search),
                 align="center"
             ),
-        #     rx.cond(
-        #         state.CaseState.show_search,
+            rx.cond(
+                state.ScenarioState.show_search,
+                rx.text("search cases table"),
         #         rx.box(
         #                 rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
         #                 rx.vstack(
@@ -75,8 +120,8 @@ def scenario_detail_page() -> rx.Component:
         #                     __search_prerequisites_table(),
         #                 ),
         #             ),
-        #         __prerequisites_table()
-        #     ),
+                __cases_table()
+            ),
         ),
         spacing="5",
         align="left",
