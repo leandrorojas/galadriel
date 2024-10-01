@@ -10,6 +10,8 @@ class ScenarioState(rx.State):
     scenarios: List['ScenarioModel'] = []
     scenario: Optional['ScenarioModel'] = None
 
+    show_search:bool = False
+
     @rx.var
     def scenario_id(self):
         #print(self.router.page.params)
@@ -27,7 +29,8 @@ class ScenarioState(rx.State):
             return f"{SCENARIO_ROUTE}"
         return f"{SCENARIO_ROUTE}/{self.scenario.id}/edit"
 
-    def get_scenario_detail(self):                
+    def get_scenario_detail(self):
+        self.show_search = False
         with rx.session() as session:
             if (self.scenario_id == ""):
                 self.scenario = None
@@ -68,6 +71,9 @@ class ScenarioState(rx.State):
         if edit_page:
             return rx.redirect(self.scenario_edit_url)
         return rx.redirect(self.scenario_url)
+    
+    def toggle_search(self):
+        self.show_search = not(self.show_search)    
 
 class AddScenarioState(ScenarioState):
     form_data:dict = {}

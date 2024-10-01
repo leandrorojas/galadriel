@@ -60,6 +60,24 @@ def scenario_detail_page() -> rx.Component:
             rx.badge(f"{state.ScenarioState.scenario.created}", variant="outline"),
             align="center",
         ),
+        rx.vstack(
+            rx.hstack(
+                rx.heading("Cases", size="5",),
+                rx.button(rx.icon("search", size=18)),#, on_click=state.CaseState.toggle_search),
+                align="center"
+            ),
+        #     rx.cond(
+        #         state.CaseState.show_search,
+        #         rx.box(
+        #                 rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
+        #                 rx.vstack(
+        #                     rx.input(placeholder="start typing to search a Test Case as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
+        #                     __search_prerequisites_table(),
+        #                 ),
+        #             ),
+        #         __prerequisites_table()
+        #     ),
+        ),
         spacing="5",
         align="left",
         min_height="85vh",
