@@ -13,12 +13,10 @@ class CaseState(rx.State):
     case: Optional['CaseModel'] = None
 
     steps: List['StepModel'] = []
-    step: Optional['StepModel'] = None
 
     prerequisites: List['PrerequisiteModel'] = []
-    prerequisite: Optional['PrerequisiteModel'] = None
 
-    search_value: str = ""
+    search_value:str = ""
     show_search:bool = False
 
     @rx.var
@@ -55,6 +53,7 @@ class CaseState(rx.State):
                 search_value = (
                     f"%{str(self.search_value).lower()}%"
                 )
+                #TODO: review this query... galadriel doesn't have payments...
                 query = query.where(
                     or_(
                         *[
@@ -135,7 +134,6 @@ class CaseState(rx.State):
             session.add(step_to_add)
             session.commit()
             session.refresh(step_to_add)
-            self.step = step_to_add
         self.load_steps()
         
         return rx.toast.success("step added!")
@@ -242,7 +240,6 @@ class CaseState(rx.State):
             session.add(prerequisite_to_add)
             session.commit()
             session.refresh(prerequisite_to_add)
-            self.step = prerequisite_to_add
         self.search_value = ""
         self.load_prerequisites()
         
