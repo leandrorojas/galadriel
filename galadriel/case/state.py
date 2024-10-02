@@ -221,11 +221,14 @@ class CaseState(rx.State):
 
         if (len(self.prerequisites) > 0):
             with rx.session() as session:
-                prerequisites_order:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
+                linked_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
                 max_order = 0
-                for prerequisite_order in prerequisites_order:
-                    if prerequisite_order.order > max_order:
-                        max_order = prerequisite_order.order
+                for linked_prerequisite in linked_prerequisites:
+                    if (linked_prerequisite.id == prerequisite_id):
+                        return rx.toast.error("prerequisite already in list")
+                    
+                    if linked_prerequisite.order > max_order:
+                        max_order = linked_prerequisite.order
                 new_prerequisite_order = max_order + 1
 
                 #TODO: if failes in othe add name of the Test Case here?
