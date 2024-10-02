@@ -169,6 +169,51 @@ class ScenarioState(rx.State):
                 session.refresh(test_case)
         self.load_cases()
         return rx.toast.info("case unlinked.")
+    
+    def move_case_up(self, scenario_case_id:int):
+        with rx.session() as session:
+            case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
+            old_order = case_going_up.order
+            if (old_order != 1):
+                case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order -1) and ScenarioCaseModel.scenario_id == self.scenario_id)).first()
+                new_order = case_going_down.order
+
+                case_going_up.order = new_order
+                session.add(case_going_up)
+                session.commit()
+                session.refresh(case_going_up)
+
+                case_going_down.order = old_order
+                session.add(case_going_down)
+                session.commit()
+                session.refresh(case_going_down)
+
+                self.load_cases()
+            else:
+                return rx.toast.warning("The case has reached min.")
+            
+    def move_case_down(self, scenario_case_id:int):
+        with rx.session() as session:
+            case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
+            old_order = case_going_down.order
+            case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order +1) and ScenarioCaseModel.scenario_id == self.scenario_id)).first()
+
+            if (case_going_up is not None):
+                new_order = case_going_up.order
+
+                case_going_down.order = new_order
+                session.add(case_going_down)
+                session.commit()
+                session.refresh(case_going_down)
+
+                case_going_up.order = old_order
+                session.add(case_going_up)
+                session.commit()
+                session.refresh(case_going_up)
+
+                self.load_cases()
+            else:
+                return rx.toast.warning("The case has reached max.")
 
 class AddScenarioState(ScenarioState):
     form_data:dict = {}
