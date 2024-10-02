@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 
 from ..navigation import routes
 from . import state
@@ -29,6 +30,7 @@ def __suite_edit_button():
         ), 
     )   
 
+@reflex_local_auth.require_login
 def suite_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True #TODO: add roles and privileges

@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 
 from .. import navigation
 from . import state, model
@@ -76,12 +77,12 @@ def __table() -> rx.Component:
         ),
     )
 
+@reflex_local_auth.require_login
 def suites_list_page() -> rx.Component:
     title_badge = Badge()
     title_tooltip = Tooltip()
 
-    return base_page(
-        rx.vstack(
+    suite_list_content = rx.vstack(
             rx.flex(
                 title_badge.title("beaker", "Test Suites"),
                 title_tooltip.info("Label for a group of Test Cases based on some criteria (i.e.: project)"),
@@ -99,4 +100,5 @@ def suites_list_page() -> rx.Component:
             align="center",
             min_height="85vh"
         ),
-    ),
+
+    return base_page(suite_list_content)
