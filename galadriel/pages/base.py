@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 from ..ui.components import TopNavBar, SideBar
 from ..auth.state import Session
 
@@ -38,6 +39,7 @@ def base_page(content: rx.Component, *args) -> rx.Component:
     # if not isinstance(content, rx.Component):
     #     content = rx.heading("this is not a valid content element")
 
+    #print(Session.is_authenticated)
     return rx.cond(
         Session.is_authenticated,
         private_page(content, *args),
