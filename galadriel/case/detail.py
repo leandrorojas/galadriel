@@ -170,7 +170,7 @@ def case_detail_page() -> rx.Component:
             align="center",
             width="100%",
             top="0px",
-            padding_top="2em",       
+            padding_top="2em",
         ),
         rx.hstack(
             rx.heading(
