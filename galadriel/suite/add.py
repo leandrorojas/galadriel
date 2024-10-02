@@ -1,4 +1,6 @@
 import reflex as rx
+import reflex_local_auth
+
 from ..ui.components import Badge
 from ..pages import base_page
 from ..navigation import routes
@@ -17,6 +19,7 @@ def __suite_list_button() -> rx.Component:
         ), 
     )
 
+@reflex_local_auth.require_login
 def suite_add_page() -> rx.Component:
     title_badge = Badge()
     my_form = forms.suite_add_form()

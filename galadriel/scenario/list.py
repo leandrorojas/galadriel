@@ -1,5 +1,5 @@
 import reflex as rx
-#from ..ui.rx_base import rx_tutorial_base_page
+import reflex_local_auth
 
 from .. import navigation
 from . import state, model
@@ -77,12 +77,12 @@ def __table() -> rx.Component:
         ),
     )
 
+@reflex_local_auth.require_login
 def scenarios_list_page() -> rx.Component:
     title_badge = Badge()
     title_tooltip = Tooltip()
 
-    return base_page(
-        rx.vstack(
+    scenario_list_content = rx.vstack(
             rx.flex(
                 title_badge.title("route", "Test Scenarios"),
                 title_tooltip.info("Group of Test Cases executed in a specific order"),
@@ -100,4 +100,5 @@ def scenarios_list_page() -> rx.Component:
             align="center",
             min_height="85vh"
         ),
-    ),
+
+    return base_page(scenario_list_content)

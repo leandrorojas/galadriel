@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 
 from . import forms
 from .state import EditCaseState
@@ -26,6 +27,7 @@ def __case_list_button() -> rx.Component:
         # )
     )
 
+@reflex_local_auth.require_login
 def case_edit_page() -> rx.Component:
     my_form = forms.case_edit_form()
     test_case = EditCaseState.case

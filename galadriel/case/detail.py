@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 
 from ..navigation import routes
 from ..pages import base_page
@@ -146,7 +147,7 @@ def __steps_table() -> rx.Component:
         ),
     )
 
-#page
+@reflex_local_auth.require_login
 def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case

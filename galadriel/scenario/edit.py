@@ -1,5 +1,5 @@
 import reflex as rx
-#from ..ui.rx_base import rx_tutorial_base_page
+import reflex_local_auth
 
 from . import forms
 from .state import EditScenarioState
@@ -19,6 +19,7 @@ def __scenario_list_button() -> rx.Component:
         ), 
     )
 
+@reflex_local_auth.require_login
 def scenario_edit_page() -> rx.Component:
     my_form = forms.scenario_edit_form()
     scenario = EditScenarioState.scenario

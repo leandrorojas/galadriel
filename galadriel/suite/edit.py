@@ -1,5 +1,5 @@
 import reflex as rx
-#from ..ui.rx_base import rx_tutorial_base_page
+import reflex_local_auth
 
 from . import forms
 from .state import EditSuiteState
@@ -19,6 +19,7 @@ def __suite_list_button() -> rx.Component:
         ), 
     )
 
+@reflex_local_auth.require_login
 def suite_edit_page() -> rx.Component:
     my_form = forms.suite_edit_form()
     suite = EditSuiteState.suite
