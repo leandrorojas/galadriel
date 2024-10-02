@@ -1,4 +1,5 @@
 import reflex as rx
+import reflex_local_auth
 
 from ..navigation import routes
 from . import state
@@ -104,6 +105,7 @@ def __search_cases_table() -> rx.Component:
         ),
     )
 
+@reflex_local_auth.require_login
 def scenario_detail_page() -> rx.Component:
     title_badge = Badge()
     scenario = state.AddScenarioState.scenario

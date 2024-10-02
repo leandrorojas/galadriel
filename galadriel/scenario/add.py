@@ -1,4 +1,6 @@
 import reflex as rx
+import reflex_local_auth
+
 from ..ui.components import Badge
 from ..pages import base_page
 from ..navigation import routes
@@ -17,6 +19,7 @@ def __scenario_list_button() -> rx.Component:
         ), 
     )
 
+@reflex_local_auth.require_login
 def scenario_add_page() -> rx.Component:
     title_badge = Badge()
     my_form = forms.scenario_add_form()
