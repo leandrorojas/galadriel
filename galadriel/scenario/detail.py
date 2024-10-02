@@ -50,7 +50,7 @@ def __show_test_cases(test_cases:model.ScenarioCaseModel):
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.CaseState.move_prerequisite_up(getattr(test_cases, "id"))), 
                 rx.button(rx.icon("arrow-big-down")),#, on_click=lambda: state.CaseState.move_prerequisite_down(getattr(test_cases, "id"))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red"),#, on_click=lambda: state.CaseState.delete_prerequisite(getattr(test_cases, "id"))),
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, "id"))),
                 spacing="2",
             )
         ),
@@ -70,14 +70,14 @@ def __cases_table() -> rx.Component:
             variant="surface",
             size="3",
             width="100%",
-            on_mount=state.ScenarioState.load_test_cases,
+            on_mount=state.ScenarioState.load_cases,
         ),
     )
 
 def __show_test_cases_in_search(test_case:CaseModel):
 
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_test_case(getattr(test_case, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_case(getattr(test_case, "id")))),
             rx.table.cell(test_case.name),
             rx.table.cell(test_case.created),
             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),

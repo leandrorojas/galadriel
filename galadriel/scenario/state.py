@@ -83,7 +83,7 @@ class ScenarioState(rx.State):
     def toggle_search(self):
         self.show_search = not(self.show_search)
 
-    def load_test_cases(self):
+    def load_cases(self):
         with rx.session() as session:
             results = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id).order_by(ScenarioCaseModel.order)).all()
             if (len(results) > 0):
@@ -124,7 +124,7 @@ class ScenarioState(rx.State):
             results = session.exec(query).all()
             self.test_cases_for_search = results
 
-    def link_test_case(self, case_id:int):        
+    def link_case(self, case_id:int):
         scenario_case_data:dict = {"scenario_id":""}
         new_case_order = 1
 
@@ -150,9 +150,25 @@ class ScenarioState(rx.State):
             session.commit()
             session.refresh(case_to_add)
         self.search_value = ""
-        self.load_test_cases()
+        self.load_cases()
         
         return rx.toast.success("case added!")
+    
+    def unlink_case(self, scenario_case_id:int):
+        with rx.session() as session:
+            case_to_delete = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
+            order_to_update = case_to_delete.order
+            session.delete(case_to_delete)
+            session.commit()
+
+            cases_to_update = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order > order_to_update)).all()
+            for test_case in cases_to_update:
+                test_case.order = test_case.order - 1
+                session.add(test_case)
+                session.commit()
+                session.refresh(test_case)
+        self.load_cases()
+        return rx.toast.info("case unlinked.")
 
 class AddScenarioState(ScenarioState):
     form_data:dict = {}
