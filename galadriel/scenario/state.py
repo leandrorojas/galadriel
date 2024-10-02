@@ -5,6 +5,8 @@ from ..navigation import routes
 
 from ..case.model import CaseModel
 
+from sqlmodel import select, asc, or_, func, cast, String
+
 SCENARIO_ROUTE = routes.SCENARIOS
 if SCENARIO_ROUTE.endswith("/"): SCENARIO_ROUTE = SCENARIO_ROUTE[:-1]
 
@@ -13,8 +15,10 @@ class ScenarioState(rx.State):
     scenario: Optional['ScenarioModel'] = None
 
     test_cases: List['ScenarioCaseModel'] = []
+    test_cases_for_search: List['CaseModel'] = []
 
     show_search:bool = False
+    search_value:str = ""
 
     @rx.var
     def scenario_id(self):
@@ -87,6 +91,68 @@ class ScenarioState(rx.State):
                     case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.case_id)).first()
                     setattr(single_result, "case_name", case_name.name)
             self.test_cases = results
+    
+    def filter_test_cases(self, search_value):
+        self.search_value = search_value
+        self.load_cases_for_search()
+
+    def load_cases_for_search(self):
+      with rx.session() as session:
+            query = select(CaseModel)
+            if self.search_value:
+                search_value = (
+                    f"%{str(self.search_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(CaseModel, field).ilike(
+                                search_value
+                            )
+                            for field in CaseModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            CaseModel.name, String
+                        ).ilike(search_value),
+                    )
+                )
+
+            results = session.exec(query).all()
+            self.test_cases_for_search = results
+
+    def link_test_case(self, case_id:int):        
+        scenario_case_data:dict = {"scenario_id":""}
+        new_case_order = 1
+
+        if (len(self.test_cases) > 0):
+            with rx.session() as session:
+                cases_order:ScenarioCaseModel = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id)).all()
+                max_order = 0
+                for case_order in cases_order:
+                    if case_order.order > max_order:
+                        max_order = case_order.order
+                new_case_order = max_order + 1
+
+                #TODO: if failes in othe add name of the Test Case here?
+
+        scenario_case_data.update({"scenario_id":self.scenario_id})
+        scenario_case_data.update({"case_id":case_id})
+        scenario_case_data.update({"order":new_case_order})
+        scenario_case_data.update({"case_name":""})
+
+        with rx.session() as session:
+            case_to_add = ScenarioCaseModel(**scenario_case_data)
+            session.add(case_to_add)
+            session.commit()
+            session.refresh(case_to_add)
+        self.search_value = ""
+        self.load_test_cases()
+        
+        return rx.toast.success("case added!")
 
 class AddScenarioState(ScenarioState):
     form_data:dict = {}

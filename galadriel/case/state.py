@@ -16,7 +16,7 @@ class CaseState(rx.State):
 
     prerequisites: List['PrerequisiteModel'] = []
 
-    search_value: str = ""
+    search_value:str = ""
     show_search:bool = False
 
     @rx.var

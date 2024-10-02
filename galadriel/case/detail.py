@@ -190,7 +190,7 @@ def case_detail_page() -> rx.Component:
                 rx.box(
                         rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
                         rx.vstack(
-                            rx.input(placeholder="start typing to search a Test Case as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
+                            rx.input(placeholder="start typing to search a Test Case to add as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
                             __search_prerequisites_table(),
                         ),
                     ),                   
