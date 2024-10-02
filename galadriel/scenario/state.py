@@ -130,11 +130,14 @@ class ScenarioState(rx.State):
 
         if (len(self.test_cases) > 0):
             with rx.session() as session:
-                cases_order:ScenarioCaseModel = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id)).all()
+                linked_cases:ScenarioCaseModel = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id)).all()
                 max_order = 0
-                for case_order in cases_order:
-                    if case_order.order > max_order:
-                        max_order = case_order.order
+                for linked_case in linked_cases:
+                    if (linked_case.case_id == case_id):
+                        return rx.toast.error("prerequisite already in list")
+                    
+                    if linked_case.order > max_order:
+                        max_order = linked_case.order
                 new_case_order = max_order + 1
 
                 #TODO: if failes in othe add name of the Test Case here?

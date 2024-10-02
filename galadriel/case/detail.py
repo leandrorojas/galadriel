@@ -61,7 +61,7 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, "id")))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(prerequisite.created),
-            rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id)), hidden=True),
+            rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id, read_only=True)), hidden=True),
     )
 
 def __search_prerequisites_table() -> rx.Component:
@@ -120,8 +120,7 @@ def __show_step(test_step:model.StepModel):
         rx.table.cell(
             rx.flex(
                 rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, "id"))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, "id"))), 
-                #rx.button(rx.icon("pencil"), disabled=True), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, "id"))),
                 rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, "id"))),
                 spacing="2",
             )
@@ -189,7 +188,7 @@ def case_detail_page() -> rx.Component:
             rx.cond(
                 state.CaseState.show_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
+                        rx.box(rx.input(type="hidden", name="case_id", value=test_case.id, read_only=True), display="none"),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
                             __search_prerequisites_table(),
