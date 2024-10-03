@@ -28,7 +28,7 @@ def __suite_edit_button():
             ),
             href=f"{state.SuiteState.suite_edit_url}"
         ), 
-    )   
+    )
 
 @reflex_local_auth.require_login
 def suite_detail_page() -> rx.Component:
