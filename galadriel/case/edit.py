@@ -16,15 +16,19 @@ def __case_list_button() -> rx.Component:
                 size="3", 
             ),            
             href=routes.CASES
-        ), 
-        # rx.link(
-        #     rx.button(
-        #         rx.icon("chevron-left", size=26), 
-        #         rx.text("to Case Detal", size="4", display=["none", "none", "block"]), 
-        #         size="3", 
-        #     ),
-        #     href=routes.CASES
-        # )
+        ),
+    )
+
+def __case_detail_button() -> rx.Component:
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("chevron-left", size=26), 
+                rx.text("to Case Detal", size="4", display=["none", "none", "block"]), 
+                size="3", 
+            ),
+            href=f"{EditCaseState.case_url}"
+        )
     )
 
 @reflex_local_auth.require_login
@@ -37,7 +41,7 @@ def case_edit_page() -> rx.Component:
         rx.flex(
             title_badge.title("test-tubes", "Edit Test Case"),
             rx.spacer(),
-            rx.hstack(__case_list_button(),),            
+            rx.hstack(__case_list_button(),__case_detail_button()),            
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
