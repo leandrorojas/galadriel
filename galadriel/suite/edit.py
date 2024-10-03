@@ -11,11 +11,23 @@ def __suite_list_button() -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
-                rx.icon("chevron-left", size=26), 
+                rx.icon("chevrons-left", size=26), 
                 rx.text("to Suites", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
             href=routes.SUITES
+        ), 
+    )
+
+def __suite_detail_button() -> rx.Component:
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("chevron-left", size=26), 
+                rx.text("back to Detail", size="4", display=["none", "none", "block"]), 
+                size="3", 
+            ),
+            href=f"{EditSuiteState.suite_url}"
         ), 
     )
 
@@ -29,7 +41,7 @@ def suite_edit_page() -> rx.Component:
         rx.flex(
             title_badge.title("beaker", "Edit Test Suite"),
             rx.spacer(),
-            rx.hstack(__suite_list_button(),),
+            rx.hstack(__suite_list_button(),__suite_detail_button()),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
