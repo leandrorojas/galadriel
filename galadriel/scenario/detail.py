@@ -28,7 +28,7 @@ def __scenario_edit_button():
                 rx.text("Edit", size="4", display=["none", "none", "block"]),
                 size="3", 
             ),
-            href=routes.SCENARIO_EDIT
+            href=f"{state.ScenarioState.scenario_edit_url}"
         ), 
     )
 

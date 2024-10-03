@@ -26,7 +26,7 @@ def __suite_edit_button():
                 rx.text("Edit", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=routes.SUITE_EDIT
+            href=f"{state.SuiteState.suite_edit_url}"
         ), 
     )   
 

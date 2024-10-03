@@ -3,6 +3,8 @@ import reflex as rx
 from .model import SuiteModel
 from ..navigation import routes
 
+from datetime import datetime
+
 SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
 
@@ -31,7 +33,7 @@ class SuiteState(rx.State):
         with rx.session() as session:
             if (self.suite_id == ""):
                 self.suite = None
-                return            
+                return
             result = session.exec(SuiteModel.select().where(SuiteModel.id == self.suite_id)).one_or_none()
             self.suite = result
 
@@ -86,4 +88,5 @@ class EditSuiteState(SuiteState):
         suite_id = form_data.pop("suite_id")
         updated_data = {**form_data}
         self.save_suite_edits(suite_id, updated_data)
-        return rx.redirect(routes.SUITES) #self.to_suite()
+        return rx.redirect(routes.SUITES)
+        #return self.to_suite() #<-- review this code, why it was changed?
