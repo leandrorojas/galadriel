@@ -28,7 +28,7 @@ def __suite_edit_button():
             ),
             href=f"{state.SuiteState.suite_edit_url}"
         ), 
-    )   
+    )
 
 @reflex_local_auth.require_login
 def suite_detail_page() -> rx.Component:
@@ -54,15 +54,14 @@ def suite_detail_page() -> rx.Component:
             top="0px",
             padding_top="2em",       
         ),
-        rx.text(            
-            f"name: {state.SuiteState.suite.name}",
-            size="5",
-            white_space='pre-wrap',),
-        rx.text(
-            f"created: {state.SuiteState.suite.created}",
-            size="5",
-            white_space='pre-wrap',
-        ),
+        rx.hstack(
+            rx.heading(
+                f"{state.SuiteState.suite.name}",
+                size="7",
+            ),
+            rx.badge(f"{state.SuiteState.suite.created}", variant="outline"),
+            align="center",
+        ),        
         spacing="5",
         align="left",
         min_height="85vh",
