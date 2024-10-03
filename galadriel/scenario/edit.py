@@ -11,11 +11,23 @@ def __scenario_list_button() -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
-                rx.icon("chevron-left", size=26), 
+                rx.icon("chevrons-left", size=26), 
                 rx.text("to Scenarios", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
             href=routes.SCENARIOS
+        ), 
+    )
+
+def __scenario_detail_button() -> rx.Component:
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("chevron-left", size=26), 
+                rx.text("to Scenario Detail", size="4", display=["none", "none", "block"]), 
+                size="3", 
+            ),
+            href=f"{EditScenarioState.scenario_url}"
         ), 
     )
 
@@ -29,7 +41,7 @@ def scenario_edit_page() -> rx.Component:
         rx.flex(
             title_badge.title("route", "Edit Test Scenario"),
             rx.spacer(),
-            rx.hstack(__scenario_list_button(),),            
+            rx.hstack(__scenario_list_button(), __scenario_detail_button()),            
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
