@@ -29,7 +29,7 @@ def suite_edit_page() -> rx.Component:
         rx.flex(
             title_badge.title("beaker", "Edit Test Suite"),
             rx.spacer(),
-            rx.hstack(__suite_list_button(),),            
+            rx.hstack(__suite_list_button(),),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
