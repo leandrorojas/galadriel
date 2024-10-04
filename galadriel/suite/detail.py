@@ -41,7 +41,7 @@ def suite_detail_page() -> rx.Component:
         edit_link,
         rx.fragment("")
     )
-    
+
     suite_detail_content = rx.vstack(
         rx.flex(
             title_badge.title("beaker", "Test Suite Detail"),
