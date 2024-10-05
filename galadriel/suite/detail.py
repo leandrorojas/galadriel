@@ -5,6 +5,7 @@ from ..navigation import routes
 from . import state
 from .. pages import base_page
 from ..ui.components import Badge
+from . import model
 
 def __suite_list_button():
     return rx.fragment(
@@ -28,6 +29,52 @@ def __suite_edit_button():
             ),
             href=f"{state.SuiteState.suite_edit_url}"
         ), 
+    )
+def __header_cell(text: str, icon: str, hide_column:bool = False):
+    return rx.table.column_header_cell(
+        rx.hstack(
+            rx.icon(icon, size=18),
+            rx.text(text),
+            align="center",
+            spacing="2",
+        ),
+        hidden=hide_column,
+    )
+
+def __show_child(suite_child:model.SuiteChildModel):
+    return rx.table.row(
+        rx.table.cell(suite_child.order),
+        rx.table.cell(rx.badge(rx.icon("route", size=16), "scenario", radius="full", variant="soft", size="3")),
+        #rx.badge(rx.icon("route", size=16), "text", color_scheme=color_scheme, radius="full", variant="soft", size="3"),
+        rx.table.cell(""),
+        #rx.table.cell(suite_child.case_name),
+        rx.table.cell(
+            rx.flex(
+                rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, "id"))), 
+                rx.button(rx.icon("arrow-big-down")),#, on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, "id"))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red"),#, on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, "id"))),
+                spacing="2",
+            )
+        ),
+    )
+
+def __suite_children_table() -> rx.Component:
+    return rx.fragment(
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    __header_cell("order", "list-ordered"),
+                    __header_cell("type","blocks"),
+                    __header_cell("name", "tag"),
+                    __header_cell("", "ellipsis"),
+                ),
+            ),
+            rx.table.body(rx.foreach(state.SuiteState.children, __show_child)),
+            variant="surface",
+            size="3",
+            width="100%",
+            on_mount=state.SuiteState.load_children,
+        ),
     )
 
 @reflex_local_auth.require_login
@@ -61,7 +108,26 @@ def suite_detail_page() -> rx.Component:
             ),
             rx.badge(f"{state.SuiteState.suite.created}", variant="outline"),
             align="center",
-        ),        
+        ),
+        rx.vstack(
+            rx.hstack(
+                rx.heading("Scenarios", size="5",),
+                rx.button(rx.icon("search", size=18)),#, on_click=state.ScenarioState.toggle_search),
+                align="center"
+            ),
+        ),
+        rx.vstack(
+            rx.hstack(
+                rx.heading("Cases", size="5",),
+                rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_case_search),
+                align="center"
+            ),
+            rx.cond(
+                state.SuiteState.show_case_search,
+                rx.text("search cases table!")
+            ),
+            __suite_children_table()
+        ),
         spacing="5",
         align="left",
         min_height="85vh",

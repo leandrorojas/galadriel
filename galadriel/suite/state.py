@@ -1,6 +1,6 @@
 from typing import List, Optional
 import reflex as rx
-from .model import SuiteModel
+from .model import SuiteModel, SuiteChildModel
 from ..navigation import routes
 
 from datetime import datetime
@@ -11,6 +11,11 @@ if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
 class SuiteState(rx.State):
     suites: List['SuiteModel'] = []
     suite: Optional['SuiteModel'] = None
+
+    children: List['SuiteChildModel'] = []
+    child: Optional['SuiteChildModel'] = None
+
+    show_case_search:bool = False
 
     @rx.var
     def suite_id(self):
@@ -70,6 +75,18 @@ class SuiteState(rx.State):
         if edit_page:
             return rx.redirect(self.suite_edit_url)
         return rx.redirect(self.suite_url)
+    
+    def toggle_case_search(self):
+        self.show_case_search = not(self.show_case_search)
+
+    def load_children(self):
+        with rx.session() as session:
+            results = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id).order_by(SuiteChildModel.order)).all()
+            # if (len(results) > 0):
+            #     for single_result in results:
+            #         case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.case_id)).first()
+            #         setattr(single_result, "case_name", case_name.name)
+            self.children = results
 
 class AddSuiteState(SuiteState):
     form_data:dict = {}
