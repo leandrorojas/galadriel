@@ -3,6 +3,9 @@ import reflex as rx
 from .model import SuiteModel, SuiteChildModel
 from ..navigation import routes
 
+from ..case.model import CaseModel
+from ..scenario.model import ScenarioModel
+
 from datetime import datetime
 
 SUITES_ROUTE = routes.SUITES
@@ -82,10 +85,14 @@ class SuiteState(rx.State):
     def load_children(self):
         with rx.session() as session:
             results = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id).order_by(SuiteChildModel.order)).all()
-            # if (len(results) > 0):
-            #     for single_result in results:
-            #         case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.case_id)).first()
-            #         setattr(single_result, "case_name", case_name.name)
+            if (len(results) > 0):
+                for single_result in results:
+                    child = None
+                    if (single_result.child_type_id == 1):
+                        child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
+                    elif (single_result.child_type_id == 2):
+                        child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
+                    setattr(single_result, "child_name", child.name)
             self.children = results
 
 class AddSuiteState(SuiteState):

@@ -41,13 +41,25 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
         hidden=hide_column,
     )
 
+def __badge(icon: str, text: str):
+    return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
+
+def __child_type_badge(child_type: str):
+    badge_mapping = {
+        "Scenario": ("route", "Scenario"),
+        "Case": ("test-tubes", "Case")
+    }
+    return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
+
 def __show_child(suite_child:model.SuiteChildModel):
     return rx.table.row(
         rx.table.cell(suite_child.order),
-        rx.table.cell(rx.badge(rx.icon("route", size=16), "scenario", radius="full", variant="soft", size="3")),
-        #rx.badge(rx.icon("route", size=16), "text", color_scheme=color_scheme, radius="full", variant="soft", size="3"),
-        rx.table.cell(""),
-        #rx.table.cell(suite_child.case_name),
+        rx.table.cell(rx.match(
+            suite_child.child_type_id,
+            (1, __child_type_badge("Scenario")),
+            (2, __child_type_badge("Case"))
+        )),
+        rx.table.cell(suite_child.child_name),
         rx.table.cell(
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, "id"))), 
