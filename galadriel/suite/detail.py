@@ -6,6 +6,7 @@ from . import state
 from .. pages import base_page
 from ..ui.components import Badge
 from . import model
+from ..case.model import CaseModel
 
 def __suite_list_button():
     return rx.fragment(
@@ -41,6 +42,35 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
         hidden=hide_column,
     )
 
+def __show_test_cases_in_search(test_case:CaseModel):
+    return rx.table.row(
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, "id")))),
+            rx.table.cell(test_case.name),
+            rx.table.cell(test_case.created),
+            rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
+    )
+
+def __search_cases_table() -> rx.Component:
+    return rx.fragment(
+        rx.form(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        __header_cell("", "ellipsis"),
+                        __header_cell("name", "fingerprint"),
+                        __header_cell("created", "calendar-check-2"),
+                        __header_cell("selected_id", "search", True),
+                    ),
+                ),
+                rx.table.body(rx.foreach(state.SuiteState.test_cases_for_search, __show_test_cases_in_search)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=state.SuiteState.load_cases_for_search,
+            ),
+        ),
+    )
+
 def __badge(icon: str, text: str):
     return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
 
@@ -64,7 +94,7 @@ def __show_child(suite_child:model.SuiteChildModel):
             rx.flex(
                 rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, "id"))), 
                 rx.button(rx.icon("arrow-big-down")),#, on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, "id"))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red"),#, on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, "id"))),
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, "id"))),
                 spacing="2",
             )
         ),
@@ -121,6 +151,7 @@ def suite_detail_page() -> rx.Component:
             rx.badge(f"{state.SuiteState.suite.created}", variant="outline"),
             align="center",
         ),
+        __suite_children_table(),
         rx.vstack(
             rx.hstack(
                 rx.heading("Scenarios", size="5",),
@@ -136,9 +167,14 @@ def suite_detail_page() -> rx.Component:
             ),
             rx.cond(
                 state.SuiteState.show_case_search,
-                rx.text("search cases table!")
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Test Case to add to the Scenario", width="77vw", on_change=lambda value: state.SuiteState.filter_test_cases(value)),
+                            __search_cases_table(),
+                        ),
+                    ),
             ),
-            __suite_children_table()
         ),
         spacing="5",
         align="left",
