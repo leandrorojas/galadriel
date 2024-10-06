@@ -226,7 +226,7 @@ class SuiteState(rx.State):
             session.commit()
             session.refresh(case_to_add)
         self.search_value = ""
-        self.load_children()
+        self.load_children() 
         
         return rx.toast.success("case added!")
 
