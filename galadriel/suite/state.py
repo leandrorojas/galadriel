@@ -87,6 +87,10 @@ class SuiteState(rx.State):
             return rx.redirect(self.suite_edit_url)
         return rx.redirect(self.suite_url)
     
+    def collapse_searches(self):
+        self.show_case_search = False
+        self.show_scenario_search = False
+    
     def toggle_case_search(self):
         self.show_case_search = not(self.show_case_search)
 
@@ -226,6 +230,7 @@ class SuiteState(rx.State):
             session.commit()
             session.refresh(case_to_add)
         self.search_value = ""
+        self.collapse_searches()
         self.load_children()
         
         return rx.toast.success("case added!")
@@ -283,9 +288,8 @@ class SuiteState(rx.State):
             session.commit()
             session.refresh(scenario_to_add)
         self.search_value = ""
-        self.toggle_scenario_search()
+        self.collapse_searches()
         self.load_children()
-        self.load_scenarios_for_search()
         
         return rx.toast.success("scenario added!")
     
