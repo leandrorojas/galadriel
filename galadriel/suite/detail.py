@@ -155,8 +155,19 @@ def suite_detail_page() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.heading("Scenarios", size="5",),
-                rx.button(rx.icon("search", size=18)),#, on_click=state.ScenarioState.toggle_search),
+                rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_scenario_search),
                 align="center"
+            ),
+            rx.cond(
+                state.SuiteState.show_scenario_search,
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Scenario to add to the Suite", width="77vw"),#, on_change=lambda value: state.SuiteState.filter_test_cases(value)),
+                            rx.input("scenario search table goes here!")
+                            #__search_cases_table(),
+                        ),
+                    ),
             ),
         ),
         rx.vstack(
@@ -170,7 +181,7 @@ def suite_detail_page() -> rx.Component:
                 rx.box(
                         rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
                         rx.vstack(
-                            rx.input(placeholder="start typing to search a Test Case to add to the Scenario", width="77vw", on_change=lambda value: state.SuiteState.filter_test_cases(value)),
+                            rx.input(placeholder="start typing to search a Test Case to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_test_cases(value)),
                             __search_cases_table(),
                         ),
                     ),

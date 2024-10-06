@@ -24,6 +24,10 @@ class SuiteState(rx.State):
     show_case_search:bool = False
     search_case_value:str = ""
 
+    scenarios_for_search: List['ScenarioModel'] = []
+    show_scenario_search:bool = False
+    search_scenario_value:str = ""
+
     @rx.var
     def suite_id(self):
         #print(self.router.page.params)
@@ -157,8 +161,7 @@ class SuiteState(rx.State):
                 max_order = 0
                 for linked_case in linked_cases:
                     if (linked_case.child_id == case_id):
-                        self.toggle_case_search()
-                        return rx.toast.error("prerequisite already in list")
+                        return rx.toast.error("case already in list")
                     
                     if linked_case.order > max_order:
                         max_order = linked_case.order
@@ -180,6 +183,9 @@ class SuiteState(rx.State):
         self.load_children()
         
         return rx.toast.success("case added!")
+
+    def toggle_scenario_search(self):
+        self.show_scenario_search = not(self.show_scenario_search)
 
 class AddSuiteState(SuiteState):
     form_data:dict = {}
