@@ -174,7 +174,7 @@ class SuiteState(rx.State):
             max_order = 0
             for linked_scenario in linked_scenarios:
                 if ((linked_scenario.child_id == child_id) and (linked_scenario.child_type_id == child_type_id)):
-                    return rx.toast.error("already in list")
+                    return -1
                 
                 if linked_scenario.order > max_order:
                     max_order = linked_scenario.order
@@ -218,6 +218,9 @@ class SuiteState(rx.State):
 
         if (len(self.scenarios_for_search) > 0):
             new_case_order = self.get_max_child_order(case_id, 2)
+
+            if new_case_order == -1:
+                return rx.toast.error("already in list")
 
         suite_case_data.update({"suite_id":self.suite_id})
         suite_case_data.update({"child_type_id":2})
@@ -276,6 +279,9 @@ class SuiteState(rx.State):
 
         if (len(self.scenarios_for_search) > 0):
             new_scenario_order = self.get_max_child_order(scenario_id, 1)
+
+            if new_scenario_order == -1:
+                return rx.toast.error("already in list")
 
         suite_scenario_data.update({"suite_id":self.suite_id})
         suite_scenario_data.update({"child_type_id":1})
