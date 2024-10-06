@@ -153,8 +153,7 @@ class SuiteState(rx.State):
 
         if (len(self.test_cases_for_search) > 0):
             with rx.session() as session:
-                linked_cases:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id and SuiteChildModel.child_type_id == "2")).all()
-                print(linked_cases)
+                linked_cases:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id, SuiteChildModel.child_type_id == 2)).all()
                 max_order = 0
                 for linked_case in linked_cases:
                     if (linked_case.child_id == case_id):
