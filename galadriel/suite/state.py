@@ -20,9 +20,13 @@ class SuiteState(rx.State):
     children: List['SuiteChildModel'] = []
     child: Optional['SuiteChildModel'] = None
 
-    test_cases_for_search: List['CaseModel'] = []
+    cases_for_search: List['CaseModel'] = []
     show_case_search:bool = False
     search_case_value:str = ""
+
+    scenarios_for_search: List['ScenarioModel'] = []
+    show_scenario_search:bool = False
+    search_scenario_value:str = ""
 
     @rx.var
     def suite_id(self):
@@ -114,6 +118,18 @@ class SuiteState(rx.State):
                 session.refresh(suite_child)
         self.load_children()
         return rx.toast.info("child unlinked.")
+    
+    def get_max_child_order(self, child_id:int, child_type_id:int):
+        with rx.session() as session:
+            linked_scenarios:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id)).all()
+            max_order = 0
+            for linked_scenario in linked_scenarios:
+                if ((linked_scenario.child_id == child_id) and (linked_scenario.child_type_id == child_type_id)):
+                    return rx.toast.error("already in list")
+                
+                if linked_scenario.order > max_order:
+                    max_order = linked_scenario.order
+            return max_order + 1
 
     def filter_test_cases(self, search_case_value):
         self.search_case_value = search_case_value
@@ -145,26 +161,14 @@ class SuiteState(rx.State):
                 )
 
             results = session.exec(query).all()
-            self.test_cases_for_search = results
+            self.cases_for_search = results
 
     def link_case(self, case_id:int):
         suite_case_data:dict = {"suite_id":""}
         new_case_order = 1
 
-        if (len(self.test_cases_for_search) > 0):
-            with rx.session() as session:
-                linked_cases:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id, SuiteChildModel.child_type_id == 2)).all()
-                max_order = 0
-                for linked_case in linked_cases:
-                    if (linked_case.child_id == case_id):
-                        self.toggle_case_search()
-                        return rx.toast.error("prerequisite already in list")
-                    
-                    if linked_case.order > max_order:
-                        max_order = linked_case.order
-                new_case_order = max_order + 1
-
-                #TODO: if failes in othe add name of the Test Case here?
+        if (len(self.scenarios_for_search) > 0):
+            new_case_order = self.get_max_child_order(case_id, 2)
 
         suite_case_data.update({"suite_id":self.suite_id})
         suite_case_data.update({"child_type_id":2})
@@ -181,6 +185,65 @@ class SuiteState(rx.State):
         
         return rx.toast.success("case added!")
 
+    def toggle_scenario_search(self):
+        self.show_scenario_search = not(self.show_scenario_search)
+
+    def filter_scenarios(self, search_scenario_value):
+        self.search_scenario_value = search_scenario_value
+        self.load_scenarios_for_search()
+
+    def load_scenarios_for_search(self):
+      with rx.session() as session:
+            query = select(ScenarioModel)
+            if self.search_scenario_value:
+                search_scenario_value = (
+                    f"%{str(self.search_scenario_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(ScenarioModel, field).ilike(
+                                search_scenario_value
+                            )
+                            for field in ScenarioModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            ScenarioModel.name, String
+                        ).ilike(search_scenario_value),
+                    )
+                )
+
+            results = session.exec(query).all()
+            self.scenarios_for_search = results
+
+    def link_scenario(self, scenario_id:int):
+        suite_scenario_data:dict = {"suite_id":""}
+        new_scenario_order = 1
+
+        if (len(self.scenarios_for_search) > 0):
+            new_scenario_order = self.get_max_child_order(scenario_id, 1)
+
+        suite_scenario_data.update({"suite_id":self.suite_id})
+        suite_scenario_data.update({"child_type_id":1})
+        suite_scenario_data.update({"child_id":scenario_id})
+        suite_scenario_data.update({"order":new_scenario_order})
+
+        with rx.session() as session:
+            scenario_to_add = SuiteChildModel(**suite_scenario_data)
+            session.add(scenario_to_add)
+            session.commit()
+            session.refresh(scenario_to_add)
+        self.search_value = ""
+        self.toggle_scenario_search()
+        self.load_children()
+        self.load_scenarios_for_search()
+        
+        return rx.toast.success("scenario added!")
+    
 class AddSuiteState(SuiteState):
     form_data:dict = {}
 
