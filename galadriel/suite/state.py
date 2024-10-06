@@ -45,7 +45,7 @@ class SuiteState(rx.State):
             return f"{SUITES_ROUTE}"
         return f"{SUITES_ROUTE}/{self.suite.id}/edit"
 
-    def get_suite_detail(self):                
+    def get_suite_detail(self):
         with rx.session() as session:
             if (self.suite_id == ""):
                 self.suite = None
