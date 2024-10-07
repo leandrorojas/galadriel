@@ -10,7 +10,7 @@ from datetime import datetime
 
 from sqlmodel import select, asc, or_, func, cast, String
 
-CYCLES_ROUTE = routes.SUITES
+CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
 
 class CycleState(rx.State):
@@ -34,24 +34,24 @@ class CycleState(rx.State):
         return self.router.page.params.get("id", "")
     
     @rx.var
-    def suite_url(self):
+    def cycle_url(self):
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}"
     
     @rx.var
-    def suite_edit_url(self):
+    def cycle_edit_url(self):
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}/edit"
 
-    # def get_suite_detail(self):
-    #     with rx.session() as session:
-    #         if (self.cycle_id == ""):
-    #             self.cycle = None
-    #             return
-    #         result = session.exec(SuiteModel.select().where(SuiteModel.id == self.cycle_id)).one_or_none()
-    #         self.cycle = result
+    def get_cycle_detail(self):
+        with rx.session() as session:
+            if (self.cycle_id == ""):
+                self.cycle = None
+                return
+            result = session.exec(CycleModel.select().where(CycleModel.id == self.cycle_id)).one_or_none()
+            self.cycle = result
 
     def load_cycles(self):
         with rx.session() as session:
@@ -66,19 +66,19 @@ class CycleState(rx.State):
             session.refresh(cycle)
             self.cycle = cycle
     
-    # def save_suite_edits(self, cycle_id:int, updated_data:dict):
-    #     with rx.session() as session:        
-    #         suite = session.exec(SuiteModel.select().where(SuiteModel.id == cycle_id)).one_or_none()
+    def save_cycle_edits(self, cycle_id:int, updated_data:dict):
+        with rx.session() as session:        
+            cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
-    #         if (suite is None):
-    #             return
-    #         for key, value in updated_data.items():
-    #             setattr(suite, key, value)
+            if (cycle is None):
+                return
+            for key, value in updated_data.items():
+                setattr(cycle, key, value)
 
-    #         session.add(suite)
-    #         session.commit()
-    #         session.refresh(suite)
-    #         self.cycle = suite
+            session.add(cycle)
+            session.commit()
+            session.refresh(cycle)
+            self.cycle = cycle
 
     # def to_suite(self, edit_page=True):
     #     if not self.cycle:
@@ -307,14 +307,14 @@ class AddCycleState(CycleState):
         self.add_cycle(form_data)
         return rx.redirect(routes.CYCLES)
 
-# class EditSuiteState(CycleState):
-#     form_data:dict = {}
-#     # suite_name:str = ""
+class EditCycleState(CycleState):
+    form_data:dict = {}
+    # suite_name:str = ""
     
-#     def handle_submit(self, form_data):
-#         self.form_data = form_data
-#         cycle_id = form_data.pop("cycle_id")
-#         updated_data = {**form_data}
-#         self.save_suite_edits(cycle_id, updated_data)
-#         return rx.redirect(routes.SUITES)
-#         #return self.to_suite() #<-- review this code, why it was changed?
+    def handle_submit(self, form_data):
+        self.form_data = form_data
+        cycle_id = form_data.pop("cycle_id")
+        updated_data = {**form_data}
+        self.save_cycle_edits(cycle_id, updated_data)
+        return rx.redirect(routes.CYCLES)
+        #return self.to_suite() #<-- review this code, why it was changed?
