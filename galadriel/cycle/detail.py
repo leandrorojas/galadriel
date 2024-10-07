@@ -8,7 +8,7 @@ from ..ui.components import Badge
 from . import model
 from ..suite.model import SuiteModel
 from ..case.model import CaseModel
-from ..scenario.model import ScenarioModel
+from ..scenario.model import ScenarioModel 
 
 def __cycle_list_button():
     return rx.fragment(
@@ -74,7 +74,7 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
 #         ),
 #     )
 
-# def __show_scenarios_in_search(scenario:ScenarioModel):
+# def __show_scenarios_in_search(scenario: ):
 #     return rx.table.row(
 #             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
 #             rx.table.cell(scenario.name),
