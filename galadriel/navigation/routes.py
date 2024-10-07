@@ -30,5 +30,5 @@ CASE_EDIT = "/cases/[id]/edit"
 #cycles
 CYCLES = "/cycles"
 CYCLE_ADD = "/cycles/add"
-# CYCLE_DETAIL = "/cycles/[id]"
-# CYCLE_EDIT = "/cycles/[id]/edit"
+CYCLE_DETAIL = "/cycles/[id]"
+CYCLE_EDIT = "/cycles/[id]/edit"

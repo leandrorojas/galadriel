@@ -51,18 +51,6 @@ def __add_adhoc_cycle_button() -> rx.Component:
         ), 
     )
 
-def __add_cycle_button() -> rx.Component:
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("plus", size=26), 
-                rx.text("Add ad hoc Cycle", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=navigation.routes.CYCLE_ADD
-        ), 
-    )
-
 def __header_cell(text: str, icon: str):
     return rx.table.column_header_cell(
         rx.hstack(
@@ -79,7 +67,7 @@ def __table() -> rx.Component:
             rx.table.header(
                 rx.table.row(
                     __header_cell("name", "fingerprint"),
-                    __header_cell("threshold", "door-open"),
+                    __header_cell("threshold", "gauge"),
                     __header_cell("created", "calendar-check-2"),
                 ),
             ),

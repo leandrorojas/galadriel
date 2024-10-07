@@ -109,8 +109,10 @@ app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load
 app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=case.CaseState.get_case_detail)
 
 #Test Cycles
-app.add_page(cycle.cycle_list_page, route=navigation.routes.CYCLES, on_load=case.CaseState.load_cases)
+app.add_page(cycle.cycle_list_page, route=navigation.routes.CYCLES, on_load=cycle.CycleState.load_cycles)
 app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD)
+app.add_page(cycle.cycle_detail_page, route=navigation.routes.CYCLE_DETAIL, on_load=cycle.CycleState.get_cycle_detail)
+app.add_page(cycle.cycle_edit_page, route=navigation.routes.CYCLE_EDIT, on_load=cycle.CycleState.get_cycle_detail)
 
 #protected test page
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
