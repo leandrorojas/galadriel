@@ -21,13 +21,17 @@ class CycleState(rx.State):
     children: List['CycleChildModel'] = []
     child: Optional['CycleChildModel'] = None
 
-    # cases_for_search: List['CaseModel'] = []
-    # show_case_search:bool = False
-    # search_case_value:str = ""
+    show_case_search:bool = False
+    search_case_value:str = ""
+    cases_for_search: List['CaseModel'] = []
 
-    # scenarios_for_search: List['ScenarioModel'] = []
-    # show_scenario_search:bool = False
-    # search_scenario_value:str = ""
+    show_scenario_search:bool = False
+    search_scenario_value:str = ""
+    scenarios_for_search: List['ScenarioModel'] = []
+
+    show_suite_search:bool = False
+    search_suite_value:str = ""
+    suites_for_search: List['SuiteModel'] = []
 
     @rx.var
     def cycle_id(self):
@@ -92,8 +96,8 @@ class CycleState(rx.State):
     #     self.show_case_search = False
     #     self.show_scenario_search = False
     
-    # def toggle_case_search(self):
-    #     self.show_case_search = not(self.show_case_search)
+    def toggle_case_search(self):
+        self.show_case_search = not(self.show_case_search)
 
     def load_children(self):
         with rx.session() as session:
@@ -183,37 +187,37 @@ class CycleState(rx.State):
     #                 max_order = linked_scenario.order
     #         return max_order + 1
 
-    # def filter_test_cases(self, search_case_value):
-    #     self.search_case_value = search_case_value
-    #     self.load_cases_for_search()
+    def filter_test_cases(self, search_case_value):
+        self.search_case_value = search_case_value
+        self.load_cases_for_search()
 
-    # def load_cases_for_search(self):
-    #   with rx.session() as session:
-    #         query = select(CaseModel)
-    #         if self.search_case_value:
-    #             search_case_value = (
-    #                 f"%{str(self.search_case_value).lower()}%"
-    #             )
-    #             #TODO: review this query... galadriel doesn't have payments...
-    #             query = query.where(
-    #                 or_(
-    #                     *[
-    #                         getattr(CaseModel, field).ilike(
-    #                             search_case_value
-    #                         )
-    #                         for field in CaseModel.get_fields()
-    #                         if field
-    #                         not in ["id", "payments"]
-    #                     ],
-    #                     # ensures that payments is cast to a string before applying the ilike operator
-    #                     cast(
-    #                         CaseModel.name, String
-    #                     ).ilike(search_case_value),
-    #                 )
-    #             )
+    def load_cases_for_search(self):
+      with rx.session() as session:
+            query = select(CaseModel)
+            if self.search_case_value:
+                search_case_value = (
+                    f"%{str(self.search_case_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(CaseModel, field).ilike(
+                                search_case_value
+                            )
+                            for field in CaseModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            CaseModel.name, String
+                        ).ilike(search_case_value),
+                    )
+                )
 
-    #         results = session.exec(query).all()
-    #         self.cases_for_search = results
+            results = session.exec(query).all()
+            self.cases_for_search = results
 
     # def link_case(self, case_id:int):
     #     suite_case_data:dict = {"cycle_id":""}
@@ -241,40 +245,40 @@ class CycleState(rx.State):
         
     #     return rx.toast.success("case added!")
 
-    # def toggle_scenario_search(self):
-    #     self.show_scenario_search = not(self.show_scenario_search)
+    def toggle_scenario_search(self):
+        self.show_scenario_search = not(self.show_scenario_search)
 
-    # def filter_scenarios(self, search_scenario_value):
-    #     self.search_scenario_value = search_scenario_value
-    #     self.load_scenarios_for_search()
+    def filter_scenarios(self, search_scenario_value):
+        self.search_scenario_value = search_scenario_value
+        self.load_scenarios_for_search()
 
-    # def load_scenarios_for_search(self):
-    #   with rx.session() as session:
-    #         query = select(ScenarioModel)
-    #         if self.search_scenario_value:
-    #             search_scenario_value = (
-    #                 f"%{str(self.search_scenario_value).lower()}%"
-    #             )
-    #             #TODO: review this query... galadriel doesn't have payments...
-    #             query = query.where(
-    #                 or_(
-    #                     *[
-    #                         getattr(ScenarioModel, field).ilike(
-    #                             search_scenario_value
-    #                         )
-    #                         for field in ScenarioModel.get_fields()
-    #                         if field
-    #                         not in ["id", "payments"]
-    #                     ],
-    #                     # ensures that payments is cast to a string before applying the ilike operator
-    #                     cast(
-    #                         ScenarioModel.name, String
-    #                     ).ilike(search_scenario_value),
-    #                 )
-    #             )
+    def load_scenarios_for_search(self):
+      with rx.session() as session:
+            query = select(ScenarioModel)
+            if self.search_scenario_value:
+                search_scenario_value = (
+                    f"%{str(self.search_scenario_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(ScenarioModel, field).ilike(
+                                search_scenario_value
+                            )
+                            for field in ScenarioModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            ScenarioModel.name, String
+                        ).ilike(search_scenario_value),
+                    )
+                )
 
-    #         results = session.exec(query).all()
-    #         self.scenarios_for_search = results
+            results = session.exec(query).all()
+            self.scenarios_for_search = results
 
     # def link_scenario(self, scenario_id:int):
     #     suite_scenario_data:dict = {"cycle_id":""}
@@ -301,7 +305,42 @@ class CycleState(rx.State):
     #     self.load_children()
         
     #     return rx.toast.success("scenario added!")
-    
+
+    def toggle_suite_search(self):
+        self.show_suite_search = not(self.show_suite_search)
+
+    def filter_suites(self, search_suite_value):
+        self.search_suite_value = search_suite_value
+        self.load_suites_for_search()
+
+    def load_suites_for_search(self):
+      with rx.session() as session:
+            query = select(SuiteModel)
+            if self.search_suite_value:
+                search_suite_value = (
+                    f"%{str(self.search_suite_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(SuiteModel, field).ilike(
+                                search_suite_value
+                            )
+                            for field in SuiteModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            SuiteModel.name, String
+                        ).ilike(search_suite_value),
+                    )
+                )
+
+            results = session.exec(query).all()
+            self.suites_for_search = results
+
 class AddCycleState(CycleState):
     form_data:dict = {}
 
