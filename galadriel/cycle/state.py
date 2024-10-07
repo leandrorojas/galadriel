@@ -72,7 +72,7 @@ class CycleState(rx.State):
             self.cycle = cycle
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
-        with rx.session() as session:        
+        with rx.session() as session:
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
             if (cycle is None):
