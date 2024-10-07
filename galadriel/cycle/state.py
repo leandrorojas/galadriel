@@ -1,10 +1,11 @@
 from typing import List, Optional
 import reflex as rx
-from .model import CycleModel
+from .model import CycleModel, CycleChildModel
 from ..navigation import routes
 
-# from ..case.model import CaseModel
-# from ..scenario.model import ScenarioModel
+from ..case.model import CaseModel
+from ..scenario.model import ScenarioModel
+from ..suite.model import SuiteModel
 
 from datetime import datetime
 
@@ -17,8 +18,8 @@ class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
 
-    # children: List['SuiteChildModel'] = []
-    # child: Optional['SuiteChildModel'] = None
+    children: List['CycleChildModel'] = []
+    child: Optional['CycleChildModel'] = None
 
     # cases_for_search: List['CaseModel'] = []
     # show_case_search:bool = False
@@ -94,18 +95,20 @@ class CycleState(rx.State):
     # def toggle_case_search(self):
     #     self.show_case_search = not(self.show_case_search)
 
-    # def load_children(self):
-    #     with rx.session() as session:
-    #         results = session.exec(SuiteChildModel.select().where(SuiteChildModel.cycle_id == self.cycle_id).order_by(SuiteChildModel.order)).all()
-    #         if (len(results) > 0):
-    #             for single_result in results:
-    #                 child = None
-    #                 if (single_result.child_type_id == 1):
-    #                     child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
-    #                 elif (single_result.child_type_id == 2):
-    #                     child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
-    #                 setattr(single_result, "child_name", child.name)
-    #         self.children = results
+    def load_children(self):
+        with rx.session() as session:
+            results = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id).order_by(CycleChildModel.order)).all()
+            if (len(results) > 0):
+                for single_result in results:
+                    child = None
+                    if (single_result.child_type_id == 1):
+                        child = session.exec(SuiteModel.select().where(SuiteModel.id == single_result.child_id)).first()
+                    if (single_result.child_type_id == 2):
+                        child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
+                    elif (single_result.child_type_id == 3):
+                        child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
+                    setattr(single_result, "child_name", child.name)
+            self.children = results
 
     # def unlink_child(self, suite_child_id:int):
     #     with rx.session() as session:
