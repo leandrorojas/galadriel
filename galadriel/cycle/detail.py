@@ -47,7 +47,7 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
 
 def __show_test_cases_in_search(test_case:CaseModel):
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"))),#, on_click=lambda: state.SuiteState.link_case(getattr(test_case, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_case(getattr(test_case, "id")))),
             rx.table.cell(test_case.name),
             rx.table.cell(test_case.created),
             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),

@@ -92,9 +92,10 @@ class CycleState(rx.State):
     #         return rx.redirect(self.suite_edit_url)
     #     return rx.redirect(self.suite_url)
     
-    # def collapse_searches(self):
-    #     self.show_case_search = False
-    #     self.show_scenario_search = False
+    def collapse_searches(self):
+        self.show_case_search = False
+        self.show_scenario_search = False
+        self.show_suite_search = False
     
     def toggle_case_search(self):
         self.show_case_search = not(self.show_case_search)
@@ -175,17 +176,17 @@ class CycleState(rx.State):
     #         else:
     #             return rx.toast.warning("The child has reached max.")
     
-    # def get_max_child_order(self, child_id:int, child_type_id:int):
-    #     with rx.session() as session:
-    #         linked_scenarios:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.cycle_id == self.cycle_id)).all()
-    #         max_order = 0
-    #         for linked_scenario in linked_scenarios:
-    #             if ((linked_scenario.child_id == child_id) and (linked_scenario.child_type_id == child_type_id)):
-    #                 return -1
+    def get_max_child_order(self, child_id:int, child_type_id:int):
+        with rx.session() as session:
+            linked_children:CycleChildModel = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id)).all()
+            max_order = 0
+            for linked_child in linked_children:
+                if ((linked_child.child_id == child_id) and (linked_child.child_type_id == child_type_id)):
+                    return -1
                 
-    #             if linked_scenario.order > max_order:
-    #                 max_order = linked_scenario.order
-    #         return max_order + 1
+                if linked_child.order > max_order:
+                    max_order = linked_child.order
+            return max_order + 1
 
     def filter_test_cases(self, search_case_value):
         self.search_case_value = search_case_value
@@ -219,31 +220,31 @@ class CycleState(rx.State):
             results = session.exec(query).all()
             self.cases_for_search = results
 
-    # def link_case(self, case_id:int):
-    #     suite_case_data:dict = {"cycle_id":""}
-    #     new_case_order = 1
+    def link_case(self, case_id:int):
+        cycle_case_data:dict = {"cycle_id":""}
+        new_case_order = 1
 
-    #     if (len(self.scenarios_for_search) > 0):
-    #         new_case_order = self.get_max_child_order(case_id, 2)
+        if (len(self.cases_for_search) > 0):
+            new_case_order = self.get_max_child_order(case_id, 3)
 
-    #         if new_case_order == -1:
-    #             return rx.toast.error("already in list")
+            if new_case_order == -1:
+                return rx.toast.error("already in list")
 
-    #     suite_case_data.update({"cycle_id":self.cycle_id})
-    #     suite_case_data.update({"child_type_id":2})
-    #     suite_case_data.update({"child_id":case_id})
-    #     suite_case_data.update({"order":new_case_order})
+        cycle_case_data.update({"cycle_id":self.cycle_id})
+        cycle_case_data.update({"child_type_id":3})
+        cycle_case_data.update({"child_id":case_id})
+        cycle_case_data.update({"order":new_case_order})
 
-    #     with rx.session() as session:
-    #         case_to_add = SuiteChildModel(**suite_case_data)
-    #         session.add(case_to_add)
-    #         session.commit()
-    #         session.refresh(case_to_add)
-    #     self.search_value = ""
-    #     self.collapse_searches()
-    #     self.load_children()
+        with rx.session() as session:
+            case_to_add = CycleChildModel(**cycle_case_data)
+            session.add(case_to_add)
+            session.commit()
+            session.refresh(case_to_add)
+        self.search_case_value = ""
+        self.collapse_searches()
+        self.load_children()
         
-    #     return rx.toast.success("case added!")
+        return rx.toast.success("case added!")
 
     def toggle_scenario_search(self):
         self.show_scenario_search = not(self.show_scenario_search)
