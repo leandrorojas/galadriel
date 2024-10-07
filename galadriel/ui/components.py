@@ -218,14 +218,14 @@ class SideBar():
 
     def __sidebar_items(self) -> rx.Component: 
         return rx.vstack(
-            self.__sidebar_item("[to do] Dashboard", "layout-dashboard", navigation.routes.HOME),
-            self.__sidebar_item("[to do] Cycles", "flask-round", navigation.routes.HOME),
+            self.__sidebar_item("[to do] Dashboard", "layout-dashboard", navigation.routes.ABOUT),
+            self.__sidebar_item("[wip] Cycles", "flask-round", navigation.routes.CYCLES),
             rx.divider(),
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),
             self.__sidebar_item("Cases", "test-tubes", navigation.routes.CASES),
-            self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.HOME),
-            self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.HOME),
+            self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.ABOUT),
+            self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.ABOUT),
             spacing="1",
             width="100%",
         )

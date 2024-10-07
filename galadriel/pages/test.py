@@ -13,8 +13,8 @@ def protetected_page() -> rx.Component:
             size="5",
         ),
         rx.link(
-            rx.button("Check out our ducks!"),
-            href=navigation.routes.HOME,
+            rx.button("Check out our about page!"),
+            href=navigation.routes.ABOUT,
             is_extgsernal=True,
         ),
         spacing="5",

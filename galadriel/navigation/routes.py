@@ -26,4 +26,9 @@ CASES = "/cases"
 CASE_ADD = "/cases/add"
 CASE_DETAIL = "/cases/[id]"
 CASE_EDIT = "/cases/[id]/edit"
-CASE_PREREQUISITES_SEARCH = "/cases/[id]/prerequisites"
+
+#cycles
+CYCLES = "/cycles"
+CYCLE_ADD = "/cycles/add"
+# CYCLE_DETAIL = "/cycles/[id]"
+# CYCLE_EDIT = "/cycles/[id]/edit"
