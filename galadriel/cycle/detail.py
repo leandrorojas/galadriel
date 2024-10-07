@@ -34,16 +34,16 @@ def __cycle_edit_button():
         ), 
     )
 
-# def __header_cell(text: str, icon: str, hide_column:bool = False):
-#     return rx.table.column_header_cell(
-#         rx.hstack(
-#             rx.icon(icon, size=18),
-#             rx.text(text),
-#             align="center",
-#             spacing="2",
-#         ),
-#         hidden=hide_column,
-#     )
+def __header_cell(text: str, icon: str, hide_column:bool = False):
+    return rx.table.column_header_cell(
+        rx.hstack(
+            rx.icon(icon, size=18),
+            rx.text(text),
+            align="center",
+            spacing="2",
+        ),
+        hidden=hide_column,
+    )
 
 # def __show_test_cases_in_search(test_case:CaseModel):
 #     return rx.table.row(
@@ -103,53 +103,55 @@ def __cycle_edit_button():
 #         ),
 #     )
 
-# def __badge(icon: str, text: str):
-#     return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
+def __badge(icon: str, text: str):
+    return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
 
-# def __child_type_badge(child_type: str):
-#     badge_mapping = {
-#         "Scenario": ("route", "Scenario"),
-#         "Case": ("test-tubes", "Case")
-#     }
-#     return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
+def __child_type_badge(child_type: str):
+    badge_mapping = {
+        "Suite": ("beaker", "Suite"),
+        "Scenario": ("route", "Scenario"),
+        "Case": ("test-tubes", "Case")
+    }
+    return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
-# def __show_child(suite_child:model.SuiteChildModel):
-#     return rx.table.row(
-#         rx.table.cell(suite_child.order),
-#         rx.table.cell(rx.match(
-#             suite_child.child_type_id,
-#             (1, __child_type_badge("Scenario")),
-#             (2, __child_type_badge("Case"))
-#         )),
-#         rx.table.cell(suite_child.child_name),
-#         rx.table.cell(
-#             rx.flex(
-#                 rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, "id"))), 
-#                 rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, "id"))), 
-#                 rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, "id"))),
-#                 spacing="2",
-#             )
-#         ),
-#     )
+def __show_child(cycle_child:model.CycleChildModel):
+    return rx.table.row(
+        rx.table.cell(cycle_child.order),
+        rx.table.cell(rx.match(
+            cycle_child.child_type_id,
+            (1, __child_type_badge("Suite")),
+            (2, __child_type_badge("Scenario")),
+            (3, __child_type_badge("Case"))
+        )),
+        rx.table.cell(cycle_child.child_name),
+        rx.table.cell(
+            rx.flex(
+                rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.SuiteState.move_child_up(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("arrow-big-down")),#, on_click=lambda: state.SuiteState.move_child_down(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red"),#, on_click=lambda: state.SuiteState.unlink_child(getattr(cycle_child, "id"))),
+                spacing="2",
+            )
+        ),
+    )
 
-# def __suite_children_table() -> rx.Component:
-#     return rx.fragment(
-#         rx.table.root(
-#             rx.table.header(
-#                 rx.table.row(
-#                     __header_cell("order", "list-ordered"),
-#                     __header_cell("type","blocks"),
-#                     __header_cell("name", "tag"),
-#                     __header_cell("", "ellipsis"),
-#                 ),
-#             ),
-#             rx.table.body(rx.foreach(state.SuiteState.children, __show_child)),
-#             variant="surface",
-#             size="3",
-#             width="100%",
-#             on_mount=state.SuiteState.load_children,
-#         ),
-#     )
+def __cycle_children_table() -> rx.Component:
+    return rx.fragment(
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    __header_cell("order", "list-ordered"),
+                    __header_cell("type","blocks"),
+                    __header_cell("name", "tag"),
+                    __header_cell("", "ellipsis"),
+                ),
+            ),
+            rx.table.body(rx.foreach(state.CycleState.children, __show_child)),
+            variant="surface",
+            size="3",
+            width="100%",
+            on_mount=state.CycleState.load_children,
+        ),
+    )
 
 @reflex_local_auth.require_login
 def cycle_detail_page() -> rx.Component:
@@ -173,19 +175,19 @@ def cycle_detail_page() -> rx.Component:
             align="center",
             width="100%",
             top="0px",
-            padding_top="2em",       
+            padding_top="2em",
         ),
         rx.hstack(
             rx.heading(
+                rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
                 f"{state.CycleState.cycle.name}",
                 size="7",
             ),
-            rx.heading(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}"),
+            #rx.heading(),
             rx.badge(f"{state.CycleState.cycle.created}"),
             align="center",
         ),
-        #__suite_children_table(),
-        rx.text("children table"),
+        __cycle_children_table(),
         rx.text("Suite search"),
         rx.text("Scenario search"),
         # rx.vstack(
