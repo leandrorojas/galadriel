@@ -14,6 +14,7 @@ from . import navigation
 from . import suite
 from . import scenario
 from . import case
+from . import cycle
 
 #galadriel
 from .pages import base_page, about_page
@@ -107,8 +108,14 @@ app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD)
 app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=case.CaseState.get_case_detail)
 app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=case.CaseState.get_case_detail)
 
+#Test Cycles
+app.add_page(cycle.cycle_list_page, route=navigation.routes.CYCLES, on_load=case.CaseState.load_cases)
+app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD)
+
+#protected test page
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
 
+#reflex tutorial pages
 # reflex_local_auth canned pages
 # app.add_page(rx_tutorial_login_page, route=reflex_local_auth.routes.LOGIN_ROUTE, title="Login")
 # app.add_page(rx_tutorial_signup_page, route=reflex_local_auth.routes.REGISTER_ROUTE, title="Register")
