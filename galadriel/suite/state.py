@@ -216,7 +216,7 @@ class SuiteState(rx.State):
         suite_case_data:dict = {"suite_id":""}
         new_case_order = 1
 
-        if (len(self.scenarios_for_search) > 0):
+        if (len(self.cases_for_search) > 0):
             new_case_order = self.get_max_child_order(case_id, 2)
 
             if new_case_order == -1:
@@ -232,7 +232,7 @@ class SuiteState(rx.State):
             session.add(case_to_add)
             session.commit()
             session.refresh(case_to_add)
-        self.search_value = ""
+        self.search_case_value = ""
         self.collapse_searches()
         self.load_children()
         

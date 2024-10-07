@@ -44,7 +44,7 @@ def __add_adhoc_cycle_button() -> rx.Component:
         rx.link(
             rx.button(
                 rx.icon("plus", size=26), 
-                rx.text("Add ad hoc Cycle", size="4", display=["none", "none", "block"]), 
+                rx.text("Add Cycle", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
             href=navigation.routes.CYCLE_ADD

@@ -45,63 +45,92 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
         hidden=hide_column,
     )
 
-# def __show_test_cases_in_search(test_case:CaseModel):
-#     return rx.table.row(
-#             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, "id")))),
-#             rx.table.cell(test_case.name),
-#             rx.table.cell(test_case.created),
-#             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
-#     )
+def __show_test_cases_in_search(test_case:CaseModel):
+    return rx.table.row(
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_case(getattr(test_case, "id")))),
+            rx.table.cell(test_case.name),
+            rx.table.cell(test_case.created),
+            rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
+    )
 
-# def __search_cases_table() -> rx.Component:
-#     return rx.fragment(
-#         rx.form(
-#             rx.table.root(
-#                 rx.table.header(
-#                     rx.table.row(
-#                         __header_cell("", "ellipsis"),
-#                         __header_cell("name", "fingerprint"),
-#                         __header_cell("created", "calendar-check-2"),
-#                         __header_cell("selected_id", "search", True),
-#                     ),
-#                 ),
-#                 rx.table.body(rx.foreach(state.SuiteState.cases_for_search, __show_test_cases_in_search)),
-#                 variant="surface",
-#                 size="3",
-#                 width="100%",
-#                 on_mount=state.SuiteState.load_cases_for_search,
-#             ),
-#         ),
-#     )
+def __search_cases_table() -> rx.Component:
+    return rx.fragment(
+        rx.form(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        __header_cell("", "ellipsis"),
+                        __header_cell("name", "fingerprint"),
+                        __header_cell("created", "calendar-check-2"),
+                        __header_cell("selected_id", "search", True),
+                    ),
+                ),
+                rx.table.body(rx.foreach(state.CycleState.cases_for_search, __show_test_cases_in_search)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=state.CycleState.load_cases_for_search,
+            ),
+        ),
+    )
 
-# def __show_scenarios_in_search(scenario:ScenarioModel):
-#     return rx.table.row(
-#             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
-#             rx.table.cell(scenario.name),
-#             rx.table.cell(scenario.created),
-#             rx.table.cell(rx.form(rx.input(name="scenario_id", value=scenario.id)), hidden=True),
-#     )
+def __show_scenarios_in_search(scenario:ScenarioModel):
+    return rx.table.row(
+            rx.table.cell(rx.button(rx.icon("plus"))),#, on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
+            rx.table.cell(scenario.name),
+            rx.table.cell(scenario.created),
+            rx.table.cell(rx.form(rx.input(name="scenario_id", value=scenario.id)), hidden=True),
+    )
 
-# def __search_scenarios_table() -> rx.Component:
-#     return rx.fragment(
-#         rx.form(
-#             rx.table.root(
-#                 rx.table.header(
-#                     rx.table.row(
-#                         __header_cell("", "ellipsis"),
-#                         __header_cell("name", "fingerprint"),
-#                         __header_cell("created", "calendar-check-2"),
-#                         __header_cell("selected_id", "search", True),
-#                     ),
-#                 ),
-#                 rx.table.body(rx.foreach(state.SuiteState.scenarios_for_search, __show_scenarios_in_search)),
-#                 variant="surface",
-#                 size="3",
-#                 width="100%",
-#                 on_mount=state.SuiteState.load_scenarios_for_search,
-#             ),
-#         ),
-#     )
+def __search_scenarios_table() -> rx.Component:
+    return rx.fragment(
+        rx.form(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        __header_cell("", "ellipsis"),
+                        __header_cell("name", "fingerprint"),
+                        __header_cell("created", "calendar-check-2"),
+                        __header_cell("selected_id", "search", True),
+                    ),
+                ),
+                rx.table.body(rx.foreach(state.CycleState.scenarios_for_search, __show_scenarios_in_search)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=state.CycleState.load_scenarios_for_search,
+            ),
+        ),
+    )
+
+def __show_suites_in_search(suite:SuiteModel):
+    return rx.table.row(
+            rx.table.cell(rx.button(rx.icon("plus"))),#, on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
+            rx.table.cell(suite.name),
+            rx.table.cell(suite.created),
+            rx.table.cell(rx.form(rx.input(name="suite_id", value=suite.id)), hidden=True),
+    )
+
+def __search_scenarios_table() -> rx.Component:
+    return rx.fragment(
+        rx.form(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        __header_cell("", "ellipsis"),
+                        __header_cell("name", "fingerprint"),
+                        __header_cell("created", "calendar-check-2"),
+                        __header_cell("selected_id", "search", True),
+                    ),
+                ),
+                rx.table.body(rx.foreach(state.CycleState.suites_for_search, __show_suites_in_search)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=state.CycleState.load_suites_for_search,
+            ),
+        ),
+    )
 
 def __badge(icon: str, text: str):
     return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
@@ -188,43 +217,57 @@ def cycle_detail_page() -> rx.Component:
             align="center",
         ),
         __cycle_children_table(),
-        rx.text("Suite search"),
-        rx.text("Scenario search"),
-        # rx.vstack(
-        #     rx.hstack(
-        #         rx.heading("Scenarios", size="5",),
-        #         rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_scenario_search),
-        #         align="center"
-        #     ),
-        #     rx.cond(
-        #         state.SuiteState.show_scenario_search,
-        #         rx.box(
-        #                 rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
-        #                 rx.vstack(
-        #                     rx.input(placeholder="start typing to search a Scenario to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_scenarios(value)),
-        #                     __search_scenarios_table(),
-        #                 ),
-        #             ),
-        #     ),
-        # ),
-        rx.text("Case search"),
-        # rx.vstack(
-        #     rx.hstack(
-        #         rx.heading("Cases", size="5",),
-        #         rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_case_search),
-        #         align="center"
-        #     ),
-        #     rx.cond(
-        #         state.SuiteState.show_case_search,
-        #         rx.box(
-        #                 rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
-        #                 rx.vstack(
-        #                     rx.input(placeholder="start typing to search a Test Case to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_test_cases(value)),
-        #                     __search_cases_table(),
-        #                 ),
-        #             ),
-        #     ),
-        # ),
+        rx.vstack(
+            rx.hstack(
+                rx.heading("Suites", size="5",),
+                rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_suite_search),
+                align="center"
+            ),
+            rx.cond(
+                state.CycleState.show_suite_search,
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_suites(value)),
+                            __search_scenarios_table(),
+                        ),
+                    ),
+            ),
+        ),
+        rx.vstack(
+            rx.hstack(
+                rx.heading("Scenarios", size="5",),
+                rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_scenario_search),
+                align="center"
+            ),
+            rx.cond(
+                state.CycleState.show_scenario_search,
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_scenarios(value)),
+                            __search_scenarios_table(),
+                        ),
+                    ),
+            ),
+        ),
+        rx.vstack(
+            rx.hstack(
+                rx.heading("Cases", size="5",),
+                rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_case_search),
+                align="center"
+            ),
+            rx.cond(
+                state.CycleState.show_case_search,
+                rx.box(
+                        rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
+                        rx.vstack(
+                            rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_test_cases(value)),
+                            __search_cases_table(),
+                        ),
+                    ),
+            ),
+        ),
         spacing="5",
         align="left",
         min_height="85vh",

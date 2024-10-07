@@ -21,13 +21,17 @@ class CycleState(rx.State):
     children: List['CycleChildModel'] = []
     child: Optional['CycleChildModel'] = None
 
-    # cases_for_search: List['CaseModel'] = []
-    # show_case_search:bool = False
-    # search_case_value:str = ""
+    show_case_search:bool = False
+    search_case_value:str = ""
+    cases_for_search: List['CaseModel'] = []
 
-    # scenarios_for_search: List['ScenarioModel'] = []
-    # show_scenario_search:bool = False
-    # search_scenario_value:str = ""
+    show_scenario_search:bool = False
+    search_scenario_value:str = ""
+    scenarios_for_search: List['ScenarioModel'] = []
+
+    show_suite_search:bool = False
+    search_suite_value:str = ""
+    suites_for_search: List['SuiteModel'] = []
 
     @rx.var
     def cycle_id(self):
@@ -88,12 +92,13 @@ class CycleState(rx.State):
     #         return rx.redirect(self.suite_edit_url)
     #     return rx.redirect(self.suite_url)
     
-    # def collapse_searches(self):
-    #     self.show_case_search = False
-    #     self.show_scenario_search = False
+    def collapse_searches(self):
+        self.show_case_search = False
+        self.show_scenario_search = False
+        self.show_suite_search = False
     
-    # def toggle_case_search(self):
-    #     self.show_case_search = not(self.show_case_search)
+    def toggle_case_search(self):
+        self.show_case_search = not(self.show_case_search)
 
     def load_children(self):
         with rx.session() as session:
@@ -171,110 +176,110 @@ class CycleState(rx.State):
     #         else:
     #             return rx.toast.warning("The child has reached max.")
     
-    # def get_max_child_order(self, child_id:int, child_type_id:int):
-    #     with rx.session() as session:
-    #         linked_scenarios:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.cycle_id == self.cycle_id)).all()
-    #         max_order = 0
-    #         for linked_scenario in linked_scenarios:
-    #             if ((linked_scenario.child_id == child_id) and (linked_scenario.child_type_id == child_type_id)):
-    #                 return -1
+    def get_max_child_order(self, child_id:int, child_type_id:int):
+        with rx.session() as session:
+            linked_children:CycleChildModel = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id)).all()
+            max_order = 0
+            for linked_child in linked_children:
+                if ((linked_child.child_id == child_id) and (linked_child.child_type_id == child_type_id)):
+                    return -1
                 
-    #             if linked_scenario.order > max_order:
-    #                 max_order = linked_scenario.order
-    #         return max_order + 1
+                if linked_child.order > max_order:
+                    max_order = linked_child.order
+            return max_order + 1
 
-    # def filter_test_cases(self, search_case_value):
-    #     self.search_case_value = search_case_value
-    #     self.load_cases_for_search()
+    def filter_test_cases(self, search_case_value):
+        self.search_case_value = search_case_value
+        self.load_cases_for_search()
 
-    # def load_cases_for_search(self):
-    #   with rx.session() as session:
-    #         query = select(CaseModel)
-    #         if self.search_case_value:
-    #             search_case_value = (
-    #                 f"%{str(self.search_case_value).lower()}%"
-    #             )
-    #             #TODO: review this query... galadriel doesn't have payments...
-    #             query = query.where(
-    #                 or_(
-    #                     *[
-    #                         getattr(CaseModel, field).ilike(
-    #                             search_case_value
-    #                         )
-    #                         for field in CaseModel.get_fields()
-    #                         if field
-    #                         not in ["id", "payments"]
-    #                     ],
-    #                     # ensures that payments is cast to a string before applying the ilike operator
-    #                     cast(
-    #                         CaseModel.name, String
-    #                     ).ilike(search_case_value),
-    #                 )
-    #             )
+    def load_cases_for_search(self):
+      with rx.session() as session:
+            query = select(CaseModel)
+            if self.search_case_value:
+                search_case_value = (
+                    f"%{str(self.search_case_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(CaseModel, field).ilike(
+                                search_case_value
+                            )
+                            for field in CaseModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            CaseModel.name, String
+                        ).ilike(search_case_value),
+                    )
+                )
 
-    #         results = session.exec(query).all()
-    #         self.cases_for_search = results
+            results = session.exec(query).all()
+            self.cases_for_search = results
 
-    # def link_case(self, case_id:int):
-    #     suite_case_data:dict = {"cycle_id":""}
-    #     new_case_order = 1
+    def link_case(self, case_id:int):
+        cycle_case_data:dict = {"cycle_id":""}
+        new_case_order = 1
 
-    #     if (len(self.scenarios_for_search) > 0):
-    #         new_case_order = self.get_max_child_order(case_id, 2)
+        if (len(self.cases_for_search) > 0):
+            new_case_order = self.get_max_child_order(case_id, 3)
 
-    #         if new_case_order == -1:
-    #             return rx.toast.error("already in list")
+            if new_case_order == -1:
+                return rx.toast.error("already in list")
 
-    #     suite_case_data.update({"cycle_id":self.cycle_id})
-    #     suite_case_data.update({"child_type_id":2})
-    #     suite_case_data.update({"child_id":case_id})
-    #     suite_case_data.update({"order":new_case_order})
+        cycle_case_data.update({"cycle_id":self.cycle_id})
+        cycle_case_data.update({"child_type_id":3})
+        cycle_case_data.update({"child_id":case_id})
+        cycle_case_data.update({"order":new_case_order})
 
-    #     with rx.session() as session:
-    #         case_to_add = SuiteChildModel(**suite_case_data)
-    #         session.add(case_to_add)
-    #         session.commit()
-    #         session.refresh(case_to_add)
-    #     self.search_value = ""
-    #     self.collapse_searches()
-    #     self.load_children()
+        with rx.session() as session:
+            case_to_add = CycleChildModel(**cycle_case_data)
+            session.add(case_to_add)
+            session.commit()
+            session.refresh(case_to_add)
+        self.search_case_value = ""
+        self.collapse_searches()
+        self.load_children()
         
-    #     return rx.toast.success("case added!")
+        return rx.toast.success("case added!")
 
-    # def toggle_scenario_search(self):
-    #     self.show_scenario_search = not(self.show_scenario_search)
+    def toggle_scenario_search(self):
+        self.show_scenario_search = not(self.show_scenario_search)
 
-    # def filter_scenarios(self, search_scenario_value):
-    #     self.search_scenario_value = search_scenario_value
-    #     self.load_scenarios_for_search()
+    def filter_scenarios(self, search_scenario_value):
+        self.search_scenario_value = search_scenario_value
+        self.load_scenarios_for_search()
 
-    # def load_scenarios_for_search(self):
-    #   with rx.session() as session:
-    #         query = select(ScenarioModel)
-    #         if self.search_scenario_value:
-    #             search_scenario_value = (
-    #                 f"%{str(self.search_scenario_value).lower()}%"
-    #             )
-    #             #TODO: review this query... galadriel doesn't have payments...
-    #             query = query.where(
-    #                 or_(
-    #                     *[
-    #                         getattr(ScenarioModel, field).ilike(
-    #                             search_scenario_value
-    #                         )
-    #                         for field in ScenarioModel.get_fields()
-    #                         if field
-    #                         not in ["id", "payments"]
-    #                     ],
-    #                     # ensures that payments is cast to a string before applying the ilike operator
-    #                     cast(
-    #                         ScenarioModel.name, String
-    #                     ).ilike(search_scenario_value),
-    #                 )
-    #             )
+    def load_scenarios_for_search(self):
+      with rx.session() as session:
+            query = select(ScenarioModel)
+            if self.search_scenario_value:
+                search_scenario_value = (
+                    f"%{str(self.search_scenario_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(ScenarioModel, field).ilike(
+                                search_scenario_value
+                            )
+                            for field in ScenarioModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            ScenarioModel.name, String
+                        ).ilike(search_scenario_value),
+                    )
+                )
 
-    #         results = session.exec(query).all()
-    #         self.scenarios_for_search = results
+            results = session.exec(query).all()
+            self.scenarios_for_search = results
 
     # def link_scenario(self, scenario_id:int):
     #     suite_scenario_data:dict = {"cycle_id":""}
@@ -301,7 +306,42 @@ class CycleState(rx.State):
     #     self.load_children()
         
     #     return rx.toast.success("scenario added!")
-    
+
+    def toggle_suite_search(self):
+        self.show_suite_search = not(self.show_suite_search)
+
+    def filter_suites(self, search_suite_value):
+        self.search_suite_value = search_suite_value
+        self.load_suites_for_search()
+
+    def load_suites_for_search(self):
+      with rx.session() as session:
+            query = select(SuiteModel)
+            if self.search_suite_value:
+                search_suite_value = (
+                    f"%{str(self.search_suite_value).lower()}%"
+                )
+                #TODO: review this query... galadriel doesn't have payments...
+                query = query.where(
+                    or_(
+                        *[
+                            getattr(SuiteModel, field).ilike(
+                                search_suite_value
+                            )
+                            for field in SuiteModel.get_fields()
+                            if field
+                            not in ["id", "payments"]
+                        ],
+                        # ensures that payments is cast to a string before applying the ilike operator
+                        cast(
+                            SuiteModel.name, String
+                        ).ilike(search_suite_value),
+                    )
+                )
+
+            results = session.exec(query).all()
+            self.suites_for_search = results
+
 class AddCycleState(CycleState):
     form_data:dict = {}
 
