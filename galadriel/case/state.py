@@ -41,7 +41,7 @@ class CaseState(rx.State):
         with rx.session() as session:
             if (self.case_id == ""):
                 self.case = None
-                return            
+                return
             result = session.exec(CaseModel.select().where(CaseModel.id == self.case_id)).one_or_none()
             self.case = result
 
