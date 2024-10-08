@@ -207,12 +207,12 @@ def cycle_detail_page() -> rx.Component:
             padding_top="2em",
         ),
         rx.hstack(
-            rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
             rx.heading(
                 f"{state.CycleState.cycle.name}",
                 size="7",
             ),
             rx.badge(f"{state.CycleState.cycle.created}"),
+            rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
             align="center",
         ),
         __cycle_children_table(),
