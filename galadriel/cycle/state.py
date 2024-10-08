@@ -13,7 +13,7 @@ from sqlmodel import select, asc, or_, func, cast, String
 
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
-
+ 
 class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
