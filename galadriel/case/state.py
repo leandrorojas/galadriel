@@ -83,7 +83,7 @@ class CaseState(rx.State):
             self.case = case
     
     def save_case_edits(self, case_id:int, updated_data:dict):
-        with rx.session() as session:        
+        with rx.session() as session:
             case = session.exec(CaseModel.select().where(CaseModel.id == case_id)).one_or_none()
 
             if (case is None):
