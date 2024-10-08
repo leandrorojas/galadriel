@@ -100,26 +100,8 @@ class ScenarioState(rx.State):
       with rx.session() as session:
             query = select(CaseModel)
             if self.search_value:
-                search_value = (
-                    f"%{str(self.search_value).lower()}%"
-                )
-                #TODO: review this query... galadriel doesn't have payments...
-                query = query.where(
-                    or_(
-                        *[
-                            getattr(CaseModel, field).ilike(
-                                search_value
-                            )
-                            for field in CaseModel.get_fields()
-                            if field
-                            not in ["id", "payments"]
-                        ],
-                        # ensures that payments is cast to a string before applying the ilike operator
-                        cast(
-                            CaseModel.name, String
-                        ).ilike(search_value),
-                    )
-                )
+                search_value = (f"%{str(self.search_value).lower()}%")
+                query = query.where(cast(CaseModel.name, String).ilike(search_value))
 
             results = session.exec(query).all()
             self.test_cases_for_search = results
