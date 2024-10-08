@@ -245,7 +245,7 @@ class SideBar():
                             rx.heading(
                                 "galadriel", size="7", weight="bold"
                             ),
-                            href=navigation.routes.HOME,
+                            href=navigation.routes.ABOUT,
                         ),
                         align="center",
                         justify="start",
