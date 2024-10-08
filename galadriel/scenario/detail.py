@@ -140,6 +140,7 @@ def scenario_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(
+                rx.icon("test-tubes"),
                 rx.heading("Cases", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.ScenarioState.toggle_search),
                 align="center"
