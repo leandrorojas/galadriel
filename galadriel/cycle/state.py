@@ -131,50 +131,50 @@ class CycleState(rx.State):
     #     self.load_children()
     #     return rx.toast.info("child unlinked.")
     
-    # def move_child_up(self, child_id:int):
-    #     with rx.session() as session:
-    #         child_going_up = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == child_id)).first()
-    #         old_order = child_going_up.order
-    #         if (old_order != 1):
-    #             child_going_down = session.exec(SuiteChildModel.select().where(SuiteChildModel.order == (old_order -1), SuiteChildModel.cycle_id == self.cycle_id)).first()
-    #             new_order = child_going_down.order
+    def move_child_up(self, child_id:int):
+        with rx.session() as session:
+            child_going_up = session.exec(CycleChildModel.select().where(CycleChildModel.id == child_id)).first()
+            old_order = child_going_up.order
+            if (old_order != 1):
+                child_going_down = session.exec(CycleChildModel.select().where(CycleChildModel.order == (old_order -1), CycleChildModel.cycle_id == self.cycle_id)).first()
+                new_order = child_going_down.order
 
-    #             child_going_up.order = new_order
-    #             session.add(child_going_up)
-    #             session.commit()
-    #             session.refresh(child_going_up)
+                child_going_up.order = new_order
+                session.add(child_going_up)
+                session.commit()
+                session.refresh(child_going_up)
 
-    #             child_going_down.order = old_order
-    #             session.add(child_going_down)
-    #             session.commit()
-    #             session.refresh(child_going_down)
+                child_going_down.order = old_order
+                session.add(child_going_down)
+                session.commit()
+                session.refresh(child_going_down)
 
-    #             self.load_children()
-    #         else:
-    #             return rx.toast.warning("The child has reached min.")
+                self.load_children()
+            else:
+                return rx.toast.warning("The child has reached min.")
             
-    # def move_child_down(self, child_id:int):
-    #     with rx.session() as session:
-    #         child_going_down = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == child_id)).first()
-    #         old_order = child_going_down.order
-    #         child_going_up = session.exec(SuiteChildModel.select().where(SuiteChildModel.order == (old_order +1), SuiteChildModel.cycle_id == self.cycle_id)).first()
+    def move_child_down(self, child_id:int):
+        with rx.session() as session:
+            child_going_down = session.exec(CycleChildModel.select().where(CycleChildModel.id == child_id)).first()
+            old_order = child_going_down.order
+            child_going_up = session.exec(CycleChildModel.select().where(CycleChildModel.order == (old_order +1), CycleChildModel.cycle_id == self.cycle_id)).first()
 
-    #         if (child_going_up is not None):
-    #             new_order = child_going_up.order
+            if (child_going_up is not None):
+                new_order = child_going_up.order
 
-    #             child_going_down.order = new_order
-    #             session.add(child_going_down)
-    #             session.commit()
-    #             session.refresh(child_going_down)
+                child_going_down.order = new_order
+                session.add(child_going_down)
+                session.commit()
+                session.refresh(child_going_down)
 
-    #             child_going_up.order = old_order
-    #             session.add(child_going_up)
-    #             session.commit()
-    #             session.refresh(child_going_up)
+                child_going_up.order = old_order
+                session.add(child_going_up)
+                session.commit()
+                session.refresh(child_going_up)
 
-    #             self.load_children()
-    #         else:
-    #             return rx.toast.warning("The child has reached max.")
+                self.load_children()
+            else:
+                return rx.toast.warning("The child has reached max.")
     
     def get_max_child_order(self, child_id:int, child_type_id:int): #TODO: split this into two: get max order and already exists
         with rx.session() as session:
