@@ -76,7 +76,7 @@ def __search_cases_table() -> rx.Component:
 
 def __show_scenarios_in_search(scenario:ScenarioModel):
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"))),#, on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_scenario(getattr(scenario, "id")))),
             rx.table.cell(scenario.name),
             rx.table.cell(scenario.created),
             rx.table.cell(rx.form(rx.input(name="scenario_id", value=scenario.id)), hidden=True),
@@ -111,7 +111,7 @@ def __show_suites_in_search(suite:SuiteModel):
             rx.table.cell(rx.form(rx.input(name="suite_id", value=suite.id)), hidden=True),
     )
 
-def __search_scenarios_table() -> rx.Component:
+def __search_suites_table() -> rx.Component:
     return rx.fragment(
         rx.form(
             rx.table.root(
@@ -207,12 +207,11 @@ def cycle_detail_page() -> rx.Component:
             padding_top="2em",
         ),
         rx.hstack(
+            rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
             rx.heading(
-                rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
                 f"{state.CycleState.cycle.name}",
                 size="7",
             ),
-            #rx.heading(),
             rx.badge(f"{state.CycleState.cycle.created}"),
             align="center",
         ),
@@ -229,7 +228,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_suites(value)),
-                            __search_scenarios_table(),
+                            __search_suites_table(),
                         ),
                     ),
             ),

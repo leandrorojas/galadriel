@@ -176,7 +176,7 @@ class CycleState(rx.State):
     #         else:
     #             return rx.toast.warning("The child has reached max.")
     
-    def get_max_child_order(self, child_id:int, child_type_id:int):
+    def get_max_child_order(self, child_id:int, child_type_id:int): #TODO: split this into two: get max order and already exists
         with rx.session() as session:
             linked_children:CycleChildModel = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id)).all()
             max_order = 0
@@ -281,31 +281,31 @@ class CycleState(rx.State):
             results = session.exec(query).all()
             self.scenarios_for_search = results
 
-    # def link_scenario(self, scenario_id:int):
-    #     suite_scenario_data:dict = {"cycle_id":""}
-    #     new_scenario_order = 1
+    def link_scenario(self, scenario_id:int):
+        suite_scenario_data:dict = {"cycle_id":""}
+        new_scenario_order = 1
 
-    #     if (len(self.scenarios_for_search) > 0):
-    #         new_scenario_order = self.get_max_child_order(scenario_id, 1)
+        if (len(self.scenarios_for_search) > 0):
+            new_scenario_order = self.get_max_child_order(scenario_id, 2)
 
-    #         if new_scenario_order == -1:
-    #             return rx.toast.error("already in list")
+            if new_scenario_order == -1:
+                return rx.toast.error("already in list")
 
-    #     suite_scenario_data.update({"cycle_id":self.cycle_id})
-    #     suite_scenario_data.update({"child_type_id":1})
-    #     suite_scenario_data.update({"child_id":scenario_id})
-    #     suite_scenario_data.update({"order":new_scenario_order})
+        suite_scenario_data.update({"cycle_id":self.cycle_id})
+        suite_scenario_data.update({"child_type_id":2})
+        suite_scenario_data.update({"child_id":scenario_id})
+        suite_scenario_data.update({"order":new_scenario_order})
 
-    #     with rx.session() as session:
-    #         scenario_to_add = SuiteChildModel(**suite_scenario_data)
-    #         session.add(scenario_to_add)
-    #         session.commit()
-    #         session.refresh(scenario_to_add)
-    #     self.search_value = ""
-    #     self.collapse_searches()
-    #     self.load_children()
+        with rx.session() as session:
+            scenario_to_add = CycleChildModel(**suite_scenario_data)
+            session.add(scenario_to_add)
+            session.commit()
+            session.refresh(scenario_to_add)
+        self.search_value = ""
+        self.collapse_searches()
+        self.load_children()
         
-    #     return rx.toast.success("scenario added!")
+        return rx.toast.success("scenario added!")
 
     def toggle_suite_search(self):
         self.show_suite_search = not(self.show_suite_search)
