@@ -105,7 +105,7 @@ def __search_scenarios_table() -> rx.Component:
 
 def __show_suites_in_search(suite:SuiteModel):
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"))),#, on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_suite(getattr(suite, "id")))),
             rx.table.cell(suite.name),
             rx.table.cell(suite.created),
             rx.table.cell(rx.form(rx.input(name="suite_id", value=suite.id)), hidden=True),

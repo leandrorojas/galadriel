@@ -13,7 +13,7 @@ from sqlmodel import select, asc, or_, func, cast, String
 
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
- 
+
 class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
@@ -282,7 +282,7 @@ class CycleState(rx.State):
             self.scenarios_for_search = results
 
     def link_scenario(self, scenario_id:int):
-        suite_scenario_data:dict = {"cycle_id":""}
+        cycle_scenario_data:dict = {"cycle_id":""}
         new_scenario_order = 1
 
         if (len(self.scenarios_for_search) > 0):
@@ -291,13 +291,13 @@ class CycleState(rx.State):
             if new_scenario_order == -1:
                 return rx.toast.error("already in list")
 
-        suite_scenario_data.update({"cycle_id":self.cycle_id})
-        suite_scenario_data.update({"child_type_id":2})
-        suite_scenario_data.update({"child_id":scenario_id})
-        suite_scenario_data.update({"order":new_scenario_order})
+        cycle_scenario_data.update({"cycle_id":self.cycle_id})
+        cycle_scenario_data.update({"child_type_id":2})
+        cycle_scenario_data.update({"child_id":scenario_id})
+        cycle_scenario_data.update({"order":new_scenario_order})
 
         with rx.session() as session:
-            scenario_to_add = CycleChildModel(**suite_scenario_data)
+            scenario_to_add = CycleChildModel(**cycle_scenario_data)
             session.add(scenario_to_add)
             session.commit()
             session.refresh(scenario_to_add)
@@ -342,6 +342,31 @@ class CycleState(rx.State):
             results = session.exec(query).all()
             self.suites_for_search = results
 
+    def link_suite(self, suite_id:int):
+        cycle_suite_data:dict = {"cycle_id":""}
+        new_scenario_order = 1
+
+        if (len(self.scenarios_for_search) > 0):
+            new_scenario_order = self.get_max_child_order(suite_id, 1)
+
+            if new_scenario_order == -1:
+                return rx.toast.error("already in list")
+
+        cycle_suite_data.update({"cycle_id":self.cycle_id})
+        cycle_suite_data.update({"child_type_id":1})
+        cycle_suite_data.update({"child_id":suite_id})
+        cycle_suite_data.update({"order":new_scenario_order})
+
+        with rx.session() as session:
+            suite_to_add = CycleChildModel(**cycle_suite_data)
+            session.add(suite_to_add)
+            session.commit()
+            session.refresh(suite_to_add)
+        self.search_value = ""
+        self.collapse_searches()
+        self.load_children()
+        
+        return rx.toast.success("scenario added!")
 class AddCycleState(CycleState):
     form_data:dict = {}
 
