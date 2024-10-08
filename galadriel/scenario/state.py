@@ -178,7 +178,7 @@ class ScenarioState(rx.State):
             case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
             old_order = case_going_up.order
             if (old_order != 1):
-                case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order -1) and ScenarioCaseModel.scenario_id == self.scenario_id)).first()
+                case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order -1), ScenarioCaseModel.scenario_id == self.scenario_id)).first()
                 new_order = case_going_down.order
 
                 case_going_up.order = new_order
@@ -199,7 +199,7 @@ class ScenarioState(rx.State):
         with rx.session() as session:
             case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
             old_order = case_going_down.order
-            case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order +1) and ScenarioCaseModel.scenario_id == self.scenario_id)).first()
+            case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order +1), ScenarioCaseModel.scenario_id == self.scenario_id)).first()
 
             if (case_going_up is not None):
                 new_order = case_going_up.order

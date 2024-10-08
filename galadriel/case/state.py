@@ -159,7 +159,7 @@ class CaseState(rx.State):
             step_going_up = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
             old_order = step_going_up.order
             if (old_order != 1):
-                step_going_down = session.exec(StepModel.select().where(StepModel.order == (old_order -1) and StepModel.case_id == self.case_id)).first()
+                step_going_down = session.exec(StepModel.select().where(StepModel.order == (old_order -1), StepModel.case_id == self.case_id)).first()
                 new_order = step_going_down.order
 
                 step_going_up.order = new_order
@@ -180,7 +180,7 @@ class CaseState(rx.State):
         with rx.session() as session:
             step_going_down = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
             old_order = step_going_down.order
-            step_going_up = session.exec(StepModel.select().where(StepModel.order == (old_order +1) and StepModel.case_id == self.case_id)).first()
+            step_going_up = session.exec(StepModel.select().where(StepModel.order == (old_order +1), StepModel.case_id == self.case_id)).first()
 
             if (step_going_up is not None):
                 new_order = step_going_up.order
@@ -272,7 +272,7 @@ class CaseState(rx.State):
             prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
             old_order = prerequisite_going_up.order
             if (old_order != 1):
-                prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order -1) and PrerequisiteModel.case_id == self.case_id)).first()
+                prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order -1), PrerequisiteModel.case_id == self.case_id)).first()
                 new_order = prerequisite_going_down.order
 
                 prerequisite_going_up.order = new_order
@@ -293,7 +293,7 @@ class CaseState(rx.State):
         with rx.session() as session:
             prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
             old_order = prerequisite_going_down.order
-            prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order +1) and PrerequisiteModel.case_id == self.case_id)).first()
+            prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order +1), PrerequisiteModel.case_id == self.case_id)).first()
 
             if (prerequisite_going_up is not None):
                 new_order = prerequisite_going_up.order
