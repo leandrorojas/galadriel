@@ -115,21 +115,21 @@ class CycleState(rx.State):
                     setattr(single_result, "child_name", child.name)
             self.children = results
 
-    # def unlink_child(self, suite_child_id:int):
-    #     with rx.session() as session:
-    #         child_to_delete = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == suite_child_id)).first()
-    #         order_to_update = child_to_delete.order
-    #         session.delete(child_to_delete)
-    #         session.commit()
+    def unlink_child(self, child_id:int):
+        with rx.session() as session:
+            child_to_delete = session.exec(CycleChildModel.select().where(CycleChildModel.id == child_id)).first()
+            order_to_update = child_to_delete.order
+            session.delete(child_to_delete)
+            session.commit()
 
-    #         children_to_update = session.exec(SuiteChildModel.select().where(SuiteChildModel.order > order_to_update)).all()
-    #         for suite_child in children_to_update:
-    #             suite_child.order = suite_child.order - 1
-    #             session.add(suite_child)
-    #             session.commit()
-    #             session.refresh(suite_child)
-    #     self.load_children()
-    #     return rx.toast.info("child unlinked.")
+            children_to_update = session.exec(CycleChildModel.select().where(CycleChildModel.order > order_to_update)).all()
+            for cycle_child in children_to_update:
+                cycle_child.order = cycle_child.order - 1
+                session.add(cycle_child)
+                session.commit()
+                session.refresh(cycle_child)
+        self.load_children()
+        return rx.toast.info("child unlinked.")
     
     def move_child_up(self, child_id:int):
         with rx.session() as session:
