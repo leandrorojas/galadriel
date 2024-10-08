@@ -155,8 +155,8 @@ def __show_child(cycle_child:model.CycleChildModel):
         rx.table.cell(cycle_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up")),#, on_click=lambda: state.SuiteState.move_child_up(getattr(cycle_child, "id"))), 
-                rx.button(rx.icon("arrow-big-down")),#, on_click=lambda: state.SuiteState.move_child_down(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
                 rx.button(rx.icon("trash-2"), color_scheme="red"),#, on_click=lambda: state.SuiteState.unlink_child(getattr(cycle_child, "id"))),
                 spacing="2",
             )
