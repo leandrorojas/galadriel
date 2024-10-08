@@ -181,6 +181,7 @@ def case_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(
+                rx.icon("test-tubes"),
                 rx.heading("Prerequisites", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.CaseState.toggle_search),
                 align="center"
@@ -198,7 +199,7 @@ def case_detail_page() -> rx.Component:
             ),
         ),        
         rx.vstack(
-            rx.heading("Steps", size="5",),
+            rx.hstack(rx.icon("test-tube"), rx.heading("Steps", size="5",)),
             step_add_form(),
             __steps_table(),
         ),

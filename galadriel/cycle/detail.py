@@ -218,6 +218,7 @@ def cycle_detail_page() -> rx.Component:
         __cycle_children_table(),
         rx.vstack(
             rx.hstack(
+                rx.icon("beaker"),
                 rx.heading("Suites", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_suite_search),
                 align="center"
@@ -235,6 +236,7 @@ def cycle_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(
+                rx.icon("route"),
                 rx.heading("Scenarios", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_scenario_search),
                 align="center"
@@ -252,6 +254,7 @@ def cycle_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(
+                rx.icon("test-tubes"),
                 rx.heading("Cases", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_case_search),
                 align="center"

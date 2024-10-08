@@ -184,6 +184,7 @@ def suite_detail_page() -> rx.Component:
         __suite_children_table(),
         rx.vstack(
             rx.hstack(
+                rx.icon("route"),
                 rx.heading("Scenarios", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_scenario_search),
                 align="center"
@@ -201,6 +202,7 @@ def suite_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(
+                rx.icon("test-tubes"),
                 rx.heading("Cases", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_case_search),
                 align="center"
