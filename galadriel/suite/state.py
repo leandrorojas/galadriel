@@ -13,6 +13,8 @@ from sqlmodel import select, asc, or_, func, cast, String
 SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
 
+RETURN_VALUE = 0
+
 class SuiteState(rx.State):
     suites: List['SuiteModel'] = []
     suite: Optional['SuiteModel'] = None
@@ -59,14 +61,18 @@ class SuiteState(rx.State):
             self.suites = results
 
     def add_suite(self, form_data:dict):
+        if form_data["name"] == "": return None
         with rx.session() as session:
             suite = SuiteModel(**form_data)
             session.add(suite)
             session.commit()
             session.refresh(suite)
             self.suite = suite
+
+            return RETURN_VALUE
     
     def save_suite_edits(self, suite_id:int, updated_data:dict):
+        if updated_data["name"] == "": return None
         with rx.session() as session:        
             suite = session.exec(SuiteModel.select().where(SuiteModel.id == suite_id)).one_or_none()
 
@@ -79,6 +85,8 @@ class SuiteState(rx.State):
             session.commit()
             session.refresh(suite)
             self.suite = suite
+
+            return RETURN_VALUE
 
     def to_suite(self, edit_page=True):
         if not self.suite:
@@ -268,7 +276,9 @@ class AddSuiteState(SuiteState):
 
     def handle_submit(self, form_data):
         self.form_data = form_data
-        self.add_suite(form_data)
+        result = self.add_suite(form_data)
+        
+        if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.SUITES)
 
 class EditSuiteState(SuiteState):
@@ -279,6 +289,8 @@ class EditSuiteState(SuiteState):
         self.form_data = form_data
         suite_id = form_data.pop("suite_id")
         updated_data = {**form_data}
-        self.save_suite_edits(suite_id, updated_data)
+        result = self.save_suite_edits(suite_id, updated_data)
+
+        if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.SUITES)
         #return self.to_suite() #<-- review this code, why it was changed?
