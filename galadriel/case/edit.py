@@ -14,7 +14,7 @@ def __case_list_button() -> rx.Component:
                 rx.icon("chevrons-left", size=26), 
                 rx.text("to List", size="4", display=["none", "none", "block"]), 
                 size="3", 
-            ),            
+            ),
             href=routes.CASES
         ),
     )
