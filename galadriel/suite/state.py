@@ -129,7 +129,7 @@ class SuiteState(rx.State):
                 session.commit()
                 session.refresh(suite_child)
         self.load_children()
-        return rx.toast.info("child unlinked.")
+        return rx.toast.info("child unlinked")
     
     def move_child_up(self, child_id:int):
         with rx.session() as session:
@@ -151,7 +151,7 @@ class SuiteState(rx.State):
 
                 self.load_children()
             else:
-                return rx.toast.warning("The child has reached min.")
+                return rx.toast.warning("The child has reached min")
             
     def move_child_down(self, child_id:int):
         with rx.session() as session:
@@ -174,7 +174,7 @@ class SuiteState(rx.State):
 
                 self.load_children()
             else:
-                return rx.toast.warning("The child has reached max.")
+                return rx.toast.warning("The child has reached max")
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
         with rx.session() as session:

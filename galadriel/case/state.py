@@ -144,7 +144,7 @@ class CaseState(rx.State):
                 session.commit()
                 session.refresh(step)
         self.load_steps()
-        return rx.toast.info("The step has been deleted.")
+        return rx.toast.info("The step has been deleted")
     
     def move_step_up(self, step_id:int):
         with rx.session() as session:
@@ -166,7 +166,7 @@ class CaseState(rx.State):
 
                 self.load_steps()
             else:
-                return rx.toast.warning("The step has reached min.")
+                return rx.toast.warning("The step has reached min")
 
     def move_step_down(self, step_id:int):
         with rx.session() as session:
@@ -189,7 +189,7 @@ class CaseState(rx.State):
 
                 self.load_steps()
             else:
-                return rx.toast.warning("The step has reached max.")
+                return rx.toast.warning("The step has reached max")
 
     def load_prerequisites(self):
         with rx.session() as session:
@@ -257,7 +257,7 @@ class CaseState(rx.State):
                 session.commit()
                 session.refresh(prerequisite)
         self.load_prerequisites()
-        return rx.toast.info("The prerequisite has been deleted.")
+        return rx.toast.info("The prerequisite has been deleted")
 
     def move_prerequisite_up(self, prerequisite_id:int):
         with rx.session() as session:
@@ -279,7 +279,7 @@ class CaseState(rx.State):
 
                 self.load_prerequisites()
             else:
-                return rx.toast.warning("The prerequisite has reached min.")
+                return rx.toast.warning("The prerequisite has reached min")
 
     def move_prerequisite_down(self, prerequisite_id:int):
         with rx.session() as session:
@@ -302,7 +302,7 @@ class CaseState(rx.State):
 
                 self.load_prerequisites()
             else:
-                return rx.toast.warning("The prerequisite has reached max.")
+                return rx.toast.warning("The prerequisite has reached max")
 
 class AddCaseState(CaseState):
     form_data:dict = {}

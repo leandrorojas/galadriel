@@ -161,7 +161,7 @@ class ScenarioState(rx.State):
                 session.commit()
                 session.refresh(test_case)
         self.load_cases()
-        return rx.toast.info("case unlinked.")
+        return rx.toast.info("case unlinked")
     
     def move_case_up(self, scenario_case_id:int):
         with rx.session() as session:
@@ -183,7 +183,7 @@ class ScenarioState(rx.State):
 
                 self.load_cases()
             else:
-                return rx.toast.warning("The case has reached min.")
+                return rx.toast.warning("The case has reached min")
             
     def move_case_down(self, scenario_case_id:int):
         with rx.session() as session:
@@ -206,7 +206,7 @@ class ScenarioState(rx.State):
 
                 self.load_cases()
             else:
-                return rx.toast.warning("The case has reached max.")
+                return rx.toast.warning("The case has reached max")
 
 class AddScenarioState(ScenarioState):
     form_data:dict = {}
