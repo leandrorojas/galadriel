@@ -78,7 +78,7 @@ app = rx.App(
     stylesheets=["https://fonts.googleapis.com/css?family=Montserrat",],
     style = {
         "font_family": "Montserrat",
-        "font_size": "16px",        
+        "font_size": "16px",
     },
 )
 
