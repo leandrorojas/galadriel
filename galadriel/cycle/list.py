@@ -35,8 +35,8 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 def __show_cycle(cycle:model.CycleModel):
     return rx.table.row(
          rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
-         rx.table.cell(cycle.threshold),
          rx.table.cell(cycle.created),
+         rx.table.cell(cycle.threshold),
     )
 
 def __add_adhoc_cycle_button() -> rx.Component:
@@ -67,8 +67,8 @@ def __table() -> rx.Component:
             rx.table.header(
                 rx.table.row(
                     __header_cell("name", "fingerprint"),
-                    __header_cell("threshold", "gauge"),
                     __header_cell("created", "calendar-check-2"),
+                    __header_cell("threshold", "gauge"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),
@@ -95,7 +95,7 @@ def cycle_list_page() -> rx.Component:
                 align="center",
                 width="100%",
                 top="0px",
-                padding_top="2em",       
+                padding_top="2em",
             ),
             __table(),
             spacing="5",
