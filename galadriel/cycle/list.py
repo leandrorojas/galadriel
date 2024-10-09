@@ -95,7 +95,7 @@ def cycle_list_page() -> rx.Component:
                 align="center",
                 width="100%",
                 top="0px",
-                padding_top="2em",       
+                padding_top="2em",
             ),
             __table(),
             spacing="5",
