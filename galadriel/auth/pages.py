@@ -3,32 +3,41 @@ from reflex_local_auth.pages.login import LoginState, login_form
 from reflex_local_auth.pages.registration import RegistrationState
 from .forms import register_form
 from ..pages.base import base_page
+from ..pages.about import about_content
 from .. import navigation
 from .state import Session
 
 def login_page() -> rx.Component:
     return base_page(
-        rx.center(
-            rx.cond(
-                LoginState.is_hydrated,  # type: ignore
-                rx.card(login_form()),
+        rx.cond(
+            ~LoginState.is_authenticated, # "~" equals "not" (in this case not authenticated)
+            rx.center(
+                rx.cond(
+                    LoginState.is_hydrated,  # type: ignore
+                    rx.card(login_form()),
+                ),
+                min_height="85vh",
             ),
-            min_height="85vh",
+            rx.container(about_content())
         )
     )
 
 def register_page() -> rx.Component:
     return base_page(
-        rx.center(
-            rx.cond(
-                RegistrationState.success,
-                rx.vstack(
-                    rx.text("Registration successful!"),
+        rx.cond(
+            ~LoginState.is_authenticated,
+            rx.center(
+                rx.cond(
+                    RegistrationState.success,
+                    rx.vstack(
+                        rx.text("Registration successful!"),
+                    ),
+                    rx.card(register_form()),
                 ),
-                rx.card(register_form()),
+                min_height="85vh",
             ),
-            min_height="85vh",
-        ),
+            rx.container(about_content())
+        )
     )
 
 def logout_page() -> rx.Component:

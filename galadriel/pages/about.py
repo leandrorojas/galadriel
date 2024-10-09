@@ -3,8 +3,8 @@ from .base import base_page
 
 from .. import navigation
 
-def about_page() -> rx.Component:
-    about_content = rx.vstack(
+def about_content() -> rx.Component:
+    about_content_var:rx.Component = rx.vstack(
         rx.heading("About galadriel"),
         rx.heading("galadriel is a simple Test Management System", size="4"),
         rx.vstack(
@@ -22,5 +22,9 @@ def about_page() -> rx.Component:
         align="center",
         min_height="85vh",
     ),
-    
-    return base_page(about_content, rx.logo())
+
+    return about_content_var
+
+def about_page() -> rx.Component:
+    about_content_var = about_content()
+    return base_page(about_content_var, rx.logo())
