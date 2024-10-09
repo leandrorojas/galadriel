@@ -10,6 +10,8 @@ from sqlmodel import select, asc, or_, func, cast, String
 SCENARIO_ROUTE = routes.SCENARIOS
 if SCENARIO_ROUTE.endswith("/"): SCENARIO_ROUTE = SCENARIO_ROUTE[:-1]
 
+RETURN_VALUE = 0
+
 class ScenarioState(rx.State):
     scenarios: List['ScenarioModel'] = []
     scenario: Optional['ScenarioModel'] = None
@@ -52,14 +54,18 @@ class ScenarioState(rx.State):
             self.scenarios = results
 
     def add_scenario(self, form_data:dict):
+        if (form_data["name"] == ""): return None
         with rx.session() as session:
             scenario = ScenarioModel(**form_data)
             session.add(scenario)
             session.commit()
             session.refresh(scenario)
             self.scenario = scenario
+
+            return RETURN_VALUE
     
     def save_scenario_edits(self, scenario_id:int, updated_data:dict):
+        if updated_data["name"] == "": return None
         with rx.session() as session:        
             scenario = session.exec(ScenarioModel.select().where(ScenarioModel.id == scenario_id)).one_or_none()
 
@@ -72,6 +78,8 @@ class ScenarioState(rx.State):
             session.commit()
             session.refresh(scenario)
             self.scenario = scenario
+
+            return RETURN_VALUE
 
     def to_scenario(self, edit_page=True):
         if not self.scenario:
@@ -205,7 +213,9 @@ class AddScenarioState(ScenarioState):
 
     def handle_submit(self, form_data):
         self.form_data = form_data
-        self.add_scenario(form_data)
+        result = self.add_scenario(form_data)
+
+        if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.SCENARIOS)
 
 class EditScenarioState(ScenarioState):
@@ -215,5 +225,7 @@ class EditScenarioState(ScenarioState):
         self.form_data = form_data
         scenario_id = form_data.pop("scenario_id")
         updated_data = {**form_data}
-        self.save_scenario_edits(scenario_id, updated_data)
+        result = self.save_scenario_edits(scenario_id, updated_data)
+
+        if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.SCENARIOS) # self.to_scenario()

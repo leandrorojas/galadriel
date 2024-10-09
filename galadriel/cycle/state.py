@@ -14,6 +14,7 @@ from sqlmodel import select, asc, or_, func, cast, String
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
 
+RETURN_VALUE = 0
 class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
@@ -64,14 +65,20 @@ class CycleState(rx.State):
             self.cycles = results
 
     def add_cycle(self, form_data:dict):
+        if form_data["name"] == "": return "name"
+        if form_data["threshold"] == "": return "threshold"
         with rx.session() as session:
             cycle = CycleModel(**form_data)
             session.add(cycle)
             session.commit()
             session.refresh(cycle)
             self.cycle = cycle
+
+            return RETURN_VALUE
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
+        if updated_data["name"] == "": return "name"
+        if updated_data["threshold"] == "": return "threshold"        
         with rx.session() as session:
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
@@ -84,6 +91,8 @@ class CycleState(rx.State):
             session.commit()
             session.refresh(cycle)
             self.cycle = cycle
+
+            return RETURN_VALUE
 
     # def to_suite(self, edit_page=True):
     #     if not self.cycle:
@@ -318,7 +327,9 @@ class AddCycleState(CycleState):
 
     def handle_submit(self, form_data):
         self.form_data = form_data
-        self.add_cycle(form_data)
+        result = self.add_cycle(form_data)
+        if result != 0:
+            return rx.toast.error(f"{result} cannot be empty")
         return rx.redirect(routes.CYCLES)
 
 class EditCycleState(CycleState):
@@ -329,6 +340,8 @@ class EditCycleState(CycleState):
         self.form_data = form_data
         cycle_id = form_data.pop("cycle_id")
         updated_data = {**form_data}
-        self.save_cycle_edits(cycle_id, updated_data)
+        result = self.save_cycle_edits(cycle_id, updated_data)
+        if result != 0:
+            return rx.toast.error(f"{result} cannot be empty")        
         return rx.redirect(routes.CYCLES)
         #return self.to_suite() #<-- review this code, why it was changed?

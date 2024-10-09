@@ -8,6 +8,8 @@ from sqlmodel import select, asc, or_, func, cast, String
 CASE_ROUTE = routes.CASES
 if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
 
+RETURN_VALUE = 0
+
 class CaseState(rx.State):
     cases: List['CaseModel'] = []
     case: Optional['CaseModel'] = None
@@ -57,14 +59,20 @@ class CaseState(rx.State):
             self.cases = results
 
     def add_case(self, form_data:dict):
+        if (form_data["name"] == ""): return None
+
         with rx.session() as session:
             case = CaseModel(**form_data)
             session.add(case)
             session.commit()
             session.refresh(case)
             self.case = case
+
+        return RETURN_VALUE
     
     def save_case_edits(self, case_id:int, updated_data:dict):
+        if (updated_data["name"] == ""): return None
+
         with rx.session() as session:
             case = session.exec(CaseModel.select().where(CaseModel.id == case_id)).one_or_none()
 
@@ -77,6 +85,8 @@ class CaseState(rx.State):
             session.commit()
             session.refresh(case)
             self.case = case
+
+            return RETURN_VALUE
 
     def to_case(self, edit_page=True):
         if not self.case:
@@ -299,7 +309,8 @@ class AddCaseState(CaseState):
 
     def handle_submit(self, form_data):
         self.form_data = form_data
-        self.add_case(form_data)
+        result = self.add_case(form_data)
+        if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
@@ -309,7 +320,8 @@ class EditCaseState(CaseState):
         self.form_data = form_data
         case_id = form_data.pop("case_id")
         updated_data = {**form_data}
-        self.save_case_edits(case_id, updated_data)
+        result = self.save_case_edits(case_id, updated_data)
+        if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(self.case_url)
     
     def get_detail_url(self, id:int):
