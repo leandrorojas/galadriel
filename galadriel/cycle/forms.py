@@ -25,8 +25,7 @@ def cycle_add_form() -> rx.Component:
 def cycle_edit_form() -> rx.Component:
     cycle = EditCycleState.cycle
     cycle_name = cycle.name
-    print(f"threshold -->  {cycle.threshold}")
-    cycle_threshold = cycle.threshold
+    cycle_threshold = EditCycleState.cycle_threshold
 
     return rx.form(
         rx.box(
@@ -45,7 +44,7 @@ def cycle_edit_form() -> rx.Component:
                     width="100%",
                 ),
                 rx.input(
-                    default_value=EditCycleState.cycle_threshold,
+                    default_value=cycle_threshold,
                     name="threshold",
                     placeholder="Pass Cases Threshold",
                     width="100%",
