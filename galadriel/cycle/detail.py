@@ -30,7 +30,7 @@ def __cycle_edit_button():
                 rx.text("Edit", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=f"{state.CycleState.cycle_edit_url}"
+            href=state.CycleState.cycle_edit_url
         ), 
     )
 

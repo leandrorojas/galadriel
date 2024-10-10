@@ -28,13 +28,13 @@ class ScenarioState(rx.State):
         return self.router.page.params.get("id", "")
     
     @rx.var
-    def scenario_url(self):
+    def scenario_url(self) -> str:
         if not self.scenario:
-            return f"{SCENARIO_ROUTE}"
-        return f"{SCENARIO_ROUTE}/{self.scenario.id}"
+            return str(f"{SCENARIO_ROUTE}")
+        return str(f"{SCENARIO_ROUTE}/{self.scenario.id}")
     
     @rx.var
-    def scenario_edit_url(self):
+    def scenario_edit_url(self) -> str:
         if not self.scenario:
             return f"{SCENARIO_ROUTE}"
         return f"{SCENARIO_ROUTE}/{self.scenario.id}/edit"

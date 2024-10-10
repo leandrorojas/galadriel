@@ -25,7 +25,7 @@ class RxTutorialBlogPostState(rx.State):
         return f"{BLOG_POSTS_ROUTE}/{self.post.id}"
     
     @rx.var
-    def blog_post_edit_url(self):
+    def blog_post_edit_url(self) -> str:
         if not self.post:
             return f"{BLOG_POSTS_ROUTE}"
         return f"{BLOG_POSTS_ROUTE}/{self.post.id}/edit"

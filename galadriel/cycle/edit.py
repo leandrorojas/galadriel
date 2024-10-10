@@ -27,7 +27,7 @@ def __cycle_detail_button() -> rx.Component:
                 rx.text("back to Detail", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=f"{EditCycleState.cycle_url}"
+            href=EditCycleState.cycle_url
         ), 
     )
 

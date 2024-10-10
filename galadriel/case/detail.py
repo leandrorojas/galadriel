@@ -106,7 +106,7 @@ def __case_edit_button():
                 rx.text("Edit", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=f"{state.CaseState.case_edit_url}"
+            href=state.CaseState.case_edit_url
         ), 
     )
 

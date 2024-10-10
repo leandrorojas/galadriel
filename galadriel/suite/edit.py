@@ -27,7 +27,7 @@ def __suite_detail_button() -> rx.Component:
                 rx.text("back to Detail", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=f"{EditSuiteState.suite_url}"
+            href=EditSuiteState.suite_url
         ), 
     )
 
