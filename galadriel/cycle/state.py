@@ -50,6 +50,12 @@ class CycleState(rx.State):
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}/edit"
+    
+    @rx.var
+    def cycle_threshold(self) -> str:
+        if not self.cycle:
+            return 0
+        return f"{self.cycle.threshold}"
 
     def get_cycle_detail(self):
         with rx.session() as session:
