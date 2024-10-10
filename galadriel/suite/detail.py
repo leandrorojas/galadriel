@@ -29,9 +29,10 @@ def __suite_edit_button():
                 rx.text("Edit", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=f"{state.SuiteState.suite_edit_url}"
+            href=state.SuiteState.suite_edit_url
         ), 
     )
+
 def __header_cell(text: str, icon: str, hide_column:bool = False):
     return rx.table.column_header_cell(
         rx.hstack(

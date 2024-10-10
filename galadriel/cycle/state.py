@@ -40,13 +40,13 @@ class CycleState(rx.State):
         return self.router.page.params.get("id", "")
     
     @rx.var
-    def cycle_url(self):
+    def cycle_url(self) -> str:
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}"
     
     @rx.var
-    def cycle_edit_url(self):
+    def cycle_edit_url(self) -> str:
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}/edit"

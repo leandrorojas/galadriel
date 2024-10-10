@@ -27,13 +27,13 @@ class CaseState(rx.State):
         return self.router.page.params.get("id", "") 
     
     @rx.var
-    def case_url(self):
+    def case_url(self) -> str:
         if not self.case:
             return f"{CASE_ROUTE}"
         return f"{CASE_ROUTE}/{self.case.id}"
     
     @rx.var
-    def case_edit_url(self):
+    def case_edit_url(self) -> str:
         if not self.case:
             return f"{CASE_ROUTE}"
         return f"{CASE_ROUTE}/{self.case.id}/edit"

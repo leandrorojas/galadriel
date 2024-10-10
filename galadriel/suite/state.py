@@ -36,13 +36,13 @@ class SuiteState(rx.State):
         return self.router.page.params.get("id", "")
     
     @rx.var
-    def suite_url(self):
+    def suite_url(self) -> str:
         if not self.suite:
             return f"{SUITES_ROUTE}"
         return f"{SUITES_ROUTE}/{self.suite.id}"
     
     @rx.var
-    def suite_edit_url(self):
+    def suite_edit_url(self) -> str:
         if not self.suite:
             return f"{SUITES_ROUTE}"
         return f"{SUITES_ROUTE}/{self.suite.id}/edit"

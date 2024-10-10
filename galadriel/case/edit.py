@@ -27,7 +27,7 @@ def __case_detail_button() -> rx.Component:
                 rx.text("to Case Detal", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
-            href=f"{EditCaseState.case_url}"
+            href=EditCaseState.case_url
         )
     )
 
