@@ -21,6 +21,12 @@ class CaseModel(rx.Model, table=True):
     )
     #created_by
 
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d    
+
 class StepModel(rx.Model, table=True):
     case_id:int = Field(foreign_key="casemodel.id")
     order:int
@@ -35,6 +41,12 @@ class StepModel(rx.Model, table=True):
         nullable=False
     )
 
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
+
 class PrerequisiteModel(rx.Model, table=True):
     case_id:int = Field(foreign_key="casemodel.id")
     prerequisite_id:int = Field(foreign_key="casemodel.id")
@@ -48,3 +60,9 @@ class PrerequisiteModel(rx.Model, table=True):
         },
         nullable=False
     )
+
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d

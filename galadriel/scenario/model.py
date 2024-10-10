@@ -21,6 +21,12 @@ class ScenarioModel(rx.Model, table=True):
     )
     #created_by
 
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
+
 class ScenarioCaseModel(rx.Model, table=True):
     scenario_id:int = Field(foreign_key="scenariomodel.id")    
     case_id:int = Field(foreign_key="casemodel.id")
@@ -34,3 +40,9 @@ class ScenarioCaseModel(rx.Model, table=True):
         },
         nullable=False
     )
+
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
