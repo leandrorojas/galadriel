@@ -21,6 +21,12 @@ class SuiteModel(rx.Model, table=True):
     )
     #created_by
 
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
+
 class SuiteChildTypeModel(rx.Model, table=True):
     type_name:str
     created: datetime = Field(
@@ -31,6 +37,12 @@ class SuiteChildTypeModel(rx.Model, table=True):
         },
         nullable=False
     )
+
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
 
 class SuiteChildModel(rx.Model, table=True):
     suite_id:int = Field(foreign_key="suitemodel.id")
@@ -47,3 +59,9 @@ class SuiteChildModel(rx.Model, table=True):
         },
         nullable=False
     )
+
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
