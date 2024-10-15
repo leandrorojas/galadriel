@@ -28,7 +28,7 @@ def case_add_page() -> rx.Component:
         rx.flex(
             title_badge.title("test-tubes", "New Test Case"),
             rx.spacer(),
-            rx.hstack(__case_list_button(),),            
+            rx.hstack(__case_list_button(),),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",

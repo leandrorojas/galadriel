@@ -48,7 +48,6 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-
       with rx.session() as session:
             query = select(CaseModel)
             if self.search_value:
