@@ -69,6 +69,7 @@ def __table() -> rx.Component:
                     __header_cell("name", "fingerprint"),
                     __header_cell("created", "calendar-check-2"),
                     __header_cell("threshold", "gauge"),
+                    __header_cell("actions","ellipsis")
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),
