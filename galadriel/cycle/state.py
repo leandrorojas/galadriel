@@ -99,7 +99,7 @@ class CycleState(rx.State):
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
         if updated_data["name"] == "": return "name"
-        if updated_data["threshold"] == "": return "threshold"        
+        if updated_data["threshold"] == "": return "threshold"
         with rx.session() as session:
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
