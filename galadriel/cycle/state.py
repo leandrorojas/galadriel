@@ -8,6 +8,8 @@ from ..scenario.model import ScenarioModel
 from ..suite.model import SuiteModel
 from ..iteration.model import IterationModel, IterationStatusModel
 
+from ..iteration.state import IterationState
+
 from datetime import datetime
 
 from sqlmodel import select, asc, or_, func, cast, String
@@ -343,6 +345,10 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("scenario added!")
+    
+    def add_iteration(self, cycle_id:int):
+        ...
+
 class AddCycleState(CycleState):
     form_data:dict = {}
 
