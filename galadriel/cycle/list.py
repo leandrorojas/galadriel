@@ -34,9 +34,23 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 
 def __show_cycle(cycle:model.CycleModel):
     return rx.table.row(
-         rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
-         rx.table.cell(cycle.created),
-         rx.table.cell(cycle.threshold),
+        rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
+        rx.table.cell(cycle.created),
+        rx.table.cell(cycle.threshold, align="center"),
+        rx.table.cell(
+            rx.cond(
+                (cycle.iteration_status_name != ""),
+                rx.badge(cycle.iteration_status_name),
+                rx.badge("n/a")
+             ), 
+             align="center"),
+        rx.table.cell(
+            rx.flex(
+                rx.button(rx.icon("list-video")),#, on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("copy-plus"), disabled=True), #, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
+                spacing="2",
+            )
+        ),
     )
 
 def __add_adhoc_cycle_button() -> rx.Component:
@@ -69,6 +83,8 @@ def __table() -> rx.Component:
                     __header_cell("name", "fingerprint"),
                     __header_cell("created", "calendar-check-2"),
                     __header_cell("threshold", "gauge"),
+                    __header_cell("status", "activity"), 
+                    __header_cell("actions","ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),
