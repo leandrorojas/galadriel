@@ -8,6 +8,7 @@ from .. import utils
 class CycleModel(rx.Model, table=True):
     name: str
     threshold:int = Field(nullable = True)
+    iteration_status_name:str = Field(nullable=True)
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),

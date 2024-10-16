@@ -6,6 +6,7 @@ from ..navigation import routes
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
 from ..suite.model import SuiteModel
+from ..iteration.model import IterationModel, IterationStatusModel
 
 from datetime import datetime
 
@@ -68,6 +69,20 @@ class CycleState(rx.State):
     def load_cycles(self):
         with rx.session() as session:
             results = session.exec(CycleModel.select()).all()
+
+            for single_result in results:
+                iteration_status = None
+                iteration_status_name = ""
+                cycle_iteration = session.exec(IterationModel.select().where(IterationModel.cycle_id == single_result.id)).one_or_none()
+                if (cycle_iteration != None):
+                    iteration_status = session.exec(IterationStatusModel.select().where(IterationStatusModel.id == cycle_iteration.iteration_status_id)).first()
+                    if (iteration_status == None):
+                        iteration_status_name = ""
+                    else:
+                        iteration_status_name = iteration_status.name
+
+                setattr(single_result, "iteration_status_name", iteration_status_name)
+
             self.cycles = results
 
     def add_cycle(self, form_data:dict):
