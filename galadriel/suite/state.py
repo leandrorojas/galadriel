@@ -265,7 +265,7 @@ class SuiteState(rx.State):
             session.add(scenario_to_add)
             session.commit()
             session.refresh(scenario_to_add)
-        self.search_value = ""
+        self.search_scenario_value = ""
         self.collapse_searches()
         self.load_children()
         
