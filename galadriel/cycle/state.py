@@ -295,7 +295,7 @@ class CycleState(rx.State):
             session.add(scenario_to_add)
             session.commit()
             session.refresh(scenario_to_add)
-        self.search_value = ""
+        self.search_scenario_value = ""
         self.collapse_searches()
         self.load_children()
         
@@ -338,7 +338,7 @@ class CycleState(rx.State):
             session.add(suite_to_add)
             session.commit()
             session.refresh(suite_to_add)
-        self.search_value = ""
+        self.search_suite_value = ""
         self.collapse_searches()
         self.load_children()
         
