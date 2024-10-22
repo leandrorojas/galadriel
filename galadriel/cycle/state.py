@@ -99,7 +99,7 @@ class CycleState(rx.State):
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
         if updated_data["name"] == "": return "name"
-        if updated_data["threshold"] == "": return "threshold"        
+        if updated_data["threshold"] == "": return "threshold"
         with rx.session() as session:
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
@@ -343,6 +343,28 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("scenario added!")
+
+    def continue_or_add_iteration(self, cycle_id:int):
+        iteration = None
+
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
+
+            if (iteration == None):
+                cycle_iteration_data:dict = {"cycle_id":cycle_id}
+
+                cycle_iteration_data.update({"iteration_status_id":0})
+                cycle_iteration_data.update({"iteration_number":1})
+
+                iteration_to_add = IterationModel(**cycle_iteration_data)
+                session.add(iteration_to_add)
+                session.commit()
+                session.refresh(iteration_to_add)
+
+                self.load_cycles()
+            else:
+                return rx.toast.info(f"opening cycle id {cycle_id}")
+
 class AddCycleState(CycleState):
     form_data:dict = {}
 
