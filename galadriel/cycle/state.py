@@ -8,8 +8,6 @@ from ..scenario.model import ScenarioModel
 from ..suite.model import SuiteModel
 from ..iteration.model import IterationModel, IterationStatusModel
 
-from ..iteration.state import IterationState
-
 from datetime import datetime
 
 from sqlmodel import select, asc, or_, func, cast, String
@@ -345,9 +343,27 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("scenario added!")
-    
-    def add_iteration(self, cycle_id:int):
-        ...
+
+    def continue_or_add_iteration(self, cycle_id:int):
+        iteration = None
+
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
+
+            if (iteration == None):
+                cycle_iteration_data:dict = {"cycle_id":cycle_id}
+
+                cycle_iteration_data.update({"iteration_status_id":0})
+                cycle_iteration_data.update({"iteration_number":1})
+
+                iteration_to_add = IterationModel(**cycle_iteration_data)
+                session.add(iteration_to_add)
+                session.commit()
+                session.refresh(iteration_to_add)
+
+                self.load_cycles()
+            else:
+                return rx.toast.info(f"opening cycle id {cycle_id}")
 
 class AddCycleState(CycleState):
     form_data:dict = {}
