@@ -213,6 +213,7 @@ def cycle_detail_page() -> rx.Component:
             ),
             rx.badge(f"{state.CycleState.cycle.created}"),
             rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
+            rx.badge(rx.icon("activity"), f"{state.CycleState.cycle.iteration_status_name}", color_scheme="blue"),
             align="center",
         ),
         __cycle_children_table(),
