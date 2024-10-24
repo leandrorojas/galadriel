@@ -29,6 +29,7 @@ def __cycle_edit_button():
                 rx.icon("pencil", size=26), 
                 rx.text("Edit", size="4", display=["none", "none", "block"]), 
                 size="3", 
+                disabled=state.CycleState.has_iteration,
             ),
             href=state.CycleState.cycle_edit_url
         ), 
@@ -155,9 +156,9 @@ def __show_child(cycle_child:model.CycleChildModel):
         rx.table.cell(cycle_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, "id"))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CycleState.unlink_child(getattr(cycle_child, "id"))),
+                rx.button(rx.icon("arrow-big-up"), disabled=state.CycleState.has_iteration, on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("arrow-big-down"), disabled=state.CycleState.has_iteration, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red", disabled=state.CycleState.has_iteration, on_click=lambda: state.CycleState.unlink_child(getattr(cycle_child, "id"))),
                 spacing="2",
             )
         ),
@@ -191,7 +192,7 @@ def cycle_detail_page() -> rx.Component:
     edit_link_element = rx.cond(
         can_edit,
         edit_link,
-        rx.fragment("")
+        rx.fragment(""),
     )
 
     cycle_detail_content = rx.vstack(
@@ -211,64 +212,70 @@ def cycle_detail_page() -> rx.Component:
                 f"{state.CycleState.cycle.name}",
                 size="7",
             ),
-            rx.badge(f"{state.CycleState.cycle.created}"),
+            rx.badge(rx.icon("activity"), f"{state.CycleState.iteration_status_name}", color_scheme="blue"),
             rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
-            rx.badge(rx.icon("activity"), f"{state.CycleState.cycle.iteration_status_name}", color_scheme="blue"),
+            rx.badge(f"{state.CycleState.cycle.created}"),            
             align="center",
         ),
         __cycle_children_table(),
-        rx.vstack(
-            rx.hstack(
-                rx.icon("beaker"),
-                rx.heading("Suites", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_suite_search),
-                align="center"
-            ),
-            rx.cond(
-                state.CycleState.show_suite_search,
-                rx.box(
-                        rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
-                        rx.vstack(
-                            rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_suites(value)),
-                            __search_suites_table(),
+        rx.cond(
+            state.CycleState.has_iteration,
+            rx.fragment(""),
+            rx.fragment(
+                rx.vstack(
+                    rx.hstack(
+                        rx.icon("beaker"),
+                        rx.heading("Suites", size="5",),
+                        rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_suite_search),
+                        align="center"
+                    ),
+                    rx.cond(
+                        state.CycleState.show_suite_search,
+                        rx.box(
+                            rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
+                            rx.vstack(
+                                rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_suites(value)),
+                                __search_suites_table(),
+                            ),
                         ),
                     ),
-            ),
-        ),
-        rx.vstack(
-            rx.hstack(
-                rx.icon("route"),
-                rx.heading("Scenarios", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_scenario_search),
-                align="center"
-            ),
-            rx.cond(
-                state.CycleState.show_scenario_search,
-                rx.box(
-                        rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
-                        rx.vstack(
-                            rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_scenarios(value)),
-                            __search_scenarios_table(),
-                        ),
                     ),
-            ),
-        ),
-        rx.vstack(
-            rx.hstack(
-                rx.icon("test-tubes"),
-                rx.heading("Cases", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_case_search),
-                align="center"
-            ),
-            rx.cond(
-                state.CycleState.show_case_search,
-                rx.box(
-                        rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
-                        rx.vstack(
-                            rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_test_cases(value)),
-                            __search_cases_table(),
-                        ),
+                rx.vstack(
+                    rx.hstack(
+                        rx.icon("route"),
+                        rx.heading("Scenarios", size="5",),
+                        rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_scenario_search),
+                        align="center"
                     ),
+                    rx.cond(
+                        state.CycleState.show_scenario_search,
+                        rx.box(
+                                rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
+                                rx.vstack(
+                                    rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_scenarios(value)),
+                                    __search_scenarios_table(),
+                                ),
+                            ),
+                    ),
+                ),
+                rx.vstack(
+                    rx.hstack(
+                        rx.icon("test-tubes"),
+                        rx.heading("Cases", size="5",),
+                        rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_case_search),
+                        align="center"
+                    ),
+                    rx.cond(
+                        state.CycleState.show_case_search,
+                        rx.box(
+                                rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.id), display="none",),
+                                rx.vstack(
+                                    rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_test_cases(value)),
+                                    __search_cases_table(),
+                                ),
+                            ),
+                    ),
+                ),
             ),
         ),
         spacing="5",
