@@ -57,6 +57,26 @@ class CycleState(rx.State):
         if not self.cycle:
             return 0
         return f"{self.cycle.threshold}"
+    
+    @rx.var
+    def iteration_status_name(self) -> str:
+        if not self.cycle:
+            return ""
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            if (iteration != None):
+                status_name = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
+                return status_name.name
+            else:
+                return ""
+
+    @rx.var
+    def has_iteration(self) -> bool:
+        if not self.cycle:
+            return False
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            return (iteration != None)
 
     def get_cycle_detail(self):
         with rx.session() as session:
@@ -364,7 +384,7 @@ class CycleState(rx.State):
                 self.load_cycles()
             else:
                 return rx.toast.info(f"opening cycle id {cycle_id}")
-
+        
 class AddCycleState(CycleState):
     form_data:dict = {}
 
