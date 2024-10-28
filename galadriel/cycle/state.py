@@ -6,11 +6,11 @@ from ..navigation import routes
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
 from ..suite.model import SuiteModel
-from ..iteration.model import IterationModel, IterationStatusModel
+from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel
 
 from datetime import datetime
 
-from sqlmodel import select, asc, or_, func, cast, String
+from sqlmodel import select, asc, or_, func, cast, String, desc
 
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
@@ -371,19 +371,60 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
 
             if (iteration == None):
-                cycle_iteration_data:dict = {"cycle_id":cycle_id}
+                children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
+                if (len(children) > 0):
+                    #add the cycle - iteration relationship
+                    cycle_iteration_data:dict = {"cycle_id":cycle_id}
 
-                cycle_iteration_data.update({"iteration_status_id":0})
-                cycle_iteration_data.update({"iteration_number":1})
+                    cycle_iteration_data.update({"iteration_status_id":0})
+                    cycle_iteration_data.update({"iteration_number":1})
 
-                iteration_to_add = IterationModel(**cycle_iteration_data)
-                session.add(iteration_to_add)
-                session.commit()
-                session.refresh(iteration_to_add)
+                    iteration_to_add = IterationModel(**cycle_iteration_data)
+                    session.add(iteration_to_add)
+                    session.commit()
+                    session.refresh(iteration_to_add)
 
-                self.load_cycles()
+                    #add the cycle's snapshot here
+                    for cycle_child in children:
+                        child = None
+                        if (cycle_child.child_type_id == 1):
+                            child = session.exec(SuiteModel.select().where(SuiteModel.id == cycle_child.child_id)).first()
+                        if (cycle_child.child_type_id == 2):
+                            child = session.exec(ScenarioModel.select().where(ScenarioModel.id == cycle_child.child_id)).first()
+                        elif (cycle_child.child_type_id == 3):
+                            child = session.exec(CaseModel.select().where(CaseModel.id == cycle_child.child_id)).first()
+                        setattr(cycle_child, "child_name", child.name)
+
+                    self.load_cycles()
+                else:
+                    return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
             else:
                 return rx.toast.info(f"opening cycle id {cycle_id}")
+
+    def get_max_iteration_snapshot_order(self, iteration_id:int):
+        with rx.session() as session:
+            snapshot_item = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == iteration_id).order_by(desc(IterationSnapshotModel.order))).first()
+
+            max_order = 0
+            if (snapshot_item != None):
+                max_order = snapshot_item.order + 1
+
+            return max_order
+
+    def add_case_to_snapshot(self, iteration_id:int, case_id:int):
+        with rx.session() as session:
+            child = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
+
+            if (child != None):
+                max_order = self.get_max_iteration_snapshot_order(iteration_id)
+                cycle_iteration_data:dict = {
+                    "iteration_id":iteration_id,
+                    "order":max_order,
+                    "child_type":3,
+                    "child_name": child.name
+                }
+
+
         
 class AddCycleState(CycleState):
     form_data:dict = {}

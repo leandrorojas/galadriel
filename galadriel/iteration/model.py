@@ -40,3 +40,26 @@ class IterationModel(rx.Model, table=True):
         d = super().dict(*args, **kwargs)
         d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
         return d
+
+class IterationSnapshotModel(rx.Model, table=True):
+    iteration_id:int = Field(foreign_key="iterationmodel.id")
+    order:int
+    child_type:int
+    child_name:str
+    child_action:str = Field(nullable=True)
+    child_name:str = Field(nullable=True)
+    child_status:int = Field(nullable=True)
+    created: datetime = Field(
+        default_factory=utils.timing.get_utc_now, 
+        sa_type=sa.DateTime(timezone=True),
+        sa_column_kwargs={
+            'server_default': sa.func.now()
+        },
+        nullable=False
+    )
+
+    def dict(self, *args, **kwargs) -> dict:
+        """Serialize method."""
+        d = super().dict(*args, **kwargs)
+        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        return d
