@@ -45,6 +45,7 @@ class IterationSnapshotModel(rx.Model, table=True):
     iteration_id:int = Field(foreign_key="iterationmodel.id")
     order:int
     child_type:int
+    child_id:int = Field(nullable=True)
     child_name:str = Field(nullable=True)
     child_action:str = Field(nullable=True)
     child_expected:str = Field(nullable=True)
