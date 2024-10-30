@@ -3,14 +3,14 @@ import reflex as rx
 from .model import CycleModel, CycleChildModel
 from ..navigation import routes
 
-from ..case.model import CaseModel
-from ..scenario.model import ScenarioModel
-from ..suite.model import SuiteModel
-from ..iteration.model import IterationModel, IterationStatusModel
+from ..case.model import CaseModel, StepModel, PrerequisiteModel
+from ..scenario.model import ScenarioModel, ScenarioCaseModel
+from ..suite.model import SuiteModel, SuiteChildModel
+from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel
 
 from datetime import datetime
 
-from sqlmodel import select, asc, or_, func, cast, String
+from sqlmodel import select, asc, or_, func, cast, String, desc
 
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
@@ -371,20 +371,165 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
 
             if (iteration == None):
-                cycle_iteration_data:dict = {"cycle_id":cycle_id}
+                children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
+                if (len(children) > 0):
+                    #add the cycle - iteration relationship
+                    cycle_iteration_data:dict = {"cycle_id":cycle_id}
 
-                cycle_iteration_data.update({"iteration_status_id":0})
-                cycle_iteration_data.update({"iteration_number":1})
+                    cycle_iteration_data.update({"iteration_status_id":0})
+                    cycle_iteration_data.update({"iteration_number":1})
 
-                iteration_to_add = IterationModel(**cycle_iteration_data)
-                session.add(iteration_to_add)
-                session.commit()
-                session.refresh(iteration_to_add)
+                    iteration_to_add = IterationModel(**cycle_iteration_data)
+                    session.add(iteration_to_add)
+                    session.commit()
+                    session.refresh(iteration_to_add)
 
-                self.load_cycles()
+                    #add the cycle's snapshot here
+                    for cycle_child in children:
+                        match cycle_child.child_type_id:
+                            case 1:
+                                self.add_suite_to_snapshot(iteration_to_add.id, cycle_child.child_id)
+                            case 2:
+                                self.add_scenario_to_snapshot(iteration_to_add.id, cycle_child.child_id)
+                            case 3:
+                                self.add_case_to_snapshot(iteration_to_add.id, cycle_child.child_id)
+
+                    self.load_cycles()
+                else:
+                    return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
             else:
                 return rx.toast.info(f"opening cycle id {cycle_id}")
+
+    def get_max_iteration_snapshot_order(self, iteration_id:int):
+        with rx.session() as session:
+            snapshot_item = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == iteration_id).order_by(desc(IterationSnapshotModel.order))).first()
+
+            max_order = 0
+            if (snapshot_item != None):
+                max_order = snapshot_item.order + 1
+
+            return max_order
         
+    #validate that the case is not yet added to the snapshot
+    def is_case_in_snapshot(self, iteration_id:int, case_id:int) -> bool:
+        with rx.session() as session:
+            snapshot_case = session.exec(IterationSnapshotModel.select().where(
+                IterationSnapshotModel.iteration_id == iteration_id,
+                IterationSnapshotModel.child_id == case_id,
+                IterationSnapshotModel.child_type == 3
+            )).first()
+
+            return (snapshot_case != None)
+
+    def add_case_to_snapshot(self, iteration_id:int, case_id:int, is_prerequisite:bool = False):
+        already_added = self.is_case_in_snapshot(iteration_id, case_id)
+
+        if (already_added == False):
+            with rx.session() as session:
+                child_case = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
+
+                if (child_case != None):
+                    max_order = self.get_max_iteration_snapshot_order(iteration_id)
+
+                    if (is_prerequisite == False):
+                        child_name = child_case.name
+                    else:
+                        child_name = f"[prerequisiste] {child_case.name}"
+
+                    #cycle through prerequisites and insert them
+                    prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == case_id).order_by(PrerequisiteModel.order)).all()
+                    
+                    for prerequisite in prerequisites:
+                        self.add_case_to_snapshot(iteration_id, prerequisite.prerequisite_id, True)
+
+                    #insert the case
+                    snapshot_case_data:dict = {
+                        "iteration_id":iteration_id,
+                        "order":max_order,
+                        "child_type":3,
+                        "child_id":case_id,
+                        "child_name": child_name
+                    }
+
+                    case_to_add = IterationSnapshotModel(**snapshot_case_data)
+                    session.add(case_to_add)
+                    session.commit()
+
+                    #cycle through case steps and insert them
+                    steps = session.exec(StepModel.select().where(StepModel.case_id == case_id).order_by(StepModel.order)).all()
+
+                    for step in steps:
+                        max_order = max_order + 1
+
+                        snapshot_step_data:dict = {
+                            "iteration_id":iteration_id,
+                            "order":max_order,
+                            "child_type":4,
+                            "child_action": step.action,
+                            "child_expected": step.expected,
+                            "child_status_id":1
+                        }
+
+                        step_to_add = IterationSnapshotModel(**snapshot_step_data)
+                        session.add(step_to_add)
+                        session.commit()
+
+    def add_scenario_to_snapshot(self, iteration_id:int, scenario_id:int):
+        with rx.session() as session:
+            child_scenario = session.exec(ScenarioModel.select().where(ScenarioModel.id == scenario_id)).first()
+
+            if (child_scenario != None):
+                max_order = self.get_max_iteration_snapshot_order(iteration_id)
+
+                #insert the case
+                snapshot_scenario_data:dict = {
+                    "iteration_id":iteration_id,
+                    "order":max_order,
+                    "child_type":2,
+                    "child_id": scenario_id,
+                    "child_name": child_scenario.name
+                }
+
+                scenario_to_add = IterationSnapshotModel(**snapshot_scenario_data)
+                session.add(scenario_to_add)
+                session.commit()
+
+                #cycle through scenario cases and insert them
+                cases_to_add = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == scenario_id).order_by(ScenarioCaseModel.order)).all()
+
+                for case_to_add in cases_to_add:
+                    self.add_case_to_snapshot(iteration_id, case_to_add.case_id)
+
+    def add_suite_to_snapshot(self, iteration_id:int, suite_id:int):
+        with rx.session() as session:
+            child_suite = session.exec(SuiteModel.select().where(SuiteModel.id == suite_id)).first()
+
+            if (child_suite != None):
+                max_order = self.get_max_iteration_snapshot_order(iteration_id)
+
+                #insert the case
+                snapshot_suite_data:dict = {
+                    "iteration_id":iteration_id,
+                    "order":max_order,
+                    "child_type":1,
+                    "child_id": suite_id,
+                    "child_name": child_suite.name
+                }
+
+                suite_to_add = IterationSnapshotModel(**snapshot_suite_data)
+                session.add(suite_to_add)
+                session.commit()
+
+                #cycle through suite children and insert them
+                suite_children_to_add = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == suite_id).order_by(SuiteChildModel.order)).all()
+
+                for suite_child in suite_children_to_add:
+                    match suite_child.child_type_id:
+                        case 1:
+                            self.add_scenario_to_snapshot(iteration_id, suite_child.child_id)
+                        case 2:
+                            self.add_case_to_snapshot(iteration_id, suite_child.child_id)
+
 class AddCycleState(CycleState):
     form_data:dict = {}
 
