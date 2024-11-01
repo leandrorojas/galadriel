@@ -10,6 +10,8 @@ if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
 
 RETURN_VALUE = 0
 
+#TODO: rename "prerequisite_id" to another meaningful name like: "selected_case_id", selected_id or "selected_prerequisite_case_id". It has to mean that you are selecting a case_id
+
 class CaseState(rx.State):
     cases: List['CaseModel'] = []
     case: Optional['CaseModel'] = None
@@ -203,9 +205,40 @@ class CaseState(rx.State):
         self.search_value = search_value
         self.load_cases()
 
+    def has_prerequisite(self, prerequisite_id:int) -> bool:
+        with rx.session() as session:
+            child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).first()
+            return (child_prerequisites != None)
+
+    def is_prerequisite_redundant(self, selected_case_id:int, main_case_id:int) -> bool:
+        print(f"selected case id = {selected_case_id} | main case id = {main_case_id}")
+        
+        with rx.session() as session:
+            child_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == selected_case_id)).all()
+            print(f"prequisites: {child_prerequisites}")
+
+            for prerequisite in child_prerequisites:
+                print(f"child prerequisite id = {prerequisite.prerequisite_id}")
+
+                if (prerequisite.prerequisite_id != main_case_id):
+                    if self.has_prerequisite(prerequisite.prerequisite_id):
+                        print("*** nest ***")
+                        return self.is_prerequisite_redundant(prerequisite.prerequisite_id, main_case_id)
+                    else:
+                        return False
+                else:
+                    break
+            
+            return True
+
     def add_prerequisite(self, prerequisite_id:int):
+        print("### new prerequisite adding ###")
         if (int(self.case_id) == prerequisite_id):
             return rx.toast.error("self cannot be prerequisite")
+        
+        if self.has_prerequisite(prerequisite_id):
+            if self.is_prerequisite_redundant(prerequisite_id, self.case_id):
+                return rx.toast.error("cannot add redundant prerequisite")
         
         prerequisite_data:dict = {"case_id":""}
         new_prerequisite_order = 1
