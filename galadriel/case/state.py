@@ -10,6 +10,8 @@ if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
 
 RETURN_VALUE = 0
 
+#TODO: rename "prerequisite_id" to another meaningful name like: "selected_case_id", selected_id or "selected_prerequisite_case_id". It has to mean that you are selecting a case_id
+
 class CaseState(rx.State):
     cases: List['CaseModel'] = []
     case: Optional['CaseModel'] = None
@@ -203,9 +205,33 @@ class CaseState(rx.State):
         self.search_value = search_value
         self.load_cases()
 
+    def has_prerequisite(self, prerequisite_id:int) -> bool:
+        with rx.session() as session:
+            child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).first()
+            return (child_prerequisites != None)
+
+    def is_prerequisite_redundant(self, prerequisite_id:int, target_case_id:int) -> bool:
+
+        with rx.session() as session:
+            child_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).all()
+
+            result = False
+            for child_prerequisite in child_prerequisites:
+                if (int(child_prerequisite.prerequisite_id) == int(target_case_id)):
+                    return True
+                else:
+                    if self.has_prerequisite(child_prerequisite.prerequisite_id):
+                        result = self.is_prerequisite_redundant(child_prerequisite.prerequisite_id, target_case_id)
+                        if result:
+                            return True
+
     def add_prerequisite(self, prerequisite_id:int):
         if (int(self.case_id) == prerequisite_id):
             return rx.toast.error("self cannot be prerequisite")
+        
+        if self.has_prerequisite(prerequisite_id):
+            if self.is_prerequisite_redundant(prerequisite_id, self.case_id):
+                return rx.toast.error("cannot add redundant prerequisite")
         
         prerequisite_data:dict = {"case_id":""}
         new_prerequisite_order = 1
