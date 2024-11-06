@@ -210,29 +210,22 @@ class CaseState(rx.State):
             child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).first()
             return (child_prerequisites != None)
 
-    def is_prerequisite_redundant(self, selected_case_id:int, main_case_id:int) -> bool:
-        print(f"selected case id = {selected_case_id} | main case id = {main_case_id}")
-        
+    def is_prerequisite_redundant(self, prerequisite_id:int, target_case_id:int) -> bool:
+
         with rx.session() as session:
-            child_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == selected_case_id)).all()
-            print(f"prequisites: {child_prerequisites}")
+            child_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).all()
 
-            for prerequisite in child_prerequisites:
-                print(f"child prerequisite id = {prerequisite.prerequisite_id}")
-
-                if (prerequisite.prerequisite_id != main_case_id):
-                    if self.has_prerequisite(prerequisite.prerequisite_id):
-                        print("*** nest ***")
-                        return self.is_prerequisite_redundant(prerequisite.prerequisite_id, main_case_id)
-                    else:
-                        return False
+            result = False
+            for child_prerequisite in child_prerequisites:
+                if (int(child_prerequisite.prerequisite_id) == int(target_case_id)):
+                    return True
                 else:
-                    break
-            
-            return True
+                    if self.has_prerequisite(child_prerequisite.prerequisite_id):
+                        result = self.is_prerequisite_redundant(child_prerequisite.prerequisite_id, target_case_id)
+                        if result:
+                            return True
 
     def add_prerequisite(self, prerequisite_id:int):
-        print("### new prerequisite adding ###")
         if (int(self.case_id) == prerequisite_id):
             return rx.toast.error("self cannot be prerequisite")
         
