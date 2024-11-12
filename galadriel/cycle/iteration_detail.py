@@ -68,13 +68,12 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             (2, __element_status_badge("Failed")),
             (3, __element_status_badge("Passed"))
         )),
-        #rx.table.cell(snapshot_element.child_status_id),
         rx.table.cell(
             rx.cond(
                 snapshot_element.child_type == 4,
                 rx.flex(
-                    rx.button(rx.icon("check"), color_scheme="green"),
-                    rx.button(rx.icon("x"), color_scheme="red"),
+                    rx.button(rx.icon("check"), color_scheme="green", on_click=lambda: CycleState.pass_iteration_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("x"), color_scheme="red", on_click=lambda: CycleState.fail_iteration_step(getattr(snapshot_element, "id"))),
                     spacing="2",
                 ),
             ),
@@ -97,24 +96,29 @@ def iteration_page() -> rx.Component:
             top="0px",
             padding_top="2em",
         ),
-        rx.fragment(
-            rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        __header_cell("name", "tag"),
-                        __header_cell("type", "blocks"),
-                        __header_cell("action", "pickaxe"),
-                        __header_cell("expected", "gem"),
-                        __header_cell("status", "activity"),
-                        __header_cell("", "ellipsis"),
+        rx.scroll_area(
+            rx.fragment(
+                rx.table.root(
+                    rx.table.header(
+                        rx.table.row(
+                            __header_cell("name", "tag"),
+                            __header_cell("type", "blocks"),
+                            __header_cell("action", "pickaxe"),
+                            __header_cell("expected", "gem"),
+                            __header_cell("status", "activity"),
+                            __header_cell("", "ellipsis"),
+                        ),
                     ),
+                    rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),
+                    variant="surface",
+                    size="3",
+                    width="100%",
+                    on_mount=CycleState.get_iteration_snapshot,
                 ),
-                rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),
-                variant="surface",
-                size="3",
-                width="100%",
-                on_mount=CycleState.get_iteration_snapshot,
             ),
+            type="hover",
+            scrollbars="vertical",
+            style={"height": "85vh"},
         ),
         spacing="5",
         align="center",
