@@ -35,6 +35,8 @@ class CycleState(rx.State):
     search_suite_value:str = ""
     suites_for_search: List['SuiteModel'] = []
 
+    iteration_snapshot_items: List['IterationSnapshotModel'] = []
+
     @rx.var
     def cycle_id(self):
         #print(self.router.page.params)
@@ -59,6 +61,12 @@ class CycleState(rx.State):
         return f"{self.cycle.threshold}"
     
     @rx.var
+    def cycle_name(self) -> str:
+        if not self.cycle:
+            return ""
+        return f"{self.cycle.name}"
+    
+    @rx.var
     def iteration_status_name(self) -> str:
         if not self.cycle:
             return ""
@@ -78,10 +86,11 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             return (iteration != None)
         
-    def has_iteration_reprise(cycle_id:int) -> bool:
-        with rx.session() as session:
-            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
-            return (iteration != None)
+    @rx.var
+    def iteration_url(self) -> str:
+        if not self.cycle:
+            return f"{CYCLES_ROUTE}"
+        return f"{CYCLES_ROUTE}/{self.cycle.id}/iteration"
 
     def get_cycle_detail(self):
         with rx.session() as session:
@@ -369,7 +378,7 @@ class CycleState(rx.State):
         
         return rx.toast.success("scenario added!")
 
-    def continue_or_add_iteration(self, cycle_id:int):
+    def add_iteration_snapshot(self, cycle_id:int):
         iteration = None
 
         with rx.session() as session:
@@ -400,10 +409,25 @@ class CycleState(rx.State):
                                 self.add_case_to_snapshot(iteration_to_add.id, cycle_child.child_id)
 
                     self.load_cycles()
+                    return self.resume_iteration_snapshot(cycle_id)
+
                 else:
                     return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
-            else:
-                return rx.toast.info(f"opening cycle id {cycle_id}")
+                
+            
+    def resume_iteration_snapshot(self, cycle_id:int) -> rx.Component:
+        with rx.session() as session:
+            result = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
+            self.cycle = result
+        return rx.redirect(self.iteration_url)
+    
+    def get_iteration_snapshot(self):
+        with rx.session() as session:
+            if (self.cycle_id == ""):
+                self.cycle = None
+                return
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            self.iteration_snapshot_items = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id).order_by(asc(IterationSnapshotModel.order))).all()
 
     def get_max_iteration_snapshot_order(self, iteration_id:int):
         with rx.session() as session:
