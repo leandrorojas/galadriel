@@ -33,6 +33,8 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 #     )
 
 def __show_cycle(cycle:model.CycleModel):
+    print(f"{getattr(cycle, "id")}")
+    print(f"{state.CycleState.has_iteration_reprise(getattr(cycle, "id"))}")
     return rx.table.row(
         rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
         rx.table.cell(cycle.created),
@@ -46,7 +48,11 @@ def __show_cycle(cycle:model.CycleModel):
              align="center"),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.continue_or_add_iteration(getattr(cycle, "id"))),
+                rx.cond(
+                    cycle.iteration_status_name != "", 
+                    rx.button(rx.icon("list-todo"), on_click=lambda: state.CycleState.continue_or_add_iteration(getattr(cycle, "id"))),
+                    rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.continue_or_add_iteration(getattr(cycle, "id")))
+                ),
                 rx.button(rx.icon("copy-plus"), disabled=True), #, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
                 spacing="2",
             )

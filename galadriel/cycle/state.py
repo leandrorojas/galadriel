@@ -77,6 +77,11 @@ class CycleState(rx.State):
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             return (iteration != None)
+        
+    def has_iteration_reprise(cycle_id:int) -> bool:
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
+            return (iteration != None)
 
     def get_cycle_detail(self):
         with rx.session() as session:
