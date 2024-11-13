@@ -30,8 +30,11 @@ def __header_cell(text: str, icon: str, hide_column:bool = False):
         hidden=hide_column,
     )
 
-def __badge(icon: str, text: str):
-    return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
+def __badge(icon: str, text: str, color=""):
+    if (color == ""):
+        return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
+    else:
+        return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3", color_scheme=color)
 
 def __element_type_badge(child_type: str):
     badge_mapping = {
@@ -45,8 +48,8 @@ def __element_type_badge(child_type: str):
 def __element_status_badge(child_status: str):
     badge_mapping = {
         "Not Attempted": ("circle-help", "Not Attempted"),
-        "Failed": ("x", "Failed"),
-        "Passed": ("check", "Passed"),
+        "Failed": ("x", "Failed", "red"),
+        "Passed": ("check", "Passed", "green"),
     }
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 

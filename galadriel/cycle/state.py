@@ -437,11 +437,35 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             self.iteration_snapshot_items = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id).order_by(asc(IterationSnapshotModel.order))).all()
 
-    def fail_iteration_step(self, step_id:int):
-        return rx.toast.error(f"case {step_id} failed! >.<")
+    def fail_iteration_step(self, snapshot_item_id:int):
+        with rx.session() as session:
+            iteration = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
 
-    def pass_iteration_step(self, step_id:int):
-        return rx.toast.success(f"case {step_id} passed! n.n")
+            if (iteration is None): return
+
+            setattr(iteration, "child_status_id", 2)
+
+            session.add(iteration)
+            session.commit()
+            session.refresh(iteration)
+            self.get_iteration_snapshot()
+        
+        #return rx.toast.error(f"case {snapshot_item_id} failed! >.<")
+
+    def pass_iteration_step(self, snapshot_item_id:int):
+        with rx.session() as session:
+            iteration = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+
+            if (iteration is None): return
+
+            setattr(iteration, "child_status_id", 3)
+
+            session.add(iteration)
+            session.commit()
+            session.refresh(iteration)
+            self.get_iteration_snapshot()
+
+        #return rx.toast.success(f"case {snapshot_item_id} passed! n.n")
 
     def get_max_iteration_snapshot_order(self, iteration_id:int):
         with rx.session() as session:

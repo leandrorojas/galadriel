@@ -48,7 +48,7 @@ def __show_cycle(cycle:model.CycleModel):
             rx.flex(
                 rx.cond(
                     cycle.iteration_status_name != "", 
-                    rx.button(rx.icon("list-todo"), on_click=lambda: state.CycleState.resume_iteration_snapshot(getattr(cycle, "id"))),
+                    rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.resume_iteration_snapshot(getattr(cycle, "id"))),
                     rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, "id")))
                 ),
                 rx.button(rx.icon("copy-plus"), disabled=True), #, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
