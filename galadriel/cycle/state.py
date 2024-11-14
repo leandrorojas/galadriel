@@ -20,21 +20,6 @@ class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
 
-    children: List['CycleChildModel'] = []
-    child: Optional['CycleChildModel'] = None
-
-    show_case_search:bool = False
-    search_case_value:str = ""
-    cases_for_search: List['CaseModel'] = []
-
-    show_scenario_search:bool = False
-    search_scenario_value:str = ""
-    scenarios_for_search: List['ScenarioModel'] = []
-
-    show_suite_search:bool = False
-    search_suite_value:str = ""
-    suites_for_search: List['SuiteModel'] = []
-
     @rx.var
     def cycle_id(self):
         #print(self.router.page.params)
@@ -59,24 +44,10 @@ class CycleState(rx.State):
         return f"{self.cycle.threshold}"
     
     @rx.var
-    def iteration_status_name(self) -> str:
+    def cycle_name(self) -> str:
         if not self.cycle:
             return ""
-        with rx.session() as session:
-            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
-            if (iteration != None):
-                status_name = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
-                return status_name.name
-            else:
-                return ""
-
-    @rx.var
-    def has_iteration(self) -> bool:
-        if not self.cycle:
-            return False
-        with rx.session() as session:
-            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
-            return (iteration != None)
+        return f"{self.cycle.name}"
 
     def get_cycle_detail(self):
         with rx.session() as session:
@@ -146,9 +117,10 @@ class CycleState(rx.State):
         self.show_case_search = False
         self.show_scenario_search = False
         self.show_suite_search = False
-    
-    def toggle_case_search(self):
-        self.show_case_search = not(self.show_case_search)
+
+    #region CYCLE CHILDREN
+    children: List['CycleChildModel'] = []
+    child: Optional['CycleChildModel'] = None
 
     def load_children(self):
         with rx.session() as session:
@@ -237,6 +209,15 @@ class CycleState(rx.State):
                 if linked_child.order > max_order:
                     max_order = linked_child.order
             return max_order + 1
+    #endregion
+
+    #region CASES
+    show_case_search:bool = False
+    search_case_value:str = ""
+    cases_for_search: List['CaseModel'] = []
+
+    def toggle_case_search(self):
+        self.show_case_search = not(self.show_case_search)
 
     def filter_test_cases(self, search_case_value):
         self.search_case_value = search_case_value
@@ -277,6 +258,12 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("case added!")
+    #endregion
+
+    #region SCENARIOS
+    show_scenario_search:bool = False
+    search_scenario_value:str = ""
+    scenarios_for_search: List['ScenarioModel'] = []
 
     def toggle_scenario_search(self):
         self.show_scenario_search = not(self.show_scenario_search)
@@ -320,6 +307,12 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("scenario added!")
+    #endregion
+
+    #region SUITES
+    show_suite_search:bool = False
+    search_suite_value:str = ""
+    suites_for_search: List['SuiteModel'] = []
 
     def toggle_suite_search(self):
         self.show_suite_search = not(self.show_suite_search)
@@ -363,42 +356,109 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("scenario added!")
+    #endregion
 
-    def continue_or_add_iteration(self, cycle_id:int):
-        iteration = None
+    #region SNAPSHOT
+    iteration_snapshot_items: List['IterationSnapshotModel'] = []
+
+    @rx.var
+    def iteration_status_name(self) -> str:
+        if not self.cycle:
+            return ""
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            if (iteration != None):
+                status_name = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
+                return status_name.name
+            else:
+                return ""
+
+    @rx.var
+    def has_iteration(self) -> bool:
+        if not self.cycle:
+            return False
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            return (iteration != None)
+        
+    @rx.var
+    def iteration_url(self) -> str:
+        if not self.cycle:
+            return f"{CYCLES_ROUTE}"
+        return f"{CYCLES_ROUTE}/{self.cycle.id}/iteration"
+    
+    def add_iteration_snapshot(self, cycle_id:int):
+        #iteration = None
 
         with rx.session() as session:
-            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
+            #iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
 
-            if (iteration == None):
-                children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
-                if (len(children) > 0):
-                    #add the cycle - iteration relationship
-                    cycle_iteration_data:dict = {"cycle_id":cycle_id}
+            # if (iteration == None):
+            children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
+            if (len(children) > 0):
+                #add the cycle - iteration relationship
+                cycle_iteration_data:dict = {"cycle_id":cycle_id}
 
-                    cycle_iteration_data.update({"iteration_status_id":0})
-                    cycle_iteration_data.update({"iteration_number":1})
+                cycle_iteration_data.update({"iteration_status_id":0})
+                cycle_iteration_data.update({"iteration_number":1})
 
-                    iteration_to_add = IterationModel(**cycle_iteration_data)
-                    session.add(iteration_to_add)
-                    session.commit()
-                    session.refresh(iteration_to_add)
+                iteration_to_add = IterationModel(**cycle_iteration_data)
+                session.add(iteration_to_add)
+                session.commit()
+                session.refresh(iteration_to_add)
 
-                    #add the cycle's snapshot here
-                    for cycle_child in children:
-                        match cycle_child.child_type_id:
-                            case 1:
-                                self.add_suite_to_snapshot(iteration_to_add.id, cycle_child.child_id)
-                            case 2:
-                                self.add_scenario_to_snapshot(iteration_to_add.id, cycle_child.child_id)
-                            case 3:
-                                self.add_case_to_snapshot(iteration_to_add.id, cycle_child.child_id)
+                #add the cycle's snapshot here
+                for cycle_child in children:
+                    match cycle_child.child_type_id:
+                        case 1:
+                            self.add_suite_to_snapshot(iteration_to_add.id, cycle_child.child_id)
+                        case 2:
+                            self.add_scenario_to_snapshot(iteration_to_add.id, cycle_child.child_id)
+                        case 3:
+                            self.add_case_to_snapshot(iteration_to_add.id, cycle_child.child_id)
 
-                    self.load_cycles()
-                else:
-                    return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
-            else:
-                return rx.toast.info(f"opening cycle id {cycle_id}")
+                self.load_cycles()
+                return self.resume_iteration_snapshot(cycle_id)
+
+                # else:
+                #     return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
+
+    def resume_iteration_snapshot(self, cycle_id:int) -> rx.Component:
+        with rx.session() as session:
+            result = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
+            self.cycle = result
+        return rx.redirect(self.iteration_url)
+    
+    def get_iteration_snapshot(self):
+        with rx.session() as session:
+            if (self.cycle_id == ""):
+                self.cycle = None
+                return
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            self.iteration_snapshot_items = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id).order_by(asc(IterationSnapshotModel.order))).all()
+
+    def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int):
+        with rx.session() as session:
+            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+
+            if (iteration_snapshot is None): return
+
+            setattr(iteration_snapshot, "child_status_id", status_id)
+
+            session.add(iteration_snapshot)
+            session.commit()
+            session.refresh(iteration_snapshot)
+            self.__figure_and_update_iteration_status(iteration_snapshot.iteration_id)
+            self.get_iteration_snapshot()
+
+    def fail_iteration_snapshot_step(self, snapshot_item_id:int):
+        self.__update_iteration_snapshot_step(snapshot_item_id, 2)
+
+    def pass_iteration_snapshot_step(self, snapshot_item_id:int):
+        self.__update_iteration_snapshot_step(snapshot_item_id, 3)
+
+    def skip_iteration_snapshot_step(self, snapshot_item_id:int):
+        self.__update_iteration_snapshot_step(snapshot_item_id, 4)
 
     def get_max_iteration_snapshot_order(self, iteration_id:int):
         with rx.session() as session:
@@ -529,6 +589,48 @@ class CycleState(rx.State):
                             self.add_scenario_to_snapshot(iteration_id, suite_child.child_id)
                         case 2:
                             self.add_case_to_snapshot(iteration_id, suite_child.child_id)
+    #endregion
+
+    #region ITERATION
+    @rx.var
+    def iteration_id(self) -> int:
+        if not self.cycle:
+            return None
+        
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle.id)).one_or_none()
+            return iteration.id
+        
+    def __figure_and_update_iteration_status(self, iteration_id:int):
+        with rx.session() as session:
+            iteration_not_attempted_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 1)).all()
+
+            not_attempted_steps_count = len(iteration_not_attempted_steps)
+
+            if (not_attempted_steps_count == 0):
+                self.__set_iteration_status(iteration_id, 4)
+            else:
+                iteration_in_progress_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id != 1)).all()
+                if len(iteration_in_progress_steps) == 1:
+                    self.__set_iteration_status(iteration_id, 1)
+
+    def set_iteration_status_on_hold(self, iteration_id:int):
+        self.__set_iteration_status(iteration_id, 2)
+
+    def set_iteration_status_closed(self, iteration_id:int):
+        self.__set_iteration_status(iteration_id, 3)
+
+    def __set_iteration_status(self, iteration_id:int, iteration_status_id:int):
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.id == iteration_id)).one_or_none()
+
+            setattr(iteration, "iteration_status_id", iteration_status_id)
+
+            session.add(iteration)
+            session.commit()
+            session.refresh(iteration)
+
+    #endregion
 
 class AddCycleState(CycleState):
     form_data:dict = {}
