@@ -4,7 +4,7 @@ from .base import base_page
 from .. import navigation
 
 def about_content() -> rx.Component:
-    about_content_var:rx.Component = rx.vstack(
+    about_content_var = rx.vstack(
         rx.heading("About galadriel"),
         rx.heading("galadriel is a simple Test Management System", size="4"),
         rx.vstack(

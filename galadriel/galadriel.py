@@ -17,7 +17,7 @@ from . import case
 from . import cycle
 
 #galadriel
-from .pages import base_page, about_page
+from .pages import base_page, about_page, about_content
 from .pages import protetected_page
 from .ui.components import Buttons
 from .auth.pages import login_page, register_page, logout_page
@@ -35,13 +35,17 @@ def index() -> rx.Component:
     if galadriel_enabled:
         buttons = Buttons()
         
-        index_content = rx.vstack(
-            rx.heading("Welcome to galadriel", size="9"),
-            buttons.signup_and_login(),
-            spacing="5",
-            justify="center",
-            align="center",
-            min_height="85vh",
+        index_content = rx.cond(
+            Session.is_authenticated,
+            rx.container(about_content()),
+            rx.vstack(
+                rx.heading("Welcome to galadriel", size="9"),
+                buttons.signup_and_login(),
+                spacing="5",
+                justify="center",
+                align="center",
+                min_height="85vh",
+            ),
         ),
     
         return base_page(index_content)
