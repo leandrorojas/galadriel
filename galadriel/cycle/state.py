@@ -489,8 +489,6 @@ class CycleState(rx.State):
                 child_case = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
 
                 if (child_case != None):
-                    max_order = self.get_max_iteration_snapshot_order(iteration_id)
-
                     if (is_prerequisite == False):
                         child_name = child_case.name
                     else:
@@ -501,6 +499,8 @@ class CycleState(rx.State):
                     
                     for prerequisite in prerequisites:
                         self.add_case_to_snapshot(iteration_id, prerequisite.prerequisite_id, True)
+
+                    max_order = self.get_max_iteration_snapshot_order(iteration_id)
 
                     #insert the case
                     snapshot_case_data:dict = {
@@ -599,6 +599,8 @@ class CycleState(rx.State):
         
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle.id)).one_or_none()
+            if not iteration:
+                return None
             return iteration.id
         
     def __figure_and_update_iteration_status(self, iteration_id:int):
