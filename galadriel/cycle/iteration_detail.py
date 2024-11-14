@@ -7,7 +7,7 @@ from ..ui.components import Badge
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
 
-def __cycle_list_button() -> rx.Component:
+def __cycle_list_button() -> rx.Component:    
     return rx.fragment(
         rx.link(
             rx.button(
@@ -15,6 +15,38 @@ def __cycle_list_button() -> rx.Component:
                 rx.text("to Cycles", size="4", display=["none", "none", "block"]), 
                 size="3", 
             ),
+            href=routes.CYCLES
+        ), 
+    )
+
+def __force_close_iteration_snapshot_button() -> rx.Component:
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("square", size=26), 
+                rx.text("Close", size="4", display=["none", "none", "block"]), 
+                size="3",
+                variant="soft",
+                color_scheme="red",
+                on_click=lambda: CycleState.set_iteration_status_closed(CycleState.iteration_id),
+            ),
+            
+            href=routes.CYCLES
+        ), 
+    )
+
+def __hold_iteration_snapshot_button() -> rx.Component:
+    return rx.fragment(
+        rx.link(
+            rx.button(
+                rx.icon("pause", size=26), 
+                rx.text("Pause", size="4", display=["none", "none", "block"]), 
+                size="3",
+                variant="soft",
+                color_scheme="yellow",
+                on_click=lambda: CycleState.set_iteration_status_on_hold(CycleState.iteration_id),
+            ),
+            
             href=routes.CYCLES
         ), 
     )
@@ -50,6 +82,7 @@ def __element_status_badge(child_status: str):
         "Not Attempted": ("circle-help", "Not Attempted"),
         "Failed": ("x", "Failed", "red"),
         "Passed": ("check", "Passed", "green"),
+        "Skipped": ("list-x", "Skipped", "gray"),
     }
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
@@ -69,14 +102,16 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             snapshot_element.child_status_id,
             (1, __element_status_badge("Not Attempted")),
             (2, __element_status_badge("Failed")),
-            (3, __element_status_badge("Passed"))
+            (3, __element_status_badge("Passed")),
+            (4, __element_status_badge("Skipped")),
         )),
         rx.table.cell(
             rx.cond(
                 snapshot_element.child_type == 4,
                 rx.flex(
-                    rx.button(rx.icon("check"), color_scheme="green", on_click=lambda: CycleState.pass_iteration_step(getattr(snapshot_element, "id"))),
-                    rx.button(rx.icon("x"), color_scheme="red", on_click=lambda: CycleState.fail_iteration_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("check"), color_scheme="green", on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("x"), color_scheme="red", on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("list-x"), color_scheme="gray", on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
                     spacing="2",
                 ),
             ),
@@ -91,6 +126,8 @@ def iteration_page() -> rx.Component:
         rx.flex(
             title_badge.title("iteration-ccw", f"Iteration for {CycleState.cycle_name}"),
             rx.spacer(),
+            __hold_iteration_snapshot_button(),
+            __force_close_iteration_snapshot_button(),
             __cycle_list_button(),
             spacing="2",
             flex_direction=["column", "column", "row"],
