@@ -48,7 +48,14 @@ def __show_cycle(cycle:model.CycleModel):
             rx.flex(
                 rx.cond(
                     cycle.iteration_status_name != "", 
-                    rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.resume_iteration_snapshot(getattr(cycle, "id"))),
+                    rx.cond((cycle.iteration_status_name == "closed") | (cycle.iteration_status_name == "completed"),
+                        rx.cond(cycle.iteration_status_name == "closed",
+                            rx.button(rx.icon("view"), color_scheme="jade", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
+                            rx.cond((cycle.iteration_status_name == "[F] completed"),
+                                rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
+                                rx.button(rx.icon("view"), color_scheme="jade", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))))),
+                        rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
+                    ),
                     rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, "id")))
                 ),
                 rx.button(rx.icon("copy-plus"), disabled=True), #, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 

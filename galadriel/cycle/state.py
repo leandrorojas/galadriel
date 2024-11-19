@@ -70,7 +70,10 @@ class CycleState(rx.State):
                     if (iteration_status == None):
                         iteration_status_name = ""
                     else:
-                        iteration_status_name = iteration_status.name
+                        if ((iteration_status.id == 4) and self.can_edit_iteration(single_result.id)):
+                            iteration_status_name = "[F] " + iteration_status.name
+                        else:
+                            iteration_status_name = iteration_status.name
 
                 setattr(single_result, "iteration_status_name", iteration_status_name)
 
@@ -117,6 +120,24 @@ class CycleState(rx.State):
         self.show_case_search = False
         self.show_scenario_search = False
         self.show_suite_search = False
+
+    def can_edit_iteration(self, cycle_id:int) -> bool:
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
+
+            if (iteration != None):
+                if (iteration.iteration_status_id == 3): return False
+
+                if (iteration.iteration_status_id == 4):
+                    all_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_type == 4)).all()
+                    passed_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 3)).all()
+
+                    if (all_steps != None) and (passed_steps != None):
+                        if (len(all_steps) == len(passed_steps)): return False
+
+                return True
+            else:
+                return False
 
     #region CYCLE CHILDREN
     children: List['CycleChildModel'] = []
@@ -387,6 +408,12 @@ class CycleState(rx.State):
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}/iteration"
     
+    @rx.var
+    def is_iteration_editable(self) -> bool:
+        if not self.cycle:
+            return False
+        return self.can_edit_iteration(self.cycle_id)
+    
     def add_iteration_snapshot(self, cycle_id:int):
         #iteration = None
 
@@ -418,12 +445,12 @@ class CycleState(rx.State):
                             self.add_case_to_snapshot(iteration_to_add.id, cycle_child.child_id)
 
                 self.load_cycles()
-                return self.resume_iteration_snapshot(cycle_id)
+                return self.view_iteration_snapshot(cycle_id)
 
                 # else:
                 #     return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
 
-    def resume_iteration_snapshot(self, cycle_id:int) -> rx.Component:
+    def view_iteration_snapshot(self, cycle_id:int) -> rx.Component:
         with rx.session() as session:
             result = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
             self.cycle = result

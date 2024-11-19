@@ -7,6 +7,8 @@ from ..ui.components import Badge
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
 
+READ_ONLY = False
+
 def __cycle_list_button() -> rx.Component:    
     return rx.fragment(
         rx.link(
@@ -28,6 +30,7 @@ def __force_close_iteration_snapshot_button() -> rx.Component:
                 size="3",
                 variant="soft",
                 color_scheme="red",
+                disabled=READ_ONLY,
                 on_click=lambda: CycleState.set_iteration_status_closed(CycleState.iteration_id),
             ),
             
@@ -44,6 +47,7 @@ def __hold_iteration_snapshot_button() -> rx.Component:
                 size="3",
                 variant="soft",
                 color_scheme="yellow",
+                disabled=READ_ONLY,
                 on_click=lambda: CycleState.set_iteration_status_on_hold(CycleState.iteration_id),
             ),
             
@@ -109,9 +113,9 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             rx.cond(
                 snapshot_element.child_type == 4,
                 rx.flex(
-                    rx.button(rx.icon("check"), color_scheme="green", on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    rx.button(rx.icon("x"), color_scheme="red", on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    rx.button(rx.icon("list-x"), color_scheme="gray", on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("check"), color_scheme="green", disabled=READ_ONLY, on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("x"), color_scheme="red", disabled=READ_ONLY, on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("list-x"), color_scheme="gray", disabled=READ_ONLY, on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
                     spacing="2",
                 ),
             ),
@@ -121,6 +125,9 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
 @reflex_local_auth.require_login
 def iteration_page() -> rx.Component:
     title_badge = Badge()
+
+    global READ_ONLY
+    READ_ONLY = ~CycleState.is_iteration_editable
 
     cycle_edit_content = rx.vstack(
         rx.flex(
