@@ -105,8 +105,9 @@ class CaseState(rx.State):
         if (form_data["action"] == ""): 
             return rx.toast.error("action cannot be empty")
 
-        if (form_data["expected"] == ""):
-            return rx.toast.error("expected cannot be empty")
+        # Removed through GAL-187
+        # if (form_data["expected"] == ""):
+        #     return rx.toast.error("expected cannot be empty")
         
         new_step_order = 1
 
