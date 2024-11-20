@@ -123,7 +123,7 @@ def __table() -> rx.Component:
                 rx.table.row(
                     __header_cell("name", "fingerprint"),
                     __header_cell("created", "calendar-check-2"),
-                    __header_cell("threshold", "gauge"),
+                    __header_cell("% threshold", "gauge"),
                     __header_cell("status", "activity"), 
                     __header_cell("","ellipsis"),
                 ),
