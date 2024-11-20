@@ -32,15 +32,45 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 #         padding="1em"
 #     )
 
+def __badge(text: str, color=""):
+    if (color != ""):
+        return rx.badge(text, radius="full", variant="soft", size="3", color_scheme=color)
+    else:
+        return rx.badge(text, radius="full", variant="soft", size="3")
+
+def __element_status_badge(child_status: str):
+    badge_mapping = {
+        "in progress": ("in progress", "blue"),
+        "closed": ("closed", "red"),
+        "completed": ("completed", "green"),
+        "on hold": ("on hold", "yellow"),
+        "[F] completed": ("[F] completed", "orange"),
+    }
+    return __badge(*badge_mapping.get(child_status, ("n/a", "")))
+
 def __show_cycle(cycle:model.CycleModel):
     return rx.table.row(
         rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
         rx.table.cell(cycle.created),
         rx.table.cell(cycle.threshold, align="center"),
+        # rx.table.cell(
+        #     rx.cond(
+        #         (cycle.iteration_status_name != ""),
+        #         rx.badge(cycle.iteration_status_name),
+        #         rx.badge("n/a")
+        #      ), 
+        #      align="center"),
         rx.table.cell(
             rx.cond(
                 (cycle.iteration_status_name != ""),
-                rx.badge(cycle.iteration_status_name),
+                rx.match(
+                    cycle.iteration_status_name,
+                    ("in progress", __element_status_badge("in progress")),
+                    ("closed", __element_status_badge("closed")),
+                    ("completed", __element_status_badge("completed")),
+                    ("on hold", __element_status_badge("on hold")),
+                    ("[F] completed", __element_status_badge("[F] completed")),
+                ),
                 rx.badge("n/a")
              ), 
              align="center"),
@@ -95,7 +125,7 @@ def __table() -> rx.Component:
                     __header_cell("created", "calendar-check-2"),
                     __header_cell("threshold", "gauge"),
                     __header_cell("status", "activity"), 
-                    __header_cell("actions","ellipsis"),
+                    __header_cell("","ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),

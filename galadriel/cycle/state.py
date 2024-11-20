@@ -59,7 +59,7 @@ class CycleState(rx.State):
 
     def load_cycles(self):
         with rx.session() as session:
-            results = session.exec(CycleModel.select()).all()
+            results = session.exec(CycleModel.select().order_by(desc(CycleModel.created))).all()
 
             for single_result in results:
                 iteration_status = None
