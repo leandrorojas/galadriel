@@ -62,18 +62,68 @@ class CycleState(rx.State):
             results = session.exec(CycleModel.select().order_by(desc(CycleModel.created))).all()
 
             for single_result in results:
-                iteration_status = None
+                iteration_execution_status = None
                 iteration_status_name = ""
+                iteration_finished = False
+
                 cycle_iteration = session.exec(IterationModel.select().where(IterationModel.cycle_id == single_result.id)).one_or_none()
                 if (cycle_iteration != None):
-                    iteration_status = session.exec(IterationStatusModel.select().where(IterationStatusModel.id == cycle_iteration.iteration_status_id)).first()
-                    if (iteration_status == None):
+                    iteration_execution_status = session.exec(IterationStatusModel.select().where(IterationStatusModel.id == cycle_iteration.iteration_status_id)).first()
+                    if (iteration_execution_status == None):
                         iteration_status_name = ""
                     else:
-                        if ((iteration_status.id == 4) and self.can_edit_iteration(single_result.id)):
-                            iteration_status_name = "[F] " + iteration_status.name
+                        iteration_finished = ((iteration_execution_status.id == 3) or (iteration_execution_status.id == 4))
+                        
+                        if (iteration_finished == False):
+                            iteration_in_progress = ((iteration_execution_status.id == 1) or (iteration_execution_status.id == 2))
+
+                        if ((iteration_execution_status.id == 4) and self.can_edit_iteration(single_result.id)):
+                            iteration_status_name = "[F] " + iteration_execution_status.name
                         else:
-                            iteration_status_name = iteration_status.name
+                            iteration_status_name = iteration_execution_status.name
+
+                    if ((iteration_finished == True) or (iteration_in_progress == True)):
+                        all_steps_count = 0
+                        failed_steps_count = 0
+                        passed_steps_count = 0
+                        snapshot_all_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4)).all()
+
+                        if snapshot_all_steps != None: 
+                            all_steps_count = len(snapshot_all_steps)
+                            snapshot_failed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 2)).all()
+
+                            if snapshot_failed_steps != None: 
+                                failed_steps_count = len(snapshot_failed_steps)
+
+                                iteration_failed_percentage = int((failed_steps_count*100)/all_steps_count)
+
+                            else:
+                                iteration_failed_percentage = 0
+
+                            snapshot_passed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 3)).all()
+                            if snapshot_passed_steps != None:
+                                passed_steps_count = len(snapshot_passed_steps)
+
+                                iteration_passed_percentage = int((passed_steps_count*100)/all_steps_count)
+                            else:
+                                iteration_passed_percentage = 0
+                        else:
+                            iteration_failed_percentage = 0
+                            iteration_passed_percentage = 0
+
+                        snapshot_threshold = f"{single_result.threshold}/{iteration_passed_percentage}/{iteration_failed_percentage}"
+
+                        if (iteration_finished == True):
+                            cycle_status = ""
+                            if (iteration_passed_percentage >= int(single_result.threshold)):
+                                cycle_status = "passed"
+                            else:
+                                cycle_status = "failed"
+                            setattr(single_result, "cycle_status_name", cycle_status)
+                        else: #iteration is in progress
+                            setattr(single_result, "cycle_status_name", "testing")
+
+                        setattr(single_result, "threshold", snapshot_threshold)
 
                 setattr(single_result, "iteration_status_name", iteration_status_name)
 
@@ -415,12 +465,7 @@ class CycleState(rx.State):
         return self.can_edit_iteration(self.cycle_id)
     
     def add_iteration_snapshot(self, cycle_id:int):
-        #iteration = None
-
         with rx.session() as session:
-            #iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
-
-            # if (iteration == None):
             children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
             if (len(children) > 0):
                 #add the cycle - iteration relationship
@@ -447,9 +492,6 @@ class CycleState(rx.State):
                 self.load_cycles()
                 return self.view_iteration_snapshot(cycle_id)
 
-                # else:
-                #     return rx.toast.warning("the cycle doesn't have any linked suites, scenarios or cases. Nothing was done")
-
     def view_iteration_snapshot(self, cycle_id:int) -> rx.Component:
         with rx.session() as session:
             result = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
@@ -475,7 +517,7 @@ class CycleState(rx.State):
             session.add(iteration_snapshot)
             session.commit()
             session.refresh(iteration_snapshot)
-            self.__figure_and_update_iteration_status(iteration_snapshot.iteration_id)
+            self.__figure_and_update_iteration_execution_status(iteration_snapshot.iteration_id)
             self.get_iteration_snapshot()
 
     def fail_iteration_snapshot_step(self, snapshot_item_id:int):
@@ -630,26 +672,26 @@ class CycleState(rx.State):
                 return None
             return iteration.id
         
-    def __figure_and_update_iteration_status(self, iteration_id:int):
+    def __figure_and_update_iteration_execution_status(self, iteration_id:int):
         with rx.session() as session:
             iteration_not_attempted_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 1)).all()
 
             not_attempted_steps_count = len(iteration_not_attempted_steps)
 
             if (not_attempted_steps_count == 0):
-                self.__set_iteration_status(iteration_id, 4)
+                self.__set_iteration_execution_status(iteration_id, 4)
             else:
                 iteration_in_progress_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id != 1)).all()
                 if len(iteration_in_progress_steps) == 1:
-                    self.__set_iteration_status(iteration_id, 1)
+                    self.__set_iteration_execution_status(iteration_id, 1)
 
-    def set_iteration_status_on_hold(self, iteration_id:int):
-        self.__set_iteration_status(iteration_id, 2)
+    def set_iteration_execution_status_on_hold(self, iteration_id:int):
+        self.__set_iteration_execution_status(iteration_id, 2)
 
-    def set_iteration_status_closed(self, iteration_id:int):
-        self.__set_iteration_status(iteration_id, 3)
+    def set_iteration_execution_status_closed(self, iteration_id:int):
+        self.__set_iteration_execution_status(iteration_id, 3)
 
-    def __set_iteration_status(self, iteration_id:int, iteration_status_id:int):
+    def __set_iteration_execution_status(self, iteration_id:int, iteration_status_id:int):
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.id == iteration_id)).one_or_none()
 
@@ -658,6 +700,9 @@ class CycleState(rx.State):
             session.add(iteration)
             session.commit()
             session.refresh(iteration)
+
+    def __figure_cycle_status(self):
+        ...
 
     #endregion
 

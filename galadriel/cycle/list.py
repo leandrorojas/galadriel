@@ -38,52 +38,60 @@ def __badge(text: str, color=""):
     else:
         return rx.badge(text, radius="full", variant="soft", size="3")
 
-def __element_status_badge(child_status: str):
+def __execution_status_badge(child_execution_status: str):
     badge_mapping = {
         "in progress": ("in progress", "blue"),
         "closed": ("closed", "red"),
         "completed": ("completed", "green"),
         "on hold": ("on hold", "yellow"),
         "[F] completed": ("[F] completed", "orange"),
+        "not started": ("not started", "")
     }
-    return __badge(*badge_mapping.get(child_status, ("n/a", "")))
+    return __badge(*badge_mapping.get(child_execution_status, ("n/a", "")))
+
+def __cycle_status_badge(cycle_status: str):
+    badge_mapping = {
+        "passed": ("passed", "green"),
+        "failed": ("failed", "red"),
+        "testing": ("testing", "blue"),
+    }
+    return __badge(*badge_mapping.get(cycle_status, ("n/a", "")))
 
 def __show_cycle(cycle:model.CycleModel):
     return rx.table.row(
         rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
-        rx.table.cell(cycle.created),
-        rx.table.cell(cycle.threshold, align="center"),
-        # rx.table.cell(
-        #     rx.cond(
-        #         (cycle.iteration_status_name != ""),
-        #         rx.badge(cycle.iteration_status_name),
-        #         rx.badge("n/a")
-        #      ), 
-        #      align="center"),
         rx.table.cell(
-            rx.cond(
-                (cycle.iteration_status_name != ""),
-                rx.match(
-                    cycle.iteration_status_name,
-                    ("in progress", __element_status_badge("in progress")),
-                    ("closed", __element_status_badge("closed")),
-                    ("completed", __element_status_badge("completed")),
-                    ("on hold", __element_status_badge("on hold")),
-                    ("[F] completed", __element_status_badge("[F] completed")),
-                ),
-                rx.badge("n/a")
-             ), 
-             align="center"),
+            rx.match(
+                cycle.cycle_status_name,
+                ("passed", __cycle_status_badge("passed")),
+                ("failed", __cycle_status_badge("failed")),
+                ("testing", __cycle_status_badge("testing")),
+            ),
+            align="center"
+        ),
+        rx.table.cell(cycle.threshold, align="center"),
+        rx.table.cell(
+            rx.match(
+                cycle.iteration_status_name,
+                ("in progress", __execution_status_badge("in progress")),
+                ("closed", __execution_status_badge("closed")),
+                ("completed", __execution_status_badge("completed")),
+                ("on hold", __execution_status_badge("on hold")),
+                ("[F] completed", __execution_status_badge("[F] completed")),
+                ("not started", __execution_status_badge("not started")),
+            ),
+            align="center"
+        ),
         rx.table.cell(
             rx.flex(
                 rx.cond(
                     cycle.iteration_status_name != "", 
                     rx.cond((cycle.iteration_status_name == "closed") | (cycle.iteration_status_name == "completed"),
                         rx.cond(cycle.iteration_status_name == "closed",
-                            rx.button(rx.icon("view"), color_scheme="jade", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
+                            rx.button(rx.icon("eye"), color_scheme="jade", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
                             rx.cond((cycle.iteration_status_name == "[F] completed"),
                                 rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
-                                rx.button(rx.icon("view"), color_scheme="jade", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))))),
+                                rx.button(rx.icon("eye"), color_scheme="jade", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))))),
                         rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
                     ),
                     rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, "id")))
@@ -92,6 +100,7 @@ def __show_cycle(cycle:model.CycleModel):
                 spacing="2",
             )
         ),
+        rx.table.cell(cycle.created),
     )
 
 def __add_adhoc_cycle_button() -> rx.Component:
@@ -106,11 +115,14 @@ def __add_adhoc_cycle_button() -> rx.Component:
         ), 
     )
 
-def __header_cell(text: str, icon: str):
+def __header_cell(text: str, icon: str, info_tooltip:str = ""):
+    title_tooltip = Tooltip()
+
     return rx.table.column_header_cell(
         rx.hstack(
             rx.icon(icon, size=18),
             rx.text(text),
+            rx.cond(info_tooltip == "", rx.text(""), title_tooltip.info(info_tooltip)),
             align="center",
             spacing="2",
         ),
@@ -122,10 +134,11 @@ def __table() -> rx.Component:
             rx.table.header(
                 rx.table.row(
                     __header_cell("name", "fingerprint"),
-                    __header_cell("created", "calendar-check-2"),
-                    __header_cell("threshold", "gauge"),
-                    __header_cell("status", "activity"), 
+                    __header_cell("status", "activity"),
+                    __header_cell("% t/p/f", "gauge", "% of [t]hreshold / [p]assed / [f]ailed"),
+                    __header_cell("execution", "activity", "[F] completed = completed with failed TCs"), 
                     __header_cell("","ellipsis"),
+                    __header_cell("created", "calendar-check-2"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),

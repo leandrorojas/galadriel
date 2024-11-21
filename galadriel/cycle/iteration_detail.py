@@ -31,7 +31,7 @@ def __force_close_iteration_snapshot_button() -> rx.Component:
                 variant="soft",
                 color_scheme="red",
                 disabled=READ_ONLY,
-                on_click=lambda: CycleState.set_iteration_status_closed(CycleState.iteration_id),
+                on_click=lambda: CycleState.set_iteration_execution_status_closed(CycleState.iteration_id),
             ),
             
             href=routes.CYCLES
@@ -48,7 +48,7 @@ def __hold_iteration_snapshot_button() -> rx.Component:
                 variant="soft",
                 color_scheme="yellow",
                 disabled=READ_ONLY,
-                on_click=lambda: CycleState.set_iteration_status_on_hold(CycleState.iteration_id),
+                on_click=lambda: CycleState.set_iteration_execution_status_on_hold(CycleState.iteration_id),
             ),
             
             href=routes.CYCLES
