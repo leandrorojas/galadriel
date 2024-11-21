@@ -48,7 +48,7 @@ def cycle_edit_form() -> rx.Component:
                     name="threshold",
                     placeholder="Pass Cases Threshold",
                     width="100%",
-                    #type="number", min="0", max="100"
+                    type="number"
                 ),                
             rx.button("Save Cycle", type="submit", width="100%",),
         ),
