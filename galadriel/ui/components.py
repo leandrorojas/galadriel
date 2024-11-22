@@ -219,7 +219,7 @@ class SideBar():
     def __sidebar_items(self) -> rx.Component: 
         return rx.vstack(
             self.__sidebar_item("[to do] Dashboard", "layout-dashboard", navigation.routes.ABOUT),
-            self.__sidebar_item("[wip] Cycles", "flask-round", navigation.routes.CYCLES),
+            self.__sidebar_item("Cycles", "flask-round", navigation.routes.CYCLES),
             rx.divider(),
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),

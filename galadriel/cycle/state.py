@@ -559,11 +559,47 @@ class CycleState(rx.State):
     def fail_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 2)
 
+        #block the remainning steps on the case
+        with rx.session() as session:
+            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+            next_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order > iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
+
+            if (next_steps != None):
+                for next_step in next_steps:
+                    if next_step.child_name == None:
+                        self.__update_iteration_snapshot_step(next_step.id, 5)
+                    else:
+                        break
+
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)
 
+        #if steps where blocked, restore the "not attempted" status for the remainning steps on the case
+        with rx.session() as session:
+            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+            next_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order > iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
+
+            if (next_steps != None):
+                for next_step in next_steps:
+                    if next_step.child_name == None:
+                        self.__update_iteration_snapshot_step(next_step.id, 1)
+                    else:
+                        break
+
     def skip_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 4)
+
+        #if steps where blocked, restore the "not attempted" status for the remainning steps on the case
+        with rx.session() as session:
+            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+            next_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order > iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
+
+            if (next_steps != None):
+                for next_step in next_steps:
+                    if next_step.child_name == None:
+                        self.__update_iteration_snapshot_step(next_step.id, 1)
+                    else:
+                        break        
 
     def get_max_iteration_snapshot_order(self, iteration_id:int):
         with rx.session() as session:

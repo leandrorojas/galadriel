@@ -87,6 +87,7 @@ def __element_status_badge(child_status: str):
         "Failed": ("x", "Failed", "red"),
         "Passed": ("check", "Passed", "green"),
         "Skipped": ("list-x", "Skipped", "gray"),
+        "Blocked": ("cuboid", "Blocked", "gray") #also brick-wall
     }
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
@@ -108,6 +109,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             (2, __element_status_badge("Failed")),
             (3, __element_status_badge("Passed")),
             (4, __element_status_badge("Skipped")),
+            (5, __element_status_badge("Blocked")),
         )),
         rx.table.cell(
             rx.cond(
