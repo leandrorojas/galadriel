@@ -90,13 +90,13 @@ def __show_cycle(cycle:model.CycleModel):
                         rx.cond(cycle.iteration_status_name == "closed",
                             rx.button(rx.icon("eye"), color_scheme="jade", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
                             rx.cond((cycle.iteration_status_name == "[F] completed"),
-                                rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
+                                rx.button(rx.icon("list-todo"), color_scheme="lime", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
                                 rx.button(rx.icon("eye"), color_scheme="jade", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))))),
-                        rx.button(rx.icon("list-todo"), color_scheme="lime", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
+                        rx.button(rx.icon("list-todo"), color_scheme="lime", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, "id"))),
                     ),
                     rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, "id")))
                 ),
-                rx.button(rx.icon("copy-plus"), on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, "id"))), 
+                rx.button(rx.icon("copy-plus"), variant="soft", on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, "id"))), 
                 spacing="2",
             )
         ),
