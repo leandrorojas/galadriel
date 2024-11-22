@@ -3,7 +3,7 @@ import reflex as rx
 from .model import SuiteModel, SuiteChildModel
 from ..navigation import routes
 
-from ..case.model import CaseModel
+from ..case.model import CaseModel, StepModel
 from ..scenario.model import ScenarioModel
 
 from datetime import datetime
@@ -203,6 +203,8 @@ class SuiteState(rx.State):
             self.cases_for_search = results
 
     def link_case(self, case_id:int):
+        if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
+
         suite_case_data:dict = {"suite_id":""}
         new_case_order = 1
 
@@ -227,6 +229,12 @@ class SuiteState(rx.State):
         self.load_children()
         
         return rx.toast.success("case added!")
+    
+    def has_steps(self, case_id:int) -> bool:
+        with rx.session() as session:
+            case_steps = session.exec(StepModel.select().where(StepModel.case_id == case_id)).all()
+
+            return len(case_steps) > 0
 
     def toggle_scenario_search(self):
         self.show_scenario_search = not(self.show_scenario_search)

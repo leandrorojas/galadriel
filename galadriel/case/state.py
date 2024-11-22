@@ -134,6 +134,10 @@ class CaseState(rx.State):
         
     def delete_step(self, step_id:int):
         with rx.session() as session:
+            case_steps = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
+
+            if (len(case_steps) == 1): return rx.toast.error("cannot delete last step")
+            
             step_to_delete = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
             order_to_update = step_to_delete.order
             session.delete(step_to_delete)
@@ -206,6 +210,12 @@ class CaseState(rx.State):
         self.search_value = search_value
         self.load_cases()
 
+    def has_steps(self, case_id:int) -> bool:
+        with rx.session() as session:
+            case_steps = session.exec(StepModel.select().where(StepModel.case_id == case_id)).all()
+
+            return len(case_steps) > 0
+
     def has_prerequisite(self, prerequisite_id:int) -> bool:
         with rx.session() as session:
             child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).first()
@@ -227,12 +237,13 @@ class CaseState(rx.State):
                             return True
 
     def add_prerequisite(self, prerequisite_id:int):
-        if (int(self.case_id) == prerequisite_id):
-            return rx.toast.error("self cannot be prerequisite")
+        if (int(self.case_id) == prerequisite_id): return rx.toast.error("self cannot be prerequisite")
         
         if self.has_prerequisite(prerequisite_id):
             if self.is_prerequisite_redundant(prerequisite_id, self.case_id):
                 return rx.toast.error("cannot add redundant prerequisite")
+            
+        if not self.has_steps(prerequisite_id): return rx.toast.error("prerequisite must have at least one step")
         
         prerequisite_data:dict = {"case_id":""}
         new_prerequisite_order = 1
@@ -242,8 +253,7 @@ class CaseState(rx.State):
                 linked_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
                 max_order = 0
                 for linked_prerequisite in linked_prerequisites:
-                    if (linked_prerequisite.id == prerequisite_id):
-                        return rx.toast.error("prerequisite already in list")
+                    if (linked_prerequisite.id == prerequisite_id): return rx.toast.error("prerequisite already in list")
                     
                     if linked_prerequisite.order > max_order:
                         max_order = linked_prerequisite.order
