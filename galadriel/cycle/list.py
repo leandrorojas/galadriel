@@ -96,7 +96,7 @@ def __show_cycle(cycle:model.CycleModel):
                     ),
                     rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, "id")))
                 ),
-                rx.button(rx.icon("copy-plus"), disabled=True), #, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, "id"))), 
+                rx.button(rx.icon("copy-plus"), on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, "id"))), 
                 spacing="2",
             )
         ),
