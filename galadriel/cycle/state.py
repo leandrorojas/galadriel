@@ -305,6 +305,8 @@ class CycleState(rx.State):
             self.cases_for_search = results
 
     def link_case(self, case_id:int):
+        if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
+        
         cycle_case_data:dict = {"cycle_id":""}
         new_case_order = 1
 
@@ -329,6 +331,12 @@ class CycleState(rx.State):
         self.load_children()
         
         return rx.toast.success("case added!")
+    
+    def has_steps(self, case_id:int) -> bool:
+        with rx.session() as session:
+            case_steps = session.exec(StepModel.select().where(StepModel.case_id == case_id)).all()
+
+            return len(case_steps) > 0
     #endregion
 
     #region SCENARIOS
