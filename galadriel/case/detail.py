@@ -204,7 +204,7 @@ def case_detail_page() -> rx.Component:
             __steps_table(),
         ),
         spacing="5",
-        align="left",
+        align="start", #align="left",
         min_height="85vh",
     ),
     

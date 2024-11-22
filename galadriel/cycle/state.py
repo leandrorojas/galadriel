@@ -40,7 +40,7 @@ class CycleState(rx.State):
     @rx.var
     def cycle_threshold(self) -> str:
         if not self.cycle:
-            return 0
+            return "0"
         return f"{self.cycle.threshold}"
     
     @rx.var

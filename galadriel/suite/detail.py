@@ -220,7 +220,7 @@ def suite_detail_page() -> rx.Component:
             ),
         ),
         spacing="5",
-        align="left",
+        align="start", #align="left",
         min_height="85vh",
     ),
     
