@@ -189,6 +189,22 @@ class CycleState(rx.State):
             else:
                 return False
 
+    def duplicate_cycle(self, origin_cycle_id:int):
+        with rx.session() as session:
+            origin_cycle = session.exec(CycleModel.select().where(CycleModel.id == origin_cycle_id)).one_or_none()
+            if origin_cycle is None: return
+
+            new_cycle:dict = {"name": "copy of " + origin_cycle.name, "threshold": origin_cycle.threshold}
+            cycle_to_add = CycleModel(**new_cycle)
+            session.add(cycle_to_add)
+            session.commit()
+            session.refresh(cycle_to_add)
+
+            self.cycle = cycle_to_add
+
+            self.duplicate_cycle_children(origin_cycle_id, self.cycle.id)
+            self.load_cycles()
+
     #region CYCLE CHILDREN
     children: List['CycleChildModel'] = []
     child: Optional['CycleChildModel'] = None
@@ -280,6 +296,18 @@ class CycleState(rx.State):
                 if linked_child.order > max_order:
                     max_order = linked_child.order
             return max_order + 1
+        
+    def duplicate_cycle_children(self, origin_cycle_id:int, target_cycle_id:int):
+        with rx.session() as session:
+            linked_children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == origin_cycle_id)).all()
+
+            for linked_child in linked_children:
+                new_child:dict = {"cycle_id": target_cycle_id, "child_type_id": linked_child.child_type_id, "child_id": linked_child.child_id, "order": linked_child.order}
+
+                child_to_add = CycleChildModel(**new_child)
+                session.add(child_to_add)
+                session.commit()
+                session.refresh(child_to_add)
     #endregion
 
     #region CASES
