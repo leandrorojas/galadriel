@@ -571,10 +571,12 @@ class CycleState(rx.State):
                     else:
                         break
 
+        #create ticket here
+
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)
 
-        #if steps where blocked, restore the "not attempted" status for the remainning steps on the case
+        #if steps where blocked, restore the "To Do" status for the remainning steps on the case
         with rx.session() as session:
             iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
             next_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order > iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
@@ -589,7 +591,7 @@ class CycleState(rx.State):
     def skip_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 4)
 
-        #if steps where blocked, restore the "not attempted" status for the remainning steps on the case
+        #if steps where blocked, restore the "To Do" status for the remainning steps on the case
         with rx.session() as session:
             iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
             next_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order > iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
@@ -633,7 +635,7 @@ class CycleState(rx.State):
                     if (is_prerequisite == False):
                         child_name = child_case.name
                     else:
-                        child_name = f"[prerequisiste] {child_case.name}"
+                        child_name = f"[P] {child_case.name}"
 
                     #cycle through prerequisites and insert them
                     prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == case_id).order_by(PrerequisiteModel.order)).all()

@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from ..pages import base_page
 from ..navigation import routes
-from ..ui.components import Badge
+from ..ui.components import Badge, Tooltip
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
 
@@ -55,11 +55,14 @@ def __hold_iteration_snapshot_button() -> rx.Component:
         ), 
     )
 
-def __header_cell(text: str, icon: str, hide_column:bool = False):
+def __header_cell(text: str, icon: str, hide_column:bool = False, info_tooltip:str = ""):
+    title_tooltip = Tooltip()
+
     return rx.table.column_header_cell(
         rx.hstack(
             rx.icon(icon, size=18),
             rx.text(text),
+            rx.cond(info_tooltip == "", rx.text(""), title_tooltip.info(info_tooltip)),
             align="center",
             spacing="2",
         ),
@@ -83,7 +86,7 @@ def __element_type_badge(child_type: str):
 
 def __element_status_badge(child_status: str):
     badge_mapping = {
-        "Not Attempted": ("circle-help", "Not Attempted"),
+        "To Do": ("circle-help", "To Do", "blue"),
         "Failed": ("x", "Failed", "red"),
         "Passed": ("check", "Passed", "green"),
         "Skipped": ("list-x", "Skipped", "gray"),
@@ -93,8 +96,15 @@ def __element_status_badge(child_status: str):
 
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
     return rx.table.row(
-        rx.table.cell(snapshot_element.child_name),
-        rx.table.cell(rx.match(
+        # rx.table.cell(rx.match(
+        #     snapshot_element.child_type,
+        #     (1, __element_type_badge("Suite")),
+        #     (2, __element_type_badge("Scenario")),
+        #     (3, __element_type_badge("Case")),
+        #     (4, __element_type_badge("Step"))
+        # )),
+        rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
+        rx.match(
             snapshot_element.child_type,
             (1, __element_type_badge("Suite")),
             (2, __element_type_badge("Scenario")),
@@ -105,7 +115,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         rx.table.cell(snapshot_element.child_expected),
         rx.table.cell(rx.match(
             snapshot_element.child_status_id,
-            (1, __element_status_badge("Not Attempted")),
+            (1, __element_status_badge("To Do")),
             (2, __element_status_badge("Failed")),
             (3, __element_status_badge("Passed")),
             (4, __element_status_badge("Skipped")),
@@ -115,9 +125,9 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             rx.cond(
                 snapshot_element.child_type == 4,
                 rx.flex(
-                    rx.button(rx.icon("check"), color_scheme="green", disabled=READ_ONLY, on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    rx.button(rx.icon("x"), color_scheme="red", disabled=READ_ONLY, on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    rx.button(rx.icon("list-x"), color_scheme="gray", disabled=READ_ONLY, on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
                     spacing="2",
                 ),
             ),
@@ -150,8 +160,8 @@ def iteration_page() -> rx.Component:
                 rx.table.root(
                     rx.table.header(
                         rx.table.row(
-                            __header_cell("name", "tag"),
-                            __header_cell("type", "blocks"),
+                            #__header_cell("type", "blocks"),
+                            __header_cell("name/type", "tag",info_tooltip="[P]requisite"),
                             __header_cell("action", "pickaxe"),
                             __header_cell("expected", "gem"),
                             __header_cell("status", "activity"),
