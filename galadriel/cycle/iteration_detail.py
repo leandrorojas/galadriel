@@ -96,13 +96,6 @@ def __element_status_badge(child_status: str):
 
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
     return rx.table.row(
-        # rx.table.cell(rx.match(
-        #     snapshot_element.child_type,
-        #     (1, __element_type_badge("Suite")),
-        #     (2, __element_type_badge("Scenario")),
-        #     (3, __element_type_badge("Case")),
-        #     (4, __element_type_badge("Step"))
-        # )),
         rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
         rx.match(
             snapshot_element.child_type,
