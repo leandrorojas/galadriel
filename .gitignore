@@ -7,3 +7,4 @@ __pycache__/
 alembic.ini
 alembic/
 assets/external/
+galadriel.yaml
