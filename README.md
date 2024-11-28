@@ -7,6 +7,7 @@ a simple, badly-designed, extremelly code-inefficient and unoptimized Test Manag
 requirements:
 * reflex 0.6.5
 * reflex-local-auth 0.2.2
+* PyYAML 6.0.2
 
 If you want to contribute, galadriel currently needs:
 * unit tests

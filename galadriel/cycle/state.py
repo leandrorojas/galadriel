@@ -12,6 +12,8 @@ from datetime import datetime
 
 from sqlmodel import select, asc, or_, func, cast, String, desc
 
+from ..utils import jira
+
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
 
@@ -572,6 +574,10 @@ class CycleState(rx.State):
                         break
 
         #create ticket here
+        new_issue = jira.create_issue()
+        issue_url = jira.get_issue_url(new_issue)
+
+        return rx.toast.success(f"new issue created [{new_issue}]: {issue_url}")
 
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)
