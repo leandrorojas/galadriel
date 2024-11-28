@@ -574,10 +574,12 @@ class CycleState(rx.State):
                         break
 
         #create ticket here
-        new_issue = jira.create_issue()
-        issue_url = jira.get_issue_url(new_issue)
-
-        return rx.toast.success(f"new issue created [{new_issue}]: {issue_url}")
+        # new_issue = jira.create_issue()
+        # if (new_issue != ""):
+        #     issue_url = jira.get_issue_url(new_issue)
+        #     return rx.toast.success(f"new issue created [{new_issue}]: {issue_url}")
+        # else:
+        #     return rx.toast.error("error creating the issue, please contact the administrator")
 
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)

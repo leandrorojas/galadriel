@@ -6,6 +6,7 @@ from ..navigation import routes
 from ..ui.components import Badge, Tooltip
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
+from ..utils import jira
 
 READ_ONLY = False
 
@@ -101,8 +102,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             snapshot_element.child_type,
             (1, __element_type_badge("Suite")),
             (2, __element_type_badge("Scenario")),
-            (3, __element_type_badge("Case")),
-            (4, __element_type_badge("Step"))
+            (3, __element_type_badge("Case")) #,(4, __element_type_badge("Step")) # Steps are skipped, too much information in the screen 
         )),
         rx.table.cell(snapshot_element.child_action),
         rx.table.cell(snapshot_element.child_expected),
@@ -114,6 +114,11 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             (4, __element_status_badge("Skipped")),
             (5, __element_status_badge("Blocked")),
         )),
+        rx.cond(
+            snapshot_element.linked_issue != None,
+            rx.table.cell(rx.link("TEST-1", href=jira.get_issue_url("TEST-1"), is_external=True)),
+            rx.table.cell("")
+        ),
         rx.table.cell(
             rx.cond(
                 snapshot_element.child_type == 4,
@@ -158,6 +163,7 @@ def iteration_page() -> rx.Component:
                             __header_cell("action", "pickaxe"),
                             __header_cell("expected", "gem"),
                             __header_cell("status", "activity"),
+                            __header_cell("issue", "bug"),
                             __header_cell("", "ellipsis"),
                         ),
                     ),
