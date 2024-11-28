@@ -12,9 +12,7 @@ from datetime import datetime
 
 from sqlmodel import select, asc, or_, func, cast, String, desc
 
-from rxconfig import config
-
-from atlassian import Jira
+from ..utils import jira
 
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
@@ -576,7 +574,10 @@ class CycleState(rx.State):
                         break
 
         #create ticket here
-        self.__create_issue(snapshot_item_id)
+        new_issue = jira.create_issue()
+        issue_url = jira.get_issue_url(new_issue)
+
+        return rx.toast.success(f"new issue created [{new_issue}]: {issue_url}")
 
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)
@@ -784,20 +785,6 @@ class CycleState(rx.State):
         ...
 
     #endregion
-
-    #region Jira
-    def __connect_to_jira(self):
-        jira = Jira(url=config.jira_url, username=config.jira_user, password=config.jira_token)
-
-        return jira
-
-    #endregion
-
-    def __create_issue(self, snapshot_item_id):
-        print(snapshot_item_id)
-        jira = self.__connect_to_jira()
-
-        jira.create_issue(fields=dict(summary="test"))
 
 class AddCycleState(CycleState):
     form_data:dict = {}

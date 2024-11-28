@@ -17,5 +17,5 @@ config = rx.Config(
     jira_user=read_yaml_setting(YAML_JIRA_SECTION, "user"),
     jira_token=read_yaml_setting(YAML_JIRA_SECTION, "token"),
     jira_project=read_yaml_setting(YAML_JIRA_SECTION, "project"),
-    jira_project=read_yaml_setting(YAML_JIRA_SECTION, "issue_type")
+    jira_issue_type=read_yaml_setting(YAML_JIRA_SECTION, "issue_type")
 )
