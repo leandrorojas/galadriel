@@ -84,7 +84,7 @@ class IterationSnapshotStatusModel(rx.Model, table=True):
         d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
         return d
 
-class IterationSnapshotLinkedIssues(rx.Model, table=True):
+class IterationSnapshotLinkedIssues(rx.Model, table=True): #rename to yadahModel
     iteration_snapshot_id:int = Field(foreign_key="iterationsnapshotmodel.id")
     issue_key:str
     created: datetime = Field(

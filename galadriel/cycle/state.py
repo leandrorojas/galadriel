@@ -6,7 +6,7 @@ from ..navigation import routes
 from ..case.model import CaseModel, StepModel, PrerequisiteModel
 from ..scenario.model import ScenarioModel, ScenarioCaseModel
 from ..suite.model import SuiteModel, SuiteChildModel
-from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel
+from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel, IterationSnapshotLinkedIssues
 
 from datetime import datetime
 
@@ -544,6 +544,14 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             self.iteration_snapshot_items = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id).order_by(asc(IterationSnapshotModel.order))).all()
 
+            #get all snapshot elements that have a linked issue
+            for snapshot_item in self.iteration_snapshot_items:
+                linked_issues = session.exec(select(IterationSnapshotLinkedIssues).where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item.id)).one_or_none()
+
+                if linked_issues is not None:
+                    setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
+                    setattr(snapshot_item, "linked_issue_status", jira.get_issue_status(linked_issues.issue_key))
+
     def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int):
         with rx.session() as session:
             iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
@@ -574,13 +582,24 @@ class CycleState(rx.State):
                         break
 
         #create ticket here
-        # new_issue = jira.create_issue()
-        # if (new_issue != ""):
-        #     issue_url = jira.get_issue_url(new_issue)
-        #     return rx.toast.success(f"new issue created [{new_issue}]: {issue_url}")
-        # else:
-        #     return rx.toast.error("error creating the issue, please contact the administrator")
+        new_issue = jira.create_issue()
+        if (new_issue != ""):
+            self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
+            self.get_iteration_snapshot()
+            return rx.toast.success(f"new issue created: {new_issue}")
+        else:
+            return rx.toast.error("error creating the issue, please contact the administrator")
+        
+    def link_issue_to_snapshot_step(self, snapshot_item_id:int, issue_key:str):
+        linked_issue:dict = {"iteration_snapshot_id": f"{snapshot_item_id}", "issue_key": issue_key}
+        with rx.session() as session:
+            issue_to_add = IterationSnapshotLinkedIssues(**linked_issue)
+            session.add(issue_to_add)
+            session.commit()
 
+    def get_previous_steps(self, snapshot_item_id:int) -> rx.Component:
+        return rx.text("these are previous steps HA!")
+    
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)
 

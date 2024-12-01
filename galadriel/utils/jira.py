@@ -40,5 +40,4 @@ def get_issue_status(issue_key) -> str:
         except:
             issue_status = ""
 
-        print(issue_status)
         return issue_status

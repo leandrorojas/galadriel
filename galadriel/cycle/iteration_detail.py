@@ -95,6 +95,42 @@ def __element_status_badge(child_status: str):
     }
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
+# def fail_step_dialog(snapshot_element:IterationSnapshotModel) -> rx.Component:
+#     return rx.dialog.root(
+#         rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY),), 
+#         rx.dialog.content(
+#             rx.hstack(
+#                 rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",),
+#                 rx.vstack(
+#                     rx.dialog.title("Add New Issue", weight="bold", margin="0",),
+#                     rx.dialog.description("yaddah yaddah yaddah", spacing="1", height="100%", align_items="start",), #TODO: fill with something that makes sense
+#                 ),
+#                 height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",
+#             ),
+#         rx.flex(
+#             rx.form.root(
+#                 rx.flex(
+#                     rx.vstack(
+#                         rx.input(name="summary", placeholder="Summary", width="100%",),
+#                         CycleState.get_previous_steps(snapshot_element.id),
+#                         rx.input(name="expected", placeholder="Expected Result", width="100%",),
+#                     ),
+#                     direction="column", spacing="3",
+#                 ),
+#                 rx.flex(
+#                     rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray",),),
+#                     rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue"),),as_child=True,),
+#                     padding_top="2em", spacing="3", mt="4", justify="end",
+#                 ),
+#                 #on_submit=CycleState.fail_iteration_snapshot_step(None, snapshot_element_id),
+#                 reset_on_submit=False,
+#             ),
+#             width="100%", direction="column", spacing="4",
+#         ),
+#         max_width="450px", padding="1.5em", border=f"2px solid {rx.color('accent', 7)}", border_radius="25px",
+#         ),
+#     ),
+
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
     return rx.table.row(
         rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
@@ -116,7 +152,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         )),
         rx.cond(
             snapshot_element.linked_issue != None,
-            rx.table.cell(rx.link("TEST-1", href=jira.get_issue_url("TEST-1"), is_external=True)),
+            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True)),
             rx.table.cell("")
         ),
         rx.table.cell(
@@ -124,7 +160,41 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                 snapshot_element.child_type == 4,
                 rx.flex(
                     rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    #rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
+                    rx.dialog.root(
+                        rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY),), 
+                        rx.dialog.content(
+                            rx.hstack(
+                                rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",),
+                                rx.vstack(
+                                    rx.dialog.title("Add New Issue", weight="bold", margin="0",),
+                                    rx.dialog.description("yaddah yaddah yaddah", spacing="1", height="100%", align_items="start",), #TODO: fill with something that makes sense
+                                ),
+                                height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",
+                            ),
+                        rx.flex(
+                            rx.form.root(
+                                rx.flex(
+                                    rx.vstack(
+                                        rx.input(name="summary", placeholder="Summary", width="100%",),
+                                        rx.text(f"{CycleState.get_previous_steps(getattr(snapshot_element, "id"))}"),
+                                        rx.input(name="expected", placeholder="Expected Result", width="100%",),
+                                    ),
+                                    direction="column", spacing="3",
+                                ),
+                                rx.flex(
+                                    rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray",),),
+                                    rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue"),),as_child=True,),
+                                    padding_top="2em", spacing="3", mt="4", justify="end",
+                                ),
+                                on_submit=CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id")),
+                                reset_on_submit=False,
+                            ),
+                            width="100%", direction="column", spacing="4",
+                        ),
+                        max_width="450px", padding="1.5em", border=f"2px solid {rx.color('accent', 7)}", border_radius="25px",
+                        ),
+                    ),
                     rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
                     spacing="2",
                 ),
