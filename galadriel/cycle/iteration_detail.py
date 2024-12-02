@@ -132,7 +132,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                 rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",),
                                 rx.vstack(
                                     rx.dialog.title("Add New Issue", weight="bold", margin="0",),
-                                    rx.dialog.description("Failed steps will be included in the report description", spacing="1", height="100%", align_items="start",),
+                                    rx.dialog.description("Additional info will be auto-included in the report description", spacing="1", height="100%", align_items="start",),
                                 ),
                                 height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",
                             ),
@@ -140,6 +140,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                             rx.form.root(
                                 rx.flex(
                                     rx.vstack(
+                                        rx.box(rx.input(type="hidden",name="snapshot_item_id", value=snapshot_element.id),display="none",),
                                         rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
                                         rx.input(name="actual", placeholder="Actual Result", width="100%",),
                                         rx.input(name="expected", placeholder="Expected Result", width="100%", default_value=f"{snapshot_element.child_expected}"),
@@ -151,7 +152,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                     rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue"),),as_child=True,),
                                     padding_top="2em", spacing="3", mt="4", justify="end",
                                 ),
-                                on_submit=CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id")),
+                                on_submit=CycleState.fail_iteration_snapshot_step_and_create_issue,
                                 reset_on_submit=False,
                             ),
                             width="100%", direction="column", spacing="4",

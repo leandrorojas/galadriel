@@ -566,7 +566,12 @@ class CycleState(rx.State):
             self.__figure_and_update_iteration_execution_status(iteration_snapshot.iteration_id)
             self.get_iteration_snapshot()
 
-    def fail_iteration_snapshot_step(self, snapshot_item_id:int):
+    def fail_iteration_snapshot_step_and_create_issue(self, form_data: dict):
+        snapshot_item_id:int = form_data.pop("snapshot_item_id")
+        summary:str = form_data.pop("summary")
+        actual_result:str = form_data.pop("actual")
+        expected_result:str = form_data.pop("expected")
+        
         self.__update_iteration_snapshot_step(snapshot_item_id, 2)
 
         #block the remainning steps on the case
@@ -581,8 +586,24 @@ class CycleState(rx.State):
                     else:
                         break
 
+        #work summary & description to send to the issue creation
+        issue_summary = ""
+        issue_description = ""
+
+        #search the previous steps
+        with rx.session() as session:
+            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+            previous_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order < iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
+
+            if (previous_steps != None):
+                for prev_step in previous_steps:
+                    if prev_step.child_name == None:
+                        self.__update_iteration_snapshot_step(prev_step.id, 5)
+                    else:
+                        break
+
         #create ticket here
-        new_issue = jira.create_issue()
+        new_issue = jira.create_issue(issue_summary, issue_description)
         if (new_issue != ""):
             self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
             self.get_iteration_snapshot()

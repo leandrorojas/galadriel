@@ -13,7 +13,7 @@ def __connect_to_jira():
     return jira_cnn
 
 
-def create_issue() -> str:
+def create_issue(summary:str, description:str) -> str:
     jira = __connect_to_jira()
 
     if jira is not None:
