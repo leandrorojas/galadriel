@@ -550,7 +550,7 @@ class CycleState(rx.State):
 
                 if linked_issues is not None:
                     setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
-                    setattr(snapshot_item, "linked_issue_status", jira.get_issue_status(linked_issues.issue_key))
+                    #setattr(snapshot_item, "linked_issue_status", jira.get_issue_status(linked_issues.issue_key))
 
     def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int):
         with rx.session() as session:
@@ -597,8 +597,9 @@ class CycleState(rx.State):
             session.add(issue_to_add)
             session.commit()
 
-    def get_previous_steps(self, snapshot_item_id:int) -> rx.Component:
-        return rx.text("these are previous steps HA!")
+    def get_previous_steps(self, snapshot_item_id:int) -> str:
+        print (f"{snapshot_item_id}")
+        return "these are previous steps HA!"
     
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)

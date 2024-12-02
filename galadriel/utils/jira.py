@@ -2,6 +2,8 @@ from rxconfig import config
 
 from atlassian import Jira
 
+from datetime import datetime
+
 def __connect_to_jira():
     try:
         jira_cnn = Jira(url=config.jira_url, username=config.jira_user, password=config.jira_token, cloud=True)
@@ -36,7 +38,7 @@ def get_issue_status(issue_key) -> str:
 
     if jira is not None:
         try:
-            issue_status = jira.get_issue_status(issue_key)
+            issue_status = jira.get_issue_status(issue_key) #TODO in GAL-216 --> this is causing delays. Try to shift to requests library and manage Jira as a class (keep connection alive)
         except:
             issue_status = ""
 
