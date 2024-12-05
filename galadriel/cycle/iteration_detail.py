@@ -124,40 +124,33 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                 snapshot_element.child_type == 4,
                 rx.flex(
                     rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    # rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id"))),
-                    rx.dialog.root(
-                        rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY),), 
-                        rx.dialog.content(
-                            rx.hstack(
-                                rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",),
-                                rx.vstack(
-                                    rx.dialog.title("Add New Issue", weight="bold", margin="0",),
-                                    rx.dialog.description("Failed steps will be included in the report description", spacing="1", height="100%", align_items="start",),
-                                ),
-                                height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",
-                            ),
-                        rx.flex(
-                            rx.form.root(
+                    rx.cond(
+                        snapshot_element.linked_issue == None,
+                        rx.dialog.root(
+                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY),), 
+                            rx.dialog.content(
+                                rx.hstack(rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",), rx.vstack(rx.dialog.title("Add New Issue", weight="bold", margin="0",), rx.dialog.description("Additional info will be auto-included in the report description", spacing="1", height="100%", align_items="start",),), height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",),
                                 rx.flex(
-                                    rx.vstack(
-                                        rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
-                                        rx.input(name="actual", placeholder="Actual Result", width="100%",),
-                                        rx.input(name="expected", placeholder="Expected Result", width="100%", default_value=f"{snapshot_element.child_expected}"),
-                                    ),
-                                    direction="column", spacing="3",
-                                ),
-                                rx.flex(
-                                    rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray",),),
-                                    rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue"),),as_child=True,),
-                                    padding_top="2em", spacing="3", mt="4", justify="end",
-                                ),
-                                on_submit=CycleState.fail_iteration_snapshot_step(getattr(snapshot_element, "id")),
-                                reset_on_submit=False,
+                                    rx.form.root(
+                                        rx.flex(
+                                            rx.vstack(
+                                                rx.box(rx.input(type="hidden",name="snapshot_item_id", value=snapshot_element.id),display="none",),
+                                                rx.box(rx.checkbox(type="hidden",name="just_fail", checked=CycleState.fail_checkbox),display="none",),
+                                                rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
+                                                rx.input(name="actual", placeholder="Actual Result", width="100%",),
+                                                rx.input(name="expected", placeholder="Expected Result", width="100%", default_value=f"{snapshot_element.child_expected}"),
+                                            ), direction="column", spacing="3",
+                                        ),
+                                        rx.flex(
+                                            rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray",),),
+                                            rx.dialog.close(rx.button("Fail Case", color_scheme="gray", on_click=CycleState.toggle_fail_checkbox)),
+                                            rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue", type="submit"),),as_child=True,),
+                                            padding_top="2em", spacing="3", mt="4", justify="end",
+                                        ), reset_on_submit=False, on_submit=CycleState.fail_iteration_snapshot_step_and_create_issue,), width="100%", direction="column", spacing="4",
+                                ), max_width="450px", padding="1.5em", border=f"2px solid {rx.color('accent', 7)}", border_radius="25px",
                             ),
-                            width="100%", direction="column", spacing="4",
                         ),
-                        max_width="450px", padding="1.5em", border=f"2px solid {rx.color('accent', 7)}", border_radius="25px",
-                        ),
+                        rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=True),
                     ),
                     rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, "id"))),
                     spacing="2",
