@@ -8,3 +8,4 @@ alembic.ini
 alembic/
 assets/external/
 galadriel.yaml
+.vscode/

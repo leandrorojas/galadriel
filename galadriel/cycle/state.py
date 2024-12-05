@@ -17,6 +17,8 @@ from ..utils import jira
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
 
+SITE_URL = "http://localhost:3000/"
+
 RETURN_VALUE = 0
 class CycleState(rx.State):
     cycles: List['CycleModel'] = []
@@ -590,20 +592,36 @@ class CycleState(rx.State):
             with rx.session() as session:
                 iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()        
 
-                previous_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order < iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(asc(IterationSnapshotModel.order))).all() 
+                previous_steps:IterationSnapshotModel = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.order < iteration_snapshot.order, IterationSnapshotModel.iteration_id == iteration_snapshot.iteration_id).order_by(desc(IterationSnapshotModel.order))).all() 
                 if (previous_steps != None):
                     #work summary & description to send to the issue creation
                     issue_summary:str = form_data.pop("summary")
                     actual_result:str = form_data.pop("actual")
                     expected_result:str = form_data.pop("expected")
+                    step_count = 0
                     
                     issue_description = ""
                     
                     for prev_step in previous_steps:
-                        if prev_step.child_name == None:
-                            self.__update_iteration_snapshot_step(prev_step.id, 5)
-                        else:
+                        if prev_step.child_name != None: 
+                            issue_summary = f"[{str(prev_step.child_name).replace("[P] ", "")}]: {issue_summary}"
                             break
+
+                        step_count = step_count + 1
+                        issue_description = f"{issue_description}{step_count}. {prev_step.child_action}"
+
+                        if (prev_step.child_expected != ""):
+                            issue_description = f"{issue_description} --> {prev_step.child_expected}"
+
+                        issue_description = f"{issue_description}\n"
+
+                    if actual_result != "":
+                        actual_result = f"\nActual Result: {actual_result}"
+
+                    if expected_result != "":
+                        expected_result = f"\nExpected Result: {expected_result}"
+
+                    issue_description = f"{issue_description}{expected_result}{actual_result}\n\nsource: {SITE_URL}{self.iteration_url}"
 
             #create ticket here
             new_issue = jira.create_issue(issue_summary, issue_description)

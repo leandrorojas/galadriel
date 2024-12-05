@@ -18,7 +18,7 @@ def create_issue(summary:str, description:str) -> str:
 
     if jira is not None:
         try:
-            new_issue = jira.issue_create(fields=dict(summary="testing", project = dict(key=config.jira_project), issuetype = dict(name=config.jira_issue_type)))
+            new_issue = jira.issue_create(fields=dict(summary=summary, description=description, project = dict(key=config.jira_project), issuetype = dict(name=config.jira_issue_type)))
             issue_key = new_issue["key"]
         except:
             issue_key = ""
