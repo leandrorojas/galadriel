@@ -548,10 +548,10 @@ class CycleState(rx.State):
 
             #get all snapshot elements that have a linked issue
             for snapshot_item in self.iteration_snapshot_items:
-                linked_issues = session.exec(select(IterationSnapshotLinkedIssues).where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item.id)).first() #TODO: multiple issues
+                linked_issues = session.exec(select(IterationSnapshotLinkedIssues).where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item.id).where(IterationSnapshotLinkedIssues.unlinked == None)).one_or_none()
 
                 if linked_issues is not None:
-                    setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
+                    setattr(snapshot_item, "linked_issue", linked_issues.issue_key)        
                     #setattr(snapshot_item, "linked_issue_status", jira.get_issue_status(linked_issues.issue_key))
 
     def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int):
@@ -625,12 +625,16 @@ class CycleState(rx.State):
 
             #create ticket here
             new_issue = jira.create_issue(issue_summary, issue_description)
+            self.turn_on_fail_checkbox()
             if (new_issue != ""):
                 self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
                 self.get_iteration_snapshot()
                 return rx.toast.success(f"new issue created: {new_issue}")
             else:
                 return rx.toast.error("error creating the issue, please contact the administrator")
+            
+    def unlink_jira_issue(self, snapshot_item_id:int):
+        print(f"unliked mfk! {snapshot_item_id}")
         
     def link_issue_to_snapshot_step(self, snapshot_item_id:int, issue_key:str):
         linked_issue:dict = {"iteration_snapshot_id": f"{snapshot_item_id}", "issue_key": issue_key}
@@ -822,8 +826,11 @@ class CycleState(rx.State):
     def fail_checkbox(self) -> bool:
         return self.__fail_checkbox
     
-    def toggle_fail_checkbox(self):
-        self.__fail_checkbox = not(self.__fail_checkbox)
+    def turn_on_fail_checkbox(self):
+        self.__fail_checkbox = True
+
+    def turn_off_fail_checkbox(self):
+        self.__fail_checkbox = False
         
     def __figure_and_update_iteration_execution_status(self, iteration_id:int):
         with rx.session() as session:

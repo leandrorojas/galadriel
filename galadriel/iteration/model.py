@@ -87,6 +87,7 @@ class IterationSnapshotStatusModel(rx.Model, table=True):
 class IterationSnapshotLinkedIssues(rx.Model, table=True): #rename to yadahModel
     iteration_snapshot_id:int = Field(foreign_key="iterationsnapshotmodel.id")
     issue_key:str
+    unlinked: bool = Field(nullable=True)
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),
