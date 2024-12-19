@@ -116,7 +116,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         )),
         rx.cond(
             snapshot_element.linked_issue != None,
-            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), color_scheme="red", size="1", on_click= lambda: CycleState.unlink_jira_issue(getattr(snapshot_element, "id"))), align="center"),
+            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, "id"))), align="center"),
             rx.table.cell("")
         ), #rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True)
         rx.table.cell(

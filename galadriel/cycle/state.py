@@ -633,8 +633,16 @@ class CycleState(rx.State):
             else:
                 return rx.toast.error("error creating the issue, please contact the administrator")
             
-    def unlink_jira_issue(self, snapshot_item_id:int):
-        print(f"unliked mfk! {snapshot_item_id}")
+    def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):
+        with rx.session() as session:
+            linked_issue = session.exec(IterationSnapshotLinkedIssues.select().where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item_id)).one_or_none()
+            if (linked_issue != None):
+                setattr(linked_issue, "unlinked", True)
+                session.add(linked_issue)
+                session.commit()
+                session.refresh(linked_issue)
+                self.get_iteration_snapshot()
+                return rx.toast.info(f"issue unlinked")
         
     def link_issue_to_snapshot_step(self, snapshot_item_id:int, issue_key:str):
         linked_issue:dict = {"iteration_snapshot_id": f"{snapshot_item_id}", "issue_key": issue_key}
@@ -642,10 +650,6 @@ class CycleState(rx.State):
             issue_to_add = IterationSnapshotLinkedIssues(**linked_issue)
             session.add(issue_to_add)
             session.commit()
-
-    def get_previous_steps(self, snapshot_item_id:int) -> str:
-        print (f"{snapshot_item_id}")
-        return "these are previous steps HA!"
     
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
         self.__update_iteration_snapshot_step(snapshot_item_id, 3)
