@@ -116,9 +116,9 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         )),
         rx.cond(
             snapshot_element.linked_issue != None,
-            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True)),
+            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, "id"))), align="center"),
             rx.table.cell("")
-        ),
+        ), #rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True)
         rx.table.cell(
             rx.cond(
                 snapshot_element.child_type == 4,
@@ -143,8 +143,8 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                         ),
                                         rx.flex(
                                             rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray",),),
-                                            rx.dialog.close(rx.button("Fail Case", color_scheme="gray", on_click=CycleState.toggle_fail_checkbox)),
-                                            rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue", type="submit"),),as_child=True,),
+                                            rx.dialog.close(rx.button("Fail Case", color_scheme="gray", on_click=CycleState.turn_on_fail_checkbox)),
+                                            rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue", type="submit", on_click=CycleState.turn_off_fail_checkbox,),),as_child=True,),
                                             padding_top="2em", spacing="3", mt="4", justify="end",
                                         ), reset_on_submit=False, on_submit=CycleState.fail_iteration_snapshot_step_and_create_issue,), width="100%", direction="column", spacing="4",
                                 ), max_width="450px", padding="1.5em", border=f"2px solid {rx.color('accent', 7)}", border_radius="25px",
