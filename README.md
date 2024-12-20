@@ -1,13 +1,16 @@
 # galadriel
 galadriel is a Test Management System
 
-
-a simple, badly-designed, extremelly code-inefficient and unoptimized Test Management System, which inherits inspiration from testlink. Built with Reflex It's built to work, but feel free to turn it into a perfect community product. The only request is that you commit your changes to this repo for everyone to enjoy (?).
+A simple but yet straight to the point and functional Test Management System, which inherits inspiration from testlink and other existing tools.
 
 requirements:
-* reflex 0.6.5
+* reflex 0.6.7
 * reflex-local-auth 0.2.2
 * PyYAML 6.0.2
+
+Feel free to turn it into the perfect community product. The request is that you commit your changes to this repo for everyone to enjoy them.
+
+Built with Reflex, built to work.
 
 If you want to contribute, galadriel currently needs:
 * unit tests
