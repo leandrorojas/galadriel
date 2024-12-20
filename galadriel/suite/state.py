@@ -31,7 +31,7 @@ class SuiteState(rx.State):
     search_scenario_value:str = ""
 
     @rx.var
-    def suite_id(self):
+    def suite_id(self) -> str:
         #print(self.router.page.params)
         return self.router.page.params.get("id", "")
     

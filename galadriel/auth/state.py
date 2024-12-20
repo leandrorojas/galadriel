@@ -34,7 +34,7 @@ class Register(reflex_local_auth.RegistrationState):
 class Session(reflex_local_auth.LocalAuthState):
 
     @rx.var(cache=True)
-    def my_user_id(self) -> Optional[str]:
+    def my_user_id(self) -> Optional[int]:
         if self.authenticated_user.id < 0:
             return
         return self.authenticated_user.id
