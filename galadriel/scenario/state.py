@@ -23,7 +23,7 @@ class ScenarioState(rx.State):
     search_value:str = ""
 
     @rx.var
-    def scenario_id(self):
+    def scenario_id(self) -> str:
         #print(self.router.page.params)
         return self.router.page.params.get("id", "")
     

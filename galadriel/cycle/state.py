@@ -25,7 +25,7 @@ class CycleState(rx.State):
     cycle: Optional['CycleModel'] = None
 
     @rx.var
-    def cycle_id(self):
+    def cycle_id(self) -> str:
         #print(self.router.page.params)
         return self.router.page.params.get("id", "")
     

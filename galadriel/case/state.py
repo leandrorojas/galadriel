@@ -24,7 +24,7 @@ class CaseState(rx.State):
     show_search:bool = False
 
     @rx.var
-    def case_id(self):
+    def case_id(self) -> str:
         #print(self.router.page.params)
         return self.router.page.params.get("id", "") 
     
