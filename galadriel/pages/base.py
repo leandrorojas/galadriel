@@ -1,5 +1,4 @@
 import reflex as rx
-import reflex_local_auth
 from ..ui.components import TopNavBar, SideBar
 from ..auth.state import Session
 
