@@ -83,22 +83,27 @@ def scenarios_list_page() -> rx.Component:
     title_tooltip = Tooltip()
 
     scenario_list_content = rx.vstack(
-            rx.flex(
-                title_badge.title("route", "Test Scenarios"),
-                title_tooltip.info("Group of Test Cases executed in a specific order"),
-                rx.spacer(),
-                rx.hstack(__add_scenario_button(),),
-                spacing="2",
-                flex_direction=["column", "column", "row"],
-                align="center",
-                width="100%",
-                top="0px",
-                padding_top="2em",       
-            ),
-            __table(),
-            spacing="5",
+        rx.flex(
+            title_badge.title("route", "Test Scenarios"),
+            title_tooltip.info("Group of Test Cases executed in a specific order"),
+            rx.spacer(),
+            rx.hstack(__add_scenario_button(),),
+            spacing="2",
+            flex_direction=["column", "column", "row"],
             align="center",
-            min_height="85vh"
+            width="100%",
+            top="0px",
+            padding_top="2em",       
         ),
+        rx.scroll_area(
+            __table(),
+            type="hover",
+            scrollbars="vertical",
+            style={"height": "85vh"},
+        ),
+        spacing="5",
+        align="center",
+        min_height="85vh"
+    ),
 
     return base_page(scenario_list_content)
