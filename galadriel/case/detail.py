@@ -197,7 +197,7 @@ def case_detail_page() -> rx.Component:
                     ),                   
                 __prerequisites_table()
             ),
-        ),        
+        ),
         rx.vstack(
             rx.hstack(rx.icon("test-tube"), rx.heading("Steps", size="5",)),
             step_add_form(),

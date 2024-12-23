@@ -155,22 +155,27 @@ def cycle_list_page() -> rx.Component:
     title_tooltip = Tooltip()
 
     cycle_list_content = rx.vstack(
-            rx.flex(
-                title_badge.title("flask-round", "Cycles"),
-                title_tooltip.info("List of Cycles to execute"),
-                rx.spacer(),
-                rx.hstack(__add_adhoc_cycle_button(),),
-                spacing="2",
-                flex_direction=["column", "column", "row"],
-                align="center",
-                width="100%",
-                top="0px",
-                padding_top="2em",
-            ),
-            __table(),
-            spacing="5",
+        rx.flex(
+            title_badge.title("flask-round", "Cycles"),
+            title_tooltip.info("List of Cycles to execute"),
+            rx.spacer(),
+            rx.hstack(__add_adhoc_cycle_button(),),
+            spacing="2",
+            flex_direction=["column", "column", "row"],
             align="center",
-            min_height="85vh"
+            width="100%",
+            top="0px",
+            padding_top="2em",
         ),
+        rx.scroll_area(
+            __table(),
+            type="hover",
+            scrollbars="vertical",
+            style={"height": "85vh"},
+        ),
+        spacing="5",
+        align="center",
+        min_height="85vh"
+    ),
 
     return base_page(cycle_list_content)
