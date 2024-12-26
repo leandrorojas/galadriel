@@ -7,6 +7,7 @@ requirements:
 * reflex 0.6.7
 * reflex-local-auth 0.2.2
 * PyYAML 6.0.2
+* atlassian-python-api 3.41.16
 
 Feel free to turn it into the perfect community product. The request is that you commit your changes to this repo for everyone to enjoy them.
 
