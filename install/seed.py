@@ -1,171 +1,86 @@
-from alembic import op
-from sqlalchemy import Table, MetaData
+import reflex as rx
+from ..galadriel import cycle, iteration, suite
 
-#cyclechildtypemodel
-cyclechildtype_metadata = MetaData(bind=op.get_bind())
-cyclechildtype_metadata.reflect(only=('cyclechildtypemodel',))
+cycle_child_types: cycle.CycleChildTypeModel = []
+cycle_status: cycle.CycleStatusModel = []
+iteration_snapshot_status: iteration.IterationSnapshotStatusModel = []
+iteration_status: iteration.IterationStatusModel = []
+suite_tyoe: suite.SuiteChildTypeModel = []
 
-# define table representation
-cyclechildtypemodel_table = Table('cyclechildtypemodel', cyclechildtype_metadata)
+cycle_child_types = [
+    {"id":1, "type_name": "Suite",},
+    {"id":2,"type_name": "Scenario",},
+    {"id":3,"type_name": "Case",},
+    {"id":4,"type_name": "Step",},
+]
 
-# insert records
-op.bulk_insert(
-    cyclechildtypemodel_table,
-    [
-        {
-            "id":1,
-            "type_name": "Suite",
-        },
-        {
-            "id":2,
-            "type_name": "Scenario",
-        },
-        {
-            "id":3,
-            "type_name": "Case",
-        },
-        {
-            "id":4,
-            "type_name": "Step",
-        },
-    ],
-)
+cycle_statuses = [
+    {"id":0,"type_name": "passed",},
+    {"id":1,"type_name": "failed",},
+]
 
-cyclechildtypemodel_table = None
-cyclechildtype_metadata = None
+iteration_snapshot_statuses = [
+    {"id":1,"type_name": "to do",},
+    {"id":2,"type_name": "failed",},
+    {"id":3,"type_name": "pass",},
+    {"id":4,"type_name": "skipped",},
+    {"id":5,"type_name": "blocked",},
+]
 
-#cyclestatusmodel
-cyclestatus_metadata = MetaData(bind=op.get_bind())
-cyclestatus_metadata.reflect(only=('cyclestatusmodel',))
+iteration_statuses = [
+    {"id":0,"type_name": "not started",},
+    {"id":1,"type_name": "in progress",},
+    {"id":2,"type_name": "on hold",},
+    {"id":3,"type_name": "closed",},
+    {"id":4,"type_name": "completed",},
+]
 
-# define table representation
-cyclestatusmodel_table = Table('cyclestatusmodel', cyclestatus_metadata)
+suite_tyoes = [
+    {"id":0,"type_name": "not started",},
+    {"id":1,"type_name": "in progress",},
+    {"id":2,"type_name": "on hold",},
+    {"id":3,"type_name": "closed",},
+    {"id":4,"type_name": "completed",},
+]
 
-# insert records
-op.bulk_insert(
-    cyclestatusmodel_table,
-    [
-        {
-            "id":0,
-            "type_name": "passed",
-        },
-        {
-            "id":1,
-            "type_name": "failed",
-        },
-    ],
-)
+for cycle_child_type in cycle_child_types:
+    with rx.session() as session:
+        cycle_child_type = cycle.CycleChildTypeModel(**cycle_child_type)
+        session.add(cycle_child_type)
+        session.commit()
 
-cyclestatusmodel_table = None
-cyclestatus_metadata = None
+for cycle_status in cycle_statuses:
+    with rx.session() as session:
+        cycle_status = cycle.CycleStatusModel(**cycle_status)
+        session.add(cycle_status)
+        session.commit()
 
-#iterationsnapshotstatusmodel
-iterationsnapshotstatus_metadata = MetaData(bind=op.get_bind())
-iterationsnapshotstatus_metadata.reflect(only=('iterationsnapshotstatusmodel',))
+for iteration_snapshot_status in iteration_snapshot_statuses:
+    with rx.session() as session:
+        iteration_snapshot_status = iteration.IterationSnapshotStatusModel(**iteration_snapshot_status)
+        session.add(iteration_snapshot_status)
+        session.commit()
 
-# define table representation
-iterationsnapshotstatusmodel_table = Table('iterationsnapshotstatusmodel', iterationsnapshotstatus_metadata)
+for iteration_status in iteration_statuses:
+    with rx.session() as session:
+        iteration_status = iteration.IterationStatusModel(**iteration_status)
+        session.add(iteration_status)
+        session.commit()
 
-# insert records
-op.bulk_insert(
-    iterationsnapshotstatusmodel_table,
-    [
-        {
-            "id":1,
-            "type_name": "to do",
-        },
-        {
-            "id":2,
-            "type_name": "failed",
-        },
-        {
-            "id":3,
-            "type_name": "pass",
-        },
-        {
-            "id":4,
-            "type_name": "skipped",
-        },
-        {
-            "id":5,
-            "type_name": "blocked",
-        },
-    ],
-)
+for suite_type in suite_tyoes:
+    with rx.session() as session:
+        suite_type = suite.SuiteChildTypeModel(**suite_type)
+        session.add(suite_type)
+        session.commit()
 
-iterationsnapshotstatusmodel_table = None
-iterationsnapshotstatus_metadata = None
+# def insert_seed_data(self, form_data:dict):
+#     if form_data["name"] == "": return "name"
+#     if form_data["threshold"] == "": return "threshold"
+#     with rx.session() as session:
+#         cycle = CycleModel(**form_data)
+#         session.add(cycle)
+#         session.commit()
+#         session.refresh(cycle)
+#         self.cycle = cycle
 
-#iterationstatusmodel
-iterationstatus_metadata = MetaData(bind=op.get_bind())
-iterationstatus_metadata.reflect(only=('iterationstatusmodel',))
-
-# define table representation
-iterationstatusmodel_table = Table('iterationstatusmodel', iterationstatus_metadata)
-
-# insert records
-op.bulk_insert(
-    iterationstatusmodel_table,
-    [
-        {
-            "id":0,
-            "type_name": "not started",
-        },
-        {
-            "id":1,
-            "type_name": "in progress",
-        },
-        {
-            "id":2,
-            "type_name": "on hold",
-        },
-        {
-            "id":3,
-            "type_name": "closed",
-        },
-        {
-            "id":4,
-            "type_name": "completed",
-        },
-    ],
-)
-
-iterationstatusmodel_table = None
-iterationstatus_metadata = None
-
-#suitechildtypemodel
-suitechildtype_metadata = MetaData(bind=op.get_bind())
-suitechildtype_metadata.reflect(only=('suitechildtypemodel',))
-
-# define table representation
-suitechildtypemodel_table = Table('suitechildtypemodel', suitechildtype_metadata)
-
-# insert records
-op.bulk_insert(
-    suitechildtypemodel_table,
-    [
-        {
-            "id":0,
-            "type_name": "not started",
-        },
-        {
-            "id":1,
-            "type_name": "in progress",
-        },
-        {
-            "id":2,
-            "type_name": "on hold",
-        },
-        {
-            "id":3,
-            "type_name": "closed",
-        },
-        {
-            "id":4,
-            "type_name": "completed",
-        },
-    ],
-)
-
-suitechildtypemodel_table = None
-suitechildtype_metadata = None
+#         return RETURN_VALUE
