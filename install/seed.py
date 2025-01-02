@@ -1,6 +1,8 @@
 import reflex as rx
 from ..galadriel import cycle, iteration, suite
 
+from ..galadriel.config import ConfigModel
+
 cycle_child_types: cycle.CycleChildTypeModel = []
 cycle_status: cycle.CycleStatusModel = []
 iteration_snapshot_status: iteration.IterationSnapshotStatusModel = []
@@ -43,44 +45,40 @@ suite_tyoes = [
     {"id":4,"type_name": "completed",},
 ]
 
-for cycle_child_type in cycle_child_types:
+def first_run() -> bool:
     with rx.session() as session:
-        cycle_child_type = cycle.CycleChildTypeModel(**cycle_child_type)
-        session.add(cycle_child_type)
-        session.commit()
+        to_return = session.exec(ConfigModel.select().where(ConfigModel.name == "")).one_or_none()
 
-for cycle_status in cycle_statuses:
-    with rx.session() as session:
-        cycle_status = cycle.CycleStatusModel(**cycle_status)
-        session.add(cycle_status)
-        session.commit()
+        return (to_return == None)
+        
 
-for iteration_snapshot_status in iteration_snapshot_statuses:
-    with rx.session() as session:
-        iteration_snapshot_status = iteration.IterationSnapshotStatusModel(**iteration_snapshot_status)
-        session.add(iteration_snapshot_status)
-        session.commit()
+def insert_seed_data():
+    for cycle_child_type in cycle_child_types:
+        with rx.session() as session:
+            cycle_child_type = cycle.CycleChildTypeModel(**cycle_child_type)
+            session.add(cycle_child_type)
+            session.commit()
 
-for iteration_status in iteration_statuses:
-    with rx.session() as session:
-        iteration_status = iteration.IterationStatusModel(**iteration_status)
-        session.add(iteration_status)
-        session.commit()
+    for cycle_status in cycle_statuses:
+        with rx.session() as session:
+            cycle_status = cycle.CycleStatusModel(**cycle_status)
+            session.add(cycle_status)
+            session.commit()
 
-for suite_type in suite_tyoes:
-    with rx.session() as session:
-        suite_type = suite.SuiteChildTypeModel(**suite_type)
-        session.add(suite_type)
-        session.commit()
+    for iteration_snapshot_status in iteration_snapshot_statuses:
+        with rx.session() as session:
+            iteration_snapshot_status = iteration.IterationSnapshotStatusModel(**iteration_snapshot_status)
+            session.add(iteration_snapshot_status)
+            session.commit()
 
-# def insert_seed_data(self, form_data:dict):
-#     if form_data["name"] == "": return "name"
-#     if form_data["threshold"] == "": return "threshold"
-#     with rx.session() as session:
-#         cycle = CycleModel(**form_data)
-#         session.add(cycle)
-#         session.commit()
-#         session.refresh(cycle)
-#         self.cycle = cycle
+    for iteration_status in iteration_statuses:
+        with rx.session() as session:
+            iteration_status = iteration.IterationStatusModel(**iteration_status)
+            session.add(iteration_status)
+            session.commit()
 
-#         return RETURN_VALUE
+    for suite_type in suite_tyoes:
+        with rx.session() as session:
+            suite_type = suite.SuiteChildTypeModel(**suite_type)
+            session.add(suite_type)
+            session.commit()
