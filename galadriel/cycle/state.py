@@ -604,7 +604,7 @@ class CycleState(rx.State):
                     
                     for prev_step in previous_steps:
                         if prev_step.child_name != None: 
-                            issue_summary = f"[{str(prev_step.child_name).replace("[P] ", "")}]: {issue_summary}"
+                            issue_summary = f"[{str(prev_step.child_name).replace('[P] ', '')}]: {issue_summary}"
                             break
 
                         step_count = step_count + 1
