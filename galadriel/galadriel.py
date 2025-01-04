@@ -8,7 +8,7 @@ from . import suite
 from . import scenario
 from . import case
 from . import cycle
-from ..install import seed
+from . import install
 
 #galadriel
 from .pages import base_page, about_page, about_content
@@ -52,8 +52,11 @@ app = rx.App(
     },
 )
 
-if (seed.first_run() == True):
-    seed.insert_seed_data()
+seed = install.seed
+
+if (seed.is_first_run() == True):
+    seed.seed_db()
+    seed.set_first_run()
 
 app.add_page(index, title="galadriel")
 

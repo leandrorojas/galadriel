@@ -1,4 +1,4 @@
-from model import ConfigModel
+from .model import ConfigModel
 
 __all__ = [
     'ConfigModel',
