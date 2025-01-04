@@ -9,18 +9,23 @@ A simple but yet straight to the point and functional Test Management System, wh
 * PyYAML 6.0.2
 * atlassian-python-api 3.41.16
 
-## install
+## first run
 * clone the repo: ```git clone https://github.com/leandrorojas/galadriel.git```
 * create an virtual environment i.e.: ```python -m venv .venv/```
 * activate the venv ```source .venv/bin/activate```
 * install prerequisietes ```pip install -r requirements.txt```
+* comment these lines on the galadriel.py:
+    ```
+    seed = install.seed
+    if (seed.is_first_run() == True):
+        seed.seed_db()
+        seed.set_first_run()
+    ```
+
 * execute the command ```reflex db init```
+* uncomment the lines
 * execute the command ```reflex run```
 * done!
-
-### fixing install errors
-```TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument: 'recursive_guard'```
-
 
 Feel free to turn it into the perfect community product. The request is that you commit your changes to this repo for everyone to enjoy them.
 
