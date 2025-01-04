@@ -8,6 +8,7 @@ from . import suite
 from . import scenario
 from . import case
 from . import cycle
+from . import install
 
 #galadriel
 from .pages import base_page, about_page, about_content
@@ -50,6 +51,12 @@ app = rx.App(
         "font_size": "16px",
     },
 )
+
+seed = install.seed
+
+if (seed.is_first_run() == True):
+    seed.seed_db()
+    seed.set_first_run()
 
 app.add_page(index, title="galadriel")
 

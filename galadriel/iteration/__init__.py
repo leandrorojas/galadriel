@@ -1,5 +1,7 @@
-from .model import IterationSnapshotModel
+from .model import IterationSnapshotModel, IterationSnapshotStatusModel, IterationStatusModel
 
 __all__ = [
-    'IterationSnapshotModel'
+    'IterationSnapshotModel',
+    'IterationSnapshotStatusModel',
+    'IterationStatusModel',
 ]
