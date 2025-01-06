@@ -34,7 +34,6 @@ def __scenario_detail_button() -> rx.Component:
 @reflex_local_auth.require_login
 def scenario_edit_page() -> rx.Component:
     my_form = forms.scenario_edit_form()
-    scenario = EditScenarioState.scenario
     title_badge = Badge()
 
     scenario_edit_content = rx.vstack(

@@ -34,7 +34,6 @@ def __suite_detail_button() -> rx.Component:
 @reflex_local_auth.require_login
 def suite_edit_page() -> rx.Component:
     my_form = forms.suite_edit_form()
-    suite = EditSuiteState.suite
     title_badge = Badge()
 
     suite_edit_content = rx.vstack(

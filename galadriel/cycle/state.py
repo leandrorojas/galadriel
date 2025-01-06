@@ -856,9 +856,6 @@ class CycleState(rx.State):
             session.commit()
             session.refresh(iteration)
 
-    def __figure_cycle_status(self):
-        ...
-
     #endregion
 
 class AddCycleState(CycleState):
