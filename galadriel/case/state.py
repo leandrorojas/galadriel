@@ -10,8 +10,6 @@ if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
 
 RETURN_VALUE = 0
 
-#TODO: rename "prerequisite_id" to another meaningful name like: "selected_case_id", selected_id or "selected_prerequisite_case_id". It has to mean that you are selecting a case_id
-
 class CaseState(rx.State):
     cases: List['CaseModel'] = []
     case: Optional['CaseModel'] = None
@@ -253,8 +251,6 @@ class CaseState(rx.State):
                     if linked_prerequisite.order > max_order:
                         max_order = linked_prerequisite.order
                 new_prerequisite_order = max_order + 1
-
-                #TODO: if failes in othe add name of the Test Case here?
 
         prerequisite_data.update({"case_id":self.case_id})
         prerequisite_data.update({"prerequisite_id":prerequisite_id})

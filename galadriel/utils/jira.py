@@ -35,7 +35,7 @@ def get_issue_status(issue_key) -> str:
 
     if jira is not None:
         try:
-            issue_status = jira.get_issue_status(issue_key) #TODO in GAL-216 --> this is causing delays. Try to shift to requests library and manage Jira as a class (keep connection alive)
+            issue_status = jira.get_issue_status(issue_key)
         except:
             issue_status = ""
 

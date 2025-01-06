@@ -150,7 +150,7 @@ def __steps_table() -> rx.Component:
 def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
-    can_edit = True #TODO: add roles and privileges
+    can_edit = True
     edit_link = __case_edit_button()
 
     edit_link_element = rx.cond(

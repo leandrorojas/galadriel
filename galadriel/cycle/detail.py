@@ -186,7 +186,7 @@ def __cycle_children_table() -> rx.Component:
 @reflex_local_auth.require_login
 def cycle_detail_page() -> rx.Component:
     title_badge = Badge()
-    can_edit = True #TODO: add roles and privileges
+    can_edit = True
     edit_link = __cycle_edit_button()
 
     edit_link_element = rx.cond(
