@@ -1,5 +1,6 @@
 import reflex as rx
 from .base import base_page
+from ..utils import consts
 
 def about_content() -> rx.Component:
     about_content_var = rx.vstack(
@@ -18,7 +19,7 @@ def about_content() -> rx.Component:
         spacing="5",
         justify="center",
         align="center",
-        min_height="85vh",
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
 
     return about_content_var

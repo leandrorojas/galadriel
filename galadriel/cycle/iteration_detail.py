@@ -6,7 +6,7 @@ from ..navigation import routes
 from ..ui.components import Badge, Tooltip
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
-from ..utils import jira
+from ..utils import jira, consts
 
 READ_ONLY = False
 
@@ -202,7 +202,7 @@ def iteration_page() -> rx.Component:
             ),
             type="hover",
             scrollbars="vertical",
-            style={"height": "85vh"},
+            style={"height": consts.RELATIVE_VIEWPORT_85},
         ),
         spacing="5",
         align="center",

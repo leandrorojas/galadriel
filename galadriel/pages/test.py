@@ -3,6 +3,7 @@ import reflex_local_auth
 from ..pages.base import base_page
 
 from .. import navigation
+from ..utils import consts
 
 @reflex_local_auth.require_login
 def protetected_page() -> rx.Component:
@@ -20,7 +21,7 @@ def protetected_page() -> rx.Component:
         spacing="5",
         justify="center",
         align="center",
-        min_height="85vh",
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
     
     return base_page(about_content)

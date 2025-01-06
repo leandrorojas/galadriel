@@ -6,6 +6,7 @@ from ..pages.base import base_page
 from ..pages.about import about_content
 from .. import navigation
 from .state import Session
+from ..utils import consts
 
 def login_page() -> rx.Component:
     return base_page(
@@ -16,7 +17,7 @@ def login_page() -> rx.Component:
                     LoginState.is_hydrated,  # type: ignore
                     rx.card(login_form()),
                 ),
-                min_height="85vh",
+                min_height=consts.RELATIVE_VIEWPORT_85,
             ),
             rx.container(about_content())
         )
@@ -34,7 +35,7 @@ def register_page() -> rx.Component:
                     ),
                     rx.card(register_form()),
                 ),
-                min_height="85vh",
+                min_height=consts.RELATIVE_VIEWPORT_85,
             ),
             rx.container(about_content())
         )
@@ -51,6 +52,6 @@ def logout_page() -> rx.Component:
             spacing="5",
             justify="center",
             align="center",
-            min_height="85vh",
+            min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     )

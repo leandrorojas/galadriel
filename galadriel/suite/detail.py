@@ -9,6 +9,8 @@ from . import model
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
 
+from ..utils import consts
+
 def __suite_list_button():
     return rx.fragment(
         rx.link(
@@ -221,7 +223,7 @@ def suite_detail_page() -> rx.Component:
         ),
         spacing="5",
         align="start",
-        min_height="85vh",
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
     
     return base_page(suite_detail_content)

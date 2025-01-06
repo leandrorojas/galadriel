@@ -7,6 +7,7 @@ from . import scenario
 from . import case
 from . import cycle
 from . import install
+from .utils import consts
 
 #galadriel
 from .pages import base_page, about_page, about_content
@@ -28,7 +29,7 @@ def index() -> rx.Component:
             spacing="5",
             justify="center",
             align="center",
-            min_height="85vh",
+            min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     ),
 
