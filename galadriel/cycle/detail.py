@@ -279,7 +279,7 @@ def cycle_detail_page() -> rx.Component:
             ),
         ),
         spacing="5",
-        align="start", #align="left",
+        align="start",
         min_height="85vh",
     ),
     

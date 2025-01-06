@@ -9,7 +9,6 @@ def read_yaml_setting(section:str, key:str):
 
         return galadriel_config[section][key]
 
-
 config = rx.Config(
     app_name="galadriel",
     db_url="sqlite:///galadriel.db",

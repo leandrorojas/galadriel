@@ -26,7 +26,6 @@ class CycleState(rx.State):
 
     @rx.var
     def cycle_id(self) -> str:
-        #print(self.router.page.params)
         return self.router.page.params.get("id", "")
     
     @rx.var
@@ -162,13 +161,6 @@ class CycleState(rx.State):
             self.cycle = cycle
 
             return RETURN_VALUE
-
-    # def to_suite(self, edit_page=True):
-    #     if not self.cycle:
-    #         return rx.redirect(routes.SUITES)
-    #     if edit_page:
-    #         return rx.redirect(self.suite_edit_url)
-    #     return rx.redirect(self.suite_url)
     
     def collapse_searches(self):
         self.show_case_search = False
@@ -551,8 +543,7 @@ class CycleState(rx.State):
                 linked_issues = session.exec(select(IterationSnapshotLinkedIssues).where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item.id).where(IterationSnapshotLinkedIssues.unlinked == None)).one_or_none()
 
                 if linked_issues is not None:
-                    setattr(snapshot_item, "linked_issue", linked_issues.issue_key)        
-                    #setattr(snapshot_item, "linked_issue_status", jira.get_issue_status(linked_issues.issue_key))
+                    setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
 
     def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int):
         with rx.session() as session:
@@ -882,7 +873,6 @@ class AddCycleState(CycleState):
 
 class EditCycleState(CycleState):
     form_data:dict = {}
-    # suite_name:str = ""
     
     def handle_submit(self, form_data):
         self.form_data = form_data
@@ -892,4 +882,3 @@ class EditCycleState(CycleState):
         if result != 0:
             return rx.toast.error(f"{result} cannot be empty")        
         return rx.redirect(routes.CYCLES)
-        #return self.to_suite() #<-- review this code, why it was changed?

@@ -34,7 +34,6 @@ def __case_detail_button() -> rx.Component:
 @reflex_local_auth.require_login
 def case_edit_page() -> rx.Component:
     my_form = forms.case_edit_form()
-    test_case = EditCaseState.case
     title_badge = Badge() 
 
     case_edit_content = rx.vstack(

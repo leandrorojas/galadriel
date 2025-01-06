@@ -24,7 +24,6 @@ class ScenarioState(rx.State):
 
     @rx.var
     def scenario_id(self) -> str:
-        #print(self.router.page.params)
         return self.router.page.params.get("id", "")
     
     @rx.var
@@ -236,4 +235,4 @@ class EditScenarioState(ScenarioState):
         result = self.save_scenario_edits(scenario_id, updated_data)
 
         if result is None: return rx.toast.error("name cannot be empty")
-        return rx.redirect(routes.SCENARIOS) # self.to_scenario()
+        return rx.redirect(routes.SCENARIOS)

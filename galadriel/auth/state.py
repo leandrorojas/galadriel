@@ -60,7 +60,6 @@ class Session(reflex_local_auth.LocalAuthState):
         if result is None:
             return None
         
-        #result.auth_user
         return result
         
     def on_load(self):

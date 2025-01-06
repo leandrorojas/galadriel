@@ -23,15 +23,6 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
         href=case_detail_url
     )
 
-# def __case_list_item(test_case: model.CaseModel):
-#     return rx.box(
-#         __case_detail_link(
-#             rx.heading(test_case.name),
-#             test_case
-#         ),
-#         padding="1em"
-#     )
-
 def __badge(text: str, color=""):
     if (color != ""):
         return rx.badge(text, radius="full", variant="soft", size="3", color_scheme=color)

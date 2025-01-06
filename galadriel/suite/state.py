@@ -32,7 +32,6 @@ class SuiteState(rx.State):
 
     @rx.var
     def suite_id(self) -> str:
-        #print(self.router.page.params)
         return self.router.page.params.get("id", "")
     
     @rx.var
@@ -291,7 +290,6 @@ class AddSuiteState(SuiteState):
 
 class EditSuiteState(SuiteState):
     form_data:dict = {}
-    # suite_name:str = ""
     
     def handle_submit(self, form_data):
         self.form_data = form_data
@@ -301,4 +299,3 @@ class EditSuiteState(SuiteState):
 
         if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.SUITES)
-        #return self.to_suite() #<-- review this code, why it was changed?
