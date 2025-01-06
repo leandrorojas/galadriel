@@ -34,8 +34,6 @@ def private_page(content: rx.Component, *args) -> rx.Component:
 
 #galadriel home page
 def base_page(content: rx.Component, *args) -> rx.Component:
-    #TODO: validate all params...always, in every def and class
-
     return rx.cond(
         Session.is_authenticated,
         private_page(content, *args),

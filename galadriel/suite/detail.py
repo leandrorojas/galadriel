@@ -153,7 +153,7 @@ def __suite_children_table() -> rx.Component:
 @reflex_local_auth.require_login
 def suite_detail_page() -> rx.Component:
     title_badge = Badge()
-    can_edit = True #TODO: add roles and privileges
+    can_edit = True
     edit_link = __suite_edit_button()
 
     edit_link_element = rx.cond(

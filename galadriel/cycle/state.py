@@ -281,7 +281,7 @@ class CycleState(rx.State):
             else:
                 return rx.toast.warning("The child has reached max")
     
-    def get_max_child_order(self, child_id:int, child_type_id:int): #TODO: split this into two: get max order and already exists
+    def get_max_child_order(self, child_id:int, child_type_id:int):
         with rx.session() as session:
             linked_children:CycleChildModel = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id)).all()
             max_order = 0

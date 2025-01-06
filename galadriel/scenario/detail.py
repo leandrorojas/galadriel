@@ -109,7 +109,7 @@ def __search_cases_table() -> rx.Component:
 def scenario_detail_page() -> rx.Component:
     title_badge = Badge()
     scenario = state.AddScenarioState.scenario
-    can_edit = True #TODO: add roles and privileges
+    can_edit = True
     edit_link = __scenario_edit_button()
 
     edit_link_element = rx.cond(

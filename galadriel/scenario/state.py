@@ -131,8 +131,6 @@ class ScenarioState(rx.State):
                         max_order = linked_case.order
                 new_case_order = max_order + 1
 
-                #TODO: if failes in othe add name of the Test Case here?
-
         scenario_case_data.update({"scenario_id":self.scenario_id})
         scenario_case_data.update({"case_id":case_id})
         scenario_case_data.update({"order":new_case_order})
