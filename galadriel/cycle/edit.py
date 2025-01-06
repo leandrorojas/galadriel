@@ -34,7 +34,6 @@ def __cycle_detail_button() -> rx.Component:
 @reflex_local_auth.require_login
 def cycle_edit_page() -> rx.Component:
     my_form = forms.cycle_edit_form()
-    cycle = EditCycleState.cycle
     title_badge = Badge()
 
     cycle_edit_content = rx.vstack(
