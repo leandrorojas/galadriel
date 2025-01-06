@@ -91,7 +91,7 @@ def __element_status_badge(child_status: str):
         "Failed": ("x", "Failed", "red"),
         "Passed": ("check", "Passed", "green"),
         "Skipped": ("list-x", "Skipped", "gray"),
-        "Blocked": ("cuboid", "Blocked", "gray") #also brick-wall
+        "Blocked": ("cuboid", "Blocked", "gray") 
     }
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
@@ -102,7 +102,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             snapshot_element.child_type,
             (1, __element_type_badge("Suite")),
             (2, __element_type_badge("Scenario")),
-            (3, __element_type_badge("Case")) #,(4, __element_type_badge("Step")) # Steps are skipped, too much information in the screen 
+            (3, __element_type_badge("Case")) 
         )),
         rx.table.cell(snapshot_element.child_action),
         rx.table.cell(snapshot_element.child_expected),
@@ -118,7 +118,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             snapshot_element.linked_issue != None,
             rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, "id"))), align="center"),
             rx.table.cell("")
-        ), #rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True)
+        ),
         rx.table.cell(
             rx.cond(
                 snapshot_element.child_type == 4,
@@ -185,7 +185,6 @@ def iteration_page() -> rx.Component:
                 rx.table.root(
                     rx.table.header(
                         rx.table.row(
-                            #__header_cell("type", "blocks"),
                             __header_cell("name/type", "tag",info_tooltip="[P]requisite"),
                             __header_cell("action", "pickaxe"),
                             __header_cell("expected", "gem"),

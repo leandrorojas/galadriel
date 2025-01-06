@@ -22,7 +22,6 @@ class CycleModel(rx.Model, table=True):
         sa_type=sa.DateTime(timezone=True),
         nullable=True
     )
-    #created_by
 
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""

@@ -25,7 +25,6 @@ class CaseState(rx.State):
 
     @rx.var
     def case_id(self) -> str:
-        #print(self.router.page.params)
         return self.router.page.params.get("id", "") 
     
     @rx.var
@@ -104,10 +103,6 @@ class CaseState(rx.State):
     def add_step(self, case_id:int, form_data:dict):
         if (form_data["action"] == ""): 
             return rx.toast.error("action cannot be empty")
-
-        # Removed through GAL-187
-        # if (form_data["expected"] == ""):
-        #     return rx.toast.error("expected cannot be empty")
         
         new_step_order = 1
 

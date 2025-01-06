@@ -23,15 +23,6 @@ def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
         href=case_detail_url
     )
 
-def __case_list_item(test_case: model.CaseModel):
-    return rx.box(
-        __case_detail_link(
-            rx.heading(test_case.name),
-            test_case
-        ),
-        padding="1em"
-    )
-
 def __show_case(test_case:model.CaseModel):
     return rx.table.row(
          rx.table.cell(__case_detail_link(test_case.name, test_case)),

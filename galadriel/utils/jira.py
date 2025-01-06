@@ -28,9 +28,6 @@ def create_issue(summary:str, description:str) -> str:
     return issue_key
 
 def get_issue_url(issue_key) -> str:
-    # Cloud
-    # https://<instance>.atlassian.net/browse/<issue_key-number>
-
     return f"{config.jira_url}/browse/{issue_key}"
 
 def get_issue_status(issue_key) -> str:
