@@ -9,3 +9,4 @@ alembic/
 assets/external/
 galadriel.yaml
 .vscode/
+.sonarlint/
