@@ -27,7 +27,7 @@ class CaseModel(rx.Model, table=True):
         return d    
 
 class StepModel(rx.Model, table=True):
-    case_id:int = Field(foreign_key="casemodel.id")
+    case_id:int = Field(foreign_key=utils.consts.CASE_MODEL_ID)
     order:int
     action:str
     expected:str
@@ -47,8 +47,8 @@ class StepModel(rx.Model, table=True):
         return d
 
 class PrerequisiteModel(rx.Model, table=True):
-    case_id:int = Field(foreign_key="casemodel.id")
-    prerequisite_id:int = Field(foreign_key="casemodel.id")
+    case_id:int = Field(foreign_key=utils.consts.CASE_MODEL_ID)
+    prerequisite_id:int = Field(foreign_key=utils.consts.CASE_MODEL_ID)
     order:int
     prerequisite_name:str = Field(nullable=True)
     created: datetime = Field(

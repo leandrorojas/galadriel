@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-from rxconfig import config
 
 #old.galadriel
 from . import navigation
@@ -9,6 +7,7 @@ from . import scenario
 from . import case
 from . import cycle
 from . import install
+from .utils import consts
 
 #galadriel
 from .pages import base_page, about_page, about_content
@@ -17,11 +16,6 @@ from .ui.components import Buttons
 from .auth.pages import login_page, register_page, logout_page
 
 from .auth.state import Session
-
-class State(rx.State):
-    """The app state."""
- 
-    ...
 
 def index() -> rx.Component:
     buttons = Buttons()
@@ -35,7 +29,7 @@ def index() -> rx.Component:
             spacing="5",
             justify="center",
             align="center",
-            min_height="85vh",
+            min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     ),
 

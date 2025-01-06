@@ -6,6 +6,8 @@ from . import state, model
 from ..pages import base_page
 from ..ui.components import Badge, Tooltip
 
+from ..utils import consts
+
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
 
     if suite is None:
@@ -21,15 +23,6 @@ def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     return rx.link(
         child,
         href=suite_detail_url
-    )
-
-def __suite_list_item(suite: model.SuiteModel):
-    return rx.box(
-        __suite_detail_link(
-            rx.heading(suite.name),
-            suite
-        ),
-        padding="1em"
     )
 
 def __show_suite(suite:model.SuiteModel):
@@ -99,11 +92,11 @@ def suites_list_page() -> rx.Component:
             __table(),
             type="hover",
             scrollbars="vertical",
-            style={"height": "85vh"},
+            style={"height": consts.RELATIVE_VIEWPORT_85},
         ),
         spacing="5",
         align="center",
-        min_height="85vh"
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
 
     return base_page(suite_list_content)

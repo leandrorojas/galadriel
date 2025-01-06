@@ -1,10 +1,6 @@
 import reflex as rx
-
-from .. import navigation
-
 from reflex.style import toggle_color_mode
-from reflex.components.radix.themes.base import (LiteralAccentColor,)
-
+from rxconfig import config
 from .. import navigation
 from ..auth.state import Session
 
@@ -18,7 +14,7 @@ class TopNavBar():
                     rx.hstack(
                         rx.link(
                             rx.image(
-                                src="/galadriel.320x320.jpg",
+                                src=config.img_src,
                                 width="2.25em",
                                 height="auto",
                                 border_radius="25%",
@@ -49,7 +45,7 @@ class TopNavBar():
                 rx.hstack(
                     rx.hstack(
                         rx.image(
-                            src="/galadriel.320x320.jpg",
+                            src=config.img_src,
                             width="2em",
                             height="auto",
                             border_radius="25%",
@@ -96,6 +92,11 @@ class Buttons():
         ),
 
 class SideBar():
+
+    X_PADDING = "0.5rem"
+    Y_PADDING = "0.75rem"
+    BORDER_RADIUS = "0.5em"
+
     def __sidebar_user_item(self) -> rx.Component:
         auth_user_info = Session.authenticated_user_info
 
@@ -124,7 +125,7 @@ class SideBar():
                 justify="start",
                 width="100%",
             ),
-            padding_x="0.5rem",
+            padding_x= self.X_PADDING,
             align="center",
             justify="start",
             width="100%",
@@ -136,15 +137,15 @@ class SideBar():
                 rx.icon(icon),
                 rx.text(text, size="4"),
                 width="100%",
-                padding_x="0.5rem",
-                padding_y="0.75rem",
+                padding_x= self.X_PADDING,
+                padding_y=self.Y_PADDING,
                 align="center",
                 style={
                     "_hover": {
                         "bg": rx.color("accent", 4),
                         "color": rx.color("accent", 11),
                     },
-                    "border_radius": "0.5em",
+                    "border_radius": self.BORDER_RADIUS,
                 },
             ),
             href=href,
@@ -167,8 +168,8 @@ class SideBar():
                     ),
                     size="4"),
                 width="100%",
-                padding_x="0.5rem",
-                padding_y="0.75rem",
+                padding_x= self.X_PADDING,
+                padding_y= self.Y_PADDING,
                 align="center",
                 style={
                     "_hover": {
@@ -177,7 +178,7 @@ class SideBar():
                         "color": rx.color("accent", 11),
                     },
                     "color": rx.color("accent", 11),
-                    "border_radius": "0.5em",
+                    "border_radius": self.BORDER_RADIUS,
                 },
             ),
             on_click=toggle_color_mode,
@@ -193,8 +194,8 @@ class SideBar():
                 rx.icon("log-out"),
                 rx.text("Logout", size="4"),
                 width="100%",
-                padding_x="0.5rem",
-                padding_y="0.75rem",
+                padding_x=self.X_PADDING,
+                padding_y=self.Y_PADDING,
                 align="center",
                 style={
                     "_hover": {
@@ -203,7 +204,7 @@ class SideBar():
                         "color": rx.color("accent", 11),
                     },
                     "color": rx.color("accent", 11),
-                    "border_radius": "0.5em",
+                    "border_radius": self.BORDER_RADIUS,
                 },
             ),
             on_click=navigation.NavigationState.to_logout,
@@ -233,7 +234,7 @@ class SideBar():
                 rx.vstack(
                     rx.hstack(
                         rx.image(
-                            src="/galadriel.320x320.jpg",
+                            src=config.img_src,
                             width="2.25em",
                             height="auto",
                             border_radius="25%",
@@ -246,7 +247,7 @@ class SideBar():
                         ),
                         align="center",
                         justify="start",
-                        padding_x="0.5rem",
+                        padding_x=self.X_PADDING,
                         width="100%",
                     ),
                     self.__sidebar_items(),

@@ -9,6 +9,7 @@ from . import model
 from ..suite.model import SuiteModel
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
+from ..utils import consts
 
 def __cycle_list_button():
     return rx.fragment(
@@ -280,7 +281,7 @@ def cycle_detail_page() -> rx.Component:
         ),
         spacing="5",
         align="start",
-        min_height="85vh",
+        min_height= consts.RELATIVE_VIEWPORT_85,
     ),
     
     return base_page(cycle_detail_content)

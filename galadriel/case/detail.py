@@ -4,9 +4,9 @@ import reflex_local_auth
 from ..navigation import routes
 from ..pages import base_page
 from ..ui.components import Badge
-from .. import navigation
 from . import model, state
 from .forms import step_add_form    
+from ..utils import consts
 
 first_row:bool = True
 last_row:bool = False
@@ -205,7 +205,7 @@ def case_detail_page() -> rx.Component:
         ),
         spacing="5",
         align="start",
-        min_height="85vh",
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
     
     return base_page(case_detail_content)

@@ -7,6 +7,7 @@ from .. pages import base_page
 from ..ui.components import Badge
 from . import model
 from ..case.model import CaseModel
+from ..utils import consts
 
 def __scenario_list_button():
     return rx.fragment(
@@ -159,7 +160,7 @@ def scenario_detail_page() -> rx.Component:
         ),
         spacing="5",
         align="start",
-        min_height="85vh",
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
     
     return base_page(scenario_detail_content)

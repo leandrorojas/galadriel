@@ -28,7 +28,7 @@ class ScenarioModel(rx.Model, table=True):
 
 class ScenarioCaseModel(rx.Model, table=True):
     scenario_id:int = Field(foreign_key="scenariomodel.id")    
-    case_id:int = Field(foreign_key="casemodel.id")
+    case_id:int = Field(foreign_key=utils.consts.CASE_MODEL_ID)
     order:int
     case_name:str = Field(nullable=True)
     created: datetime = Field(

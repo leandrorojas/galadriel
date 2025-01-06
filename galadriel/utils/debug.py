@@ -1,3 +1,14 @@
+"""
+to use this module, you first need to import it, of course
+then use the folowing sequence:
+debug.set_log(False)
+debug.set_module("<module_name>")
+debug.log("<message>")
+
+end a log with True to finish the logging
+debug.log("<message>", True)
+"""
+
 enabled = False
 global_module = ""
 

@@ -5,6 +5,7 @@ from .. import navigation
 from . import state, model
 from ..pages import base_page
 from ..ui.components import Badge, Tooltip
+from ..utils import consts
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 
@@ -162,11 +163,11 @@ def cycle_list_page() -> rx.Component:
             __table(),
             type="hover",
             scrollbars="vertical",
-            style={"height": "85vh"},
+            style={"height": consts.RELATIVE_VIEWPORT_85},
         ),
         spacing="5",
         align="center",
-        min_height="85vh"
+        min_height=consts.RELATIVE_VIEWPORT_85,
     ),
 
     return base_page(cycle_list_content)

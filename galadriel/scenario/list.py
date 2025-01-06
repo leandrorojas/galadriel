@@ -6,6 +6,8 @@ from . import state, model
 from ..pages import base_page
 from ..ui.components import Badge, Tooltip
 
+from ..utils import consts
+
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
 
     if scenario is None:
@@ -21,15 +23,6 @@ def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
     return rx.link(
         child,
         href=scenario_detail_url
-    )
-
-def __scenario_list_item(scenario: model.ScenarioModel):
-    return rx.box(
-        __scenario_detail_link(
-            rx.heading(scenario.name),
-            scenario
-        ),
-        padding="1em"
     )
 
 def __show_scenario(scenario:model.ScenarioModel):
@@ -99,11 +92,11 @@ def scenarios_list_page() -> rx.Component:
             __table(),
             type="hover",
             scrollbars="vertical",
-            style={"height": "85vh"},
+            style={"height": consts.RELATIVE_VIEWPORT_85},
         ),
         spacing="5",
         align="center",
-        min_height="85vh"
+        min_height=consts.RELATIVE_VIEWPORT_85
     ),
 
     return base_page(scenario_list_content)
