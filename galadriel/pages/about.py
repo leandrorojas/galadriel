@@ -1,8 +1,6 @@
 import reflex as rx
 from .base import base_page
 
-from .. import navigation
-
 def about_content() -> rx.Component:
     about_content_var = rx.vstack(
         rx.heading("About galadriel"),

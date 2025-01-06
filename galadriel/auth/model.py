@@ -2,9 +2,7 @@ import reflex as rx
 import sqlalchemy as sa
 
 from datetime import datetime
-from sqlmodel import Field, Relationship
-
-from reflex_local_auth import LocalUser
+from sqlmodel import Field
 
 from .. import utils
 

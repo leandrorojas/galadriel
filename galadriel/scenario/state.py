@@ -2,10 +2,11 @@ from typing import List, Optional
 import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
+from ..utils import consts
 
 from ..case.model import CaseModel, StepModel
 
-from sqlmodel import select, asc, or_, func, cast, String
+from sqlmodel import select, cast, String
 
 SCENARIO_ROUTE = routes.SCENARIOS
 if SCENARIO_ROUTE.endswith("/"): SCENARIO_ROUTE = SCENARIO_ROUTE[:-1]
@@ -125,7 +126,7 @@ class ScenarioState(rx.State):
                 max_order = 0
                 for linked_case in linked_cases:
                     if (linked_case.case_id == case_id):
-                        return rx.toast.error("prerequisite already in list")
+                        return rx.toast.error(consts.MESSAGE_PREREQUISITE_ALREADY_IN_LIST)
                     
                     if linked_case.order > max_order:
                         max_order = linked_case.order

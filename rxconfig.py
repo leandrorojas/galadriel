@@ -12,6 +12,7 @@ def read_yaml_setting(section:str, key:str):
 config = rx.Config(
     app_name="galadriel",
     db_url="sqlite:///galadriel.db",
+    img_src="/galadriel.320x320.jpg",
     jira_url=read_yaml_setting(YAML_JIRA_SECTION, "url"),
     jira_user=read_yaml_setting(YAML_JIRA_SECTION, "user"),
     jira_token=read_yaml_setting(YAML_JIRA_SECTION, "token"),

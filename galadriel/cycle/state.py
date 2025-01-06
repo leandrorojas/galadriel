@@ -8,11 +8,9 @@ from ..scenario.model import ScenarioModel, ScenarioCaseModel
 from ..suite.model import SuiteModel, SuiteChildModel
 from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel, IterationSnapshotLinkedIssues
 
-from datetime import datetime
+from sqlmodel import select, asc, cast, String, desc
 
-from sqlmodel import select, asc, or_, func, cast, String, desc
-
-from ..utils import jira
+from ..utils import jira, consts
 
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
@@ -338,7 +336,7 @@ class CycleState(rx.State):
             new_case_order = self.get_max_child_order(case_id, 3)
 
             if new_case_order == -1:
-                return rx.toast.error("already in list")
+                return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_case_data.update({"cycle_id":self.cycle_id})
         cycle_case_data.update({"child_type_id":3})
@@ -393,7 +391,7 @@ class CycleState(rx.State):
             new_scenario_order = self.get_max_child_order(scenario_id, 2)
 
             if new_scenario_order == -1:
-                return rx.toast.error("already in list")
+                return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_scenario_data.update({"cycle_id":self.cycle_id})
         cycle_scenario_data.update({"child_type_id":2})
@@ -442,7 +440,7 @@ class CycleState(rx.State):
             new_scenario_order = self.get_max_child_order(suite_id, 1)
 
             if new_scenario_order == -1:
-                return rx.toast.error("already in list")
+                return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_suite_data.update({"cycle_id":self.cycle_id})
         cycle_suite_data.update({"child_type_id":1})
@@ -633,7 +631,7 @@ class CycleState(rx.State):
                 session.commit()
                 session.refresh(linked_issue)
                 self.get_iteration_snapshot()
-                return rx.toast.info(f"issue unlinked")
+                return rx.toast.info("issue unlinked")
         
     def link_issue_to_snapshot_step(self, snapshot_item_id:int, issue_key:str):
         linked_issue:dict = {"iteration_snapshot_id": f"{snapshot_item_id}", "issue_key": issue_key}

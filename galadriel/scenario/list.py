@@ -23,15 +23,6 @@ def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
         href=scenario_detail_url
     )
 
-def __scenario_list_item(scenario: model.ScenarioModel):
-    return rx.box(
-        __scenario_detail_link(
-            rx.heading(scenario.name),
-            scenario
-        ),
-        padding="1em"
-    )
-
 def __show_scenario(scenario:model.ScenarioModel):
     return rx.table.row(
          rx.table.cell(__scenario_detail_link(scenario.name, scenario)),

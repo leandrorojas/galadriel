@@ -1,0 +1,4 @@
+CASE_MODEL_ID = "casemodel.id"
+
+MESSAGE_ALREADY_IN_LIST = "already in list"
+MESSAGE_PREREQUISITE_ALREADY_IN_LIST = "prerequisite " + MESSAGE_ALREADY_IN_LIST

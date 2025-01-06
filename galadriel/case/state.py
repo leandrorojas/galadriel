@@ -2,8 +2,9 @@ from typing import List, Optional
 import reflex as rx
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
+from ..utils import consts
 
-from sqlmodel import select, asc, or_, func, cast, String
+from sqlmodel import select, cast, String
 
 CASE_ROUTE = routes.CASES
 if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
@@ -246,7 +247,7 @@ class CaseState(rx.State):
                 linked_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
                 max_order = 0
                 for linked_prerequisite in linked_prerequisites:
-                    if (linked_prerequisite.id == prerequisite_id): return rx.toast.error("prerequisite already in list")
+                    if (linked_prerequisite.id == prerequisite_id): return rx.toast.error(consts.MESSAGE_PREREQUISITE_ALREADY_IN_LIST)
                     
                     if linked_prerequisite.order > max_order:
                         max_order = linked_prerequisite.order

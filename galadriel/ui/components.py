@@ -1,10 +1,6 @@
 import reflex as rx
-
-from .. import navigation
-
 from reflex.style import toggle_color_mode
-from reflex.components.radix.themes.base import (LiteralAccentColor,)
-
+from rxconfig import config
 from .. import navigation
 from ..auth.state import Session
 
@@ -18,7 +14,7 @@ class TopNavBar():
                     rx.hstack(
                         rx.link(
                             rx.image(
-                                src="/galadriel.320x320.jpg",
+                                src=config.img_src,
                                 width="2.25em",
                                 height="auto",
                                 border_radius="25%",
@@ -49,7 +45,7 @@ class TopNavBar():
                 rx.hstack(
                     rx.hstack(
                         rx.image(
-                            src="/galadriel.320x320.jpg",
+                            src=config.img_src,
                             width="2em",
                             height="auto",
                             border_radius="25%",
@@ -233,7 +229,7 @@ class SideBar():
                 rx.vstack(
                     rx.hstack(
                         rx.image(
-                            src="/galadriel.320x320.jpg",
+                            src=config.img_src,
                             width="2.25em",
                             height="auto",
                             border_radius="25%",

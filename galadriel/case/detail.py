@@ -4,7 +4,6 @@ import reflex_local_auth
 from ..navigation import routes
 from ..pages import base_page
 from ..ui.components import Badge
-from .. import navigation
 from . import model, state
 from .forms import step_add_form    
 

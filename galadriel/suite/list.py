@@ -23,15 +23,6 @@ def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
         href=suite_detail_url
     )
 
-def __suite_list_item(suite: model.SuiteModel):
-    return rx.box(
-        __suite_detail_link(
-            rx.heading(suite.name),
-            suite
-        ),
-        padding="1em"
-    )
-
 def __show_suite(suite:model.SuiteModel):
     return rx.table.row(
          rx.table.cell(__suite_detail_link(suite.name, suite)),
