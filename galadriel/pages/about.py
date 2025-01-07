@@ -5,9 +5,9 @@ from ..utils import consts
 def about_content() -> rx.Component:
     about_content_var = rx.vstack(
         rx.heading("About galadriel"),
-        rx.heading("galadriel is a simple Test Management System", size="4"),
+        rx.heading("galadriel is a Test Management System", size="4"),
         rx.vstack(
-            rx.text("badly-designed, extremelly code-inefficient and unoptimized Test Management System. Inspiration drawn from ", rx.link(rx.code("testlink™"), href="https://testlink.org/")),
+            rx.text("A simple but yet straight to the point and functional Test Management System. Inspiration drawn from ", rx.link(rx.code("testlink™"), href="https://testlink.org/")),
             rx.spacer(), rx.spacer(),
             rx.text("want to contribute? have a question? need attention and tender love?"),
             rx.flex(
