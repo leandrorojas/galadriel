@@ -76,7 +76,7 @@ def cases_list_page() -> rx.Component:
 
     case_list_content = rx.vstack(
         rx.flex(
-            title_badge.title("test-tubes", "Test Cases"),
+            title_badge.title(consts.ICON_TEST_TUBES, "Test Cases"),
             title_tooltip.info("Individual Test Cases to be executed"),
             rx.spacer(),
             rx.hstack(__add_case_button(),),

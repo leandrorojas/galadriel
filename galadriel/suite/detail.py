@@ -110,7 +110,7 @@ def __badge(icon: str, text: str):
 def __child_type_badge(child_type: str):
     badge_mapping = {
         "Scenario": ("route", "Scenario"),
-        "Case": ("test-tubes", "Case")
+        "Case": (consts.ICON_TEST_TUBES, "Case")
     }
     return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
@@ -205,7 +205,7 @@ def suite_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(
-                rx.icon("test-tubes"),
+                rx.icon(consts.ICON_TEST_TUBES),
                 rx.heading("Cases", size="5",),
                 rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_case_search),
                 align="center"
