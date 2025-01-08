@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from ..pages import base_page
 from ..navigation import routes
-from ..ui.components import Badge, Tooltip
+from ..ui.components import Badge, Table
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
 from ..utils import jira, consts
@@ -54,20 +54,6 @@ def __hold_iteration_snapshot_button() -> rx.Component:
             
             href=routes.CYCLES
         ), 
-    )
-
-def __header_cell(text: str, icon: str, hide_column:bool = False, info_tooltip:str = ""):
-    title_tooltip = Tooltip()
-
-    return rx.table.column_header_cell(
-        rx.hstack(
-            rx.icon(icon, size=18),
-            rx.text(text),
-            rx.cond(info_tooltip == "", rx.text(""), title_tooltip.info(info_tooltip)),
-            align="center",
-            spacing="2",
-        ),
-        hidden=hide_column,
     )
 
 def __badge(icon: str, text: str, color=""):
@@ -162,6 +148,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
 @reflex_local_auth.require_login
 def iteration_page() -> rx.Component:
     title_badge = Badge()
+    table_componenet = Table()
 
     global READ_ONLY
     READ_ONLY = ~CycleState.is_iteration_editable
@@ -185,12 +172,12 @@ def iteration_page() -> rx.Component:
                 rx.table.root(
                     rx.table.header(
                         rx.table.row(
-                            __header_cell("name/type", "tag",info_tooltip="[P]requisite"),
-                            __header_cell("action", "pickaxe"),
-                            __header_cell("expected", "gem"),
-                            __header_cell("status", "activity"),
-                            __header_cell("issue", "bug"),
-                            __header_cell("", "ellipsis"),
+                            table_componenet.header("name/type", "tag",info_tooltip="[P]requisite"),
+                            table_componenet.header("action", "pickaxe"),
+                            table_componenet.header("expected", "gem"),
+                            table_componenet.header("status", "activity"),
+                            table_componenet.header("issue", "bug"),
+                            table_componenet.header("", "ellipsis"),
                         ),
                     ),
                     rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),

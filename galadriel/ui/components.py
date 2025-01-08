@@ -337,3 +337,17 @@ class Badge():
 class Tooltip():
     def info(self, legend:str) -> rx.Component:
         return rx.tooltip(rx.icon("info", size=18, color=rx.color("gray", 10)), content=legend, side="right")
+    
+class Table():
+    def header(self, text: str, icon: str, hide_column:bool = False, info_tooltip:str = ""):
+        title_tooltip = Tooltip()
+        return rx.table.column_header_cell(
+            rx.hstack(
+                rx.icon(icon, size=18),
+                rx.text(text),
+                rx.cond(info_tooltip == "", rx.text(""), title_tooltip.info(info_tooltip)),
+                align="center",
+                spacing="2",
+            ),
+            hidden=hide_column,
+        )

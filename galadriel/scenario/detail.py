@@ -33,17 +33,6 @@ def __scenario_edit_button():
         ), 
     )
 
-def __header_cell(text: str, icon: str, hide_column:bool = False):
-    return rx.table.column_header_cell(
-        rx.hstack(
-            rx.icon(icon, size=18),
-            rx.text(text),
-            align="center",
-            spacing="2",
-        ),
-        hidden=hide_column,
-    )
-
 def __show_test_cases(test_cases:model.ScenarioCaseModel):
     return rx.table.row(
         rx.table.cell(test_cases.order),
@@ -63,9 +52,9 @@ def __cases_table() -> rx.Component:
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("order", "list-ordered"),
-                    __header_cell("test case", "pickaxe"),
-                    __header_cell("", "ellipsis"),
+                    Table.header("order", "list-ordered"),
+                    Table.header("test case", "pickaxe"),
+                    Table.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.ScenarioState.test_cases, __show_test_cases)),
@@ -91,10 +80,10 @@ def __search_cases_table() -> rx.Component:
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        __header_cell("", "ellipsis"),
-                        __header_cell("name", "fingerprint"),
-                        __header_cell("created", "calendar-check-2"),
-                        __header_cell("selected_id", "search", True),
+                        Table.header("", "ellipsis"),
+                        Table.header("name", "fingerprint"),
+                        Table.header("created", "calendar-check-2"),
+                        Table.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.ScenarioState.test_cases_for_search, __show_test_cases_in_search)),
