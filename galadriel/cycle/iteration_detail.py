@@ -80,7 +80,7 @@ def __element_type_badge(child_type: str):
     badge_mapping = {
         "Suite": ("beaker", "Suite"),
         "Scenario": ("route", "Scenario"),
-        "Case": ("test-tubes", "Case"),
+        "Case": (consts.ICON_TEST_TUBES, "Case"),
         "Step": ("test-tube", "Step"),
     }
     return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))

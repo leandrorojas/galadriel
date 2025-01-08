@@ -3,6 +3,7 @@ from reflex.style import toggle_color_mode
 from rxconfig import config
 from .. import navigation
 from ..auth.state import Session
+from ..utils import consts
 
 class TopNavBar():
     def navbar(self) -> rx.Component:
@@ -221,7 +222,7 @@ class SideBar():
             rx.divider(),
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),
-            self.__sidebar_item("Cases", "test-tubes", navigation.routes.CASES),
+            self.__sidebar_item("Cases", consts.ICON_TEST_TUBES, navigation.routes.CASES),
             self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.ABOUT),
             self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.ABOUT),
             spacing="1",
