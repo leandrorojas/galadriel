@@ -104,6 +104,18 @@ class Button():
                 href=link
             ), 
         )
+    
+    def to_list(self, list_name:str, link:str) -> rx.Component:
+        return rx.fragment(
+            rx.link(
+                rx.button(
+                    rx.icon("chevron-left", size=26), 
+                    rx.text(f"{list_name}", size="4", display=["none", "none", "block"]), 
+                    size="3", 
+                ),
+                href=link
+            ),
+        )
 
 class SideBar():
 

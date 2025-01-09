@@ -3,7 +3,7 @@ import reflex as rx
 from ..ui.components import Badge
 from ..pages import base_page
 
-def __case_list_button(to_list_button:str, link:str) -> rx.Component:
+def __to_list_button(to_list_button:str, link:str) -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
@@ -15,7 +15,7 @@ def __case_list_button(to_list_button:str, link:str) -> rx.Component:
         ),
     )
 
-def __case_detail_button(to_detail_button:str, link:str) -> rx.Component:
+def __to_detail_button(to_detail_button:str, link:str) -> rx.Component:
     return rx.fragment(
         rx.link(
             rx.button(
@@ -35,29 +35,17 @@ def edit_page(form:rx.Component, title:str, title_icon:str, to_list_button:str, 
         rx.flex(
             title_badge.title(title_icon, title),
             rx.spacer(),
-            rx.hstack(__case_list_button(to_list_button, list_link),__case_detail_button(to_detail_button, detail_link)),            
+            rx.hstack(__to_list_button(to_list_button, list_link),__to_detail_button(to_detail_button, detail_link)),            
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
             width="100%",
             top="0px",
-            padding_top="2em",       
+            padding_top="2em",
         ),
-        rx.desktop_only(
-            rx.box( 
-                my_form,
-                width="50vw",
-            ),
-        ),
-        rx.mobile_and_tablet(
-            rx.box(
-                my_form,
-                width="55vw"
-            ),
-        ),
-        spacing="5",
-        align="center",
-        min_height="95vh",
+        rx.desktop_only(rx.box(my_form, width="50vw",),),
+        rx.mobile_and_tablet(rx.box(my_form, width="55vw"),),
+        spacing="5", align="center", min_height="95vh",
     ),
     
     return base_page(case_edit_content)

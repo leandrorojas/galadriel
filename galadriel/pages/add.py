@@ -1,26 +1,18 @@
 import reflex as rx
 
-from ..ui.components import Badge
+from ..ui.components import Badge, Button
 from . import base_page
 
 def add_page(form:rx.Component, title:str, title_icon:str, button:str, link:str) -> rx.Component:
     title_badge = Badge()
     my_form = form()
+    button_component = Button()
 
     content = rx.vstack(
         rx.flex(
             title_badge.title(title_icon, title),
             rx.spacer(),
-            rx.hstack(
-                rx.link(
-                    rx.button(
-                        rx.icon("chevron-left", size=26), 
-                        rx.text(button, size="4", display=["none", "none", "block"]), 
-                        size="3", 
-                    ),
-                    href=link
-                ),
-            ),
+            rx.hstack(button_component.to_list(button, link),),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",

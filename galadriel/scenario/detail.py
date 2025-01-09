@@ -9,18 +9,6 @@ from . import model
 from ..case.model import CaseModel
 from ..utils import consts
 
-def __scenario_list_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("chevron-left", size=26), 
-                rx.text("to Scenarios", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=routes.SCENARIOS
-        ), 
-    )
-
 def __show_test_cases(test_cases:model.ScenarioCaseModel):
     return rx.table.row(
         rx.table.cell(test_cases.order),
@@ -90,11 +78,11 @@ def scenario_detail_page() -> rx.Component:
     title_badge = Badge()
     scenario = state.AddScenarioState.scenario
     can_edit = True
-    edit_link = Button()
+    button_component = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link.edit(state.ScenarioState.scenario_edit_url),
+        button_component.edit(state.ScenarioState.scenario_edit_url),
         rx.fragment("") 
     )
     
@@ -102,7 +90,7 @@ def scenario_detail_page() -> rx.Component:
         rx.flex(
             title_badge.title("route", "Test Scenario Detail"),
             rx.spacer(),
-            rx.hstack(__scenario_list_button(), edit_link_element),
+            rx.hstack(button_component.to_list("to Scenarios", routes.SCENARIOS), edit_link_element),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
