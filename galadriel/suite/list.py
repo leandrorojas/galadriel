@@ -4,7 +4,7 @@ import reflex_local_auth
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip
+from ..ui.components import Badge, Tooltip, Table
 
 from ..utils import consts
 
@@ -44,12 +44,13 @@ def __add_suite_button() -> rx.Component:
     )
 
 def __table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    Table.header("name", "fingerprint"),
-                    Table.header("created", "calendar-check-2"),
+                    table_component.header("name", "fingerprint"),
+                    table_component.header("created", "calendar-check-2"),
                 ),
             ),
             rx.table.body(rx.foreach(state.SuiteState.suites, __show_suite)),

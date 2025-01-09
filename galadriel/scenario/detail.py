@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge
+from ..ui.components import Badge, Table
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
@@ -48,13 +48,14 @@ def __show_test_cases(test_cases:model.ScenarioCaseModel):
     )
 
 def __cases_table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    Table.header("order", "list-ordered"),
-                    Table.header("test case", "pickaxe"),
-                    Table.header("", "ellipsis"),
+                    table_component.header("order", "list-ordered"),
+                    table_component.header("test case", "pickaxe"),
+                    table_component.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.ScenarioState.test_cases, __show_test_cases)),
@@ -75,15 +76,16 @@ def __show_test_cases_in_search(test_case:CaseModel):
     )
 
 def __search_cases_table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        Table.header("", "ellipsis"),
-                        Table.header("name", "fingerprint"),
-                        Table.header("created", "calendar-check-2"),
-                        Table.header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.ScenarioState.test_cases_for_search, __show_test_cases_in_search)),

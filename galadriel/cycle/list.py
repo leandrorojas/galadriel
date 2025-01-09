@@ -108,18 +108,18 @@ def __add_adhoc_cycle_button() -> rx.Component:
     )
 
 def __table() -> rx.Component:
-    table_componenet = Table()
+    table_component = Table()
     
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_componenet.header("name", "fingerprint"),
-                    table_componenet.header("status", "activity"),
-                    table_componenet.header("% t/p/f", "gauge", info_tooltip= "% of [t]hreshold / [p]assed / [f]ailed"),
-                    table_componenet.header("execution", "activity", info_tooltip="[F] completed = completed with failed TCs"), 
-                    table_componenet.header("","ellipsis"),
-                    table_componenet.header("created", "calendar-check-2"),
+                    table_component.header("name", "fingerprint"),
+                    table_component.header("status", "activity"),
+                    table_component.header("% t/p/f", "gauge", info_tooltip= "% of [t]hreshold / [p]assed / [f]ailed"),
+                    table_component.header("execution", "activity", info_tooltip="[F] completed = completed with failed TCs"), 
+                    table_component.header("","ellipsis"),
+                    table_component.header("created", "calendar-check-2"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),

@@ -27,14 +27,14 @@ def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     )
 
 def __prerequisites_table() -> rx.Component:
-    table_componenet = Table()
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_componenet.header("order", "list-ordered"),
-                    table_componenet.header("test case", "pickaxe"),
-                    table_componenet.header("", "ellipsis"),
+                    table_component.header("order", "list-ordered"),
+                    table_component.header("test case", "pickaxe"),
+                    table_component.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CaseState.prerequisites, __show_prerequisite)),
@@ -55,16 +55,16 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
     )
 
 def __search_prerequisites_table() -> rx.Component:
-    table_header = Table
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        table_header("", "ellipsis"),
-                        table_header("name", "fingerprint"),
-                        table_header("created", "calendar-check-2"),
-                        table_header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CaseState.cases, __show_case_as_prerequisite)),
@@ -119,15 +119,15 @@ def __show_step(test_step:model.StepModel):
     )
 
 def __steps_table() -> rx.Component:
-    table_componenet = Table()
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_componenet.header("order", "list-ordered"),
-                    table_componenet.header("action", "pickaxe"),
-                    table_componenet.header("expected", "gem"),
-                    table_componenet.header("", "ellipsis"),
+                    table_component.header("order", "list-ordered"),
+                    table_component.header("action", "pickaxe"),
+                    table_component.header("expected", "gem"),
+                    table_component.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CaseState.steps, __show_step)),
