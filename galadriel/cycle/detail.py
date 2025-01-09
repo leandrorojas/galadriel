@@ -45,16 +45,16 @@ def __show_test_cases_in_search(test_case:CaseModel):
     )
 
 def __search_cases_table() -> rx.Component:
-    table_componenet = Table()
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        table_componenet.header("", "ellipsis"),
-                        table_componenet.header("name", "fingerprint"),
-                        table_componenet.header("created", "calendar-check-2"),
-                        table_componenet.header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CycleState.cases_for_search, __show_test_cases_in_search)),
@@ -75,16 +75,16 @@ def __show_scenarios_in_search(scenario:ScenarioModel):
     )
 
 def __search_scenarios_table() -> rx.Component:
-    table_componenet = Table()
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        table_componenet.header("", "ellipsis"),
-                        table_componenet.header("name", "fingerprint"),
-                        table_componenet.header("created", "calendar-check-2"),
-                        table_componenet.header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CycleState.scenarios_for_search, __show_scenarios_in_search)),
@@ -105,16 +105,16 @@ def __show_suites_in_search(suite:SuiteModel):
     )
 
 def __search_suites_table() -> rx.Component:
-    table_componenet = Table()
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        table_componenet.header("", "ellipsis"),
-                        table_componenet.header("name", "fingerprint"),
-                        table_componenet.header("created", "calendar-check-2"),
-                        table_componenet.header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CycleState.suites_for_search, __show_suites_in_search)),
@@ -158,14 +158,15 @@ def __show_child(cycle_child:model.CycleChildModel):
     )
 
 def __cycle_children_table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    Table.header("order", "list-ordered"),
-                    Table.header("type","blocks"),
-                    Table.header("name", "tag"),
-                    Table.header("", "ellipsis"),
+                    table_component.header("order", "list-ordered"),
+                    table_component.header("type","blocks"),
+                    table_component.header("name", "tag"),
+                    table_component.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.children, __show_child)),

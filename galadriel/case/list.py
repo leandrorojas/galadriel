@@ -43,12 +43,13 @@ def __add_case_button() -> rx.Component:
     )
 
 def __table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    Table.header("name", "fingerprint"),
-                    Table.header("created", "calendar-check-2"),
+                    table_component.header("name", "fingerprint"),
+                    table_component.header("created", "calendar-check-2"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),

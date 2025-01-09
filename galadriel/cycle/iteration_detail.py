@@ -148,7 +148,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
 @reflex_local_auth.require_login
 def iteration_page() -> rx.Component:
     title_badge = Badge()
-    table_componenet = Table()
+    table_component = Table()
 
     global READ_ONLY
     READ_ONLY = ~CycleState.is_iteration_editable
@@ -172,12 +172,12 @@ def iteration_page() -> rx.Component:
                 rx.table.root(
                     rx.table.header(
                         rx.table.row(
-                            table_componenet.header("name/type", "tag",info_tooltip="[P]requisite"),
-                            table_componenet.header("action", "pickaxe"),
-                            table_componenet.header("expected", "gem"),
-                            table_componenet.header("status", "activity"),
-                            table_componenet.header("issue", "bug"),
-                            table_componenet.header("", "ellipsis"),
+                            table_component.header("name/type", "tag",info_tooltip="[P]requisite"),
+                            table_component.header("action", "pickaxe"),
+                            table_component.header("expected", "gem"),
+                            table_component.header("status", "activity"),
+                            table_component.header("issue", "bug"),
+                            table_component.header("", "ellipsis"),
                         ),
                     ),
                     rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),

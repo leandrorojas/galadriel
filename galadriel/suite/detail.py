@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge
+from ..ui.components import Badge, Table
 from . import model
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
@@ -44,15 +44,16 @@ def __show_test_cases_in_search(test_case:CaseModel):
     )
 
 def __search_cases_table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        Table.header("", "ellipsis"),
-                        Table.header("name", "fingerprint"),
-                        Table.header("created", "calendar-check-2"),
-                        Table.header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", hide_column=True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.SuiteState.cases_for_search, __show_test_cases_in_search)),
@@ -73,15 +74,16 @@ def __show_scenarios_in_search(scenario:ScenarioModel):
     )
 
 def __search_scenarios_table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        Table.header("", "ellipsis"),
-                        Table.header("name", "fingerprint"),
-                        Table.header("created", "calendar-check-2"),
-                        Table.header("selected_id", "search", True),
+                        table_component.header("", "ellipsis"),
+                        table_component.header("name", "fingerprint"),
+                        table_component.header("created", "calendar-check-2"),
+                        table_component.header("selected_id", "search", hide_column=True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.SuiteState.scenarios_for_search, __show_scenarios_in_search)),
@@ -123,14 +125,15 @@ def __show_child(suite_child:model.SuiteChildModel):
     )
 
 def __suite_children_table() -> rx.Component:
+    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    Table.header("order", "list-ordered"),
-                    Table.header("type","blocks"),
-                    Table.header("name", "tag"),
-                    Table.header("", "ellipsis"),
+                    table_component.header("order", "list-ordered"),
+                    table_component.header("type","blocks"),
+                    table_component.header("name", "tag"),
+                    table_component.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.SuiteState.children, __show_child)),
