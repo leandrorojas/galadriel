@@ -9,20 +9,16 @@ from ..utils import consts
 
 def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
 
-    if test_case is None:
-        return rx.fragment(child)
+    if test_case is None: return rx.fragment(child)
     
     case_id = test_case.id
-    if case_id is None:
-        return rx.fragment(child)
+
+    if case_id is None: return rx.fragment(child)
 
     root_path = navigation.routes.CASES
     case_detail_url = f"{root_path}/{case_id}"
 
-    return rx.link(
-        child,
-        href=case_detail_url
-    )
+    return rx.link(child, href=case_detail_url)
 
 def __show_case(test_case:model.CaseModel):
     return rx.table.row(
@@ -36,7 +32,7 @@ def __add_case_button() -> rx.Component:
             rx.button(
                 rx.icon("plus", size=26), 
                 rx.text("Add Case", size="4", display=["none", "none", "block"]), 
-                size="3", 
+                size="3",
             ),
             href=navigation.routes.CASE_ADD
         ), 
