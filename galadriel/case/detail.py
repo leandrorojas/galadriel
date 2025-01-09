@@ -76,19 +76,6 @@ def __search_prerequisites_table() -> rx.Component:
         ),
     )
 
-#cases
-def __case_list_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("chevron-left", size=26), 
-                rx.text("to Cases", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=routes.CASES
-        ), 
-    )
-
 #steps
 def __show_step(test_step:model.StepModel):
 
@@ -131,11 +118,11 @@ def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
     can_edit = True
-    edit_link = Button()
+    button_component = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link.edit(state.CaseState.case_edit_url),
+        button_component.edit(state.CaseState.case_edit_url),
         rx.fragment("")
     )
 
@@ -143,7 +130,7 @@ def case_detail_page() -> rx.Component:
         rx.flex(
             title_badge.title(consts.ICON_TEST_TUBES, "Test Case Detail"),
             rx.spacer(),
-            rx.hstack(__case_list_button(), edit_link_element),
+            rx.hstack(button_component.to_list("to Cases", routes.CASES), edit_link_element),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",

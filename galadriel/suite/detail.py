@@ -22,18 +22,6 @@ def __search_table_header():
         ),
     ),
 
-def __suite_list_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("chevron-left", size=26), 
-                rx.text("to Suites", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=routes.SUITES
-        ), 
-    )
-
 def __show_test_cases_in_search(test_case:CaseModel):
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, "id")))),
@@ -131,11 +119,11 @@ def __suite_children_table() -> rx.Component:
 def suite_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True
-    edit_link = Button()
+    button_component = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link.edit(state.SuiteState.suite_edit_url),
+        button_component.edit(state.SuiteState.suite_edit_url),
         rx.fragment("")
     )
 
@@ -143,7 +131,7 @@ def suite_detail_page() -> rx.Component:
         rx.flex(
             title_badge.title("beaker", "Test Suite Detail"),
             rx.spacer(),
-            rx.hstack(__suite_list_button(), edit_link_element),
+            rx.hstack(button_component.to_list("to Suites", routes.SUITES), edit_link_element),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",

@@ -22,18 +22,6 @@ def __search_table_header():
         ),
     ),
 
-def __cycle_list_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("chevron-left", size=26), 
-                rx.text("to Cycles", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=routes.CYCLES
-        ), 
-    )
-
 def __show_test_cases_in_search(test_case:CaseModel):
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_case(getattr(test_case, "id")))),
@@ -155,11 +143,11 @@ def __cycle_children_table() -> rx.Component:
 def cycle_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True
-    edit_link = Button()
+    button_component = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link.edit(state.CycleState.cycle_edit_url, disabled=state.CycleState.has_iteration),
+        button_component.edit(state.CycleState.cycle_edit_url, disabled=state.CycleState.has_iteration),
         rx.fragment(""),
     )
 
@@ -167,7 +155,7 @@ def cycle_detail_page() -> rx.Component:
         rx.flex(
             title_badge.title("beaker", "Test Cycle Detail"),
             rx.spacer(),
-            rx.hstack(__cycle_list_button(), edit_link_element),
+            rx.hstack(button_component.to_list("to Cycles", routes.CYCLES), edit_link_element),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
