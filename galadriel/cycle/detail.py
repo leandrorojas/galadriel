@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table
+from ..ui.components import Badge, Table, Button
 from . import model
 from ..suite.model import SuiteModel
 from ..case.model import CaseModel
@@ -31,19 +31,6 @@ def __cycle_list_button():
                 size="3", 
             ),
             href=routes.CYCLES
-        ), 
-    )
-
-def __cycle_edit_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("pencil", size=26), 
-                rx.text("Edit", size="4", display=["none", "none", "block"]), 
-                size="3", 
-                disabled=state.CycleState.has_iteration,
-            ),
-            href=state.CycleState.cycle_edit_url
         ), 
     )
 
@@ -168,11 +155,11 @@ def __cycle_children_table() -> rx.Component:
 def cycle_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True
-    edit_link = __cycle_edit_button()
+    edit_link = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link,
+        edit_link.edit(state.CycleState.cycle_edit_url, disabled=state.CycleState.has_iteration),
         rx.fragment(""),
     )
 

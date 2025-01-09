@@ -7,7 +7,7 @@ from ..utils import consts
 
 class TopNavBar():
     def navbar(self) -> rx.Component:
-        buttons = Buttons()
+        buttons = Button()
 
         return rx.box(
             rx.desktop_only(
@@ -83,7 +83,7 @@ class TopNavBar():
             rx.text(text, size="4", weight="medium"), href=url
         )
     
-class Buttons():
+class Button():
     def signup_and_login(self):
         return rx.hstack(
             rx.link(rx.button("Sign Up", size="3", variant="outline",), href=navigation.routes.SIGNUP,),
@@ -91,6 +91,19 @@ class Buttons():
             spacing="4",
             justify="end",
         ),
+
+    def edit(self, link:str, disabled:bool = False) -> rx.Component:
+        return rx.fragment(
+            rx.link(
+                rx.button(
+                    rx.icon("pencil", size=26), 
+                    rx.text("Edit", size="4", display=["none", "none", "block"]), 
+                    size="3", 
+                    disabled=disabled,
+                ),
+                href=link
+            ), 
+        )
 
 class SideBar():
 
