@@ -11,6 +11,17 @@ from ..scenario.model import ScenarioModel
 
 from ..utils import consts
 
+def __search_table_header():
+    table_component = Table()
+    return rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            table_component.header("name", "fingerprint"),
+            table_component.header("created", "calendar-check-2"),
+            table_component.header("selected_id", "search", hide_column=True),
+        ),
+    ),
+
 def __suite_list_button():
     return rx.fragment(
         rx.link(
@@ -44,18 +55,10 @@ def __show_test_cases_in_search(test_case:CaseModel):
     )
 
 def __search_cases_table() -> rx.Component:
-    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        table_component.header("", "ellipsis"),
-                        table_component.header("name", "fingerprint"),
-                        table_component.header("created", "calendar-check-2"),
-                        table_component.header("selected_id", "search", hide_column=True),
-                    ),
-                ),
+                __search_table_header(),
                 rx.table.body(rx.foreach(state.SuiteState.cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
@@ -78,14 +81,7 @@ def __search_scenarios_table() -> rx.Component:
     return rx.fragment(
         rx.form(
             rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        table_component.header("", "ellipsis"),
-                        table_component.header("name", "fingerprint"),
-                        table_component.header("created", "calendar-check-2"),
-                        table_component.header("selected_id", "search", hide_column=True),
-                    ),
-                ),
+                __search_table_header(),
                 rx.table.body(rx.foreach(state.SuiteState.scenarios_for_search, __show_scenarios_in_search)),
                 variant="surface",
                 size="3",
