@@ -4,7 +4,7 @@ import reflex_local_auth
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip
+from ..ui.components import Badge, Tooltip, Table
 from ..utils import consts
 
 def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
@@ -42,23 +42,13 @@ def __add_case_button() -> rx.Component:
         ), 
     )
 
-def __header_cell(text: str, icon: str):
-    return rx.table.column_header_cell(
-        rx.hstack(
-            rx.icon(icon, size=18),
-            rx.text(text),
-            align="center",
-            spacing="2",
-        ),
-    )    
-
 def __table() -> rx.Component:
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("name", "fingerprint"),
-                    __header_cell("created", "calendar-check-2"),
+                    Table.header("name", "fingerprint"),
+                    Table.header("created", "calendar-check-2"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),

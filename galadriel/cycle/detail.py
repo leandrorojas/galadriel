@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge
+from ..ui.components import Badge, Table
 from . import model
 from ..suite.model import SuiteModel
 from ..case.model import CaseModel
@@ -36,17 +36,6 @@ def __cycle_edit_button():
         ), 
     )
 
-def __header_cell(text: str, icon: str, hide_column:bool = False):
-    return rx.table.column_header_cell(
-        rx.hstack(
-            rx.icon(icon, size=18),
-            rx.text(text),
-            align="center",
-            spacing="2",
-        ),
-        hidden=hide_column,
-    )
-
 def __show_test_cases_in_search(test_case:CaseModel):
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_case(getattr(test_case, "id")))),
@@ -56,15 +45,16 @@ def __show_test_cases_in_search(test_case:CaseModel):
     )
 
 def __search_cases_table() -> rx.Component:
+    table_componenet = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        __header_cell("", "ellipsis"),
-                        __header_cell("name", "fingerprint"),
-                        __header_cell("created", "calendar-check-2"),
-                        __header_cell("selected_id", "search", True),
+                        table_componenet.header("", "ellipsis"),
+                        table_componenet.header("name", "fingerprint"),
+                        table_componenet.header("created", "calendar-check-2"),
+                        table_componenet.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CycleState.cases_for_search, __show_test_cases_in_search)),
@@ -85,15 +75,16 @@ def __show_scenarios_in_search(scenario:ScenarioModel):
     )
 
 def __search_scenarios_table() -> rx.Component:
+    table_componenet = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        __header_cell("", "ellipsis"),
-                        __header_cell("name", "fingerprint"),
-                        __header_cell("created", "calendar-check-2"),
-                        __header_cell("selected_id", "search", True),
+                        table_componenet.header("", "ellipsis"),
+                        table_componenet.header("name", "fingerprint"),
+                        table_componenet.header("created", "calendar-check-2"),
+                        table_componenet.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CycleState.scenarios_for_search, __show_scenarios_in_search)),
@@ -114,15 +105,16 @@ def __show_suites_in_search(suite:SuiteModel):
     )
 
 def __search_suites_table() -> rx.Component:
+    table_componenet = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        __header_cell("", "ellipsis"),
-                        __header_cell("name", "fingerprint"),
-                        __header_cell("created", "calendar-check-2"),
-                        __header_cell("selected_id", "search", True),
+                        table_componenet.header("", "ellipsis"),
+                        table_componenet.header("name", "fingerprint"),
+                        table_componenet.header("created", "calendar-check-2"),
+                        table_componenet.header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CycleState.suites_for_search, __show_suites_in_search)),
@@ -170,10 +162,10 @@ def __cycle_children_table() -> rx.Component:
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("order", "list-ordered"),
-                    __header_cell("type","blocks"),
-                    __header_cell("name", "tag"),
-                    __header_cell("", "ellipsis"),
+                    Table.header("order", "list-ordered"),
+                    Table.header("type","blocks"),
+                    Table.header("name", "tag"),
+                    Table.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.children, __show_child)),

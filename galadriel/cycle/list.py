@@ -4,7 +4,7 @@ import reflex_local_auth
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip
+from ..ui.components import Badge, Tooltip, Table
 from ..utils import consts
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
@@ -107,30 +107,19 @@ def __add_adhoc_cycle_button() -> rx.Component:
         ), 
     )
 
-def __header_cell(text: str, icon: str, info_tooltip:str = ""):
-    title_tooltip = Tooltip()
-
-    return rx.table.column_header_cell(
-        rx.hstack(
-            rx.icon(icon, size=18),
-            rx.text(text),
-            rx.cond(info_tooltip == "", rx.text(""), title_tooltip.info(info_tooltip)),
-            align="center",
-            spacing="2",
-        ),
-    )    
-
 def __table() -> rx.Component:
+    table_componenet = Table()
+    
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("name", "fingerprint"),
-                    __header_cell("status", "activity"),
-                    __header_cell("% t/p/f", "gauge", "% of [t]hreshold / [p]assed / [f]ailed"),
-                    __header_cell("execution", "activity", "[F] completed = completed with failed TCs"), 
-                    __header_cell("","ellipsis"),
-                    __header_cell("created", "calendar-check-2"),
+                    table_componenet.header("name", "fingerprint"),
+                    table_componenet.header("status", "activity"),
+                    table_componenet.header("% t/p/f", "gauge", info_tooltip= "% of [t]hreshold / [p]assed / [f]ailed"),
+                    table_componenet.header("execution", "activity", info_tooltip="[F] completed = completed with failed TCs"), 
+                    table_componenet.header("","ellipsis"),
+                    table_componenet.header("created", "calendar-check-2"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),

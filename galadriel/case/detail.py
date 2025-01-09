@@ -3,24 +3,13 @@ import reflex_local_auth
 
 from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge
+from ..ui.components import Badge, Table
 from . import model, state
 from .forms import step_add_form    
 from ..utils import consts
 
 first_row:bool = True
 last_row:bool = False
-
-def __header_cell(text: str, icon: str, hide_column:bool = False):
-    return rx.table.column_header_cell(
-        rx.hstack(
-            rx.icon(icon, size=18),
-            rx.text(text),
-            align="center",
-            spacing="2",
-        ),
-        hidden=hide_column,
-    )
 
 #prerequisites
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
@@ -38,13 +27,14 @@ def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     )
 
 def __prerequisites_table() -> rx.Component:
+    table_componenet = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("order", "list-ordered"),
-                    __header_cell("test case", "pickaxe"),
-                    __header_cell("", "ellipsis"),
+                    table_componenet.header("order", "list-ordered"),
+                    table_componenet.header("test case", "pickaxe"),
+                    table_componenet.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CaseState.prerequisites, __show_prerequisite)),
@@ -65,15 +55,16 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
     )
 
 def __search_prerequisites_table() -> rx.Component:
+    table_header = Table
     return rx.fragment(
         rx.form(
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        __header_cell("", "ellipsis"),
-                        __header_cell("name", "fingerprint"),
-                        __header_cell("created", "calendar-check-2"),
-                        __header_cell("selected_id", "search", True),
+                        table_header("", "ellipsis"),
+                        table_header("name", "fingerprint"),
+                        table_header("created", "calendar-check-2"),
+                        table_header("selected_id", "search", True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CaseState.cases, __show_case_as_prerequisite)),
@@ -128,14 +119,15 @@ def __show_step(test_step:model.StepModel):
     )
 
 def __steps_table() -> rx.Component:
+    table_componenet = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    __header_cell("order", "list-ordered"),
-                    __header_cell("action", "pickaxe"),
-                    __header_cell("expected", "gem"),
-                    __header_cell("", "ellipsis"),
+                    table_componenet.header("order", "list-ordered"),
+                    table_componenet.header("action", "pickaxe"),
+                    table_componenet.header("expected", "gem"),
+                    table_componenet.header("", "ellipsis"),
                 ),
             ),
             rx.table.body(rx.foreach(state.CaseState.steps, __show_step)),
