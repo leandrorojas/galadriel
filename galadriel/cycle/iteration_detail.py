@@ -73,7 +73,7 @@ def __element_type_badge(child_type: str):
 
 def __element_status_badge(child_status: str):
     badge_mapping = {
-        "To Do": ("circle-help", "To Do", "blue"),
+        consts.STATUS_TO_DO: ("circle-help", consts.STATUS_TO_DO, "blue"),
         "Failed": ("x", "Failed", "red"),
         "Passed": ("check", "Passed", "green"),
         "Skipped": ("list-x", "Skipped", "gray"),
@@ -94,7 +94,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         rx.table.cell(snapshot_element.child_expected),
         rx.table.cell(rx.match(
             snapshot_element.child_status_id,
-            (1, __element_status_badge("To Do")),
+            (1, __element_status_badge(consts.STATUS_TO_DO)),
             (2, __element_status_badge("Failed")),
             (3, __element_status_badge("Passed")),
             (4, __element_status_badge("Skipped")),
