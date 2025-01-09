@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table
+from ..ui.components import Badge, Table, Button
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
@@ -18,18 +18,6 @@ def __scenario_list_button():
                 size="3", 
             ),
             href=routes.SCENARIOS
-        ), 
-    )
-
-def __scenario_edit_button(): 
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("pencil", size=26), 
-                rx.text("Edit", size="4", display=["none", "none", "block"]),
-                size="3", 
-            ),
-            href=state.ScenarioState.scenario_edit_url
         ), 
     )
 
@@ -102,11 +90,11 @@ def scenario_detail_page() -> rx.Component:
     title_badge = Badge()
     scenario = state.AddScenarioState.scenario
     can_edit = True
-    edit_link = __scenario_edit_button()
+    edit_link = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link,
+        edit_link.edit(state.ScenarioState.scenario_edit_url),
         rx.fragment("") 
     )
     

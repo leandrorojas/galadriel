@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table
+from ..ui.components import Badge, Table, Button
 from . import model
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
@@ -31,18 +31,6 @@ def __suite_list_button():
                 size="3", 
             ),
             href=routes.SUITES
-        ), 
-    )
-
-def __suite_edit_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("pencil", size=26), 
-                rx.text("Edit", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=state.SuiteState.suite_edit_url
         ), 
     )
 
@@ -77,7 +65,6 @@ def __show_scenarios_in_search(scenario:ScenarioModel):
     )
 
 def __search_scenarios_table() -> rx.Component:
-    table_component = Table()
     return rx.fragment(
         rx.form(
             rx.table.root(
@@ -144,11 +131,11 @@ def __suite_children_table() -> rx.Component:
 def suite_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True
-    edit_link = __suite_edit_button()
+    edit_link = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link,
+        edit_link.edit(state.SuiteState.suite_edit_url),
         rx.fragment("")
     )
 

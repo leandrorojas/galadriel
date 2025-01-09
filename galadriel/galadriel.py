@@ -12,13 +12,13 @@ from .utils import consts
 #galadriel
 from .pages import base_page, about_page, about_content
 from .pages import protetected_page
-from .ui.components import Buttons
+from .ui.components import Button
 from .auth.pages import login_page, register_page, logout_page
 
 from .auth.state import Session
 
 def index() -> rx.Component:
-    buttons = Buttons()
+    buttons = Button()
     
     index_content = rx.cond(
         Session.is_authenticated,

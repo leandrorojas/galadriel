@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge, Table
+from ..ui.components import Badge, Table, Button
 from . import model, state
 from .forms import step_add_form    
 from ..utils import consts
@@ -89,18 +89,6 @@ def __case_list_button():
         ), 
     )
 
-def __case_edit_button():
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("pencil", size=26), 
-                rx.text("Edit", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=state.CaseState.case_edit_url
-        ), 
-    )
-
 #steps
 def __show_step(test_step:model.StepModel):
 
@@ -143,11 +131,11 @@ def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
     can_edit = True
-    edit_link = __case_edit_button()
+    edit_link = Button()
 
     edit_link_element = rx.cond(
         can_edit,
-        edit_link,
+        edit_link.edit(state.CaseState.case_edit_url),
         rx.fragment("")
     )
 
