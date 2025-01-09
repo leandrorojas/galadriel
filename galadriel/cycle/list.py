@@ -4,25 +4,21 @@ import reflex_local_auth
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip, Table
+from ..ui.components import Badge, Tooltip, Table, Button
 from ..utils import consts
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 
-    if cycle is None:
-        return rx.fragment(child)
+    if cycle is None: return rx.fragment(child)
     
     cycle_id = cycle.id
-    if cycle_id is None:
-        return rx.fragment(child)
+    
+    if cycle_id is None: return rx.fragment(child)
 
     root_path = navigation.routes.CYCLES
     case_detail_url = f"{root_path}/{cycle_id}"
 
-    return rx.link(
-        child,
-        href=case_detail_url
-    )
+    return rx.link(child, href=case_detail_url)
 
 def __badge(text: str, color=""):
     if (color != ""):
@@ -95,18 +91,6 @@ def __show_cycle(cycle:model.CycleModel):
         rx.table.cell(cycle.created),
     )
 
-def __add_adhoc_cycle_button() -> rx.Component:
-    return rx.fragment(
-        rx.link(
-            rx.button(
-                rx.icon("plus", size=26), 
-                rx.text("Add Cycle", size="4", display=["none", "none", "block"]), 
-                size="3", 
-            ),
-            href=navigation.routes.CYCLE_ADD
-        ), 
-    )
-
 def __table() -> rx.Component:
     table_component = Table()
     
@@ -134,13 +118,14 @@ def __table() -> rx.Component:
 def cycle_list_page() -> rx.Component:
     title_badge = Badge()
     title_tooltip = Tooltip()
+    button_component = Button()
 
     cycle_list_content = rx.vstack(
         rx.flex(
             title_badge.title("flask-round", "Cycles"),
             title_tooltip.info("List of Cycles to execute"),
             rx.spacer(),
-            rx.hstack(__add_adhoc_cycle_button(),),
+            rx.hstack(button_component.add("Add Cycle", navigation.routes.CYCLE_ADD),),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",

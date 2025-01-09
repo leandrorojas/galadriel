@@ -116,6 +116,18 @@ class Button():
                 href=link
             ),
         )
+    
+    def add(self, name:str, link:str) -> rx.Component:
+        return rx.fragment(
+            rx.link(
+                rx.button(
+                    rx.icon("plus", size=26), 
+                    rx.text(f"{name}", size="4", display=["none", "none", "block"]), 
+                    size="3",
+                ),
+                href=link
+            ), 
+        )
 
 class SideBar():
 
