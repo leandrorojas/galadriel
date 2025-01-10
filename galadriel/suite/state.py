@@ -7,7 +7,7 @@ from ..case.model import CaseModel, StepModel
 from ..scenario.model import ScenarioModel
 
 from sqlmodel import select, cast, String
-from .. import utils
+from ..utils import consts
 
 SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
@@ -31,7 +31,7 @@ class SuiteState(rx.State):
 
     @rx.var
     def suite_id(self) -> str:
-        return self.router.page.params.get("id", "")
+        return self.router.page.params.get(consts.FIELD_ID, "")
     
     @rx.var
     def suite_url(self) -> str:
@@ -210,7 +210,7 @@ class SuiteState(rx.State):
             new_case_order = self.get_max_child_order(case_id, 2)
 
             if new_case_order == -1:
-                return rx.toast.error(utils.consts.MESSAGE_ALREADY_IN_LIST)
+                return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         suite_case_data.update({"suite_id":self.suite_id})
         suite_case_data.update({"child_type_id":2})
@@ -259,7 +259,7 @@ class SuiteState(rx.State):
             new_scenario_order = self.get_max_child_order(scenario_id, 1)
 
             if new_scenario_order == -1:
-                return rx.toast.error(utils.consts.MESSAGE_ALREADY_IN_LIST)
+                return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         suite_scenario_data.update({"suite_id":self.suite_id})
         suite_scenario_data.update({"child_type_id":1})
