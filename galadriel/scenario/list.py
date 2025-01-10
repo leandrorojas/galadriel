@@ -4,7 +4,7 @@ import reflex_local_auth
 from .. import navigation
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip, Table, Button
+from ..ui.components import Badge, Tooltip, Table, Button, PageHeader
 
 from ..utils import consts
 
@@ -47,23 +47,10 @@ def __table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def scenarios_list_page() -> rx.Component:
-    title_badge = Badge()
-    title_tooltip = Tooltip()
-    button_component = Button()
+    header_component = PageHeader()
 
     scenario_list_content = rx.vstack(
-        rx.flex(
-            title_badge.title("route", "Test Scenarios"),
-            title_tooltip.info("Group of Test Cases executed in a specific order"),
-            rx.spacer(),
-            rx.hstack(button_component.add("Add Scenario", navigation.routes.SCENARIO_ADD),),
-            spacing="2",
-            flex_direction=["column", "column", "row"],
-            align="center",
-            width="100%",
-            top="0px",
-            padding_top="2em",       
-        ),
+        header_component.list("Test Scenarios", "route", "Add Scenario", navigation.routes.SCENARIO_ADD, "Group of Test Cases executed in a specific order"),
         rx.scroll_area(
             __table(),
             type="hover",
