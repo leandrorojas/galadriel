@@ -8,6 +8,13 @@ from ..utils import consts
 
 from . import state, model
 
+from ..pages.add import add_page
+from .forms import scenario_add_form
+
+from .state import EditScenarioState
+from .forms import scenario_edit_form
+from ..pages.edit import edit_page
+
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
 
     if scenario is None: return rx.fragment(child)
@@ -63,3 +70,11 @@ def scenarios_list_page() -> rx.Component:
     ),
 
     return base_page(scenario_list_content)
+
+@reflex_local_auth.require_login
+def scenario_add_page() -> rx.Component:
+    return add_page(scenario_add_form, "New Test Scenario", "route", "to Scenarios", routes.SCENARIOS)
+
+@reflex_local_auth.require_login
+def scenario_edit_page() -> rx.Component:
+    return edit_page(scenario_edit_form, "Edit Test Scenario", "route", "to Scenarios", "to Scenario Detail", routes.SCENARIOS, EditScenarioState.scenario_url)

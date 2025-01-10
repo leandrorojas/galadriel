@@ -1,7 +1,4 @@
-from .add import scenario_add_page
-from .edit import scenario_edit_page
-from .model import ScenarioModel
-from .list import scenarios_list_page
+from .add_edit_list import scenarios_list_page, scenario_add_page, scenario_edit_page
 from .state import ScenarioState
 from .detail import scenario_detail_page
 

@@ -1,7 +1,5 @@
-from .add import case_add_page
-from .edit import case_edit_page
 from .model import CaseModel
-from .list import cases_list_page
+from .add_edit_list import cases_list_page, case_add_page, case_edit_page
 from .state import CaseState
 from .detail import case_detail_page
 

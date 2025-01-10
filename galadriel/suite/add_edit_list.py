@@ -8,6 +8,12 @@ from ..ui.components import Table, PageHeader
 
 from ..utils import consts
 
+from ..pages.add import add_page
+from .forms import suite_add_form
+from .forms import suite_edit_form
+from .state import EditSuiteState
+from ..pages.edit import edit_page
+
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
 
     if suite is None: return rx.fragment(child)
@@ -63,3 +69,11 @@ def suites_list_page() -> rx.Component:
     ),
 
     return base_page(suite_list_content)
+
+@reflex_local_auth.require_login
+def suite_add_page() -> rx.Component:
+    return add_page(suite_add_form, "New Test Suite", "beaker", "to Suites", routes.SUITES)
+
+@reflex_local_auth.require_login
+def suite_edit_page() -> rx.Component:
+    return edit_page(suite_edit_form, "Edit Test Suite", "route", "to Suites", "to Suite Detail", routes.SUITES, EditSuiteState.suite_url)

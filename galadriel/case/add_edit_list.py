@@ -7,6 +7,12 @@ from ..pages import base_page
 from ..ui.components import Table, PageHeader
 from ..utils import consts
 
+from ..pages.add import add_page
+from ..pages.edit import edit_page
+
+from .forms import case_add_form, case_edit_form
+from .state import EditCaseState
+
 def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
 
     if test_case is None: return rx.fragment(child)
@@ -62,3 +68,11 @@ def cases_list_page() -> rx.Component:
     ),
 
     return base_page(case_list_content)
+
+@reflex_local_auth.require_login
+def case_add_page() -> rx.Component:
+    return add_page(case_add_form, "New Test Case", consts.ICON_TEST_TUBES, "to Cases", routes.CASES)
+
+@reflex_local_auth.require_login
+def case_edit_page() -> rx.Component:
+    return edit_page(case_edit_form, "Edit Test Case", consts.ICON_TEST_TUBES, "to Cases", "to Case Detail", routes.CASES, EditCaseState.case_url)

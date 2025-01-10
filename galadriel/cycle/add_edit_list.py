@@ -8,6 +8,12 @@ from ..pages import base_page
 from ..ui.components import Table, PageHeader
 from ..utils import consts
 
+from ..pages.add import add_page
+from .forms import cycle_add_form, cycle_edit_form
+
+from .state import EditCycleState
+from ..pages.edit import edit_page
+
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 
     if cycle is None: return rx.fragment(child)
@@ -133,3 +139,11 @@ def cycle_list_page() -> rx.Component:
     ),
 
     return base_page(cycle_list_content)
+
+@reflex_local_auth.require_login
+def cycle_add_page() -> rx.Component:
+    return add_page(cycle_add_form, "New Cycle", "flask-round", "to Cycles", routes.CYCLES)
+
+@reflex_local_auth.require_login
+def cycle_edit_page() -> rx.Component:
+    return edit_page(cycle_edit_form, "Edit Test Cycle", "beaker", "to Cycles", "back to Detail", routes.CYCLES, EditCycleState.cycle_url)
