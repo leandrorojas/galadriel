@@ -24,7 +24,7 @@ class CycleState(rx.State):
 
     @rx.var
     def cycle_id(self) -> str:
-        return self.router.page.params.get("id", "")
+        return self.router.page.params.get(consts.FIELD_ID, "")
     
     @rx.var
     def cycle_url(self) -> str:

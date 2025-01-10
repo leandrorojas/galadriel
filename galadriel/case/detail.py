@@ -18,9 +18,9 @@ def __show_prerequisite(prerequisite:model.PrerequisiteModel):
         rx.table.cell(prerequisite.prerequisite_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, "id"))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, "id"))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, "id"))),
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -48,7 +48,7 @@ def __prerequisites_table() -> rx.Component:
 def __show_case_as_prerequisite(prerequisite:model.CaseModel):
 
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, consts.FIELD_ID)))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(prerequisite.created),
             rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id, read_only=True)), hidden=True),
@@ -85,9 +85,9 @@ def __show_step(test_step:model.StepModel):
         rx.table.cell(test_step.expected),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, "id"))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, "id"))),
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, "id"))),
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, consts.FIELD_ID))),
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, consts.FIELD_ID))),
                 spacing="2",
             )
         ),

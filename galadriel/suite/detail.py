@@ -24,7 +24,7 @@ def __search_table_header():
 
 def __show_test_cases_in_search(test_case:CaseModel):
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
             rx.table.cell(test_case.created),
             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
@@ -46,7 +46,7 @@ def __search_cases_table() -> rx.Component:
 
 def __show_scenarios_in_search(scenario:ScenarioModel):
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, consts.FIELD_ID)))),
             rx.table.cell(scenario.name),
             rx.table.cell(scenario.created),
             rx.table.cell(rx.form(rx.input(name="scenario_id", value=scenario.id)), hidden=True),
@@ -87,9 +87,9 @@ def __show_child(suite_child:model.SuiteChildModel):
         rx.table.cell(suite_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, "id"))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, "id"))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, "id"))),
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, consts.FIELD_ID))),
                 spacing="2",
             )
         ),

@@ -15,9 +15,9 @@ def __show_test_cases(test_cases:model.ScenarioCaseModel):
         rx.table.cell(test_cases.case_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, "id"))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, "id"))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, "id"))),
+                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -45,7 +45,7 @@ def __cases_table() -> rx.Component:
 def __show_test_cases_in_search(test_case:CaseModel):
 
     return rx.table.row(
-            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_case(getattr(test_case, "id")))),
+            rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
             rx.table.cell(test_case.created),
             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),

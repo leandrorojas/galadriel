@@ -25,7 +25,7 @@ class ScenarioState(rx.State):
 
     @rx.var
     def scenario_id(self) -> str:
-        return self.router.page.params.get("id", "")
+        return self.router.page.params.get(consts.FIELD_ID, "")
     
     @rx.var
     def scenario_url(self) -> str:
