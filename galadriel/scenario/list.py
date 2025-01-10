@@ -1,12 +1,12 @@
 import reflex as rx
 import reflex_local_auth
 
-from .. import navigation
-from . import state, model
+from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip, Table, Button, PageHeader
-
+from ..ui.components import Table, PageHeader
 from ..utils import consts
+
+from . import state, model
 
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
 
@@ -16,7 +16,7 @@ def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
 
     if scenario_id is None: return rx.fragment(child)
 
-    root_path = navigation.routes.SCENARIOS
+    root_path = routes.SCENARIOS
     scenario_detail_url = f"{root_path}/{scenario_id}"
 
     return rx.link(child, href=scenario_detail_url)
@@ -50,7 +50,7 @@ def scenarios_list_page() -> rx.Component:
     header_component = PageHeader()
 
     scenario_list_content = rx.vstack(
-        header_component.list("Test Scenarios", "route", "Add Scenario", navigation.routes.SCENARIO_ADD, "Group of Test Cases executed in a specific order"),
+        header_component.list("Test Scenarios", "route", "Add Scenario", routes.SCENARIO_ADD, "Group of Test Cases executed in a specific order"),
         rx.scroll_area(
             __table(),
             type="hover",
