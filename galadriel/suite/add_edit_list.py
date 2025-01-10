@@ -1,21 +1,19 @@
 import reflex as rx
 import reflex_local_auth
 
-from ..navigation import routes
 from . import state, model
+from .forms import suite_add_form, suite_edit_form
+
+from ..navigation import routes
+
 from ..pages import base_page
-from ..ui.components import Table, PageHeader
-
-from ..utils import consts
-
 from ..pages.add import add_page
-from .forms import suite_add_form
-from .forms import suite_edit_form
-from .state import EditSuiteState
 from ..pages.edit import edit_page
 
-def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
+from ..ui.components import Table, PageHeader
+from ..utils import consts
 
+def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite is None: return rx.fragment(child)
     
     suite_id = suite.id
@@ -55,20 +53,13 @@ def __table() -> rx.Component:
 def suites_list_page() -> rx.Component:
     header_component = PageHeader()
 
-    suite_list_content = rx.vstack(
-        header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
-        rx.scroll_area(
-            __table(),
-            type="hover",
-            scrollbars="vertical",
-            style={"height": consts.RELATIVE_VIEWPORT_85},
+    return base_page(
+        rx.vstack(
+            header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
+            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
-        spacing="5",
-        align="center",
-        min_height=consts.RELATIVE_VIEWPORT_85,
-    ),
-
-    return base_page(suite_list_content)
+    )
 
 @reflex_local_auth.require_login
 def suite_add_page() -> rx.Component:
@@ -76,4 +67,4 @@ def suite_add_page() -> rx.Component:
 
 @reflex_local_auth.require_login
 def suite_edit_page() -> rx.Component:
-    return edit_page(suite_edit_form, "Edit Test Suite", "route", "to Suites", "to Suite Detail", routes.SUITES, EditSuiteState.suite_url)
+    return edit_page(suite_edit_form, "Edit Test Suite", "route", "to Suites", "to Suite Detail", routes.SUITES, state.EditSuiteState.suite_url)

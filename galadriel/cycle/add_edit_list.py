@@ -2,20 +2,18 @@ import reflex as rx
 import reflex_local_auth
 
 from . import state, model
+from .forms import cycle_add_form, cycle_edit_form
 
 from ..navigation import routes
+
+from ..pages.add import add_page
+from ..pages.edit import edit_page
 from ..pages import base_page
+
 from ..ui.components import Table, PageHeader
 from ..utils import consts
 
-from ..pages.add import add_page
-from .forms import cycle_add_form, cycle_edit_form
-
-from .state import EditCycleState
-from ..pages.edit import edit_page
-
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
-
     if cycle is None: return rx.fragment(child)
     
     cycle_id = cycle.id
@@ -121,29 +119,28 @@ def __table() -> rx.Component:
         ),
     )
 
+#region LIST
 @reflex_local_auth.require_login
 def cycle_list_page() -> rx.Component:
     page_component = PageHeader()
 
-    cycle_list_content = rx.vstack(
-        page_component.list("Cycles", "flask-round", "Add Cycle", routes.CYCLE_ADD, "List of Cycles to execute"),
-        rx.scroll_area(
-            __table(),
-            type="hover",
-            scrollbars="vertical",
-            style={"height": consts.RELATIVE_VIEWPORT_85},
+    return base_page(
+        rx.vstack(
+            page_component.list("Cycles", "flask-round", "Add Cycle", routes.CYCLE_ADD, "List of Cycles to execute"),
+            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
-        spacing="5",
-        align="center",
-        min_height=consts.RELATIVE_VIEWPORT_85,
-    ),
+    )
+#endregion
 
-    return base_page(cycle_list_content)
-
+#region ADD
 @reflex_local_auth.require_login
 def cycle_add_page() -> rx.Component:
     return add_page(cycle_add_form, "New Cycle", "flask-round", "to Cycles", routes.CYCLES)
+#endregion
 
+#region EDIT
 @reflex_local_auth.require_login
 def cycle_edit_page() -> rx.Component:
-    return edit_page(cycle_edit_form, "Edit Test Cycle", "beaker", "to Cycles", "back to Detail", routes.CYCLES, EditCycleState.cycle_url)
+    return edit_page(cycle_edit_form, "Edit Test Cycle", "beaker", "to Cycles", "back to Detail", routes.CYCLES, state.EditCycleState.cycle_url)
+#endregion
