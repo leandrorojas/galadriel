@@ -1,6 +1,7 @@
 from .add_edit_list import scenarios_list_page, scenario_add_page, scenario_edit_page
 from .state import ScenarioState
 from .detail import scenario_detail_page
+from .model import ScenarioModel
 
 __all__ = [
     'scenario_add_page',
