@@ -1,10 +1,10 @@
 import reflex as rx
 import reflex_local_auth
 
-from .. import navigation
+from ..navigation import routes
 from . import state, model
 from ..pages import base_page
-from ..ui.components import Badge, Tooltip, Table, Button
+from ..ui.components import Table, PageHeader
 
 from ..utils import consts
 
@@ -16,7 +16,7 @@ def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
 
     if suite_id is None: return rx.fragment(child)
 
-    root_path = navigation.routes.SUITES
+    root_path = routes.SUITES
     suite_detail_url = f"{root_path}/{suite_id}"
 
     return rx.link(child, href=suite_detail_url)
@@ -47,23 +47,10 @@ def __table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def suites_list_page() -> rx.Component:
-    title_badge = Badge()
-    title_tooltip = Tooltip()
-    button_component = Button()
+    header_component = PageHeader()
 
     suite_list_content = rx.vstack(
-        rx.flex(
-            title_badge.title("beaker", "Test Suites"),
-            title_tooltip.info("Label for a group of Test Cases based on some criteria (i.e.: project)"),
-            rx.spacer(),
-            rx.hstack(button_component.add("Add Suite", navigation.routes.SUITE_ADD),),
-            spacing="2",
-            flex_direction=["column", "column", "row"],
-            align="center",
-            width="100%",
-            top="0px",
-            padding_top="2em",       
-        ),
+        header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
         rx.scroll_area(
             __table(),
             type="hover",

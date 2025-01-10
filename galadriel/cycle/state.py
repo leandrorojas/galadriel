@@ -117,9 +117,9 @@ class CycleState(rx.State):
                         if (iteration_finished == True):
                             cycle_status = ""
                             if (iteration_passed_percentage >= int(single_result.threshold)):
-                                cycle_status = "passed"
+                                cycle_status = consts.STATUS_CYCLE_PASSED
                             else:
-                                cycle_status = "failed"
+                                cycle_status = consts.STATUS_CYCLE_FAILED
                             setattr(single_result, "cycle_status_name", cycle_status)
                         else: #iteration is in progress
                             setattr(single_result, "cycle_status_name", "testing")
