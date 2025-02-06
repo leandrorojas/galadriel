@@ -29,17 +29,17 @@ class SuiteState(rx.State):
     show_scenario_search:bool = False
     search_scenario_value:str = ""
 
-    @rx.var
+    @rx.var(cache=True)
     def suite_id(self) -> str:
         return self.router.page.params.get(consts.FIELD_ID, "")
     
-    @rx.var
+    @rx.var(cache=True)
     def suite_url(self) -> str:
         if not self.suite:
             return f"{SUITES_ROUTE}"
         return f"{SUITES_ROUTE}/{self.suite.id}"
     
-    @rx.var
+    @rx.var(cache=True)
     def suite_edit_url(self) -> str:
         if not self.suite:
             return f"{SUITES_ROUTE}"
