@@ -22,29 +22,29 @@ class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
 
-    @rx.var
+    @rx.var(cache=True)
     def cycle_id(self) -> str:
         return self.router.page.params.get(consts.FIELD_ID, "")
     
-    @rx.var
+    @rx.var(cache=True)
     def cycle_url(self) -> str:
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}"
     
-    @rx.var
+    @rx.var(cache=True)
     def cycle_edit_url(self) -> str:
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}/edit"
     
-    @rx.var
+    @rx.var(cache=True)
     def cycle_threshold(self) -> str:
         if not self.cycle:
             return "0"
         return f"{self.cycle.threshold}"
     
-    @rx.var
+    @rx.var(cache=True)
     def cycle_name(self) -> str:
         if not self.cycle:
             return ""
@@ -462,7 +462,7 @@ class CycleState(rx.State):
     #region SNAPSHOT
     iteration_snapshot_items: List['IterationSnapshotModel'] = []
 
-    @rx.var
+    @rx.var(cache=True)
     def iteration_status_name(self) -> str:
         if not self.cycle:
             return ""
@@ -474,7 +474,7 @@ class CycleState(rx.State):
             else:
                 return ""
 
-    @rx.var
+    @rx.var(cache=True)
     def has_iteration(self) -> bool:
         if not self.cycle:
             return False
@@ -482,13 +482,13 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             return (iteration != None)
         
-    @rx.var
+    @rx.var(cache=True)
     def iteration_url(self) -> str:
         if not self.cycle:
             return f"{CYCLES_ROUTE}"
         return f"{CYCLES_ROUTE}/{self.cycle.id}/iteration"
     
-    @rx.var
+    @rx.var(cache=True)
     def is_iteration_editable(self) -> bool:
         if not self.cycle:
             return False
@@ -802,7 +802,7 @@ class CycleState(rx.State):
     #endregion
 
     #region ITERATION
-    @rx.var
+    @rx.var(cache=True)
     def iteration_id(self) -> int:
         if not self.cycle:
             return -1
@@ -815,7 +815,7 @@ class CycleState(rx.State):
         
     __fail_checkbox = False
 
-    @rx.var
+    @rx.var(cache=True)
     def fail_checkbox(self) -> bool:
         return self.__fail_checkbox
     

@@ -23,17 +23,17 @@ class CaseState(rx.State):
     search_value:str = ""
     show_search:bool = False
 
-    @rx.var
+    @rx.var(cache=True)
     def case_id(self) -> str:
         return self.router.page.params.get(consts.FIELD_ID, "") 
     
-    @rx.var
+    @rx.var(cache=True)
     def case_url(self) -> str:
         if not self.case:
             return f"{CASE_ROUTE}"
         return f"{CASE_ROUTE}/{self.case.id}"
     
-    @rx.var
+    @rx.var(cache=True)
     def case_edit_url(self) -> str:
         if not self.case:
             return f"{CASE_ROUTE}"

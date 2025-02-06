@@ -23,17 +23,17 @@ class ScenarioState(rx.State):
     show_search:bool = False
     search_value:str = ""
 
-    @rx.var
+    @rx.var(cache=True)
     def scenario_id(self) -> str:
         return self.router.page.params.get(consts.FIELD_ID, "")
     
-    @rx.var
+    @rx.var(cache=True)
     def scenario_url(self) -> str:
         if not self.scenario:
             return str(f"{SCENARIO_ROUTE}")
         return str(f"{SCENARIO_ROUTE}/{self.scenario.id}")
     
-    @rx.var
+    @rx.var(cache=True)
     def scenario_edit_url(self) -> str:
         if not self.scenario:
             return f"{SCENARIO_ROUTE}"
