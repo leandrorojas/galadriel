@@ -24,7 +24,7 @@ A simple but yet straight to the point and functional Test Management System, wh
         seed.seed_db()
         seed.set_first_run()
     ```
-    ### configuring jira
+    ### configuring Jira
     * rename ```rename_me_to_galadriel.yaml``` to ```galadriel.yaml```
     * get a Jira token for your account by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
     * fill in the yaml configuration, the yaml file has sameple dummy data:
