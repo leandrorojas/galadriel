@@ -25,7 +25,7 @@ A simple but yet straight to the point and functional Test Management System, wh
         seed.set_first_run()
     ```
     ### configuring Jira
-    * rename ```rename_me_to_galadriel.yaml``` to ```galadriel.yaml```
+    * copy ```copy_me_into_galadriel.yaml``` into ```galadriel.yaml```
     * get a Jira token for your account by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
     * fill in the yaml configuration, the yaml file has sameple dummy data:
         * _url_: the url of your jira instance, i.e.: _https://instance.atlassian.net_
