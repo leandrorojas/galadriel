@@ -1,4 +1,4 @@
-reflex==0.6.8
+reflex==0.7.2
 reflex-local-auth>=0.2.2
 PyYAML==6.0.2
 atlassian-python-api==3.41.16
