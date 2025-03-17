@@ -24,8 +24,11 @@ class CaseState(rx.State):
     show_search:bool = False
 
     @rx.var(cache=True)
-    def case_id(self) -> str:
-        return self.router.page.params.get(consts.FIELD_ID, "") 
+    def case_id(self) -> int:
+        try:
+            return int(self.router.page.params.get(consts.FIELD_ID, "0"))
+        except ValueError:
+            return 0
     
     @rx.var(cache=True)
     def case_url(self) -> str:
@@ -42,7 +45,7 @@ class CaseState(rx.State):
     def get_case_detail(self):
         self.show_search = False
         with rx.session() as session:
-            if (self.case_id == ""):
+            if (self.case_id == 0):
                 self.case = None
                 return
             result = session.exec(CaseModel.select().where(CaseModel.id == self.case_id)).one_or_none()
@@ -240,7 +243,7 @@ class CaseState(rx.State):
             
         if not self.has_steps(prerequisite_id): return rx.toast.error("prerequisite must have at least one step")
         
-        prerequisite_data:dict = {"case_id":""}
+        prerequisite_data:dict = {"case_id": 0}
         new_prerequisite_order = 1
 
         if (len(self.prerequisites) > 0):
@@ -346,8 +349,11 @@ class EditCaseState(CaseState):
     form_data:dict = {}
     
     def handle_submit(self, form_data):
+        try:
+            case_id = int(form_data.pop("case_id"))
+        except (ValueError, KeyError):
+            return rx.toast.error("Invalid case ID")
         self.form_data = form_data
-        case_id = form_data.pop("case_id")
         updated_data = {**form_data}
         result = self.save_case_edits(case_id, updated_data)
         if result is None: return rx.toast.error("name cannot be empty")
@@ -360,8 +366,11 @@ class AddStepState(CaseState):
     form_data:dict = {}
     
     def handle_submit(self, form_data):
+        try:
+            case_id = int(form_data.pop("case_id"))
+        except (ValueError, KeyError):
+            return rx.toast.error("Invalid case ID")
         self.form_data = form_data
-        case_id = form_data.pop("case_id")
         updated_data = {**form_data}
         result = self.add_step(case_id, updated_data)
         return result
