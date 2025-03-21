@@ -10,7 +10,7 @@ A simple but yet straight to the point and functional Test Management System, wh
 * reflex 0.6.8
 * reflex-local-auth 0.2.2
 * PyYAML 6.0.2
-* atlassian-python-api 3.41.16
+* requests 2.32.3
 
 ## first run
 * clone the repo: ```git clone https://github.com/leandrorojas/galadriel.git```
