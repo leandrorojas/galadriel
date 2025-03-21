@@ -1,4 +1,5 @@
 reflex==0.7.2
 reflex-local-auth>=0.2.2
 PyYAML==6.0.2
-atlassian-python-api==3.41.16
+#atlassian-python-api==3.41.21
+requests==2.32.3
