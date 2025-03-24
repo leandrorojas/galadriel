@@ -254,7 +254,7 @@ class SideBar():
 
     def __sidebar_items(self) -> rx.Component: 
         return rx.vstack(
-            self.__sidebar_item("[wip] Dashboard", "layout-dashboard", navigation.routes.ABOUT),
+            self.__sidebar_item("[wip] Dashboard", "layout-dashboard", navigation.routes.DASHBOARD),
             self.__sidebar_item("Cycles", "flask-round", navigation.routes.CYCLES),
             rx.divider(),
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
@@ -390,7 +390,7 @@ class PageHeader():
             align="center",
             width="100%",
             top="0px",
-            padding_top="2em",       
+            padding_top="2em",
         ),
 
 class Table():
