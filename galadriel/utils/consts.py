@@ -1,6 +1,7 @@
 CASE_MODEL_ID = "casemodel.id"
 
 RELATIVE_VIEWPORT_85 = "85vh"
+RELATIVE_VIEWPORT_95 = "95vh"
 
 ICON_TEST_TUBES = "test-tubes"
 
