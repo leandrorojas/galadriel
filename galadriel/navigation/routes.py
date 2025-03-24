@@ -33,3 +33,6 @@ CYCLE_ADD = "/cycles/add"
 CYCLE_DETAIL = "/cycles/[id]"
 CYCLE_EDIT = "/cycles/[id]/edit"
 CYCLE_ITERATION_DETAIL = "/cycles/[id]/iteration"
+
+#dashboard
+DASHBOARD = "/dashboard"

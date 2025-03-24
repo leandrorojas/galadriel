@@ -7,6 +7,7 @@ from . import scenario
 from . import case
 from . import cycle
 from . import install
+from . import dashboard
 from .utils import consts
 
 #galadriel
@@ -84,6 +85,9 @@ app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD)
 app.add_page(cycle.cycle_detail_page, route=navigation.routes.CYCLE_DETAIL, on_load=cycle.CycleState.get_cycle_detail)
 app.add_page(cycle.cycle_edit_page, route=navigation.routes.CYCLE_EDIT, on_load=cycle.CycleState.get_cycle_detail)
 app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAIL)
+
+#Dashboard
+app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD)
 
 #protected test page
 app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
