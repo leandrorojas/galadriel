@@ -430,7 +430,7 @@ class StatCard():
                     ),
                     height="100%", spacing="4", align="center", width="100%",
                 ),
-                rx.hstack(
+                rx.hstack( 
                     rx.hstack(
                         rx.icon(tag=arrow_icon, size=24, color=rx.color(arrow_color, 9),),
                         rx.text(f"{percentage_change}%", size="3", color=rx.color(arrow_color, 9), weight="medium",),
@@ -441,5 +441,5 @@ class StatCard():
                 ),
                 spacing="3",
             ),
-            size="3", width="100%", box_shadow="0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+            size="1", width="100%", box_shadow="0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         )
