@@ -8,7 +8,7 @@ A simple but yet straight to the point and functional Test Management System, wh
 
  ## requirements
 * reflex 0.7.4
-* reflex-local-auth 0.2.2
+* reflex-local-auth 0.3.0
 * PyYAML 6.0.2
 * requests 2.32.3
 
