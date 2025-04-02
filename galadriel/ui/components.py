@@ -410,7 +410,7 @@ class Table():
         )
 
 class StatCard():
-    def stat_card(self, stat_name: str, value: int, prev_value: int, icon: str, icon_color: LiteralAccentColor, extra_char: str = "",) -> rx.Component:
+    def stat_card(self, stat_name: str, value: int, icon: str, icon_color: LiteralAccentColor, extra_char: str = "", prev_value: int = 0) -> rx.Component:
         if prev_value == 0:
             percentage_change = 0 if value == 0 else float("inf")
         else:
@@ -422,7 +422,7 @@ class StatCard():
         return rx.card(
             rx.vstack(
                 rx.hstack(
-                    rx.badge(rx.icon(tag=icon, size=34), color_scheme=icon_color, radius="full", padding="0.7rem",),
+                    rx.badge(rx.icon(tag=icon, size=34), color_scheme=str(icon_color), radius="full", padding="0.7rem",),
                     rx.vstack(
                         rx.heading(f"{extra_char}{value:,}", size="6", weight="bold",),
                         rx.text(stat_name, size="4", weight="medium"),
@@ -438,6 +438,24 @@ class StatCard():
                     ),
                     rx.text(f"{change} from last month", size="2", color=rx.color("gray", 10),),
                     align="center", width="100%",
+                ),
+                spacing="3",
+            ),
+            size="1", width="100%", box_shadow="0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        )
+
+class Card():
+    def card(self, card_name: str, value, icon: str, icon_color: LiteralAccentColor, extra_char: str = "") -> rx.Component:
+        return rx.card(
+            rx.vstack(
+                rx.hstack(
+                    rx.badge(rx.icon(tag=icon, size=34), color_scheme=str(icon_color), radius="full", padding="0.7rem",),
+                    rx.vstack(
+                        rx.heading(f"{extra_char}{value:,}", size="6", weight="bold",),
+                        rx.text(card_name, size="4", weight="medium"),
+                        spacing="1", height="100%", align_items="start", width="100%",
+                    ),
+                    height="100%", spacing="4", align="center", width="100%",
                 ),
                 spacing="3",
             ),
