@@ -38,6 +38,18 @@ def __table() -> rx.Component:
                     rx.table.cell("Open"),
                     rx.table.cell("2025-03-10"),
                 ),
+                rx.table.row(
+                    rx.table.cell("TEST-004"),
+                    rx.table.cell("that bug"),
+                    rx.table.cell("Closed"),
+                    rx.table.cell("2025-03-01"),
+                ),
+                rx.table.row(
+                    rx.table.cell("TEST-005"),
+                    rx.table.cell("some bug"),
+                    rx.table.cell("To Do"),
+                    rx.table.cell("2025-03-31"),
+                ),
             ),
             variant="surface",
             size="3",
@@ -92,6 +104,7 @@ def dashboard_page() -> rx.Component:
                     StatCard().stat_card("Cycle(s) In Progress", 150, 743, "flask-round", "cyan"),
                     StatCard().stat_card("Skipped Case(s)", 2, 1, "test-tubes", "amber"),
                     StatCard().stat_card("Failed Case(s) / No bug", 10, 15, "bug-off", "bronze"),
+                    spacing="4",
                 ),
                 rx.flex(
                     rx.card(
@@ -104,12 +117,13 @@ def dashboard_page() -> rx.Component:
                                 fill="#8884d8",
                                 label=True,
                             ),
-                            width=400,
-                            height=200,
+                            width="100%",
+                            height=250,
                         ),
+                        width="27vw",
                     ),
                     rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": "33%"}),
-                    spacing="3",
+                    spacing="4",
                 ),
                 rx.flex(
                     rx.card(
