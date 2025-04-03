@@ -1,9 +1,11 @@
 import reflex as rx
 import reflex_local_auth
 
+from .state import DashboardState
+
 from ..pages import base_page
 
-from ..ui.components import Badge, StatCard, Table
+from ..ui.components import Badge, Table, Card
 from ..utils import consts
 
 def __table() -> rx.Component:
@@ -21,39 +23,13 @@ def __table() -> rx.Component:
             ),
             rx.table.body(
                 rx.table.row(
-                    rx.table.cell("TEST-001"),
-                    rx.table.cell("some bug"),
-                    rx.table.cell("To Do"),
-                    rx.table.cell("2025-03-31"),
-                ),
-                rx.table.row(
-                    rx.table.cell("TEST-002"),
-                    rx.table.cell("another bug"),
-                    rx.table.cell("In Progress"),
-                    rx.table.cell("2025-03-18"),
-                ),
-                rx.table.row(
-                    rx.table.cell("TEST-003"),
-                    rx.table.cell("this bug"),
-                    rx.table.cell("Open"),
-                    rx.table.cell("2025-03-10"),
-                ),
-                rx.table.row(
-                    rx.table.cell("TEST-004"),
-                    rx.table.cell("that bug"),
-                    rx.table.cell("Closed"),
-                    rx.table.cell("2025-03-01"),
-                ),
-                rx.table.row(
-                    rx.table.cell("TEST-005"),
-                    rx.table.cell("some bug"),
-                    rx.table.cell("To Do"),
-                    rx.table.cell("2025-03-31"),
-                ),
+                    rx.table.cell("TEST-001"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
+                rx.table.row(rx.table.cell("TEST-002"), rx.table.cell("another bug"), rx.table.cell("In Progress"), rx.table.cell("2025-03-18"), ),
+                rx.table.row(rx.table.cell("TEST-003"), rx.table.cell("this bug"), rx.table.cell("Open"), rx.table.cell("2025-03-10"), ),
+                rx.table.row(rx.table.cell("TEST-004"),rx.table.cell("that bug"), rx.table.cell("Closed"), rx.table.cell("2025-03-01"), ),
+                rx.table.row(rx.table.cell("TEST-005"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
             ),
-            variant="surface",
-            size="3",
-            width="100%",
+            variant="surface", size="3", width="100%",
         ),
     )
 
@@ -93,18 +69,14 @@ def dashboard_page() -> rx.Component:
             rx.vstack(
                 rx.flex(
                     page_title.title("chart-no-axes-combined", "Dashboard"),
-                    spacing="2",
                     flex_direction=["column", "column", "row"],
-                    align="center",
-                    width="100%",
-                    top="0px",
-                    padding_top="2em",
+                    align="center", width="100%", top="0px", padding_top="2em", spacing="2",
                 ),
                 rx.hstack(
-                    StatCard().stat_card("Cycle(s) In Progress", 150, 743, "flask-round", "cyan"),
-                    StatCard().stat_card("Skipped Case(s)", 2, 1, "test-tubes", "amber"),
-                    StatCard().stat_card("Failed Case(s) / No bug", 10, 15, "bug-off", "bronze"),
-                    spacing="4",
+                    Card().card("Cycle(s) In Progress", DashboardState.cycke_count, "flask-round", "cyan"),
+                    Card().card("Skipped Case(s)", 1, "test-tubes", "amber"),
+                    Card().card("Failed Case(s) w/o bug", 10, "bug-off", "bronze"),
+                    width="63vw", spacing="4",
                 ),
                 rx.flex(
                     rx.card(
@@ -117,8 +89,7 @@ def dashboard_page() -> rx.Component:
                                 fill="#8884d8",
                                 label=True,
                             ),
-                            width="100%",
-                            height=250,
+                            width="100%", height=250,
                         ),
                         width="27vw",
                     ),

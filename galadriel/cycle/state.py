@@ -58,6 +58,7 @@ class CycleState(rx.State):
             result = session.exec(CycleModel.select().where(CycleModel.id == self.cycle_id)).one_or_none()
             self.cycle = result
 
+    #region CYCLES
     def load_cycles(self):
         with rx.session() as session:
             results = session.exec(CycleModel.select().order_by(desc(CycleModel.created))).all()
@@ -198,6 +199,7 @@ class CycleState(rx.State):
 
             self.duplicate_cycle_children(origin_cycle_id, self.cycle.id)
             self.load_cycles()
+    #endregion
 
     #region CYCLE CHILDREN
     children: List['CycleChildModel'] = []
