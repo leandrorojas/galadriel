@@ -451,7 +451,7 @@ class Card():
                 rx.hstack(
                     rx.badge(rx.icon(tag=icon, size=34), color_scheme=str(icon_color), radius="full", padding="0.7rem",),
                     rx.vstack(
-                        rx.heading(f"{extra_char}{value:,}", size="6", weight="bold",),
+                        rx.heading(f"{extra_char}{value}", size="6", weight="bold",),
                         rx.text(card_name, size="4", weight="medium"),
                         spacing="1", height="100%", align_items="start", width="100%",
                     ),

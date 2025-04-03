@@ -1,9 +1,11 @@
 import reflex as rx
 import reflex_local_auth
 
+from .state import DashboardState
+
 from ..pages import base_page
 
-from ..ui.components import Badge, StatCard, Table, Card
+from ..ui.components import Badge, Table, Card
 from ..utils import consts
 
 def __table() -> rx.Component:
@@ -71,9 +73,9 @@ def dashboard_page() -> rx.Component:
                     align="center", width="100%", top="0px", padding_top="2em", spacing="2",
                 ),
                 rx.hstack(
-                    Card().card("Cycle(s) In Progress", 150, "flask-round", "cyan"),
+                    Card().card("Cycle(s) In Progress", DashboardState.cycke_count, "flask-round", "cyan"),
                     Card().card("Skipped Case(s)", 1, "test-tubes", "amber"),
-                    Card().card("Failed Case(s) / No bug", 10, "bug-off", "bronze"),
+                    Card().card("Failed Case(s) w/o bug", 10, "bug-off", "bronze"),
                     width="63vw", spacing="4",
                 ),
                 rx.flex(
