@@ -1,6 +1,6 @@
 import reflex as rx
 from ..iteration.model import IterationModel
-from ..iteration.model import IterationSnapshotModel
+from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
 class DashboardState(rx.State):
 
@@ -22,3 +22,19 @@ class DashboardState(rx.State):
                 skipped_case_count = skipped_case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == 4)).all())
 
         return skipped_case_count
+    
+    @rx.var(cache=False)
+    def cases_without_bug(self) -> int:
+        in_progress_iter = self.__get_in_progress_iterations()
+        cases_without_bug_count = 0
+
+        for iteration in in_progress_iter:
+            with rx.session() as session:
+                failed_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == 2)).all()
+                failed_cases_count = len(failed_cases)
+
+                for failed_case in failed_cases:
+                    linked_issues = session.exec(IterationSnapshotLinkedIssues.select().where(IterationSnapshotLinkedIssues.iteration_snapshot_id == failed_case.id, IterationSnapshotLinkedIssues.unlinked == None)).all()
+                    cases_without_bug_count += len(linked_issues)
+
+        return failed_cases_count - cases_without_bug_count

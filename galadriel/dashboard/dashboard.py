@@ -75,7 +75,7 @@ def dashboard_page() -> rx.Component:
                 rx.hstack(
                     Card().card("Cycle(s) In Progress", DashboardState.cycke_count, "flask-round", "cyan"),
                     Card().card("Skipped Case(s)", DashboardState.skipped_cases, "test-tubes", "amber"),
-                    Card().card("Failed Case(s) w/o bug", 10, "bug-off", "bronze"),
+                    Card().card("Failed Case(s) w/o bug", DashboardState.cases_without_bug, "bug-off", "bronze"),
                     width="63vw", spacing="4",
                 ),
                 rx.flex(
