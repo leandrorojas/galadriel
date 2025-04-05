@@ -7,6 +7,16 @@ class DashboardState(rx.State):
     def __get_in_progress_iterations(self):
         with rx.session() as session:
             return session.exec(IterationModel.select().where(IterationModel.iteration_status_id == 1)).all()
+        
+    def __get_case_count_by_status(self, status_id: int) -> int:
+        in_progress_iter = self.__get_in_progress_iterations()
+        case_count = 0
+
+        for iteration in in_progress_iter:
+            with rx.session() as session:
+                case_count = case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == status_id)).all())
+
+        return case_count
 
     @rx.var(cache=False)
     def cycle_count(self) -> int:
@@ -14,14 +24,7 @@ class DashboardState(rx.State):
         
     @rx.var(cache=False)
     def skipped_cases(self) -> int:
-        in_progress_iter = self.__get_in_progress_iterations()
-        skipped_case_count = 0
-
-        for iteration in in_progress_iter:
-            with rx.session() as session:
-                skipped_case_count = skipped_case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == 4)).all())
-
-        return skipped_case_count
+        return self.__get_case_count_by_status(4)
     
     @rx.var(cache=False)
     def cases_without_bug(self) -> int:
@@ -43,11 +46,28 @@ class DashboardState(rx.State):
     
     @rx.var(cache=False)
     def blocked_cases(self) -> int:
-        in_progress_iter = self.__get_in_progress_iterations()
-        blocked_case_count = 0
+        return self.__get_case_count_by_status(5)
+    
+    def __get_passed_cases(self) -> int:
+        return self.__get_case_count_by_status(3)
+    
+    def __get_failed_cases(self) -> int:
+        return self.__get_case_count_by_status(2)
+    
+    @rx.var(cache=False)
+    def get_pie_chart_data(self) -> list:
+        passed_cases = self.__get_passed_cases()
+        failed_cases = self.__get_failed_cases()
+        blocked_cases = self.blocked_cases
 
-        for iteration in in_progress_iter:
-            with rx.session() as session:
-                blocked_case_count = blocked_case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == 5)).all())
+        total_cases = passed_cases + failed_cases + blocked_cases
 
-        return blocked_case_count
+        passed_percentage = round((passed_cases / total_cases), 2) * 100 if total_cases > 0 else 0
+        failed_percentage = round((failed_cases / total_cases), 2) * 100 if total_cases > 0 else 0
+        blocked_percentage = round((blocked_cases / total_cases), 2) * 100 if total_cases > 0 else 0
+
+        return [
+            {"name": "Passed", "value": passed_percentage, "fill": "#71d083"},
+            {"name": "Failed", "value": failed_percentage, "fill": "#b0a9ff"},
+            {"name": "Blocked", "value": blocked_percentage, "fill": "#ff8a88"},
+        ]
