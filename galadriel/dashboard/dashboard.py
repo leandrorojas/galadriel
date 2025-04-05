@@ -8,6 +8,8 @@ from ..pages import base_page
 from ..ui.components import Badge, Table, Card
 from ..utils import consts
 
+TEXT_CASES = " Case(s)"
+
 def __table() -> rx.Component:
     table_component = Table()
     
@@ -73,9 +75,10 @@ def dashboard_page() -> rx.Component:
                     align="center", width="100%", top="0px", padding_top="2em", spacing="2",
                 ),
                 rx.hstack(
-                    Card().card("Cycle(s) In Progress", DashboardState.cycke_count, "flask-round", "cyan"),
-                    Card().card("Skipped Case(s)", DashboardState.skipped_cases, "test-tubes", "amber"),
-                    Card().card("Failed Case(s) w/o bug", DashboardState.cases_without_bug, "bug-off", "bronze"),
+                    Card().card(" Cycle(s)", DashboardState.cycke_count, "flask-round", "cyan", sufix=" In Progress", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "cuboid", "gray", sufix=" Blocked", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "test-tubes", "amber", sufix=" Skipped", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(TEXT_CASES + " w/o Bug", DashboardState.cases_without_bug, "bug-off", "bronze", sufix=" Failed", header_size="5", subtext_size="3", icon_size=30),
                     width="63vw", spacing="4",
                 ),
                 rx.flex(
