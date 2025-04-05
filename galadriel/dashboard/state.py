@@ -40,3 +40,14 @@ class DashboardState(rx.State):
                     cases_without_bug_count += len(linked_issues)
 
         return failed_cases_count - cases_without_bug_count
+    
+    @rx.var(cache=False)
+    def blocked_cases(self) -> int:
+        in_progress_iter = self.__get_in_progress_iterations()
+        blocked_case_count = 0
+
+        for iteration in in_progress_iter:
+            with rx.session() as session:
+                blocked_case_count = blocked_case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == 5)).all())
+
+        return blocked_case_count
