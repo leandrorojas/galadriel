@@ -445,14 +445,14 @@ class StatCard():
         )
 
 class Card():
-    def card(self, card_name: str, value, icon: str, icon_color: LiteralAccentColor, extra_char: str = "") -> rx.Component:
+    def card(self, card_name: str, value, icon: str, icon_color: LiteralAccentColor, header_size="6", subtext_size="4", icon_size:int = 34, prefix: str = "", suffix: str = "") -> rx.Component:
         return rx.card(
             rx.vstack(
                 rx.hstack(
-                    rx.badge(rx.icon(tag=icon, size=34), color_scheme=str(icon_color), radius="full", padding="0.7rem",),
+                    rx.badge(rx.icon(tag=icon, size=icon_size), color_scheme=str(icon_color), radius="full", padding="0.7rem",),
                     rx.vstack(
-                        rx.heading(f"{extra_char}{value}", size="6", weight="bold",),
-                        rx.text(card_name, size="4", weight="medium"),
+                        rx.heading(f"{prefix}{value}{suffix}", size=header_size, weight="bold",),
+                        rx.text(card_name, size=subtext_size, weight="medium"),
                         spacing="1", height="100%", align_items="start", width="100%",
                     ),
                     height="100%", spacing="4", align="center", width="100%",
