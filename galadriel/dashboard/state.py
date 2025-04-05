@@ -9,7 +9,7 @@ class DashboardState(rx.State):
             return session.exec(IterationModel.select().where(IterationModel.iteration_status_id == 1)).all()
 
     @rx.var(cache=False)
-    def cycke_count(self) -> int:
+    def cycle_count(self) -> int:
         return len(self.__get_in_progress_iterations())
         
     @rx.var(cache=False)

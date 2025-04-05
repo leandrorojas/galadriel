@@ -75,10 +75,10 @@ def dashboard_page() -> rx.Component:
                     align="center", width="100%", top="0px", padding_top="2em", spacing="2",
                 ),
                 rx.hstack(
-                    Card().card(" Cycle(s)", DashboardState.cycke_count, "flask-round", "cyan", sufix=" In Progress", header_size="5", subtext_size="3", icon_size=30),
-                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "cuboid", "gray", sufix=" Blocked", header_size="5", subtext_size="3", icon_size=30),
-                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "test-tubes", "amber", sufix=" Skipped", header_size="5", subtext_size="3", icon_size=30),
-                    Card().card(TEXT_CASES + " w/o Bug", DashboardState.cases_without_bug, "bug-off", "bronze", sufix=" Failed", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(" Cycle(s)", DashboardState.cycle_count, "flask-round", "cyan", suffix=" In Progress", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "cuboid", "gray", suffix=" Blocked", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "test-tubes", "amber", suffix=" Skipped", header_size="5", subtext_size="3", icon_size=30),
+                    Card().card(TEXT_CASES + " w/o Bug", DashboardState.cases_without_bug, "bug-off", "bronze", suffix=" Failed", header_size="5", subtext_size="3", icon_size=30),
                     width="63vw", spacing="4",
                 ),
                 rx.flex(
