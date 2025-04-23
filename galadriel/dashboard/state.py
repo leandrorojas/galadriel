@@ -1,8 +1,12 @@
 import reflex as rx
+from typing import List
+
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
 class DashboardState(rx.State):
+
+    linked_bugs: List['IterationSnapshotLinkedIssues'] = []
 
     def __get_in_progress_iterations(self):
         with rx.session() as session:
@@ -71,3 +75,23 @@ class DashboardState(rx.State):
             {"name": "Failed", "value": failed_percentage, "fill": "#b0a9ff"},
             {"name": "Blocked", "value": blocked_percentage, "fill": "#ff8a88"},
         ]
+    
+    #@rx.var(cache=False)
+    def load_linked_bugs(self) -> rx.Component:
+        in_progress_iter = self.__get_in_progress_iterations()
+
+        for iteration in in_progress_iter:
+            with rx.session() as session:
+                pass
+
+        #id, description, status, updated
+        #rx.table.cell("TEST-7"), rx.table.cell("new bug"), rx.table.cell("In Progress"), rx.table.cell("2025-03-31")
+        return rx.table.body(
+            rx.table.row(rx.table.cell("TEST-1"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
+            rx.table.row(rx.table.cell(rx.link("TEST-2", href="https://smallfix.atlassian.net/browse/TEST-2")), rx.table.cell("another bug"), rx.table.cell("In Progress"), rx.table.cell("2025-03-18"), ),
+            rx.table.row(rx.table.cell("TEST-3"), rx.table.cell("this bug this bug this bug this bug this bug this bug"), rx.table.cell("Open"), rx.table.cell("2025-03-10"), ),
+            rx.table.row(rx.table.cell("TEST-4"),rx.table.cell("that bug"), rx.table.cell("Closed"), rx.table.cell("2025-03-01"), ),
+            rx.table.row(rx.table.cell("TEST-5"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
+            rx.table.row(rx.table.cell("TEST-6"), rx.table.cell("another bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
+            rx.table.row(rx.table.cell("TEST-7"), rx.table.cell("new bug"), rx.table.cell("In Progress"), rx.table.cell("2025-03-31"), ),
+        ),
