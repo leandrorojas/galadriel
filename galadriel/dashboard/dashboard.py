@@ -14,13 +14,7 @@ TEXT_CASES = " Case(s)"
 
 def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
     print(linked_bug)
-    #return rx.table.row(rx.table.cell("TEST-1"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"),),
-    return rx.table.row(
-        rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), #rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue)
-        rx.table.cell(linked_bug[2]), 
-        rx.table.cell(linked_bug[3]), 
-        rx.table.cell(linked_bug[4]),
-        ),
+    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
 
 def __table() -> rx.Component:
     table_component = Table()
