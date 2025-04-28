@@ -1,7 +1,7 @@
 """
 to use this module, you first need to import it, of course
 then use the folowing sequence:
-debug.set_log(False)
+debug.set_log(True)
 debug.set_module("<module_name>")
 debug.log("<message>")
 
@@ -27,6 +27,8 @@ def log(message:str, final_log:bool = False):
     if enabled:
         if (global_module == ""):
             module = "DEBUG"
+        else:
+            module = global_module
         
         print(f"[{module}] " + message)
 

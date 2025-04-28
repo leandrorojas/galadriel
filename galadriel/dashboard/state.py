@@ -1,8 +1,16 @@
 import reflex as rx
+from typing import List
+
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
+from sqlmodel import desc
+from ..utils import jira
+from rxconfig import config
+
 class DashboardState(rx.State):
+
+    linked_bugs: List[str] = []
 
     def __get_in_progress_iterations(self):
         with rx.session() as session:
@@ -71,3 +79,27 @@ class DashboardState(rx.State):
             {"name": "Failed", "value": failed_percentage, "fill": "#b0a9ff"},
             {"name": "Blocked", "value": blocked_percentage, "fill": "#ff8a88"},
         ]
+    
+    def load_linked_bugs(self):
+        self.linked_bugs = []
+        appended_bugs = 0
+        with rx.session() as session:
+            all_linked_bugs = session.exec(
+                IterationSnapshotLinkedIssues.select()
+                    .where(IterationSnapshotLinkedIssues.unlinked == None)
+                    .order_by(desc(IterationSnapshotLinkedIssues.created))
+                ).all()
+
+        for linked_bug in all_linked_bugs:
+            if (appended_bugs < 5):
+                with rx.session() as session:
+                    raw_issue = jira.get_issue(linked_bug.issue_key)
+
+                    if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
+                        if (raw_issue != None):
+                            self.linked_bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
+                            appended_bugs += 1
+                        else:
+                            return rx.toast.error("there was an error while loading the linked bugs")
+            else:
+                break

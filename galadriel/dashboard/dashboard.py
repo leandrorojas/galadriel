@@ -4,17 +4,22 @@ import reflex_local_auth
 from .state import DashboardState
 
 from ..pages import base_page
+from ..iteration.model import IterationSnapshotLinkedIssues
+from typing import List
 
 from ..ui.components import Badge, Table, Card
 from ..utils import consts
 
 TEXT_CASES = " Case(s)"
 
+def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
+    print(linked_bug)
+    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
+
 def __table() -> rx.Component:
     table_component = Table()
     
-    return rx.fragment(
-        rx.table.root(
+    return rx.table.root(
             rx.table.header(
                 rx.table.row(
                     table_component.header("key","fingerprint"),
@@ -23,40 +28,14 @@ def __table() -> rx.Component:
                     table_component.header("updated", "calendar-clock"),
                 ),
             ),
-            rx.table.body(
-                rx.table.row(
-                    rx.table.cell("TEST-1"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
-                rx.table.row(rx.table.cell(rx.link("TEST-2", href="https://smallfix.atlassian.net/browse/TEST-2")), rx.table.cell("another bug"), rx.table.cell("In Progress"), rx.table.cell("2025-03-18"), ),
-                rx.table.row(rx.table.cell("TEST-3"), rx.table.cell("this bug"), rx.table.cell("Open"), rx.table.cell("2025-03-10"), ),
-                rx.table.row(rx.table.cell("TEST-4"),rx.table.cell("that bug"), rx.table.cell("Closed"), rx.table.cell("2025-03-01"), ),
-                rx.table.row(rx.table.cell("TEST-5"), rx.table.cell("some bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
-                rx.table.row(rx.table.cell("TEST-6"), rx.table.cell("another bug"), rx.table.cell("To Do"), rx.table.cell("2025-03-31"), ),
-                rx.table.row(rx.table.cell("TEST-7"), rx.table.cell("new bug"), rx.table.cell("In Progress"), rx.table.cell("2025-03-31"), ),
-            ),
+            rx.table.body(rx.foreach(DashboardState.linked_bugs, __show_linked_bug)),
             variant="surface", size="3", width="100%",
+            on_mount=DashboardState.load_linked_bugs,
         ),
-    )
 
 @reflex_local_auth.require_login
 def dashboard_page() -> rx.Component:
     page_title = Badge()
-
-    tmp_pie_chart_data = [
-        {"name": "Group A", "value": 400},
-        {"name": "Group B", "value": 300, "fill": "#AC0E08FF"},
-        {
-            "name": "Group C",
-            "value": 300,
-            "fill": "rgb(80,40, 190)",
-        },
-        {
-            "name": "Group D",
-            "value": 200,
-            "fill": rx.color("yellow", 10),
-        },
-        {"name": "Group E", "value": 278, "fill": "purple"},
-        {"name": "Group F", "value": 189, "fill": "orange"},
-    ]
 
     tmp_chart_data = [
         {"name": "Page A", "uv": 4000, "pv": 2400, "amt": 2400},
