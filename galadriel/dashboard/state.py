@@ -104,5 +104,20 @@ class DashboardState(rx.State):
             else:
                 break
 
-    def cases(self):
-        pass
+    @rx.var(cache=False)
+    def cases_trends(self) -> List:
+        #to return days of the week, executed, passed, failed, blocked
+        #find the latest ocurrence of updated cases
+
+        with rx.session() as session:
+            updated_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.updated != None)).all()
+
+        return  [
+            {"name": "Page A", "exec": 4000, "passed": 2400, "failed": 2400},
+            {"name": "Page B", "exec": 3000, "passed": 1398, "failed": 2210},
+            {"name": "Page C", "exec": 2000, "passed": 9800, "failed": 2290},
+            {"name": "Page D", "exec": 2780, "passed": 3908, "failed": 2000},
+            {"name": "Page E", "exec": 1890, "passed": 4800, "failed": 2181},
+            {"name": "Page F", "exec": 2390, "passed": 3800, "failed": 2500},
+            {"name": "Page G", "exec": 3490, "passed": 4300, "failed": 2100}, 
+        ]

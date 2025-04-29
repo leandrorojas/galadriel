@@ -1,4 +1,5 @@
 from typing import List, Optional
+from datetime import datetime, timezone
 import reflex as rx
 from .model import CycleModel, CycleChildModel
 from ..navigation import routes
@@ -496,6 +497,22 @@ class CycleState(rx.State):
             return False
         return self.can_edit_iteration(self.cycle_id)
     
+    def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int, set_updated = False, clear_updated = False):
+        with rx.session() as session:
+            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
+
+            if (iteration_snapshot is None): return
+
+            setattr(iteration_snapshot, "child_status_id", status_id)
+            if (set_updated == True): setattr(iteration_snapshot, "updated", datetime.now(timezone.utc))
+            if (clear_updated == True): setattr(iteration_snapshot, "updated", None)
+
+            session.add(iteration_snapshot)
+            session.commit()
+            session.refresh(iteration_snapshot)
+            self.__figure_and_update_iteration_execution_status(iteration_snapshot.iteration_id)
+            self.get_iteration_snapshot()
+    
     def add_iteration_snapshot(self, cycle_id:int):
         with rx.session() as session:
             children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
@@ -545,22 +562,8 @@ class CycleState(rx.State):
                 if linked_issues is not None:
                     setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
 
-    def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int):
-        with rx.session() as session:
-            iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
-
-            if (iteration_snapshot is None): return
-
-            setattr(iteration_snapshot, "child_status_id", status_id)
-
-            session.add(iteration_snapshot)
-            session.commit()
-            session.refresh(iteration_snapshot)
-            self.__figure_and_update_iteration_execution_status(iteration_snapshot.iteration_id)
-            self.get_iteration_snapshot()
-
     def fail_iteration_snapshot_step(self, snapshot_item_id:int):
-        self.__update_iteration_snapshot_step(snapshot_item_id, 2)
+        self.__update_iteration_snapshot_step(snapshot_item_id, 2, True)
 
         #block the remainning steps on the case
         with rx.session() as session:
@@ -570,7 +573,7 @@ class CycleState(rx.State):
             if (next_steps != None):
                 for next_step in next_steps:
                     if next_step.child_name == None:
-                        self.__update_iteration_snapshot_step(next_step.id, 5)
+                        self.__update_iteration_snapshot_step(next_step.id, 5, set_updated=True)
                     else:
                         break
 
@@ -643,7 +646,7 @@ class CycleState(rx.State):
             session.commit()
     
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
-        self.__update_iteration_snapshot_step(snapshot_item_id, 3)
+        self.__update_iteration_snapshot_step(snapshot_item_id, 3, True)
 
         #if steps where blocked, restore the "To Do" status for the remainning steps on the case
         with rx.session() as session:
@@ -653,12 +656,12 @@ class CycleState(rx.State):
             if (next_steps != None):
                 for next_step in next_steps:
                     if next_step.child_name == None:
-                        self.__update_iteration_snapshot_step(next_step.id, 1)
+                        self.__update_iteration_snapshot_step(next_step.id, 1, clear_updated=True)
                     else:
                         break
 
     def skip_iteration_snapshot_step(self, snapshot_item_id:int):
-        self.__update_iteration_snapshot_step(snapshot_item_id, 4)
+        self.__update_iteration_snapshot_step(snapshot_item_id, 4, True)
 
         #if steps where blocked, restore the "To Do" status for the remainning steps on the case
         with rx.session() as session:
@@ -668,7 +671,7 @@ class CycleState(rx.State):
             if (next_steps != None):
                 for next_step in next_steps:
                     if next_step.child_name == None:
-                        self.__update_iteration_snapshot_step(next_step.id, 1)
+                        self.__update_iteration_snapshot_step(next_step.id, 1, clear_updated=True)
                     else:
                         break        
 
@@ -821,12 +824,16 @@ class CycleState(rx.State):
     def fail_checkbox(self) -> bool:
         return self.__fail_checkbox
     
-    def turn_on_fail_checkbox(self):
-        self.__fail_checkbox = True
+    def __set_iteration_execution_status(self, iteration_id:int, iteration_status_id:int):
+        with rx.session() as session:
+            iteration = session.exec(select(IterationModel).where(IterationModel.id == iteration_id)).one_or_none()
 
-    def turn_off_fail_checkbox(self):
-        self.__fail_checkbox = False
-        
+            setattr(iteration, "iteration_status_id", iteration_status_id)
+
+            session.add(iteration)
+            session.commit()
+            session.refresh(iteration)
+
     def __figure_and_update_iteration_execution_status(self, iteration_id:int):
         with rx.session() as session:
             iteration_not_attempted_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 1)).all()
@@ -839,22 +846,18 @@ class CycleState(rx.State):
                 iteration_in_progress_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id != 1)).all()
                 if len(iteration_in_progress_steps) == 1:
                     self.__set_iteration_execution_status(iteration_id, 1)
+    
+    def turn_on_fail_checkbox(self):
+        self.__fail_checkbox = True
+
+    def turn_off_fail_checkbox(self):
+        self.__fail_checkbox = False
 
     def set_iteration_execution_status_on_hold(self, iteration_id:int):
         self.__set_iteration_execution_status(iteration_id, 2)
 
     def set_iteration_execution_status_closed(self, iteration_id:int):
         self.__set_iteration_execution_status(iteration_id, 3)
-
-    def __set_iteration_execution_status(self, iteration_id:int, iteration_status_id:int):
-        with rx.session() as session:
-            iteration = session.exec(select(IterationModel).where(IterationModel.id == iteration_id)).one_or_none()
-
-            setattr(iteration, "iteration_status_id", iteration_status_id)
-
-            session.add(iteration)
-            session.commit()
-            session.refresh(iteration)
 
     #endregion
 
