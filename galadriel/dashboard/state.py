@@ -103,3 +103,6 @@ class DashboardState(rx.State):
                             return rx.toast.error("there was an error while loading the linked bugs")
             else:
                 break
+
+    def cases(self):
+        pass

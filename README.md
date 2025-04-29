@@ -7,7 +7,7 @@ A simple but yet straight to the point and functional Test Management System, wh
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)
 
  ## requirements
-* reflex 0.7.8
+* reflex 0.7.9
 * reflex-local-auth 0.3.0
 * PyYAML 6.0.2
 * requests 2.32.3

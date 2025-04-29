@@ -4,17 +4,15 @@ import reflex_local_auth
 from .state import DashboardState
 
 from ..pages import base_page
-from ..iteration.model import IterationSnapshotLinkedIssues
 from typing import List
 
-from ..ui.components import Badge, Table, Card
+from ..ui.components import Badge, Table, Card, Chart
 from ..utils import consts
 
 TEXT_CASES = " Case(s)"
 
 def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
-    print(linked_bug)
-    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
+    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4]),),
 
 def __table() -> rx.Component:
     table_component = Table()
@@ -36,6 +34,7 @@ def __table() -> rx.Component:
 @reflex_local_auth.require_login
 def dashboard_page() -> rx.Component:
     page_title = Badge()
+    charts = Chart()
 
     tmp_chart_data = [
         {"name": "Page A", "uv": 4000, "pv": 2400, "amt": 2400},
@@ -76,60 +75,19 @@ def dashboard_page() -> rx.Component:
                             rx.recharts.legend(),
                             width="100%", height=350,
                         ),
-                        width="27vw",
+                        width="26vw",
                     ),
-                    rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": "33%"}),
+                    rx.card(
+                        rx.text("Trends"),
+                        charts.composed(tmp_chart_data, "name", "uv", "pv", "uv", "amt"),
+                        width="36vw",
+                    ),
                     spacing="4",
                 ),
                 rx.flex(
-                    rx.card(
-                        rx.text("Cases Executed"),
-                        rx.recharts.composed_chart(
-                            rx.recharts.area(
-                                data_key="uv", stroke="#8884d8", fill="#8884d8"
-                            ),
-                            rx.recharts.bar(
-                                data_key="amt", bar_size=20, fill="#413ea0"
-                            ),
-                            rx.recharts.line(
-                                data_key="pv",
-                                type_="monotone",
-                                stroke="#ff7300",
-                            ),
-                            rx.recharts.x_axis(data_key="name"),
-                            rx.recharts.y_axis(),
-                            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-                            rx.recharts.graphing_tooltip(),
-                            data=tmp_chart_data,
-                            height=300, 
-                        ),
-                        width="31vw",
-                    ),
-                    rx.card(
-                        rx.text("Pass/Fail trends"),
-                        rx.recharts.line_chart(
-                            rx.recharts.line(
-                                data_key="pv",
-                                type_="monotone",
-                                stroke="#8884d8",
-                            ),
-                            rx.recharts.line(
-                                data_key="uv",
-                                type_="monotone",
-                                stroke="#82ca9d",
-                            ),
-                            rx.recharts.x_axis(data_key="name"),
-                            rx.recharts.y_axis(),
-                            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-                            rx.recharts.graphing_tooltip(),
-                            rx.recharts.legend(),
-                            data=tmp_chart_data,
-                            height=300,
-                        ),
-                        width="31vw", 
-                    ),
+                    rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": "33%"}, width="63vw",),
                     spacing="4",
-                ),
+                ),                
                 spacing="5", align="center",
             ),
             type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_95},
