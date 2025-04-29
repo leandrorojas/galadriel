@@ -461,3 +461,56 @@ class Card():
             ),
             size="1", width="100%", box_shadow="0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         )
+    
+class Chart():
+    def composed(self, data: list, name_key: str, area_key: str = "", bar_key: str = "", line_one_key: str = "", line_two_key: str = "", height:int=300) -> rx.Component:
+        return rx.recharts.composed_chart(
+            rx.cond(
+                area_key!="", 
+                rx.recharts.area(data_key=area_key, stroke="#8884d8", fill="#8884d8"),
+                rx.fragment(),
+            ),
+            rx.cond(
+                bar_key!="",
+                rx.recharts.bar(data_key=bar_key, bar_size=20, fill="#413ea0"),
+                rx.fragment(),
+            ),
+            rx.cond(
+                line_one_key!="",
+                rx.recharts.line(data_key=line_one_key, type_="monotone", stroke="#ff7300",),
+                rx.fragment(),
+            ),
+            rx.cond(
+                line_two_key!="",
+                rx.recharts.line(data_key=line_two_key, type_="monotone", stroke="#82ca9d",),
+                rx.fragment(),
+            ),
+            rx.recharts.x_axis(data_key=name_key),
+            rx.recharts.y_axis(),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.graphing_tooltip(),
+            rx.recharts.legend(),
+            data=data,
+            height=height, 
+        )
+    
+    def line(self, data: list, name_key: str, line_one_key: str, line_two_key: str, height:int=300) -> rx.Component:
+        return rx.recharts.line_chart(
+            rx.recharts.line(
+                data_key=line_one_key,
+                type_="monotone",
+                stroke="#8884d8",
+            ),
+            rx.recharts.line(
+                data_key=line_two_key,
+                type_="monotone",
+                stroke="#82ca9d",
+            ),
+            rx.recharts.x_axis(data_key=name_key),
+            rx.recharts.y_axis(),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.graphing_tooltip(),
+            rx.recharts.legend(),
+            data=data,
+            height=height,
+        ),
