@@ -1,5 +1,6 @@
 import reflex as rx
 from typing import List
+from datetime import datetime, timedelta
 
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
@@ -107,17 +108,34 @@ class DashboardState(rx.State):
     @rx.var(cache=False)
     def cases_trends(self) -> List:
         #to return days of the week, executed, passed, failed, blocked
-        #find the latest ocurrence of updated cases
+
+        trend_data = []
+        current_date = datetime.now()
+        i = 0
+        executed_cases = 0
+        passed_cases = 0
+        failed_cases = 0
+        bloked_cases = 0
+
+        while i < 11:
+            i += 1
+
+            trend_data.append({"date": current_date.strftime("%Y-%m-%d"), "exec": executed_cases, "passed": passed_cases, "failed": failed_cases, "blocked": bloked_cases})
+            current_date = current_date - timedelta(days=1)
+
+        print(f"current date (last): {current_date}")
 
         with rx.session() as session:
-            updated_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.updated != None)).all()
+            #find the latest ocurrence of updated cases
+            current_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            print(f"current date (after update): {current_date}")
+            updated_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.updated >= current_date.replace(hour=0, minute=0, second=0, microsecond=0)).order_by(desc(IterationSnapshotModel.updated))).all()
 
-        return  [
-            {"name": "Page A", "exec": 4000, "passed": 2400, "failed": 2400},
-            {"name": "Page B", "exec": 3000, "passed": 1398, "failed": 2210},
-            {"name": "Page C", "exec": 2000, "passed": 9800, "failed": 2290},
-            {"name": "Page D", "exec": 2780, "passed": 3908, "failed": 2000},
-            {"name": "Page E", "exec": 1890, "passed": 4800, "failed": 2181},
-            {"name": "Page F", "exec": 2390, "passed": 3800, "failed": 2500},
-            {"name": "Page G", "exec": 3490, "passed": 4300, "failed": 2100}, 
-        ]
+            print(f"updated cases: {updated_cases}")
+
+            if (updated_cases != None):
+                for updated_case in updated_cases:
+                    pass
+
+        list.reverse(trend_data)
+        return trend_data
