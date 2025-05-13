@@ -12,7 +12,7 @@ from ..utils import consts
 TEXT_CASES = " Case(s)"
 
 def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
-    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
+    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1], is_external=True)), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
 
 def __table() -> rx.Component:
     table_component = Table()
@@ -69,7 +69,7 @@ def dashboard_page() -> rx.Component:
                     ),
                     rx.card(
                         rx.text("Trends"),
-                        charts.composed(DashboardState.cases_trends, "date", "exec", "passed", "failed", "passed"),
+                        charts.composed(DashboardState.cases_trends, "date", "exec", "passed", "failed"),
                         width="36vw",
                     ),
                     spacing="4",
@@ -77,7 +77,7 @@ def dashboard_page() -> rx.Component:
                 rx.flex(
                     rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": "33%"}, width="63vw",),
                     spacing="4",
-                ),                
+                ),
                 spacing="5", align="center",
             ),
             type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_95},

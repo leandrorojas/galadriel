@@ -2,6 +2,8 @@ import reflex as rx
 from typing import List
 from datetime import datetime, timedelta
 
+import asyncio
+
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
@@ -81,7 +83,7 @@ class DashboardState(rx.State):
             {"name": "Blocked", "value": blocked_percentage, "fill": "#ff8a88"},
         ]
     
-    def load_linked_bugs(self):
+    async def load_linked_bugs(self):
         self.linked_bugs = []
         appended_bugs = 0
         with rx.session() as session:
@@ -112,30 +114,37 @@ class DashboardState(rx.State):
         trend_data = []
         current_date = datetime.now()
         i = 0
-        executed_cases = 0
-        passed_cases = 0
-        failed_cases = 0
-        bloked_cases = 0
 
         while i < 11:
             i += 1
-
-            trend_data.append({"date": current_date.strftime("%Y-%m-%d"), "exec": executed_cases, "passed": passed_cases, "failed": failed_cases, "blocked": bloked_cases})
+            trend_data.append({"date": current_date.strftime("%Y-%m-%d"), "exec": 0, "passed": 0, "failed": 0, "blocked": 0})
             current_date = current_date - timedelta(days=1)
-
-        print(f"current date (last): {current_date}")
 
         with rx.session() as session:
             #find the latest ocurrence of updated cases
-            current_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            print(f"current date (after update): {current_date}")
-            updated_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.updated >= current_date.replace(hour=0, minute=0, second=0, microsecond=0)).order_by(desc(IterationSnapshotModel.updated))).all()
-
-            print(f"updated cases: {updated_cases}")
+            updated_cases = session.exec(IterationSnapshotModel.select().where(
+                IterationSnapshotModel.child_type == 4, 
+                IterationSnapshotModel.updated >= current_date.replace(hour=0, minute=0, second=0, microsecond=0))
+            .order_by(desc(IterationSnapshotModel.updated))).all()
 
             if (updated_cases != None):
                 for updated_case in updated_cases:
-                    pass
+                    case_date = updated_case.updated.strftime("%Y-%m-%d")
+
+                    # Find the corresponding date entry in trend_data
+                    for trend_entry in trend_data:
+                        if trend_entry["date"] == case_date:
+                            # Increment executed cases
+                            trend_entry["exec"] += 1
+
+                            # Increment based on the case status
+                            if updated_case.child_status_id == 3:  # Passed
+                                trend_entry["passed"] += 1
+                            elif updated_case.child_status_id == 2:  # Failed
+                                trend_entry["failed"] += 1
+                            elif updated_case.child_status_id == 5:  # Blocked
+                                trend_entry["blocked"] += 1
+                            break
 
         list.reverse(trend_data)
         return trend_data
