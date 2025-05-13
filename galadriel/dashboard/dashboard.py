@@ -12,7 +12,7 @@ from ..utils import consts
 TEXT_CASES = " Case(s)"
 
 def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
-    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1])), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4]),),
+    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1], is_external=True)), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
 
 def __table() -> rx.Component:
     table_component = Table()
@@ -35,16 +35,6 @@ def __table() -> rx.Component:
 def dashboard_page() -> rx.Component:
     page_title = Badge()
     charts = Chart()
-
-    tmp_chart_data = [
-        {"name": "Page A", "uv": 4000, "pv": 2400, "amt": 2400},
-        {"name": "Page B", "uv": 3000, "pv": 1398, "amt": 2210},
-        {"name": "Page C", "uv": 2000, "pv": 9800, "amt": 2290},
-        {"name": "Page D", "uv": 2780, "pv": 3908, "amt": 2000},
-        {"name": "Page E", "uv": 1890, "pv": 4800, "amt": 2181},
-        {"name": "Page F", "uv": 2390, "pv": 3800, "amt": 2500},
-        {"name": "Page G", "uv": 3490, "pv": 4300, "amt": 2100},
-    ]
 
     return base_page(
         rx.scroll_area(
@@ -79,7 +69,7 @@ def dashboard_page() -> rx.Component:
                     ),
                     rx.card(
                         rx.text("Trends"),
-                        charts.composed(tmp_chart_data, "name", "uv", "pv", "uv", "amt"),
+                        charts.composed(DashboardState.cases_trends, "date", "exec", "passed", "failed"),
                         width="36vw",
                     ),
                     spacing="4",
@@ -87,7 +77,7 @@ def dashboard_page() -> rx.Component:
                 rx.flex(
                     rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": "33%"}, width="63vw",),
                     spacing="4",
-                ),                
+                ),
                 spacing="5", align="center",
             ),
             type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_95},
