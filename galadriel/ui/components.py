@@ -333,7 +333,7 @@ class SideBar():
                                 rx.spacer(),
                                 rx.vstack(
                                     rx.vstack(
-                                        self.__sidebar_item("[to do] Settings", "settings", "/#"),
+                                        #self.__sidebar_item("[to do] Settings", "settings", "/#"),
                                         self.__sidebar_color_mode_toggle_item(),
                                         self.__sidebar_logout_item(),
                                         width="100%",
