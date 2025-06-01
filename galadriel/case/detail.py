@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge, Table, Button
+from ..ui.components import Badge, Table, Button, Moment, TimeBadge
 from . import model, state
 from .forms import step_add_form    
 from ..utils import consts
@@ -46,11 +46,12 @@ def __prerequisites_table() -> rx.Component:
     )
 
 def __show_case_as_prerequisite(prerequisite:model.CaseModel):
+    moment_component = Moment()
 
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, consts.FIELD_ID)))),
             rx.table.cell(prerequisite.name),
-            rx.table.cell(prerequisite.created),
+            rx.table.cell(moment_component.moment(prerequisite.created)),
             rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=prerequisite.id, read_only=True)), hidden=True),
     )
 
@@ -119,6 +120,7 @@ def case_detail_page() -> rx.Component:
     test_case = state.AddStepState.case
     can_edit = True
     button_component = Button()
+    time_badge_component = TimeBadge()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -139,11 +141,9 @@ def case_detail_page() -> rx.Component:
             padding_top="2em",
         ),
         rx.hstack(
-            rx.heading(
-                f"{state.CaseState.case.name}",
-                size="7",
-            ),
-            rx.badge(f"{state.CaseState.case.created}", variant="outline"),
+            rx.heading(f"{state.CaseState.case.name}", size="7",),
+            #TODO: the tooltip is displayed in UTC, it should be displayed in local time
+            time_badge_component.time_badge(state.CaseState.case.created),
             align="center",
         ),
         rx.vstack(
