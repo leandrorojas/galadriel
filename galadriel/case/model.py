@@ -22,7 +22,7 @@ class CaseModel(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created)
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d
 
 class StepModel(rx.Model, table=True):
@@ -62,5 +62,5 @@ class PrerequisiteModel(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created)
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d
