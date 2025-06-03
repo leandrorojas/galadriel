@@ -10,7 +10,7 @@ from ..pages import base_page
 from ..pages.add import add_page
 from ..pages.edit import edit_page
 
-from ..ui.components import Table, PageHeader
+from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
 
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
@@ -26,9 +26,11 @@ def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     return rx.link(child, href=suite_detail_url)
 
 def __show_suite(suite:model.SuiteModel):
+    moment_component = Moment()
+
     return rx.table.row(
          rx.table.cell(__suite_detail_link(suite.name, suite)),
-         rx.table.cell(suite.created),
+         rx.table.cell(moment_component.moment(suite.created)),
     )
 
 def __table() -> rx.Component:

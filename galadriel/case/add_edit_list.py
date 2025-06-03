@@ -11,7 +11,7 @@ from ..pages import base_page
 from ..pages.add import add_page
 from ..pages.edit import edit_page
 
-from ..ui.components import Table, PageHeader
+from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
 
 def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
@@ -27,9 +27,10 @@ def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
     return rx.link(child, href=case_detail_url)
 
 def __show_case(test_case:model.CaseModel):
+    moment_component = Moment()
     return rx.table.row(
         rx.table.cell(__case_detail_link(test_case.name, test_case)),
-         rx.table.cell(test_case.created),
+        rx.table.cell(moment_component.moment(test_case.created))
     )
 
 def __table() -> rx.Component:

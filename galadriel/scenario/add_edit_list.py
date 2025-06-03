@@ -10,7 +10,7 @@ from ..pages.add import add_page
 from ..pages.edit import edit_page
 from ..pages import base_page
 
-from ..ui.components import Table, PageHeader
+from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
 
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
@@ -26,9 +26,10 @@ def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
     return rx.link(child, href=scenario_detail_url)
 
 def __show_scenario(scenario:model.ScenarioModel):
+    moment_component = Moment()
     return rx.table.row(
          rx.table.cell(__scenario_detail_link(scenario.name, scenario)),
-         rx.table.cell(scenario.created),
+         rx.table.cell(moment_component.moment(scenario.created)),
     )
 
 def __table() -> rx.Component:

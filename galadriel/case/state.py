@@ -3,7 +3,9 @@ import reflex as rx
 from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
-from ..utils import consts
+from ..utils import consts, timing
+
+from datetime import datetime
 
 from sqlmodel import select, cast, String
 
@@ -335,6 +337,9 @@ class CaseState(rx.State):
                 self.load_prerequisites()
             else:
                 return rx.toast.warning("The prerequisite has reached max")
+            
+    def ensure_utc(self, dt) -> datetime:
+        return timing.ensure_utc(dt)
 
 class AddCaseState(CaseState):
     form_data:dict = {}

@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
@@ -43,11 +43,12 @@ def __cases_table() -> rx.Component:
     )
 
 def __show_test_cases_in_search(test_case:CaseModel):
+    moment_component = Moment()
 
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
-            rx.table.cell(test_case.created),
+            rx.table.cell(moment_component.moment(test_case.created)),
             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
     )
 
@@ -79,6 +80,7 @@ def scenario_detail_page() -> rx.Component:
     scenario = state.AddScenarioState.scenario
     can_edit = True
     button_component = Button()
+    moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -99,11 +101,8 @@ def scenario_detail_page() -> rx.Component:
             padding_top="2em",       
         ),
         rx.hstack(
-            rx.heading(
-                f"{state.ScenarioState.scenario.name}",
-                size="7",
-            ),
-            rx.badge(f"{state.ScenarioState.scenario.created}", variant="outline"),
+            rx.heading(f"{state.ScenarioState.scenario.name}", size="7",),
+            moment_badge_component.moment_badge(state.ScenarioState.scenario.created),
             align="center",
         ),
         rx.vstack(
