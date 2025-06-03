@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge, Table, Button, Moment, TimeBadge
+from ..ui.components import Badge, Table, Button, Moment, MomentBadge
 from . import model, state
 from .forms import step_add_form    
 from ..utils import consts
@@ -120,7 +120,7 @@ def case_detail_page() -> rx.Component:
     test_case = state.AddStepState.case
     can_edit = True
     button_component = Button()
-    time_badge_component = TimeBadge()
+    moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -143,7 +143,7 @@ def case_detail_page() -> rx.Component:
         rx.hstack(
             rx.heading(f"{state.CaseState.case.name}", size="7",),
             #TODO: the tooltip is displayed in UTC, it should be displayed in local time
-            time_badge_component.time_badge(state.CaseState.case.created),
+            moment_badge_component.moment_badge(state.CaseState.case.created),
             align="center",
         ),
         rx.vstack(

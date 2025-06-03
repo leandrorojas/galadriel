@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment
 from . import model
 from ..suite.model import SuiteModel
 from ..case.model import CaseModel
@@ -23,10 +23,12 @@ def __search_table_header():
     ),
 
 def __show_test_cases_in_search(test_case:CaseModel):
+    moment_component = Moment()
+
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
-            rx.table.cell(test_case.created),
+            rx.table.cell(moment_component.moment(test_case.created)),
             rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
     )
 
@@ -45,10 +47,12 @@ def __search_cases_table() -> rx.Component:
     )
 
 def __show_scenarios_in_search(scenario:ScenarioModel):
+    moment_component = Moment()
+
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_scenario(getattr(scenario, consts.FIELD_ID)))),
             rx.table.cell(scenario.name),
-            rx.table.cell(scenario.created),
+            rx.table.cell(moment_component.moment(scenario.created)),
             rx.table.cell(rx.form(rx.input(name="scenario_id", value=scenario.id)), hidden=True),
     )
 
@@ -67,10 +71,12 @@ def __search_scenarios_table() -> rx.Component:
     )
 
 def __show_suites_in_search(suite:SuiteModel):
+    moment_component = Moment()
+
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CycleState.link_suite(getattr(suite, consts.FIELD_ID)))),
             rx.table.cell(suite.name),
-            rx.table.cell(suite.created),
+            rx.table.cell(moment_component.moment(suite.created)),
             rx.table.cell(rx.form(rx.input(name="suite_id", value=suite.id)), hidden=True),
     )
 
@@ -144,6 +150,7 @@ def cycle_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True
     button_component = Button()
+    moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -170,7 +177,7 @@ def cycle_detail_page() -> rx.Component:
             ),
             rx.badge(rx.icon("activity"), f"{state.CycleState.iteration_status_name}", color_scheme="blue"),
             rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
-            rx.badge(f"{state.CycleState.cycle.created}"),            
+            moment_badge_component.moment_badge(state.CycleState.cycle.created),
             align="center",
         ),
         __cycle_children_table(),

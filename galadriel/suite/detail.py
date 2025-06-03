@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button, TimeBadge, Moment
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment
 from . import model
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
@@ -48,7 +48,7 @@ def __search_cases_table() -> rx.Component:
 
 def __show_scenarios_in_search(scenario:ScenarioModel):
     moment_component = Moment()
-    
+
     return rx.table.row(
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, consts.FIELD_ID)))),
             rx.table.cell(scenario.name),
@@ -124,7 +124,7 @@ def suite_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = True
     button_component = Button()
-    time_badge_component = TimeBadge()
+    moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -146,7 +146,7 @@ def suite_detail_page() -> rx.Component:
         ),
         rx.hstack(
             rx.heading(f"{state.SuiteState.suite.name}", size="7",),
-            time_badge_component.time_badge(state.SuiteState.suite.created),
+            moment_badge_component.moment_badge(state.SuiteState.suite.created),
             align="center",
         ),
         __suite_children_table(),

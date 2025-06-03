@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button, TimeBadge, Moment
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
@@ -80,7 +80,7 @@ def scenario_detail_page() -> rx.Component:
     scenario = state.AddScenarioState.scenario
     can_edit = True
     button_component = Button()
-    time_badge_component = TimeBadge()
+    moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
         can_edit,
@@ -102,7 +102,7 @@ def scenario_detail_page() -> rx.Component:
         ),
         rx.hstack(
             rx.heading(f"{state.ScenarioState.scenario.name}", size="7",),
-            time_badge_component.time_badge(state.ScenarioState.scenario.created),
+            moment_badge_component.moment_badge(state.ScenarioState.scenario.created),
             align="center",
         ),
         rx.vstack(

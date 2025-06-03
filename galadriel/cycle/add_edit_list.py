@@ -10,7 +10,7 @@ from ..pages.add import add_page
 from ..pages.edit import edit_page
 from ..pages import base_page
 
-from ..ui.components import Table, PageHeader
+from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
@@ -51,6 +51,8 @@ def __cycle_status_badge(cycle_status: str):
     return __badge(*badge_mapping.get(cycle_status, ("n/a", "")))
 
 def __show_cycle(cycle:model.CycleModel):
+    moment_component = Moment()
+    
     return rx.table.row(
         rx.table.cell(__cycle_detail_link(cycle.name, cycle)),
         rx.table.cell(
@@ -93,7 +95,7 @@ def __show_cycle(cycle:model.CycleModel):
                 spacing="2",
             )
         ),
-        rx.table.cell(cycle.created),
+        rx.table.cell(moment_component.moment(cycle.created)),
     )
 
 def __table() -> rx.Component:

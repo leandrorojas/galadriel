@@ -519,7 +519,7 @@ class Moment():
     def moment(self, date) -> rx.Component:
         return rx.moment(date, local=True, format="YYYY-MM-DD HH:mm", from_now=True, from_now_during=15552000000)
     
-class TimeBadge():
-    def time_badge(self, date) -> rx.Component:
+class MomentBadge():
+    def moment_badge(self, date) -> rx.Component:
         moment_component = Moment()
         return rx.tooltip(rx.badge(moment_component.moment(date), variant="outline"), content=f"{date}")
