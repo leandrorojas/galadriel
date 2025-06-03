@@ -1,14 +1,12 @@
 import reflex as rx
 from typing import List
-from datetime import datetime, timedelta
-
-import asyncio
+from datetime import datetime, timedelta, timezone
 
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
 from sqlmodel import desc
-from ..utils import jira
+from ..utils import jira, timing
 from rxconfig import config
 
 class DashboardState(rx.State):
@@ -110,21 +108,20 @@ class DashboardState(rx.State):
     @rx.var(cache=False)
     def cases_trends(self) -> List:
         #to return days of the week, executed, passed, failed, blocked
-
         trend_data = []
-        current_date = datetime.now()
+        current_utc_date = datetime.now(timezone.utc)
         i = 0
 
         while i < 11:
             i += 1
-            trend_data.append({"date": current_date.strftime("%Y-%m-%d"), "exec": 0, "passed": 0, "failed": 0, "blocked": 0})
-            current_date = current_date - timedelta(days=1)
+            trend_data.append({"date": current_utc_date.strftime("%Y-%m-%d %H:%M:%S"), "exec": 0, "passed": 0, "failed": 0, "blocked": 0})
+            current_utc_date = current_utc_date - timedelta(days=1)
 
         with rx.session() as session:
             #find the latest ocurrence of updated cases
             updated_cases = session.exec(IterationSnapshotModel.select().where(
                 IterationSnapshotModel.child_type == 4, 
-                IterationSnapshotModel.updated >= current_date.replace(hour=0, minute=0, second=0, microsecond=0))
+                IterationSnapshotModel.updated >= current_utc_date)
             .order_by(desc(IterationSnapshotModel.updated))).all()
 
             if (updated_cases != None):
@@ -133,7 +130,9 @@ class DashboardState(rx.State):
 
                     # Find the corresponding date entry in trend_data
                     for trend_entry in trend_data:
-                        if trend_entry["date"] == case_date:
+                        trend_entry_date = datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")
+
+                        if trend_entry_date.strftime("%Y-%m-%d") == case_date:
                             # Increment executed cases
                             trend_entry["exec"] += 1
 
@@ -145,6 +144,11 @@ class DashboardState(rx.State):
                             elif updated_case.child_status_id == 5:  # Blocked
                                 trend_entry["blocked"] += 1
                             break
+                
+                # Convert trend_entry from utc to local timezone after processing
+                for trend_entry in trend_data:
+                    trend_entry["date"] = timing.convert_utc_to_local(datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")).strftime("%Y-%m-%d")
 
         list.reverse(trend_data)
         return trend_data
+    
