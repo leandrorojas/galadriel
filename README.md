@@ -4,7 +4,7 @@ galadriel is a Test Management System
 A simple but yet straight to the point and functional Test Management System, which inherits inspiration from testlink and other existing tools.
 
 # badges
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel) ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/leandrorojas/galadriel?utm_source=oss&utm_medium=github&utm_campaign=leandrorojas%2Fgaladriel&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
  ## requirements
 * reflex 0.7.14
