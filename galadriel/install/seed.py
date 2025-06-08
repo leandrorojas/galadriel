@@ -11,6 +11,12 @@ iteration_snapshot_status: iteration.IterationSnapshotStatusModel = []
 iteration_status: iteration.IterationStatusModel = []
 suite_tyoe: suite.SuiteChildTypeModel = []
 
+galadriel_user_roles: auth.GaladrielUserRole = []
+local_users: reflex_local_auth.LocalUser = []
+galadriel_users: auth.GaladrielUser = []
+
+# TODO: standadize initial id to 0 and include a migration prodedure
+
 cycle_child_types = [
     {"id":1, "type_name":"Suite",},
     {"id":2, "type_name":"Scenario",},
@@ -47,7 +53,7 @@ suite_tyoes = [
     {"id":4, "type_name":"completed",},
 ]
 
-user_roles = [
+galadriel_user_roles = [
     {"id":0, "name":"admin", "description":"Manages user access"},
     {"id":1, "name":"viewer", "description":"Can navigate through the galadriel instance"},
     {"id":2, "name":"editor", "description":"Can perform any task in the galadriel instance, but manage users"},
@@ -58,7 +64,7 @@ local_users = [
 ]
 
 galadriel_users = [
-    {"id":0, "email":"no@email.com", "user_id":0, "created":"2024-08-20 10:41:40.000000", "updated":"2024-08-20 10:41:40.000000"},
+    {"id":0, "email":"no_email", "user_id":0},
 ]
 
 def is_first_run() -> bool:
@@ -113,6 +119,12 @@ def __clear_seed_data():
             session.commit()
         results = None
 
+        results = session.exec(auth.GaladrielUserRole.select()).all()
+        for to_delete in results:
+            session.delete(to_delete)
+            session.commit()
+        results = None
+
         results = session.exec(auth.GaladrielUser.select()).all()
         for to_delete in results:
             session.delete(to_delete)
@@ -154,6 +166,12 @@ def __insert_seed_data():
         with rx.session() as session:
             local_user = reflex_local_auth.LocalUser(**local_user)
             session.add(local_user)
+            session.commit()
+
+    for galadriel_user_role in galadriel_user_roles:
+        with rx.session() as session:
+            galadriel_user_role = reflex_local_auth.LocalUser(**galadriel_user_role)
+            session.add(galadriel_user_role)
             session.commit()
 
     for galadriel_user in galadriel_users:
