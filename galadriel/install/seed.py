@@ -1,5 +1,7 @@
 import reflex as rx
-from .. import cycle, iteration, suite
+import reflex_local_auth
+
+from .. import auth, cycle, iteration, suite
 
 from ..config import ConfigModel
 
@@ -10,39 +12,53 @@ iteration_status: iteration.IterationStatusModel = []
 suite_tyoe: suite.SuiteChildTypeModel = []
 
 cycle_child_types = [
-    {"id":1, "type_name": "Suite",},
-    {"id":2,"type_name": "Scenario",},
-    {"id":3,"type_name": "Case",},
-    {"id":4,"type_name": "Step",},
+    {"id":1, "type_name":"Suite",},
+    {"id":2, "type_name":"Scenario",},
+    {"id":3, "type_name":"Case",},
+    {"id":4, "type_name":"Step",},
 ]
 
 cycle_statuses = [
-    {"id":0,"status_name": "passed",},
-    {"id":1,"status_name": "failed",},
+    {"id":0, "status_name":"passed",},
+    {"id":1, "status_name":"failed",},
 ]
 
 iteration_snapshot_statuses = [
-    {"id":1,"status_name": "to do",},
-    {"id":2,"status_name": "failed",},
-    {"id":3,"status_name": "pass",},
-    {"id":4,"status_name": "skipped",},
-    {"id":5,"status_name": "blocked",},
+    {"id":1, "status_name":"to do",},
+    {"id":2, "status_name":"failed",},
+    {"id":3, "status_name":"pass",},
+    {"id":4, "status_name":"skipped",},
+    {"id":5, "status_name":"blocked",},
 ]
 
 iteration_statuses = [
-    {"id":0,"name": "not started",},
-    {"id":1,"name": "in progress",},
-    {"id":2,"name": "on hold",},
-    {"id":3,"name": "closed",},
-    {"id":4,"name": "completed",},
+    {"id":0, "name":"not started",},
+    {"id":1, "name":"in progress",},
+    {"id":2, "name":"on hold",},
+    {"id":3, "name":"closed",},
+    {"id":4, "name":"completed",},
 ]
 
 suite_tyoes = [
-    {"id":0,"type_name": "not started",},
-    {"id":1,"type_name": "in progress",},
-    {"id":2,"type_name": "on hold",},
-    {"id":3,"type_name": "closed",},
-    {"id":4,"type_name": "completed",},
+    {"id":0, "type_name":"not started",},
+    {"id":1, "type_name":"in progress",},
+    {"id":2, "type_name":"on hold",},
+    {"id":3, "type_name":"closed",},
+    {"id":4, "type_name":"completed",},
+]
+
+user_roles = [
+    {"id":0, "name":"admin", "description":"Manages user access"},
+    {"id":1, "name":"viewer", "description":"Can navigate through the galadriel instance"},
+    {"id":2, "name":"editor", "description":"Can perform any task in the galadriel instance, but manage users"},
+]
+
+local_users = [
+    {"id":0, "username":"admin", "password_hash":"$2b$12$4Y/xnz/5yrRXEo/1oZAtWeU6QmwsgObdx7GecWNO0hJUx8JrQHMdi", "enabled":1},
+]
+
+galadriel_users = [
+    {"id":0, "email":"no@email.com", "user_id":0, "created":"2024-08-20 10:41:40.000000", "updated":"2024-08-20 10:41:40.000000"},
 ]
 
 def is_first_run() -> bool:
@@ -91,6 +107,18 @@ def __clear_seed_data():
             session.commit()
         results = None
 
+        results = session.exec(reflex_local_auth.LocalUser.select()).all()
+        for to_delete in results:
+            session.delete(to_delete)
+            session.commit()
+        results = None
+
+        results = session.exec(auth.GaladrielUser.select()).all()
+        for to_delete in results:
+            session.delete(to_delete)
+            session.commit()
+        results = None
+
 def __insert_seed_data():
     for cycle_child_type in cycle_child_types:
         with rx.session() as session:
@@ -120,6 +148,18 @@ def __insert_seed_data():
         with rx.session() as session:
             suite_type = suite.SuiteChildTypeModel(**suite_type)
             session.add(suite_type)
+            session.commit()
+
+    for local_user in local_users:
+        with rx.session() as session:
+            local_user = reflex_local_auth.LocalUser(**local_user)
+            session.add(local_user)
+            session.commit()
+
+    for galadriel_user in galadriel_users:
+        with rx.session() as session:
+            galadriel_user = auth.GaladrielUser(**galadriel_user)
+            session.add(galadriel_user)
             session.commit()
 
 def set_first_run():
