@@ -89,5 +89,5 @@ app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAI
 #Dashboard
 app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD)
 
-#protected test page
-app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
+# #protected test page
+# app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)

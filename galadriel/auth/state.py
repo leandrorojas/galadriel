@@ -3,7 +3,8 @@ import reflex_local_auth
 import sqlmodel
 
 from typing import Optional
-from .model import GaladrielUser
+
+from ..user.model import GaladrielUser
 
 class Register(reflex_local_auth.RegistrationState):
     # This event handler must be named something besides `handle_registration`!!!

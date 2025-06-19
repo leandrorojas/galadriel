@@ -1,7 +1,7 @@
 import reflex as rx
 import reflex_local_auth
 
-from .. import auth, cycle, iteration, suite
+from .. import cycle, iteration, suite, user
 
 from ..config import ConfigModel
 
@@ -11,9 +11,9 @@ iteration_snapshot_status: iteration.IterationSnapshotStatusModel = []
 iteration_status: iteration.IterationStatusModel = []
 suite_tyoe: suite.SuiteChildTypeModel = []
 
-galadriel_user_roles: auth.GaladrielUserRole = []
+galadriel_user_roles: user.GaladrielUserRole = []
 local_users: reflex_local_auth.LocalUser = []
-galadriel_users: auth.GaladrielUser = []
+galadriel_users: user.GaladrielUser = []
 
 # TODO: standadize initial id to 0 and include a migration prodedure
 
@@ -64,7 +64,7 @@ local_users = [
 ]
 
 galadriel_users = [
-    {"id":0, "email":"no_email", "user_id":0},
+    {"id":0, "email":"no_email", "user_id":0, "user_role":0, "active":True},
 ]
 
 def is_first_run() -> bool:
@@ -119,13 +119,13 @@ def __clear_seed_data():
             session.commit()
         results = None
 
-        results = session.exec(auth.GaladrielUserRole.select()).all()
+        results = session.exec(user.GaladrielUserRole.select()).all()
         for to_delete in results:
             session.delete(to_delete)
             session.commit()
         results = None
 
-        results = session.exec(auth.GaladrielUser.select()).all()
+        results = session.exec(user.GaladrielUser.select()).all()
         for to_delete in results:
             session.delete(to_delete)
             session.commit()
@@ -176,7 +176,7 @@ def __insert_seed_data():
 
     for galadriel_user in galadriel_users:
         with rx.session() as session:
-            galadriel_user = auth.GaladrielUser(**galadriel_user)
+            galadriel_user = user.GaladrielUser(**galadriel_user)
             session.add(galadriel_user)
             session.commit()
 
