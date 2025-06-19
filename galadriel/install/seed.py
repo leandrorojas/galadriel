@@ -64,7 +64,7 @@ local_users = [
 ]
 
 galadriel_users = [
-    {"id":0, "email":"no_email", "user_id":0},
+    {"id":0, "email":"no_email", "user_id":0, "user_role":0, "active":True},
 ]
 
 def is_first_run() -> bool:

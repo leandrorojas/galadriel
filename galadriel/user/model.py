@@ -10,6 +10,7 @@ class GaladrielUser(rx.Model, table=True):
     email:str
     user_id:int = Field(foreign_key="localuser.id")
     user_role:int = Field(foreign_key="galadrieluserrole.id")
+    active:bool = Field(default=False, nullable=True)
     created: datetime = Field(
         default_factory=utils.timing.get_utc_now, 
         sa_type=sa.DateTime(timezone=True),
