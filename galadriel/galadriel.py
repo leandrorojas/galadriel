@@ -12,7 +12,6 @@ from .utils import consts
 
 #galadriel
 from .pages import base_page, about_page, about_content
-from .pages import protetected_page
 from .ui.components import Button
 from .auth.pages import login_page, register_page, logout_page
 
@@ -88,6 +87,3 @@ app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAI
 
 #Dashboard
 app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD)
-
-# #protected test page
-# app.add_page(protetected_page, route="/protected_page", on_load=Session.on_load)
