@@ -6,7 +6,7 @@ A simple but yet straight to the point and functional Test Management System, wh
 What galadriel do: [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/leandrorojas/galadriel)
 
 # badges
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)  ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/leandrorojas/galadriel?utm_source=oss&utm_medium=github&utm_campaign=leandrorojas%2Fgaladriel&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)
 
  ## requirements
 * reflex 0.7.14
