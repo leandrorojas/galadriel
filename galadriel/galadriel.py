@@ -8,7 +8,10 @@ from . import case
 from . import cycle
 from . import install
 from . import dashboard
+from . import user
 from .utils import consts
+
+from .auth import add_edit_list as user_add_edit_list
 
 #galadriel
 from .pages import base_page, about_page, about_content
@@ -87,3 +90,6 @@ app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAI
 
 #Dashboard
 app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD)
+
+# Users
+app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=user.UserState.load_users)
