@@ -60,7 +60,7 @@ galadriel_user_roles = [
 ]
 
 local_users = [
-    {"id":0, "username":"admin", "password_hash":"$2b$12$4Y/xnz/5yrRXEo/1oZAtWeU6QmwsgObdx7GecWNO0hJUx8JrQHMdi", "enabled":1},
+    {"id":0, "username":"admin", "password":"admin", "enabled":1},
 ]
 
 galadriel_users = [
@@ -164,6 +164,8 @@ def __insert_seed_data():
 
     for local_user in local_users:
         with rx.session() as session:
+            local_user["password"] = reflex_local_auth.LocalUser.hash_password(local_user["password"])
+            #local_user[2] = reflex_local_auth.LocalUser.hash_password(local_user[2])
             local_user = reflex_local_auth.LocalUser(**local_user)
             session.add(local_user)
             session.commit()

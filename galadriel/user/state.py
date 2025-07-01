@@ -35,3 +35,4 @@ class UserState(rx.State):
                             updated=single_user.updated
                         )
                     )
+    
