@@ -1,3 +1,4 @@
+python==3.12.5
 reflex==0.7.14
 reflex-local-auth==0.3.0
 PyYAML==6.0.2
