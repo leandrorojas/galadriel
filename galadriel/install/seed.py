@@ -171,7 +171,7 @@ def __insert_seed_data():
 
     for galadriel_user_role in galadriel_user_roles:
         with rx.session() as session:
-            galadriel_user_role = reflex_local_auth.LocalUser(**galadriel_user_role)
+            galadriel_user_role = user.GaladrielUserRole(**galadriel_user_role)
             session.add(galadriel_user_role)
             session.commit()
 
