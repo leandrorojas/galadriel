@@ -19,14 +19,7 @@ What galadriel do: [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://dee
 * create an virtual environment, i.e.: ```python -m venv .venv/```
 * activate the venv ```source .venv/bin/activate```
 * install prerequisietes ```pip install -r requirements.txt```
-* comment these lines on the galadriel.py:
-    ```
-    seed = install.seed
-    if (seed.is_first_run() == True):
-        seed.seed_db()
-        seed.set_first_run()
-    ```
-    ### configuring Jira
+* set up jira
     * copy ```copy_me_into_galadriel.yaml``` into ```galadriel.yaml```
     * get a Jira token for your account by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
     * fill in the yaml configuration, the yaml file has sameple dummy data:
@@ -39,7 +32,6 @@ What galadriel do: [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://dee
         <u>Note</U>: galadriel does not validate on the Jira objects existence, yet.
 
 * execute the command ```reflex db init```
-* uncomment the lines
 * execute the command ```reflex run```
 * done, enjoy galadriel
 

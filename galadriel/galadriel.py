@@ -1,3 +1,5 @@
+import os
+
 import reflex as rx
 
 #old.galadriel
@@ -49,11 +51,13 @@ app = rx.App(
     },
 )
 
-seed = install.seed
+# Only check the seed for reflex run commands, not for db migrations, etc.
+if os.environ.get("REFLEX_ENV_MODE"):
+    seed = install.seed
 
-if (seed.is_first_run() == True):
-    seed.seed_db()
-    seed.set_first_run()
+    if (seed.is_first_run() == True):
+        seed.seed_db()
+        seed.set_first_run()
 
 app.add_page(index, title="galadriel")
 
