@@ -4,7 +4,7 @@ import sqlmodel
 
 from typing import Optional
 
-from ..user.model import GaladrielUser
+from ..user.model import GaladrielUser, GaladrielUserRole
 
 class Register(reflex_local_auth.RegistrationState):
     # This event handler must be named something besides `handle_registration`!!!
@@ -12,7 +12,8 @@ class Register(reflex_local_auth.RegistrationState):
         registration_result = self.handle_registration(form_data)
         if self.new_user_id >= 0:
             with rx.session() as session:
-                session.add(GaladrielUser(email=form_data["email"], user_id=self.new_user_id,))
+                role = session.exec(GaladrielUserRole.select().where(GaladrielUserRole.name == "viewer")).one_or_none()
+                session.add(GaladrielUser(email=form_data["email"], user_id=self.new_user_id, user_role=role.id))
                 session.commit()
 
         return registration_result
