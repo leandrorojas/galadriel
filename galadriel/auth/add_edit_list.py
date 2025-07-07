@@ -1,7 +1,6 @@
 import reflex as rx
 import reflex_local_auth
 
-
 from ..user import state, model
 # from .forms import case_add_form, case_edit_form
 
