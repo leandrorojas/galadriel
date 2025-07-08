@@ -35,6 +35,7 @@ What galadriel do: [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://dee
         * _token_: the token you got above
         * _project_: the Jira project key in which the issues will be created, i.e: _TEST_
         * _issue_type_: the issue types that will be created i.e: _Bug_
+        * _done_status_: the status in which the _issue_type_ is considered as Done by Jira
 
         <u>Note</U>: galadriel does not validate on the Jira objects existence, yet.
 
