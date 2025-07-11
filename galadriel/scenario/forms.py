@@ -24,7 +24,7 @@ def scenario_edit_form() -> rx.Component:
             rx.input(
                 type="hidden",
                 name="scenario_id",
-                value=scenario.id
+                value=~scenario.id
             ),
             display="none",
         ),

@@ -16,7 +16,7 @@ from ..utils import consts
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
     if scenario is None: return rx.fragment(child)
     
-    scenario_id = scenario.id
+    scenario_id = ~scenario.id
 
     if scenario_id is None: return rx.fragment(child)
 
