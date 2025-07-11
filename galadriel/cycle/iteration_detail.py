@@ -120,7 +120,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                     rx.form.root(
                                         rx.flex(
                                             rx.vstack(
-                                                rx.box(rx.input(type="hidden",name="snapshot_item_id", value=snapshot_element.id),display="none",),
+                                                rx.box(rx.input(type="hidden",name="snapshot_item_id", value=~snapshot_element.id),display="none",),
                                                 rx.box(rx.checkbox(type="hidden",name="just_fail", checked=CycleState.fail_checkbox),display="none",),
                                                 rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
                                                 rx.input(name="actual", placeholder="Actual Result", width="100%",),

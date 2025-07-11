@@ -49,7 +49,7 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
             rx.table.cell(moment_component.moment(test_case.created)),
-            rx.table.cell(rx.form(rx.input(name="case_id", value=test_case.id)), hidden=True),
+            rx.table.cell(rx.form(rx.input(name="case_id", value=~test_case.id)), hidden=True),
     )
 
 def __search_cases_table() -> rx.Component:
@@ -115,7 +115,7 @@ def scenario_detail_page() -> rx.Component:
             rx.cond(
                 state.ScenarioState.show_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden", name="scenario_id", value=scenario.id), display="none",),
+                        rx.box(rx.input(type="hidden", name="scenario_id", value=~scenario.id), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add to the Scenario", width="77vw", on_change=lambda value: state.ScenarioState.filter_test_cases(value)),
                             __search_cases_table(),
