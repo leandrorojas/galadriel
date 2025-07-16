@@ -16,7 +16,7 @@ from ..utils import consts
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
     if cycle is None: return rx.fragment(child)
     
-    cycle_id = ~cycle.id
+    cycle_id = cycle.id
     
     if cycle_id is None: return rx.fragment(child)
 

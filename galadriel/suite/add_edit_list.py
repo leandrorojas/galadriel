@@ -16,7 +16,7 @@ from ..utils import consts
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite is None: return rx.fragment(child)
     
-    suite_id = ~suite.id
+    suite_id = suite.id
 
     if suite_id is None: return rx.fragment(child)
 
