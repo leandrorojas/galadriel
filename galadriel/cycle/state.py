@@ -25,8 +25,12 @@ class CycleState(rx.State):
 
     @rx.var(cache=True)
     def cycle_id(self) -> str:
-        return self.router.page.params.get(consts.FIELD_ID, "")
-    
+        try:
+            cycle_id = self.router.url.path.split('/')[2]
+        except Exception:
+            cycle_id = ""
+        return cycle_id
+
     @rx.var(cache=True)
     def cycle_url(self) -> str:
         if not self.cycle:
@@ -496,7 +500,7 @@ class CycleState(rx.State):
         if not self.cycle:
             return False
         return self.can_edit_iteration(self.cycle_id)
-    
+
     def __update_iteration_snapshot_step(self, snapshot_item_id:int, status_id:int, set_updated = False, clear_updated = False):
         with rx.session() as session:
             iteration_snapshot = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.id == snapshot_item_id)).one_or_none()
