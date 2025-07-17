@@ -9,7 +9,7 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)
 
  ## requirements
-* reflex 0.8.1
+* reflex 0.8.0
 * reflex-local-auth 0.3.0
 * PyYAML 6.0.2
 * requests 2.32.3
@@ -40,6 +40,9 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
         <u>Note</U>: galadriel does not validate on the Jira objects existence, yet.
 
 * execute the command ```reflex db init```
+    * if you receive the error ```TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument: 'recursive_guard``` (note the line number, usually 66)
+    * search & open the ```pydantic/pydantic/v1/typing.py``` file
+    * replace line 66 with ```return cast(Any, type_)._evaluate(globalns, localns, recursive_guard=set())```
 * uncomment the lines
 * execute the command ```reflex run```
 * done, enjoy galadriel

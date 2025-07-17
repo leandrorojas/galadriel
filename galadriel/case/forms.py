@@ -24,7 +24,7 @@ def case_edit_form() -> rx.Component:
             rx.input(
                 type="hidden, number",
                 name="case_id",
-                value=~case.id
+                value=case.id
             ),
             display="none",
         ),
@@ -48,7 +48,7 @@ def step_add_form() -> rx.Component:
             rx.input(
                 type="hidden, number",
                 name="case_id",
-                value=~test_case.id
+                value=test_case.id
             ),
             display="none",
         ),

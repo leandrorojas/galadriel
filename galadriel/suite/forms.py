@@ -24,7 +24,7 @@ def suite_edit_form() -> rx.Component:
             rx.input(
                 type="hidden",
                 name="suite_id",
-                value=~suite.id
+                value=suite.id
             ),
             display="none",
         ),

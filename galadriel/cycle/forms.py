@@ -32,7 +32,7 @@ def cycle_edit_form() -> rx.Component:
             rx.input(
                 type="hidden",
                 name="cycle_id",
-                value=~cycle.id
+                value=cycle.id
             ),
             display="none",
         ),

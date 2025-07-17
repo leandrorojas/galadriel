@@ -17,7 +17,7 @@ from ..utils import consts
 def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
     if test_case is None: return rx.fragment(child)
     
-    case_id = ~test_case.id
+    case_id = test_case.id
 
     if case_id is None: return rx.fragment(child)
 
