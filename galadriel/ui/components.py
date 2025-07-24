@@ -84,7 +84,7 @@ class TopNavBar():
         return rx.link(
             rx.text(text, size="4", weight="medium"), href=url
         )
-    
+
 class Button():
     def signup_and_login(self):
         return rx.hstack(
@@ -254,7 +254,7 @@ class SideBar():
             width="100%",
         )
 
-    def __sidebar_items(self) -> rx.Component: 
+    def __non_admin_sidebar_items(self) -> rx.Component: 
         return rx.vstack(
             self.__sidebar_item("Dashboard", "layout-dashboard", navigation.routes.DASHBOARD),
             self.__sidebar_item("Cycles", "flask-round", navigation.routes.CYCLES),
@@ -262,14 +262,22 @@ class SideBar():
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),
             self.__sidebar_item("Cases", consts.ICON_TEST_TUBES, navigation.routes.CASES),
-            self.__sidebar_item("Users", "users", navigation.routes.USERS),
             #self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.ABOUT),
             #self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.ABOUT),
+            spacing="1",
+            width=
+            "100%",
+        )
+    
+    def __admin_sidebar_items(self) -> rx.Component: 
+        return rx.vstack(
+            self.__sidebar_item("Users", "users", navigation.routes.USERS),
+            self.__sidebar_item("[to do] Settings", "settings", "/#"),            
             spacing="1",
             width="100%",
         )
 
-    def sidebar(self) -> rx.Component:
+    def sidebar(self, is_admin:bool=True) -> rx.Component:
         return rx.box(
             rx.desktop_only(
                 rx.vstack(
@@ -291,11 +299,13 @@ class SideBar():
                         padding_x=self.X_PADDING,
                         width="100%",
                     ),
-                    self.__sidebar_items(),
+                    rx.cond(is_admin,
+                        self.__admin_sidebar_items(),
+                        self.__non_admin_sidebar_items()
+                    ),
                     rx.spacer(),
                     rx.vstack(
                         rx.vstack(
-                            #self.__sidebar_item("[to do] Settings", "settings", navigation.routes.ABOUT),
                             self.__sidebar_color_mode_toggle_item(),
                             self.__sidebar_logout_item(),
                             spacing="1",
@@ -330,11 +340,10 @@ class SideBar():
                                     ),
                                     width="100%",
                                 ),
-                                self.__sidebar_items(),
+                                self.__admin_sidebar_items(),
                                 rx.spacer(),
                                 rx.vstack(
                                     rx.vstack(
-                                        #self.__sidebar_item("[to do] Settings", "settings", "/#"),
                                         self.__sidebar_color_mode_toggle_item(),
                                         self.__sidebar_logout_item(),
                                         width="100%",
