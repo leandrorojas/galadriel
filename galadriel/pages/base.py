@@ -31,7 +31,7 @@ def private_page(content: rx.Component, *args) -> rx.Component:
                 padding_x=["1.5em", "1.5em", "3em"],
             ),
         ),
-        *args,
+        *args, 
     )
 
 #galadriel home page
