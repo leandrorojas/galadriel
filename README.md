@@ -9,7 +9,7 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)
 
  ## requirements
-* reflex 0.8.0
+* reflex 0.8.3
 * reflex-local-auth 0.3.0
 * PyYAML 6.0.2
 * requests 2.32.3
