@@ -41,6 +41,16 @@ class Session(reflex_local_auth.LocalAuthState):
             result = session.exec(sqlmodel.select(GaladrielUser).where(GaladrielUser.user_id == self.authenticated_user.id),).one_or_none()
         
         return result
+    
+    @rx.var(cache=True)
+    def is_admin(self) -> bool:
+        with rx.session() as session:
+            if self.authenticated_user.id < 0:
+                return False
+            galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.id == self.my_user_id)).one_or_none()
+            if not galadriel_user:
+                return False
+            return galadriel_user.user_role == 0
         
     def on_load(self):
         if not self.is_authenticated: return reflex_local_auth.LoginState.redir

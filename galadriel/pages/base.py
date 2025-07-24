@@ -2,6 +2,7 @@ import reflex as rx
 from ..ui.components import TopNavBar, SideBar
 from ..auth.state import Session
 from ..utils import consts
+from ..user.state import UserState
 
 def public_page(content: rx.Component, *args) -> rx.Component:
     top_navbar = TopNavBar()
@@ -18,8 +19,8 @@ def private_page(content: rx.Component, *args) -> rx.Component:
     left_sidebar = SideBar()
     return rx.fragment(
         rx.hstack(
-            left_sidebar.sidebar(),
-            rx.box( 
+            left_sidebar.sidebar(Session.is_admin),
+            rx.box(
                 content,
                 width="100%",
                 justify="center",
