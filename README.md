@@ -15,7 +15,14 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
 * requests 2.32.3
 
 ## first run
-* clone the repo: ```git clone https://github.com/leandrorojas/galadriel.git```
+* clone the repo and fetch the latest tag:
+    ```
+    git clone https://github.com/leandrorojas/galadriel.git
+    cd galadriel
+    git fetch --tags
+    latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+    git checkout $latestTag
+    ```
 * create an virtual environment, i.e.: ```python -m venv .venv/```
 * activate the venv ```source .venv/bin/activate```
 * install prerequisietes ```pip install -r requirements.txt```
