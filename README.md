@@ -13,6 +13,8 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
 * reflex-local-auth 0.3.0
 * PyYAML 6.0.2
 * requests 2.32.3
+* pydantic 2.11.7
+* dateutil 2.9.0.post
 
 ## first run
 * clone the repo and fetch the latest tag:
