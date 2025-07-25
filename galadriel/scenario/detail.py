@@ -8,16 +8,21 @@ from ..ui.components import Badge, Table, Button, MomentBadge, Moment
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
+from ..auth.state import Session
+
+DISABLE_EDIT_MODE:bool = True
 
 def __show_test_cases(test_cases:model.ScenarioCaseModel):
+    global DISABLE_EDIT_MODE
+
     return rx.table.row(
         rx.table.cell(test_cases.order),
         rx.table.cell(test_cases.case_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, consts.FIELD_ID))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -76,16 +81,18 @@ def __search_cases_table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def scenario_detail_page() -> rx.Component:
+    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
+
     title_badge = Badge()
     scenario = state.AddScenarioState.scenario
-    can_edit = True
     button_component = Button()
     moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
-        can_edit,
-        button_component.edit(state.ScenarioState.scenario_edit_url),
-        rx.fragment("") 
+        DISABLE_EDIT_MODE,
+        rx.fragment(""),
+        button_component.edit(state.ScenarioState.scenario_edit_url)
     )
     
     scenario_detail_content = rx.vstack(
@@ -109,7 +116,7 @@ def scenario_detail_page() -> rx.Component:
             rx.hstack(
                 rx.icon(consts.ICON_TEST_TUBES),
                 rx.heading("Cases", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.ScenarioState.toggle_search),
+                rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.ScenarioState.toggle_search),
                 align="center"
             ),
             rx.cond(

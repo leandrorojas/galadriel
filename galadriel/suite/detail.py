@@ -11,6 +11,10 @@ from ..scenario.model import ScenarioModel
 
 from ..utils import consts
 
+from ..auth.state import Session
+
+DISABLE_EDIT_MODE:bool = True
+
 def __search_table_header():
     table_component = Table()
     return rx.table.header(
@@ -81,6 +85,7 @@ def __child_type_badge(child_type: str):
     return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
 def __show_child(suite_child:model.SuiteChildModel):
+    global DISABLE_EDIT_MODE
     return rx.table.row(
         rx.table.cell(suite_child.order),
         rx.table.cell(rx.match(
@@ -91,9 +96,9 @@ def __show_child(suite_child:model.SuiteChildModel):
         rx.table.cell(suite_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, consts.FIELD_ID))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -121,15 +126,17 @@ def __suite_children_table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def suite_detail_page() -> rx.Component:
+    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
+    
     title_badge = Badge()
-    can_edit = True
     button_component = Button()
     moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
-        can_edit,
-        button_component.edit(state.SuiteState.suite_edit_url),
-        rx.fragment("")
+        DISABLE_EDIT_MODE,
+        rx.fragment(""),
+        button_component.edit(state.SuiteState.suite_edit_url)
     )
 
     suite_detail_content = rx.vstack(
@@ -154,7 +161,7 @@ def suite_detail_page() -> rx.Component:
             rx.hstack(
                 rx.icon("route"),
                 rx.heading("Scenarios", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_scenario_search),
+                rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.SuiteState.toggle_scenario_search),
                 align="center"
             ),
             rx.cond(
@@ -172,7 +179,7 @@ def suite_detail_page() -> rx.Component:
             rx.hstack(
                 rx.icon(consts.ICON_TEST_TUBES),
                 rx.heading("Cases", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.SuiteState.toggle_case_search),
+                rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.SuiteState.toggle_case_search),
                 align="center"
             ),
             rx.cond(

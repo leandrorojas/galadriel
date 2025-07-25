@@ -7,20 +7,24 @@ from ..ui.components import Badge, Table, Button, Moment, MomentBadge
 from . import model, state
 from .forms import step_add_form    
 from ..utils import consts
+from ..auth.state import Session
+
+DISABLE_EDIT_MODE:bool = True
 
 first_row:bool = True
 last_row:bool = False
 
 #prerequisites
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
+    global DISABLE_EDIT_MODE
     return rx.table.row(
         rx.table.cell(prerequisite.order),
         rx.table.cell(prerequisite.prerequisite_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, consts.FIELD_ID))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -79,6 +83,7 @@ def __search_prerequisites_table() -> rx.Component:
 
 #steps
 def __show_step(test_step:model.StepModel):
+    global DISABLE_EDIT_MODE
 
     return rx.table.row(
         rx.table.cell(test_step.order),
@@ -86,9 +91,9 @@ def __show_step(test_step:model.StepModel):
         rx.table.cell(test_step.expected),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, consts.FIELD_ID))),
-                rx.button(rx.icon("trash-2"), color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_step_up(getattr(test_step, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_step_down(getattr(test_step, consts.FIELD_ID))),
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -118,14 +123,16 @@ def __steps_table() -> rx.Component:
 def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case
-    can_edit = True
     button_component = Button()
     moment_badge_component = MomentBadge()
 
+    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
+
     edit_link_element = rx.cond(
-        can_edit,
+        DISABLE_EDIT_MODE,
+        rx.fragment(""),
         button_component.edit(state.CaseState.case_edit_url),
-        rx.fragment("")
     )
 
     case_detail_content = rx.vstack(
@@ -150,7 +157,7 @@ def case_detail_page() -> rx.Component:
             rx.hstack(
                 rx.icon(consts.ICON_TEST_TUBES),
                 rx.heading("Prerequisites", size="5",),
-                rx.button(rx.icon("search", size=18), on_click=state.CaseState.toggle_search),
+                rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.CaseState.toggle_search),
                 align="center"
             ),
             rx.cond(
@@ -167,7 +174,7 @@ def case_detail_page() -> rx.Component:
         ),
         rx.vstack(
             rx.hstack(rx.icon("test-tube"), rx.heading("Steps", size="5",)),
-            step_add_form(),
+            step_add_form(DISABLE_EDIT_MODE),
             __steps_table(),
         ),
         spacing="5",

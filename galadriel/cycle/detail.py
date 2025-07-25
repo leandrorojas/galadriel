@@ -11,6 +11,10 @@ from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
 from ..utils import consts
 
+from ..auth.state import Session
+
+DISABLE_EDIT_MODE:bool = True
+
 def __search_table_header():
     table_component = Table()
     return rx.table.header(
@@ -106,6 +110,8 @@ def __child_type_badge(child_type: str):
     return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
 def __show_child(cycle_child:model.CycleChildModel):
+    global DISABLE_EDIT_MODE
+
     return rx.table.row(
         rx.table.cell(cycle_child.order),
         rx.table.cell(rx.match(
@@ -117,9 +123,9 @@ def __show_child(cycle_child:model.CycleChildModel):
         rx.table.cell(cycle_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=state.CycleState.has_iteration, on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), disabled=state.CycleState.has_iteration, on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, consts.FIELD_ID))), 
-                rx.button(rx.icon("trash-2"), color_scheme="red", disabled=state.CycleState.has_iteration, on_click=lambda: state.CycleState.unlink_child(getattr(cycle_child, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=rx.cond(DISABLE_EDIT_MODE,DISABLE_EDIT_MODE, state.CycleState.has_iteration), on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, consts.FIELD_ID))), 
+                rx.button(rx.icon("arrow-big-down"), disabled=rx.cond(DISABLE_EDIT_MODE,DISABLE_EDIT_MODE, state.CycleState.has_iteration), on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, consts.FIELD_ID))), 
+                rx.button(rx.icon("trash-2"), color_scheme="red", disabled=rx.cond(DISABLE_EDIT_MODE,DISABLE_EDIT_MODE, state.CycleState.has_iteration), on_click=lambda: state.CycleState.unlink_child(getattr(cycle_child, consts.FIELD_ID))),
                 spacing="2",
             )
         ),
@@ -147,15 +153,17 @@ def __cycle_children_table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def cycle_detail_page() -> rx.Component:
+    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
+
     title_badge = Badge()
-    can_edit = True
     button_component = Button()
     moment_badge_component = MomentBadge()
 
     edit_link_element = rx.cond(
-        can_edit,
-        button_component.edit(state.CycleState.cycle_edit_url, disabled=state.CycleState.has_iteration),
+        DISABLE_EDIT_MODE,
         rx.fragment(""),
+        button_component.edit(state.CycleState.cycle_edit_url, disabled=state.CycleState.has_iteration)
     )
 
     cycle_detail_content = rx.vstack(
@@ -189,7 +197,7 @@ def cycle_detail_page() -> rx.Component:
                     rx.hstack(
                         rx.icon("beaker"),
                         rx.heading("Suites", size="5",),
-                        rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_suite_search),
+                        rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.CycleState.toggle_suite_search),
                         align="center"
                     ),
                     rx.cond(
@@ -207,7 +215,7 @@ def cycle_detail_page() -> rx.Component:
                     rx.hstack(
                         rx.icon("route"),
                         rx.heading("Scenarios", size="5",),
-                        rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_scenario_search),
+                        rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.CycleState.toggle_scenario_search),
                         align="center"
                     ),
                     rx.cond(
@@ -225,7 +233,7 @@ def cycle_detail_page() -> rx.Component:
                     rx.hstack(
                         rx.icon(consts.ICON_TEST_TUBES),
                         rx.heading("Cases", size="5",),
-                        rx.button(rx.icon("search", size=18), on_click=state.CycleState.toggle_case_search),
+                        rx.button(rx.icon("search", size=18), disabled=DISABLE_EDIT_MODE, on_click=state.CycleState.toggle_case_search),
                         align="center"
                     ),
                     rx.cond(

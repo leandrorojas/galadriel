@@ -12,6 +12,7 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
+from ..auth.state import Session
 
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
     if scenario is None: return rx.fragment(child)
@@ -56,7 +57,7 @@ def scenarios_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
-            header_component.list("Test Scenarios", "route", "Add Scenario", routes.SCENARIO_ADD, "Group of Test Cases executed in a specific order"),
+            header_component.list("Test Scenarios", "route", "Add Scenario", routes.SCENARIO_ADD, Session.can_edit, "Group of Test Cases executed in a specific order"),
             rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85
         ),

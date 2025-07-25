@@ -8,8 +8,15 @@ from .model import GaladrielUser, GaladrielUserRole, GaladrielUserDisplay
 from ..navigation import routes
 from ..utils import consts
 
+from enum import Enum
+
 USERS_ROUTE = routes.USERS
 if USERS_ROUTE.endswith("/"): USERS_ROUTE = USERS_ROUTE[:-1]
+
+class UserRole(Enum):
+    ADMIN = 0
+    EDITOR = 2
+    VIEWER = 1
 
 class UserState(rx.State):
     users: List['GaladrielUserDisplay'] = []
