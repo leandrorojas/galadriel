@@ -1,7 +1,8 @@
-from . import consts, timing, debug
+from . import consts, timing, debug, yaml
 
 __all__ = [
     'debug',
     'timing',
-    'consts'
+    'consts',
+    'yaml'
 ]

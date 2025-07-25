@@ -21,6 +21,8 @@ from .auth.pages import login_page, register_page, logout_page
 
 from .auth.state import Session
 
+from .utils.yaml import read_setting, write_setting
+
 def index() -> rx.Component:
     buttons = Button()
     
@@ -50,11 +52,11 @@ app = rx.App(
     },
 )
 
-seed = install.seed
-
-if (seed.is_first_run() == True):
+if (read_setting("galadriel", "first_run") == 0):
+    seed = install.seed
     seed.seed_db()
     seed.set_first_run()
+    write_setting("galadriel", "first_run", 1)
 
 app.add_page(index, title="galadriel")
 

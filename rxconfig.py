@@ -1,23 +1,18 @@
 import reflex as rx
-import yaml
+
+from galadriel.utils.yaml import read_setting
 
 YAML_JIRA_SECTION = "jira"
-
-def read_yaml_setting(section:str, key:str):
-    with open("galadriel.yaml") as galadriel_yaml:
-        galadriel_config = yaml.safe_load(galadriel_yaml)
-
-        return galadriel_config[section][key]
 
 config = rx.Config(
     app_name="galadriel",
     db_url="sqlite:///galadriel.db",
     img_src="/galadriel.320x320.jpg",
     tailwind=None,
-    jira_url=read_yaml_setting(YAML_JIRA_SECTION, "url"),
-    jira_user=read_yaml_setting(YAML_JIRA_SECTION, "user"),
-    jira_token=read_yaml_setting(YAML_JIRA_SECTION, "token"),
-    jira_project=read_yaml_setting(YAML_JIRA_SECTION, "project"),
-    jira_issue_type=read_yaml_setting(YAML_JIRA_SECTION, "issue_type"),
-    jira_done_status=read_yaml_setting(YAML_JIRA_SECTION, "done_status")
+    jira_url= read_setting(YAML_JIRA_SECTION, "url"),
+    jira_user=read_setting(YAML_JIRA_SECTION, "user"),
+    jira_token=read_setting(YAML_JIRA_SECTION, "token"),
+    jira_project=read_setting(YAML_JIRA_SECTION, "project"),
+    jira_issue_type=read_setting(YAML_JIRA_SECTION, "issue_type"),
+    jira_done_status=read_setting(YAML_JIRA_SECTION, "done_status")
 )
