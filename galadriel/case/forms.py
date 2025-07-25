@@ -40,22 +40,15 @@ def case_edit_form() -> rx.Component:
         on_submit=EditCaseState.handle_submit,
     ),
 
-def step_add_form() -> rx.Component:
+def step_add_form(disable_edit:bool) -> rx.Component:
     test_case = AddStepState.case
 
     return rx.form(
-        rx.box(
-            rx.input(
-                type="hidden, number",
-                name="case_id",
-                value=test_case.id
-            ),
-            display="none",
-        ),
+        rx.box(rx.input(type="hidden, number", name="case_id", value=test_case.id), display="none",),
         rx.hstack(
             rx.input(name="action", placeholder="action", width="50%"), 
             rx.input(name="expected", placeholder="expected", width="50%"),
-            rx.button(rx.icon("plus", size=26), type="submit",),
+            rx.button(rx.icon("plus", size=26), disabled=disable_edit, type="submit",),
             spacing="2",
         ),
         on_submit=AddStepState.handle_submit,

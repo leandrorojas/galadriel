@@ -12,6 +12,8 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
+from ..auth.state import Session
+
 
 def __user_detail_link(child: rx.Component, galadriel_user: model.GaladrielUserDisplay):
     if galadriel_user is None: return rx.fragment(child)
@@ -63,7 +65,7 @@ def users_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
-            header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, "Galadriel Users"),
+            header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.can_edit, "Galadriel Users"),
             rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),

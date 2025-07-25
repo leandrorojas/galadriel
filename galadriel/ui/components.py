@@ -119,12 +119,13 @@ class Button():
             ),
         )
     
-    def add(self, name:str, link:str) -> rx.Component:
+    def add(self, name:str, link:str, enabled:bool) -> rx.Component:
         return rx.fragment(
             rx.link(
                 rx.button(
                     rx.icon("plus", size=26), 
                     rx.text(f"{name}", size="4", display=["none", "none", "block"]), 
+                    disabled=~enabled,
                     size="3",
                 ),
                 href=link
@@ -138,7 +139,7 @@ class SideBar():
     BORDER_RADIUS = "0.5em"
 
     def __sidebar_user_item(self) -> rx.Component:
-        auth_user_info = Session.authenticated_user_info
+        auth_user_info = Session.user_info
 
         return rx.hstack(
             rx.icon_button(
@@ -149,7 +150,7 @@ class SideBar():
             rx.vstack(
                 rx.box(
                     rx.text(
-                        f"{Session.autheticated_username}",
+                        f"{Session.username}",
                         size="3",
                         weight="bold",
                     ),
@@ -254,7 +255,7 @@ class SideBar():
             width="100%",
         )
 
-    def __non_admin_sidebar_items(self) -> rx.Component: 
+    def __galadriel_sidebar_items(self) -> rx.Component: 
         return rx.vstack(
             self.__sidebar_item("Dashboard", "layout-dashboard", navigation.routes.DASHBOARD),
             self.__sidebar_item("Cycles", "flask-round", navigation.routes.CYCLES),
@@ -269,7 +270,7 @@ class SideBar():
             "100%",
         )
     
-    def __admin_sidebar_items(self) -> rx.Component: 
+    def __backoffice_sidebar_items(self) -> rx.Component: 
         return rx.vstack(
             self.__sidebar_item("Users", "users", navigation.routes.USERS),
             self.__sidebar_item("[to do] Settings", "settings", "/#"),            
@@ -277,7 +278,7 @@ class SideBar():
             width="100%",
         )
 
-    def sidebar(self, is_admin:bool=True) -> rx.Component:
+    def sidebar(self, show_backoffice:bool=True) -> rx.Component:
         return rx.box(
             rx.desktop_only(
                 rx.vstack(
@@ -299,9 +300,9 @@ class SideBar():
                         padding_x=self.X_PADDING,
                         width="100%",
                     ),
-                    rx.cond(is_admin,
-                        self.__admin_sidebar_items(),
-                        self.__non_admin_sidebar_items()
+                    rx.cond(show_backoffice,
+                        self.__backoffice_sidebar_items(),
+                        self.__galadriel_sidebar_items()
                     ),
                     rx.spacer(),
                     rx.vstack(
@@ -340,7 +341,7 @@ class SideBar():
                                     ),
                                     width="100%",
                                 ),
-                                self.__admin_sidebar_items(),
+                                self.__backoffice_sidebar_items(),
                                 rx.spacer(),
                                 rx.vstack(
                                     rx.vstack(
@@ -388,7 +389,7 @@ class Tooltip():
         return rx.tooltip(rx.icon("info", size=18, color=rx.color("gray", 10)), content=legend, side="right")
 
 class PageHeader():
-    def list(self, title:str, icon:str, button:str, button_link:str, tootip:str="") -> rx.Component:
+    def list(self, title:str, icon:str, button:str, button_link:str, button_enabled:bool, tootip:str="") -> rx.Component:
         title_badge = Badge()
         title_tooltip = Tooltip()
         button_component = Button()
@@ -396,7 +397,7 @@ class PageHeader():
             title_badge.title(icon, title),
             rx.cond(tootip, title_tooltip.info(tootip), rx.fragment("")),
             rx.spacer(),
-            rx.hstack(button_component.add(button, button_link),),
+            rx.hstack(button_component.add(button, button_link, button_enabled),),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",

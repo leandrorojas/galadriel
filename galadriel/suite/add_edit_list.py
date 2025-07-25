@@ -12,6 +12,7 @@ from ..pages.edit import edit_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
+from ..auth.state import Session
 
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite is None: return rx.fragment(child)
@@ -57,7 +58,7 @@ def suites_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
-            header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
+            header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, Session.can_edit, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
             rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),

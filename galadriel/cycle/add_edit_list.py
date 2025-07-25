@@ -12,6 +12,9 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
+from ..auth.state import Session
+
+DISABLE_EDIT_MODE:bool = True
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
     if cycle is None: return rx.fragment(child)
@@ -51,6 +54,8 @@ def __cycle_status_badge(cycle_status: str):
     return __badge(*badge_mapping.get(cycle_status, ("n/a", "")))
 
 def __show_cycle(cycle:model.CycleModel):
+    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
     moment_component = Moment()
     
     return rx.table.row(
@@ -89,9 +94,9 @@ def __show_cycle(cycle:model.CycleModel):
                                 rx.button(rx.icon("eye"), color_scheme="jade", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, consts.FIELD_ID))))),
                         rx.button(rx.icon("list-todo"), color_scheme="lime", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, consts.FIELD_ID))),
                     ),
-                    rx.button(rx.icon("list-video"), on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, consts.FIELD_ID)))
+                    rx.button(rx.icon("list-video"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, consts.FIELD_ID)))
                 ),
-                rx.button(rx.icon("copy-plus"), variant="soft", on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, consts.FIELD_ID))), 
+                rx.button(rx.icon("copy-plus"), disabled=DISABLE_EDIT_MODE, variant="soft", on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, consts.FIELD_ID))), 
                 spacing="2",
             )
         ),
@@ -128,7 +133,7 @@ def cycle_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
-            page_component.list("Cycles", "flask-round", "Add Cycle", routes.CYCLE_ADD, "List of Cycles to execute"),
+            page_component.list("Cycles", "flask-round", "Add Cycle", routes.CYCLE_ADD, Session.can_edit, "List of Cycles to execute"),
             rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),

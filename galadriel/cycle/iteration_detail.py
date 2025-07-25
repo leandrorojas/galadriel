@@ -8,7 +8,10 @@ from .state import CycleState
 from ..iteration import IterationSnapshotModel
 from ..utils import jira, consts
 
+from ..auth.state import Session
+
 READ_ONLY = False
+DISABLE_EDIT_MODE: bool = True
 
 def __cycle_list_button() -> rx.Component:    
     return rx.fragment(
@@ -23,15 +26,18 @@ def __cycle_list_button() -> rx.Component:
     )
 
 def __force_close_iteration_snapshot_button() -> rx.Component:
+    global READ_ONLY
+    global DISABLE_EDIT_MODE
+
     return rx.fragment(
         rx.link(
             rx.button(
                 rx.icon("square", size=26), 
-                rx.text("Close", size="4", display=["none", "none", "block"]), 
+                rx.text("Close", size="4", display=["none", "none", "block"]),
                 size="3",
                 variant="soft",
                 color_scheme="red",
-                disabled=READ_ONLY,
+                disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY),
                 on_click=lambda: CycleState.set_iteration_execution_status_closed(CycleState.iteration_id),
             ),
             
@@ -40,15 +46,18 @@ def __force_close_iteration_snapshot_button() -> rx.Component:
     )
 
 def __hold_iteration_snapshot_button() -> rx.Component:
+    global READ_ONLY
+    global DISABLE_EDIT_MODE
+
     return rx.fragment(
         rx.link(
             rx.button(
                 rx.icon("pause", size=26), 
-                rx.text("Pause", size="4", display=["none", "none", "block"]), 
+                rx.text("Pause", size="4", display=["none", "none", "block"]),
                 size="3",
                 variant="soft",
                 color_scheme="yellow",
-                disabled=READ_ONLY,
+                disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY),
                 on_click=lambda: CycleState.set_iteration_execution_status_on_hold(CycleState.iteration_id),
             ),
             
@@ -82,6 +91,9 @@ def __element_status_badge(child_status: str):
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
+    global READ_ONLY
+    global DISABLE_EDIT_MODE
+
     return rx.table.row(
         rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
         rx.match(
@@ -102,18 +114,18 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         )),
         rx.cond(
             snapshot_element.linked_issue != None,
-            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))), align="center"),
+            rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), disabled=DISABLE_EDIT_MODE, color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))), align="center"),
             rx.table.cell("")
         ),
         rx.table.cell(
             rx.cond(
                 snapshot_element.child_type == 4,
                 rx.flex(
-                    rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),
+                    rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY), on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),
                     rx.cond(
                         snapshot_element.linked_issue == None,
                         rx.dialog.root(
-                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=READ_ONLY),), 
+                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)),), 
                             rx.dialog.content(
                                 rx.hstack(rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",), rx.vstack(rx.dialog.title("Add New Issue", weight="bold", margin="0",), rx.dialog.description("Additional info will be auto-included in the report description", spacing="1", height="100%", align_items="start",),), height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",),
                                 rx.flex(
@@ -138,7 +150,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                         ),
                         rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=True),
                     ),
-                    rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=READ_ONLY, on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),
+                    rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY), on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),
                     spacing="2",
                 ),
             ),
@@ -147,6 +159,9 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
 
 @reflex_local_auth.require_login
 def iteration_page() -> rx.Component:
+    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
+
     title_badge = Badge()
     table_component = Table()
 
