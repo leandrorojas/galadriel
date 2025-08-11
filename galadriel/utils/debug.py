@@ -32,5 +32,6 @@ def log(message:str, final_log:bool = False):
         
         print(f"[{module}] " + message)
 
-        enabled = final_log
-        if final_log: global_module = ""
+        enabled = not final_log
+        if final_log:
+            global_module = ""
