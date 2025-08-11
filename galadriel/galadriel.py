@@ -10,6 +10,7 @@ from . import install
 from . import dashboard
 from . import user
 from .utils import consts
+from .utils import yaml  # local yaml.py with PyYAML helpers
 
 from .auth import add_edit_list as user_add_edit_list
 from .auth import detail as user_detail
@@ -20,8 +21,6 @@ from .ui.components import Button
 from .auth.pages import login_page, register_page, logout_page
 
 from .auth.state import Session
-
-from .utils.yaml import read_setting, write_setting
 
 def index() -> rx.Component:
     buttons = Button()
@@ -52,11 +51,11 @@ app = rx.App(
     },
 )
 
-if (read_setting("galadriel", "first_run") == 0):
+if (yaml.read_setting("galadriel.yaml", "galadriel", "first_run") == 0):
     seed = install.seed
     seed.seed_db()
     seed.set_first_run()
-    write_setting("galadriel", "first_run", 1)
+    yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
 
 app.add_page(index, title="galadriel")
 

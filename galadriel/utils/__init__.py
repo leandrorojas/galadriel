@@ -1,8 +1,8 @@
-from . import consts, timing, debug, yaml
+from . import consts, timing, debug, jira
 
 __all__ = [
     'debug',
     'timing',
     'consts',
-    'yaml'
+    'jira'
 ]
