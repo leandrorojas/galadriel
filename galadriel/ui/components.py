@@ -533,4 +533,4 @@ class Moment():
 class MomentBadge():
     def moment_badge(self, date) -> rx.Component:
         moment_component = Moment()
-        return rx.tooltip(rx.badge(moment_component.moment(str(date)), variant="outline"), content=f"{date}")
+        return rx.tooltip(rx.badge(moment_component.moment(date), variant="outline"), content=f"{date}")
