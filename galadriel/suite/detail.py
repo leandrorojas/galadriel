@@ -153,7 +153,7 @@ def suite_detail_page() -> rx.Component:
         ),
         rx.hstack(
             rx.heading(f"{state.SuiteState.suite.name}", size="7",),
-            moment_badge_component.moment_badge(str(state.SuiteState.suite.created)),
+            moment_badge_component.moment_badge(state.SuiteState.suite.created),
             align="center",
         ),
         __suite_children_table(),

@@ -51,11 +51,13 @@ app = rx.App(
     },
 )
 
-if (yaml.read_setting("galadriel.yaml", "galadriel", "first_run") == 0):
+print("before first run check")
+if (yaml.read_setting("galadriel.yaml", "galadriel", "first_run") == None):
     seed = install.seed
     seed.seed_db()
     seed.set_first_run()
     yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
+print("after first run check")
 
 app.add_page(index, title="galadriel")
 

@@ -109,7 +109,7 @@ def scenario_detail_page() -> rx.Component:
         ),
         rx.hstack(
             rx.heading(f"{state.ScenarioState.scenario.name}", size="7",),
-            moment_badge_component.moment_badge(str(state.ScenarioState.scenario.created)),
+            moment_badge_component.moment_badge(state.ScenarioState.scenario.created),
             align="center",
         ),
         rx.vstack(

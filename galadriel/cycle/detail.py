@@ -185,7 +185,7 @@ def cycle_detail_page() -> rx.Component:
             ),
             rx.badge(rx.icon("activity"), f"{state.CycleState.iteration_status_name}", color_scheme="blue"),
             rx.badge(rx.icon("gauge"), f"{state.CycleState.cycle.threshold}", color_scheme="lime"),
-            moment_badge_component.moment_badge(str(state.CycleState.cycle.created)),
+            moment_badge_component.moment_badge(state.CycleState.cycle.created),
             align="center",
         ),
         __cycle_children_table(),
