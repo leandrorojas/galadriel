@@ -10,6 +10,7 @@ from . import install
 from . import dashboard
 from . import user
 from .utils import consts
+from .utils import yaml  # local yaml.py with PyYAML helpers
 
 from .auth import add_edit_list as user_add_edit_list
 from .auth import detail as user_detail
@@ -50,11 +51,11 @@ app = rx.App(
     },
 )
 
-seed = install.seed
-
-if (seed.is_first_run() == True):
+if not(yaml.read_setting("galadriel.yaml", "galadriel", "first_run")):
+    seed = install.seed
     seed.seed_db()
     seed.set_first_run()
+    yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
 
 app.add_page(index, title="galadriel")
 
