@@ -52,10 +52,13 @@ app = rx.App(
 )
 
 if not(yaml.read_setting("galadriel.yaml", "galadriel", "first_run")):
-    seed = install.seed
-    seed.seed_db()
-    seed.set_first_run()
-    yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
+    try: # reflex db init run fails, this should run after the db is initialized
+        seed = install.seed
+        seed.seed_db()
+        seed.set_first_run()
+        yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
+    except:
+        pass
 
 app.add_page(index, title="galadriel")
 

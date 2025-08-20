@@ -65,7 +65,7 @@ def users_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
-            header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.can_edit, "Galadriel Users"),
+            header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.is_admin, "Galadriel Users"), # Add User button enabled only for admins
             rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),

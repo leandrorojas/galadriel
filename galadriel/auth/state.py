@@ -44,6 +44,10 @@ class Session(reflex_local_auth.LocalAuthState):
         return self.role == UserRole.EDITOR
     
     @rx.var(cache=True)
+    def is_admin(self) -> bool:
+        return self.role == UserRole.ADMIN
+    
+    @rx.var(cache=True)
     def role(self) -> UserRole:
         with rx.session() as session:
             if self.authenticated_user.id < 0:
