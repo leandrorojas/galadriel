@@ -13,7 +13,7 @@ class Register(reflex_local_auth.RegistrationState):
         registration_result = self.handle_registration(form_data)
         if self.new_user_id >= 0:
             with rx.session() as session:
-                role = session.exec(GaladrielUserRole.select().where(GaladrielUserRole.name == "viewer")).one_or_none()
+                role = session.exec(GaladrielUserRole.select().where(GaladrielUserRole.name == "editor")).one_or_none()
                 session.add(GaladrielUser(email=form_data["email"], user_id=self.new_user_id, user_role=role.id))
                 session.commit()
 
