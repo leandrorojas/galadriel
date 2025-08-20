@@ -25,18 +25,12 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
     latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     git checkout $latestTag
     ```
-* create an virtual environment, i.e.: ```python -m venv .venv/```
-* activate the venv ```source .venv/bin/activate```
-* install prerequisietes ```pip install -r requirements.txt```
-* comment these lines on the galadriel.py:
-    ```
-    seed = install.seed
-    if (seed.is_first_run() == True):
-        seed.seed_db()
-        seed.set_first_run()
-    ```
+* create an virtual environment (i.e.: ```python -m venv .venv/```)
+* activate the virtual environment (```source .venv/bin/activate```)
+* install prerequisietes: ```pip install -r requirements.txt```
+* copy ```copy_me_into_galadriel.yaml``` into ```galadriel.yaml```
+    
     ### configuring Jira
-    * copy ```copy_me_into_galadriel.yaml``` into ```galadriel.yaml```
     * get a Jira token for your account by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
     * fill in the yaml configuration, the yaml file has sameple dummy data:
         * _url_: the url of your jira instance, i.e.: _https://instance.atlassian.net_
@@ -49,10 +43,6 @@ See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwik
         <u>Note</U>: galadriel does not validate on the Jira objects existence, yet.
 
 * execute the command ```reflex db init```
-    * if you receive the error ```TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument: 'recursive_guard``` (note the line number, usually 66)
-    * search & open the ```pydantic/pydantic/v1/typing.py``` file
-    * replace line 66 with ```return cast(Any, type_)._evaluate(globalns, localns, recursive_guard=set())```
-* uncomment the lines
 * execute the command ```reflex run```
 * done, enjoy galadriel
 
@@ -62,6 +52,6 @@ Feel free to turn it into the perfect community product. The request is that you
 Built with Reflex, built to work.
 
 If you want to contribute, galadriel currently needs:
-* unit tests
+* unit tests --> Soon to be done with Codex :D
 * code optimization/reusability
 
