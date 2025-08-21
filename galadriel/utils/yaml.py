@@ -21,7 +21,7 @@ def read_setting(filename:str, section:str, key:str):
         with open(filename) as galadriel_yaml:
             galadriel_config = yaml.safe_load(galadriel_yaml)
             setting = galadriel_config[section][key]
-    except:
+    except Exception:
         setting = None
     return setting
 
@@ -49,5 +49,6 @@ def write_setting(filename:str, section:str, key:str, value):
         with open(filename, "w") as galadriel_yaml:
             yaml.safe_dump(current_config, galadriel_yaml)
     except Exception:
-        # Silently ignore write errors to maintain backward compatible behaviour
+        # Silently ignore write errors, since this function does not create keys
+        # or sections that do not already exist.
         pass

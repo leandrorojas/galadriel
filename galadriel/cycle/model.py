@@ -3,7 +3,6 @@ import sqlalchemy as sa
 from sqlmodel import Field
 import reflex as rx
 
-#from .. import utils
 from ..utils import timing, consts
 
 class CycleModel(rx.Model, table=True):

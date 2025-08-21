@@ -149,7 +149,6 @@ def case_detail_page() -> rx.Component:
         ),
         rx.hstack(
             rx.heading(f"{state.CaseState.case.name}", size="7",),
-            #TODO: the tooltip is displayed in UTC, it should be displayed in local time
             moment_badge_component.moment_badge(state.CaseState.case.created),
             align="center",
         ),
