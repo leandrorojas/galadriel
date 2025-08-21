@@ -89,6 +89,3 @@ def get_issue_url(issue_key) -> str:
 def get_issue(issue_key):
     raw_response = __jira_hit(REQUEST_GET, __get_issue_api_url(issue_key))
     return json.loads(raw_response.text)
-    #return str(json.dumps(json.loads(raw_response.text), sort_keys=True, indent=4, separators=(",", ": ")))
-
-#TODO: Add get_issue_status by bulk --> /rest/api/3/issue/bulkfetch --> https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-bulkfetch-post

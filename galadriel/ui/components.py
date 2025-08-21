@@ -263,8 +263,6 @@ class SideBar():
             self.__sidebar_item("Suites", "beaker", navigation.routes.SUITES),
             self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),
             self.__sidebar_item("Cases", consts.ICON_TEST_TUBES, navigation.routes.CASES),
-            #self.__sidebar_item("[to do] Steps", "test-tube", navigation.routes.ABOUT),
-            #self.__sidebar_item("[to do] Functions", "test-tube-diagonal", navigation.routes.ABOUT),
             spacing="1",
             width=
             "100%",

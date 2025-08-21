@@ -15,8 +15,6 @@ galadriel_user_roles: user.GaladrielUserRole = []
 local_users: reflex_local_auth.LocalUser = []
 galadriel_users: user.GaladrielUser = []
 
-# TODO: standadize initial id to 0 and include a migration prodedure
-
 cycle_child_types = [
     {"id":1, "type_name":"Suite",},
     {"id":2, "type_name":"Scenario",},
