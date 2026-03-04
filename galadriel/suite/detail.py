@@ -13,8 +13,6 @@ from ..utils import consts
 
 from ..auth.state import Session
 
-DISABLE_EDIT_MODE:bool = True
-
 def __search_table_header():
     table_component = Table()
     return rx.table.header(
@@ -85,7 +83,7 @@ def __child_type_badge(child_type: str):
     return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
 def __show_child(suite_child:model.SuiteChildModel):
-    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
     return rx.table.row(
         rx.table.cell(suite_child.order),
         rx.table.cell(rx.match(
@@ -126,9 +124,8 @@ def __suite_children_table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def suite_detail_page() -> rx.Component:
-    global DISABLE_EDIT_MODE
     DISABLE_EDIT_MODE = ~Session.can_edit
-    
+
     title_badge = Badge()
     button_component = Button()
     moment_badge_component = MomentBadge()

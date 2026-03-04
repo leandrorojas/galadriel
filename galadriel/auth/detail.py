@@ -7,11 +7,12 @@ from ..pages import base_page
 from ..ui.components import Badge, Button, MomentBadge
 
 from ..utils import consts
+from ..auth.state import Session
 
 @reflex_local_auth.require_login
 def user_detail_page() -> rx.Component:
     title_badge = Badge()
-    can_edit = True
+    can_edit = Session.is_admin
     button_component = Button()
     moment_badge_component = MomentBadge()
 

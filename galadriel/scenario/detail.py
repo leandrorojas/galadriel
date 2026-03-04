@@ -10,10 +10,8 @@ from ..case.model import CaseModel
 from ..utils import consts
 from ..auth.state import Session
 
-DISABLE_EDIT_MODE:bool = True
-
 def __show_test_cases(test_cases:model.ScenarioCaseModel):
-    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
 
     return rx.table.row(
         rx.table.cell(test_cases.order),
@@ -81,7 +79,6 @@ def __search_cases_table() -> rx.Component:
 
 @reflex_local_auth.require_login
 def scenario_detail_page() -> rx.Component:
-    global DISABLE_EDIT_MODE
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()
