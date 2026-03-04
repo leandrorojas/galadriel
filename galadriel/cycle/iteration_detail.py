@@ -10,9 +10,6 @@ from ..utils import jira, consts
 
 from ..auth.state import Session
 
-READ_ONLY = False
-DISABLE_EDIT_MODE: bool = True
-
 def __cycle_list_button() -> rx.Component:    
     return rx.fragment(
         rx.link(
@@ -26,8 +23,8 @@ def __cycle_list_button() -> rx.Component:
     )
 
 def __force_close_iteration_snapshot_button() -> rx.Component:
-    global READ_ONLY
-    global DISABLE_EDIT_MODE
+    READ_ONLY = ~CycleState.is_iteration_editable
+    DISABLE_EDIT_MODE = ~Session.can_edit
 
     return rx.fragment(
         rx.link(
@@ -46,8 +43,8 @@ def __force_close_iteration_snapshot_button() -> rx.Component:
     )
 
 def __hold_iteration_snapshot_button() -> rx.Component:
-    global READ_ONLY
-    global DISABLE_EDIT_MODE
+    READ_ONLY = ~CycleState.is_iteration_editable
+    DISABLE_EDIT_MODE = ~Session.can_edit
 
     return rx.fragment(
         rx.link(
@@ -91,8 +88,8 @@ def __element_status_badge(child_status: str):
     return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
-    global READ_ONLY
-    global DISABLE_EDIT_MODE
+    READ_ONLY = ~CycleState.is_iteration_editable
+    DISABLE_EDIT_MODE = ~Session.can_edit
 
     return rx.table.row(
         rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
@@ -159,13 +156,11 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
 
 @reflex_local_auth.require_login
 def iteration_page() -> rx.Component:
-    global DISABLE_EDIT_MODE
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()
     table_component = Table()
 
-    global READ_ONLY
     READ_ONLY = ~CycleState.is_iteration_editable
 
     cycle_edit_content = rx.vstack(

@@ -14,8 +14,6 @@ from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
 from ..auth.state import Session
 
-DISABLE_EDIT_MODE:bool = True
-
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
     if cycle is None: return rx.fragment(child)
     
@@ -54,7 +52,6 @@ def __cycle_status_badge(cycle_status: str):
     return __badge(*badge_mapping.get(cycle_status, ("n/a", "")))
 
 def __show_cycle(cycle:model.CycleModel):
-    global DISABLE_EDIT_MODE
     DISABLE_EDIT_MODE = ~Session.can_edit
     moment_component = Moment()
     

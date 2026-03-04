@@ -9,14 +9,12 @@ from .forms import step_add_form
 from ..utils import consts
 from ..auth.state import Session
 
-DISABLE_EDIT_MODE:bool = True
-
 first_row:bool = True
 last_row:bool = False
 
 #prerequisites
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
-    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
     return rx.table.row(
         rx.table.cell(prerequisite.order),
         rx.table.cell(prerequisite.prerequisite_name),
@@ -83,7 +81,7 @@ def __search_prerequisites_table() -> rx.Component:
 
 #steps
 def __show_step(test_step:model.StepModel):
-    global DISABLE_EDIT_MODE
+    DISABLE_EDIT_MODE = ~Session.can_edit
 
     return rx.table.row(
         rx.table.cell(test_step.order),
@@ -126,7 +124,6 @@ def case_detail_page() -> rx.Component:
     button_component = Button()
     moment_badge_component = MomentBadge()
 
-    global DISABLE_EDIT_MODE
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     edit_link_element = rx.cond(

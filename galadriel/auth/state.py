@@ -13,7 +13,9 @@ class Register(reflex_local_auth.RegistrationState):
         registration_result = self.handle_registration(form_data)
         if self.new_user_id >= 0:
             with rx.session() as session:
-                role = session.exec(GaladrielUserRole.select().where(GaladrielUserRole.name == "editor")).one_or_none()
+                role = session.exec(GaladrielUserRole.select().where(GaladrielUserRole.name == "viewer")).one_or_none()
+                if role is None:
+                    return rx.toast.error("default role not found")
                 session.add(GaladrielUser(email=form_data["email"], user_id=self.new_user_id, user_role=role.id))
                 session.commit()
 
@@ -52,7 +54,7 @@ class Session(reflex_local_auth.LocalAuthState):
         with rx.session() as session:
             if self.authenticated_user.id < 0:
                 return UserRole.VIEWER
-            galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.id == self.user_id)).one_or_none()
+            galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.user_id == self.user_id)).one_or_none()
             if not galadriel_user:
                 return UserRole.VIEWER
             return UserRole(galadriel_user.user_role)
