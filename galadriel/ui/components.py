@@ -54,7 +54,7 @@ class TopNavBar():
                             border_radius="25%",
                         ),
                         rx.heading(
-                            "Reflex", size="6", weight="bold"
+                            "galadriel", size="6", weight="bold"
                         ),
                         align_items="center",
                     ),
@@ -66,8 +66,17 @@ class TopNavBar():
                             rx.menu.item("Home", on_click=navigation.NavigationState.to_home),
                             rx.menu.item("About", on_click=navigation.NavigationState.to_about),
                             rx.menu.separator(),
-                            rx.menu.item("Log in", on_click=navigation.NavigationState.to_login),
-                            rx.menu.item("Sign up", on_click=navigation.NavigationState.to_signup),
+                            rx.cond(
+                                Session.is_authenticated,
+                                rx.fragment(
+                                    rx.menu.item("Dashboard", on_click=rx.redirect(navigation.routes.DASHBOARD)),
+                                    rx.menu.item("Logout", on_click=navigation.NavigationState.to_logout),
+                                ),
+                                rx.fragment(
+                                    rx.menu.item("Log in", on_click=navigation.NavigationState.to_login),
+                                    rx.menu.item("Sign up", on_click=navigation.NavigationState.to_signup),
+                                ),
+                            ),
                         ),
                         justify="end",
                     ),
@@ -339,7 +348,10 @@ class SideBar():
                                     ),
                                     width="100%",
                                 ),
-                                self.__backoffice_sidebar_items(),
+                                rx.cond(show_backoffice,
+                                    self.__backoffice_sidebar_items(),
+                                    self.__galadriel_sidebar_items()
+                                ),
                                 rx.spacer(),
                                 rx.vstack(
                                     rx.vstack(
