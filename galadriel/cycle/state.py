@@ -218,7 +218,7 @@ class CycleState(rx.State):
                     child = None
                     if (single_result.child_type_id == 1):
                         child = session.exec(SuiteModel.select().where(SuiteModel.id == single_result.child_id)).first()
-                    if (single_result.child_type_id == 2):
+                    elif (single_result.child_type_id == 2):
                         child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
                     elif (single_result.child_type_id == 3):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
@@ -441,18 +441,18 @@ class CycleState(rx.State):
 
     def link_suite(self, suite_id:int):
         cycle_suite_data:dict = {"cycle_id":""}
-        new_scenario_order = 1
+        new_suite_order = 1
 
-        if (len(self.scenarios_for_search) > 0):
-            new_scenario_order = self.get_max_child_order(suite_id, 1)
+        if (len(self.suites_for_search) > 0):
+            new_suite_order = self.get_max_child_order(suite_id, 1)
 
-            if new_scenario_order == -1:
+            if new_suite_order == -1:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_suite_data.update({"cycle_id":self.cycle_id})
         cycle_suite_data.update({"child_type_id":1})
         cycle_suite_data.update({"child_id":suite_id})
-        cycle_suite_data.update({"order":new_scenario_order})
+        cycle_suite_data.update({"order":new_suite_order})
 
         with rx.session() as session:
             suite_to_add = CycleChildModel(**cycle_suite_data)
@@ -463,7 +463,7 @@ class CycleState(rx.State):
         self.collapse_searches()
         self.load_children()
         
-        return rx.toast.success("scenario added!")
+        return rx.toast.success("suite added!")
     #endregion
 
     #region SNAPSHOT
