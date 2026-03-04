@@ -76,108 +76,49 @@ def seed_db():
 
 def __clear_seed_data():
     with rx.session() as session:
-        #delete CycleChildTypeModel
-        results = session.exec(cycle.CycleChildTypeModel.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        #delete CycleStatusModel
-        results = session.exec(cycle.CycleStatusModel.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        #delete IterationSnapshotStatusModel
-        results = session.exec(iteration.IterationSnapshotStatusModel.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        #delete IterationStatusModel
-        results = session.exec(iteration.IterationStatusModel.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        #delete SuiteChildTypeModel
-        results = session.exec(suite.SuiteChildTypeModel.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        results = session.exec(reflex_local_auth.LocalUser.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        results = session.exec(user.GaladrielUserRole.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
-
-        results = session.exec(user.GaladrielUser.select()).all()
-        for to_delete in results:
-            session.delete(to_delete)
-            session.commit()
-        results = None
+        for model in [
+            cycle.CycleChildTypeModel,
+            cycle.CycleStatusModel,
+            iteration.IterationSnapshotStatusModel,
+            iteration.IterationStatusModel,
+            suite.SuiteChildTypeModel,
+            user.GaladrielUser,
+            user.GaladrielUserRole,
+            reflex_local_auth.LocalUser,
+        ]:
+            results = session.exec(model.select()).all()
+            for to_delete in results:
+                session.delete(to_delete)
+        session.commit()
 
 def __insert_seed_data():
-    for cycle_child_type in cycle_child_types:
-        with rx.session() as session:
-            cycle_child_type = cycle.CycleChildTypeModel(**cycle_child_type)
-            session.add(cycle_child_type)
-            session.commit()
+    with rx.session() as session:
+        for item in cycle_child_types:
+            session.add(cycle.CycleChildTypeModel(**item))
 
-    for cycle_status in cycle_statuses:
-        with rx.session() as session:
-            cycle_status = cycle.CycleStatusModel(**cycle_status)
-            session.add(cycle_status)
-            session.commit()
+        for item in cycle_statuses:
+            session.add(cycle.CycleStatusModel(**item))
 
-    for iteration_snapshot_status in iteration_snapshot_statuses:
-        with rx.session() as session:
-            iteration_snapshot_status = iteration.IterationSnapshotStatusModel(**iteration_snapshot_status)
-            session.add(iteration_snapshot_status)
-            session.commit()
+        for item in iteration_snapshot_statuses:
+            session.add(iteration.IterationSnapshotStatusModel(**item))
 
-    for iteration_status in iteration_statuses:
-        with rx.session() as session:
-            iteration_status = iteration.IterationStatusModel(**iteration_status)
-            session.add(iteration_status)
-            session.commit()
+        for item in iteration_statuses:
+            session.add(iteration.IterationStatusModel(**item))
 
-    for suite_type in suite_tyoes:
-        with rx.session() as session:
-            suite_type = suite.SuiteChildTypeModel(**suite_type)
-            session.add(suite_type)
-            session.commit()
+        for item in suite_tyoes:
+            session.add(suite.SuiteChildTypeModel(**item))
 
-    for local_user in local_users:
-        with rx.session() as session:
+        for local_user in local_users:
             local_user["password_hash"] = reflex_local_auth.LocalUser.hash_password(local_user["password_hash"])
-            local_user = reflex_local_auth.LocalUser(**local_user)
-            session.add(local_user)
-            session.commit()
+            session.add(reflex_local_auth.LocalUser(**local_user))
 
-    for galadriel_user_role in galadriel_user_roles:
-        with rx.session() as session:
-            galadriel_user_role = user.GaladrielUserRole(**galadriel_user_role)
-            session.add(galadriel_user_role)
-            session.commit()
+        for item in galadriel_user_roles:
+            session.add(user.GaladrielUserRole(**item))
 
-    for galadriel_user in galadriel_users:
-        with rx.session() as session:
-            galadriel_user = user.GaladrielUser(**galadriel_user)
-            session.add(galadriel_user)
-            session.commit()
+        for item in galadriel_users:
+            session.add(user.GaladrielUser(**item))
+
+        session.commit()
 
 def set_first_run():
     first_run:dict = {"name":"first_run", "value": "1"}
