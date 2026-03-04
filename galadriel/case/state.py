@@ -203,7 +203,7 @@ class CaseState(rx.State):
             if (len(results) > 0):
                 for single_result in results:
                     case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.prerequisite_id)).first()
-                    setattr(single_result, "prerequisite_name", case_name.name)
+                    setattr(single_result, "prerequisite_name", case_name.name if case_name else "unknown")
             self.prerequisites = results 
 
     def filter_cases(self, search_value):
@@ -276,6 +276,7 @@ class CaseState(rx.State):
     def delete_prerequisite(self, prerequisite_id:int):
         with rx.session() as session:
             prerequisite_to_delete = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
+            if prerequisite_to_delete is None: return rx.toast.error("prerequisite not found")
             order_to_update = prerequisite_to_delete.order
             session.delete(prerequisite_to_delete)
             session.commit()

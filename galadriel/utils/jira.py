@@ -88,4 +88,6 @@ def get_issue_url(issue_key) -> str:
 
 def get_issue(issue_key):
     raw_response = __jira_hit(REQUEST_GET, __get_issue_api_url(issue_key))
+    if raw_response is None:
+        return None
     return json.loads(raw_response.text)

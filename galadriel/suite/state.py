@@ -110,12 +110,13 @@ class SuiteState(rx.State):
                         child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
                     elif (single_result.child_type_id == 2):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
-                    setattr(single_result, "child_name", child.name)
+                    setattr(single_result, "child_name", child.name if child else "unknown")
             self.children = results
 
     def unlink_child(self, suite_child_id:int):
         with rx.session() as session:
             child_to_delete = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == suite_child_id)).first()
+            if child_to_delete is None: return rx.toast.error("child not found")
             order_to_update = child_to_delete.order
             session.delete(child_to_delete)
             session.commit()
