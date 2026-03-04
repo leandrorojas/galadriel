@@ -43,5 +43,5 @@ class ScenarioCaseModel(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d
