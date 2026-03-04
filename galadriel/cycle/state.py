@@ -1,6 +1,7 @@
 from typing import List, Optional
 from datetime import datetime, timezone
 import reflex as rx
+from rxconfig import config
 from .model import CycleModel, CycleChildModel
 from ..navigation import routes
 
@@ -16,7 +17,7 @@ from ..utils import jira, consts
 CYCLES_ROUTE = routes.CYCLES
 if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
 
-SITE_URL = "http://localhost:3000/"
+SITE_URL = f"http://localhost:{config.frontend_port}/"
 
 RETURN_VALUE = 0
 class CycleState(rx.State):
