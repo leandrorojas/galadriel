@@ -232,7 +232,7 @@ class CycleState(rx.State):
             session.delete(child_to_delete)
             session.commit()
 
-            children_to_update = session.exec(CycleChildModel.select().where(CycleChildModel.order > order_to_update)).all()
+            children_to_update = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id, CycleChildModel.order > order_to_update)).all()
             for cycle_child in children_to_update:
                 cycle_child.order = cycle_child.order - 1
                 session.add(cycle_child)

@@ -120,7 +120,7 @@ class SuiteState(rx.State):
             session.delete(child_to_delete)
             session.commit()
 
-            children_to_update = session.exec(SuiteChildModel.select().where(SuiteChildModel.order > order_to_update)).all()
+            children_to_update = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id, SuiteChildModel.order > order_to_update)).all()
             for suite_child in children_to_update:
                 suite_child.order = suite_child.order - 1
                 session.add(suite_child)

@@ -143,7 +143,7 @@ class CaseState(rx.State):
             session.delete(step_to_delete)
             session.commit()
 
-            steps_to_update = session.exec(StepModel.select().where(StepModel.order > order_to_update)).all()
+            steps_to_update = session.exec(StepModel.select().where(StepModel.case_id == self.case_id, StepModel.order > order_to_update)).all()
             for step in steps_to_update:
                 step.order = step.order - 1
                 session.add(step)
@@ -280,7 +280,7 @@ class CaseState(rx.State):
             session.delete(prerequisite_to_delete)
             session.commit()
 
-            prerequisites_to_update = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order > order_to_update)).all()
+            prerequisites_to_update = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id, PrerequisiteModel.order > order_to_update)).all()
             for prerequisite in prerequisites_to_update:
                 prerequisite.order = prerequisite.order - 1
                 session.add(prerequisite)
