@@ -154,7 +154,7 @@ class ScenarioState(rx.State):
             session.delete(case_to_delete)
             session.commit()
 
-            cases_to_update = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order > order_to_update)).all()
+            cases_to_update = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id, ScenarioCaseModel.order > order_to_update)).all()
             for test_case in cases_to_update:
                 test_case.order = test_case.order - 1
                 session.add(test_case)
