@@ -57,8 +57,8 @@ if not(yaml.read_setting("galadriel.yaml", "galadriel", "first_run")):
         seed.seed_db()
         seed.set_first_run()
         yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[galadriel] seed failed: {e}")
 
 app.add_page(index, title="galadriel")
 

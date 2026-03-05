@@ -71,9 +71,9 @@ class DashboardState(rx.State):
 
         total_cases = passed_cases + failed_cases + blocked_cases
 
-        passed_percentage = round((passed_cases / total_cases), 2) * 100 if total_cases > 0 else 0
-        failed_percentage = round((failed_cases / total_cases), 2) * 100 if total_cases > 0 else 0
-        blocked_percentage = round((blocked_cases / total_cases), 2) * 100 if total_cases > 0 else 0
+        passed_percentage = round((passed_cases / total_cases) * 100, 2) if total_cases > 0 else 0
+        failed_percentage = round((failed_cases / total_cases) * 100, 2) if total_cases > 0 else 0
+        blocked_percentage = round((blocked_cases / total_cases) * 100, 2) if total_cases > 0 else 0
 
         return [
             {"name": "Passed", "value": passed_percentage, "fill": "#71d083"},

@@ -249,7 +249,7 @@ class CaseState(rx.State):
                 linked_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
                 max_order = 0
                 for linked_prerequisite in linked_prerequisites:
-                    if (linked_prerequisite.id == prerequisite_id): return rx.toast.error(consts.MESSAGE_PREREQUISITE_ALREADY_IN_LIST)
+                    if (linked_prerequisite.prerequisite_id == prerequisite_id): return rx.toast.error(consts.MESSAGE_PREREQUISITE_ALREADY_IN_LIST)
                     
                     if linked_prerequisite.order > max_order:
                         max_order = linked_prerequisite.order
