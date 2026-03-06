@@ -8,6 +8,7 @@ from ..scenario.model import ScenarioModel
 
 from sqlmodel import select, cast, String
 from ..utils import consts
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete
 
 SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
@@ -114,66 +115,21 @@ class SuiteState(rx.State):
             self.children = results
 
     def unlink_child(self, suite_child_id:int):
-        with rx.session() as session:
-            child_to_delete = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == suite_child_id)).first()
-            if child_to_delete is None: return rx.toast.error("child not found")
-            order_to_update = child_to_delete.order
-            session.delete(child_to_delete)
-            session.commit()
-
-            children_to_update = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id, SuiteChildModel.order > order_to_update)).all()
-            for suite_child in children_to_update:
-                suite_child.order = suite_child.order - 1
-                session.add(suite_child)
-                session.commit()
-                session.refresh(suite_child)
+        toast = reorder_delete(SuiteChildModel, suite_child_id, "suite_id", self.suite_id, "child")
         self.load_children()
-        return rx.toast.info("child unlinked")
-    
+        return toast
+
     def move_child_up(self, child_id:int):
-        with rx.session() as session:
-            child_going_up = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == child_id)).first()
-            old_order = child_going_up.order
-            if (old_order != 1):
-                child_going_down = session.exec(SuiteChildModel.select().where(SuiteChildModel.order == (old_order -1), SuiteChildModel.suite_id == self.suite_id)).first()
-                new_order = child_going_down.order
+        toast = reorder_move_up(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
+        if toast is None:
+            self.load_children()
+        return toast
 
-                child_going_up.order = new_order
-                session.add(child_going_up)
-                session.commit()
-                session.refresh(child_going_up)
-
-                child_going_down.order = old_order
-                session.add(child_going_down)
-                session.commit()
-                session.refresh(child_going_down)
-
-                self.load_children()
-            else:
-                return rx.toast.warning("The child has reached min")
-            
     def move_child_down(self, child_id:int):
-        with rx.session() as session:
-            child_going_down = session.exec(SuiteChildModel.select().where(SuiteChildModel.id == child_id)).first()
-            old_order = child_going_down.order
-            child_going_up = session.exec(SuiteChildModel.select().where(SuiteChildModel.order == (old_order +1), SuiteChildModel.suite_id == self.suite_id)).first()
-
-            if (child_going_up is not None):
-                new_order = child_going_up.order
-
-                child_going_down.order = new_order
-                session.add(child_going_down)
-                session.commit()
-                session.refresh(child_going_down)
-
-                child_going_up.order = old_order
-                session.add(child_going_up)
-                session.commit()
-                session.refresh(child_going_up)
-
-                self.load_children()
-            else:
-                return rx.toast.warning("The child has reached max")
+        toast = reorder_move_down(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
+        if toast is None:
+            self.load_children()
+        return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
         with rx.session() as session:
