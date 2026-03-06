@@ -31,6 +31,10 @@ class TestReorderMoveUp:
 
         assert result is not None
 
+    def test_nonexistent_item_returns_error(self, patch_rx_session):
+        result = reorder_move_up(StepModel, 9999, "case_id", 1, "step")
+        assert result is not None
+
     def test_does_not_affect_other_parents(self, patch_rx_session, make_case, make_step):
         case_a = make_case(name="A")
         case_b = make_case(name="B")
@@ -66,6 +70,10 @@ class TestReorderMoveDown:
 
         result = reorder_move_down(StepModel, s2.id, "case_id", case.id, "step")
 
+        assert result is not None
+
+    def test_nonexistent_item_returns_error(self, patch_rx_session):
+        result = reorder_move_down(StepModel, 9999, "case_id", 1, "step")
         assert result is not None
 
     def test_three_items_middle_down(self, patch_rx_session, make_case, make_step):
