@@ -1,0 +1,78 @@
+"""Tests for galadriel.dashboard.state — DashboardState business logic."""
+
+import pytest
+from sqlmodel import select
+
+from galadriel.dashboard.state import DashboardState
+from galadriel.iteration.model import IterationModel, IterationSnapshotModel
+from galadriel.cycle.model import CycleModel
+from conftest import init_state
+
+pytestmark = pytest.mark.integration
+
+
+def _make_state():
+    return init_state(DashboardState, linked_bugs=[])
+
+
+class TestPieChartData:
+    def test_empty_data_returns_zeroes(self, patch_rx_session):
+        state = _make_state()
+        data = state.get_pie_chart_data
+        assert len(data) == 3
+        for entry in data:
+            assert entry["value"] == 0
+
+    def test_with_data(self, patch_rx_session, seeded_db):
+        session = patch_rx_session
+        cycle = CycleModel(name="C", threshold="80")
+        session.add(cycle)
+        session.commit()
+        session.refresh(cycle)
+
+        iteration = IterationModel(cycle_id=cycle.id, iteration_status_id=1, iteration_number=1)
+        session.add(iteration)
+        session.commit()
+        session.refresh(iteration)
+
+        for status_id in [3, 3, 2, 5]:
+            session.add(IterationSnapshotModel(
+                iteration_id=iteration.id, order=0, child_type=4, child_status_id=status_id
+            ))
+        session.commit()
+
+        state = _make_state()
+        data = state.get_pie_chart_data
+        names = {d["name"]: d["value"] for d in data}
+        assert names["Passed"] == 50.0
+        assert names["Failed"] == 25.0
+        assert names["Blocked"] == 25.0
+
+
+class TestCaseCountByStatus:
+    def test_cycle_count_zero_when_empty(self, patch_rx_session):
+        state = _make_state()
+        assert state.cycle_count == 0
+
+    def test_blocked_cases_count(self, patch_rx_session, seeded_db):
+        session = patch_rx_session
+        cycle = CycleModel(name="C", threshold="80")
+        session.add(cycle)
+        session.commit()
+        session.refresh(cycle)
+
+        iteration = IterationModel(cycle_id=cycle.id, iteration_status_id=1, iteration_number=1)
+        session.add(iteration)
+        session.commit()
+        session.refresh(iteration)
+
+        session.add(IterationSnapshotModel(
+            iteration_id=iteration.id, order=0, child_type=4, child_status_id=5
+        ))
+        session.add(IterationSnapshotModel(
+            iteration_id=iteration.id, order=1, child_type=4, child_status_id=5
+        ))
+        session.commit()
+
+        state = _make_state()
+        assert state.blocked_cases == 2

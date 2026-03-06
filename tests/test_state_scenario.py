@@ -1,0 +1,141 @@
+"""Tests for galadriel.scenario.state — ScenarioState business logic."""
+
+import pytest
+from unittest.mock import PropertyMock
+from sqlmodel import select
+
+from galadriel.scenario.state import ScenarioState
+from galadriel.scenario.model import ScenarioModel, ScenarioCaseModel
+from conftest import init_state
+
+pytestmark = pytest.mark.integration
+
+
+def _make_state(scenario_id_value=""):
+    state = init_state(
+        ScenarioState,
+        scenarios=[], scenario=None,
+        test_cases=[], test_cases_for_search=[],
+        show_search=False, search_value="",
+    )
+    type(state).scenario_id = PropertyMock(return_value=scenario_id_value)
+    return state
+
+
+class TestAddScenario:
+    def test_success(self, patch_rx_session):
+        state = _make_state()
+        result = state.add_scenario({"name": "Checkout"})
+        assert result == 0
+        assert state.scenario.name == "Checkout"
+
+    def test_empty_name(self, patch_rx_session):
+        state = _make_state()
+        result = state.add_scenario({"name": ""})
+        assert result is None
+
+
+class TestSaveScenarioEdits:
+    def test_edit_success(self, patch_rx_session, make_scenario):
+        sc = make_scenario(name="Old")
+        state = _make_state(scenario_id_value=str(sc.id))
+        result = state.save_scenario_edits(sc.id, {"name": "New"})
+        assert result == 0
+        assert state.scenario.name == "New"
+
+    def test_edit_empty_name(self, patch_rx_session, make_scenario):
+        sc = make_scenario(name="S")
+        state = _make_state(scenario_id_value=str(sc.id))
+        result = state.save_scenario_edits(sc.id, {"name": ""})
+        assert result is None
+
+
+class TestLinkCase:
+    def test_requires_steps(self, patch_rx_session, make_scenario, make_case):
+        sc = make_scenario(name="S")
+        case = make_case(name="No steps")
+        state = _make_state(scenario_id_value=str(sc.id))
+        result = state.link_case(case.id)
+        assert result is not None
+
+    def test_link_success(self, patch_rx_session, make_scenario, make_case, make_step):
+        sc = make_scenario(name="S")
+        case = make_case(name="C")
+        make_step(case_id=case.id, order=1)
+        state = _make_state(scenario_id_value=str(sc.id))
+        state.test_cases = []
+        state.link_case(case.id)
+        session = patch_rx_session
+        links = session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.scenario_id == sc.id)).all()
+        assert len(links) == 1
+        assert links[0].case_id == case.id
+
+    def test_duplicate_case_rejected(self, patch_rx_session, make_scenario, make_case, make_step):
+        sc = make_scenario(name="S")
+        case = make_case(name="C")
+        make_step(case_id=case.id, order=1)
+
+        state = _make_state(scenario_id_value=str(sc.id))
+        state.test_cases = []
+        state.link_case(case.id)
+        state.load_cases()
+        result = state.link_case(case.id)
+        assert result is not None
+
+
+class TestUnlinkCase:
+    def test_unlink_reorders(self, patch_rx_session, make_scenario):
+        sc = make_scenario(name="S")
+        session = patch_rx_session
+        l1 = ScenarioCaseModel(scenario_id=sc.id, case_id=1, order=1, case_name="a")
+        l2 = ScenarioCaseModel(scenario_id=sc.id, case_id=2, order=2, case_name="b")
+        l3 = ScenarioCaseModel(scenario_id=sc.id, case_id=3, order=3, case_name="c")
+        session.add_all([l1, l2, l3])
+        session.commit()
+        session.refresh(l1)
+
+        state = _make_state(scenario_id_value=str(sc.id))
+        state.unlink_case(l1.id)
+
+        remaining = session.exec(
+            select(ScenarioCaseModel).where(ScenarioCaseModel.scenario_id == sc.id).order_by(ScenarioCaseModel.order)
+        ).all()
+        assert len(remaining) == 2
+        assert remaining[0].order == 1
+        assert remaining[1].order == 2
+
+
+class TestMoveCase:
+    def test_move_up(self, patch_rx_session, make_scenario):
+        sc = make_scenario(name="S")
+        session = patch_rx_session
+        l1 = ScenarioCaseModel(scenario_id=sc.id, case_id=1, order=1, case_name="a")
+        l2 = ScenarioCaseModel(scenario_id=sc.id, case_id=2, order=2, case_name="b")
+        session.add_all([l1, l2])
+        session.commit()
+        session.refresh(l1)
+        session.refresh(l2)
+
+        state = _make_state(scenario_id_value=str(sc.id))
+        state.move_case_up(l2.id)
+
+        session.expire_all()
+        assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l2.id)).first().order == 1
+        assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l1.id)).first().order == 2
+
+    def test_move_down(self, patch_rx_session, make_scenario):
+        sc = make_scenario(name="S")
+        session = patch_rx_session
+        l1 = ScenarioCaseModel(scenario_id=sc.id, case_id=1, order=1, case_name="a")
+        l2 = ScenarioCaseModel(scenario_id=sc.id, case_id=2, order=2, case_name="b")
+        session.add_all([l1, l2])
+        session.commit()
+        session.refresh(l1)
+        session.refresh(l2)
+
+        state = _make_state(scenario_id_value=str(sc.id))
+        state.move_case_down(l1.id)
+
+        session.expire_all()
+        assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l1.id)).first().order == 2
+        assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l2.id)).first().order == 1
