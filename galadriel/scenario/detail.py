@@ -18,9 +18,9 @@ def __show_test_cases(test_cases:model.ScenarioCaseModel):
         rx.table.cell(test_cases.case_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, consts.FIELD_ID))), 
-                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.ScenarioState.move_case_up(getattr(test_cases, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
+                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.ScenarioState.move_case_down(getattr(test_cases, consts.FIELD_ID))),  # NOSONAR
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.ScenarioState.unlink_case(getattr(test_cases, consts.FIELD_ID))),  # NOSONAR
                 spacing="2",
             )
         ),

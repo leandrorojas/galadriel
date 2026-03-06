@@ -104,47 +104,41 @@ class DashboardState(rx.State):
             else:
                 break
 
-    @rx.var(cache=False)
-    def cases_trends(self) -> List:
-        #to return days of the week, executed, passed, failed, blocked
+    def __build_trend_data(self):
         trend_data = []
         current_utc_date = datetime.now(timezone.utc)
-        i = 0
-
-        while i < 11:
-            i += 1
+        for _ in range(11):
             trend_data.append({"date": current_utc_date.strftime("%Y-%m-%d %H:%M:%S"), "exec": 0, "passed": 0, "failed": 0, "blocked": 0})
             current_utc_date = current_utc_date - timedelta(days=1)
+        return trend_data, current_utc_date
+
+    def __apply_case_to_trend(self, trend_data, updated_case):
+        STATUS_MAP = {3: "passed", 2: "failed", 5: "blocked"}
+        case_date = updated_case.updated.strftime("%Y-%m-%d")
+
+        for trend_entry in trend_data:
+            trend_entry_date = datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")
+            if trend_entry_date.strftime("%Y-%m-%d") == case_date:
+                trend_entry["exec"] += 1
+                status_key = STATUS_MAP.get(updated_case.child_status_id)
+                if status_key:
+                    trend_entry[status_key] += 1
+                break
+
+    @rx.var(cache=False)
+    def cases_trends(self) -> List:
+        trend_data, cutoff_date = self.__build_trend_data()
 
         with rx.session() as session:
-            #find the latest ocurrence of updated cases
             updated_cases = session.exec(IterationSnapshotModel.select().where(
-                IterationSnapshotModel.child_type == 4, 
-                IterationSnapshotModel.updated >= current_utc_date)
+                IterationSnapshotModel.child_type == 4,
+                IterationSnapshotModel.updated >= cutoff_date)
             .order_by(desc(IterationSnapshotModel.updated))).all()
 
-            if (updated_cases != None):
+            if updated_cases is not None:
                 for updated_case in updated_cases:
-                    case_date = updated_case.updated.strftime("%Y-%m-%d")
+                    self.__apply_case_to_trend(trend_data, updated_case)
 
-                    # Find the corresponding date entry in trend_data
-                    for trend_entry in trend_data:
-                        trend_entry_date = datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")
-
-                        if trend_entry_date.strftime("%Y-%m-%d") == case_date:
-                            # Increment executed cases
-                            trend_entry["exec"] += 1
-
-                            # Increment based on the case status
-                            if updated_case.child_status_id == 3:  # Passed
-                                trend_entry["passed"] += 1
-                            elif updated_case.child_status_id == 2:  # Failed
-                                trend_entry["failed"] += 1
-                            elif updated_case.child_status_id == 5:  # Blocked
-                                trend_entry["blocked"] += 1
-                            break
-                
-                # Convert trend_entry from utc to local timezone after processing
                 for trend_entry in trend_data:
                     trend_entry["date"] = timing.convert_utc_to_local(datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")).strftime("%Y-%m-%d")
 
