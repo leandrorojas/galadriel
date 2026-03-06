@@ -3,6 +3,7 @@ import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
 from ..utils import consts
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete
 
 from ..case.model import CaseModel, StepModel
 
@@ -148,66 +149,21 @@ class ScenarioState(rx.State):
         return rx.toast.success("case added!")
     
     def unlink_case(self, scenario_case_id:int):
-        with rx.session() as session:
-            case_to_delete = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
-            if case_to_delete is None: return rx.toast.error("case not found")
-            order_to_update = case_to_delete.order
-            session.delete(case_to_delete)
-            session.commit()
-
-            cases_to_update = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id, ScenarioCaseModel.order > order_to_update)).all()
-            for test_case in cases_to_update:
-                test_case.order = test_case.order - 1
-                session.add(test_case)
-                session.commit()
-                session.refresh(test_case)
+        toast = reorder_delete(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         self.load_cases()
-        return rx.toast.info("case unlinked")
-    
+        return toast
+
     def move_case_up(self, scenario_case_id:int):
-        with rx.session() as session:
-            case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
-            old_order = case_going_up.order
-            if (old_order != 1):
-                case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order -1), ScenarioCaseModel.scenario_id == self.scenario_id)).first()
-                new_order = case_going_down.order
+        toast = reorder_move_up(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
+        if toast is None:
+            self.load_cases()
+        return toast
 
-                case_going_up.order = new_order
-                session.add(case_going_up)
-                session.commit()
-                session.refresh(case_going_up)
-
-                case_going_down.order = old_order
-                session.add(case_going_down)
-                session.commit()
-                session.refresh(case_going_down)
-
-                self.load_cases()
-            else:
-                return rx.toast.warning("The case has reached min")
-            
     def move_case_down(self, scenario_case_id:int):
-        with rx.session() as session:
-            case_going_down = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
-            old_order = case_going_down.order
-            case_going_up = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.order == (old_order +1), ScenarioCaseModel.scenario_id == self.scenario_id)).first()
-
-            if (case_going_up is not None):
-                new_order = case_going_up.order
-
-                case_going_down.order = new_order
-                session.add(case_going_down)
-                session.commit()
-                session.refresh(case_going_down)
-
-                case_going_up.order = old_order
-                session.add(case_going_up)
-                session.commit()
-                session.refresh(case_going_up)
-
-                self.load_cases()
-            else:
-                return rx.toast.warning("The case has reached max")
+        toast = reorder_move_down(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
+        if toast is None:
+            self.load_cases()
+        return toast
 
     def has_steps(self, case_id:int) -> bool:
         with rx.session() as session:

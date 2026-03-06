@@ -4,6 +4,7 @@ from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 from ..utils import consts, timing
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete
 
 from datetime import datetime
 
@@ -133,69 +134,21 @@ class CaseState(rx.State):
         return rx.toast.success("step added!")
         
     def delete_step(self, step_id:int):
-        with rx.session() as session:
-            case_steps = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
-
-            if (len(case_steps) == 1): return rx.toast.error("cannot delete last step")
-            
-            step_to_delete = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
-            order_to_update = step_to_delete.order
-            session.delete(step_to_delete)
-            session.commit()
-
-            steps_to_update = session.exec(StepModel.select().where(StepModel.case_id == self.case_id, StepModel.order > order_to_update)).all()
-            for step in steps_to_update:
-                step.order = step.order - 1
-                session.add(step)
-                session.commit()
-                session.refresh(step)
+        toast = reorder_delete(StepModel, step_id, "case_id", self.case_id, "step", min_count=1)
         self.load_steps()
-        return rx.toast.info("The step has been deleted")
+        return toast
     
     def move_step_up(self, step_id:int):
-        with rx.session() as session:
-            step_going_up = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
-            old_order = step_going_up.order
-            if (old_order != 1):
-                step_going_down = session.exec(StepModel.select().where(StepModel.order == (old_order -1), StepModel.case_id == self.case_id)).first()
-                new_order = step_going_down.order
-
-                step_going_up.order = new_order
-                session.add(step_going_up)
-                session.commit()
-                session.refresh(step_going_up)
-
-                step_going_down.order = old_order
-                session.add(step_going_down)
-                session.commit()
-                session.refresh(step_going_down)
-
-                self.load_steps()
-            else:
-                return rx.toast.warning("The step has reached min")
+        toast = reorder_move_up(StepModel, step_id, "case_id", self.case_id, "step")
+        if toast is None:
+            self.load_steps()
+        return toast
 
     def move_step_down(self, step_id:int):
-        with rx.session() as session:
-            step_going_down = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
-            old_order = step_going_down.order
-            step_going_up = session.exec(StepModel.select().where(StepModel.order == (old_order +1), StepModel.case_id == self.case_id)).first()
-
-            if (step_going_up is not None):
-                new_order = step_going_up.order
-
-                step_going_down.order = new_order
-                session.add(step_going_down)
-                session.commit()
-                session.refresh(step_going_down)
-
-                step_going_up.order = old_order
-                session.add(step_going_up)
-                session.commit()
-                session.refresh(step_going_up)
-
-                self.load_steps()
-            else:
-                return rx.toast.warning("The step has reached max")
+        toast = reorder_move_down(StepModel, step_id, "case_id", self.case_id, "step")
+        if toast is None:
+            self.load_steps()
+        return toast
 
     def load_prerequisites(self):
         with rx.session() as session:
@@ -274,66 +227,21 @@ class CaseState(rx.State):
         self.show_search = not(self.show_search)
 
     def delete_prerequisite(self, prerequisite_id:int):
-        with rx.session() as session:
-            prerequisite_to_delete = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
-            if prerequisite_to_delete is None: return rx.toast.error("prerequisite not found")
-            order_to_update = prerequisite_to_delete.order
-            session.delete(prerequisite_to_delete)
-            session.commit()
-
-            prerequisites_to_update = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id, PrerequisiteModel.order > order_to_update)).all()
-            for prerequisite in prerequisites_to_update:
-                prerequisite.order = prerequisite.order - 1
-                session.add(prerequisite)
-                session.commit()
-                session.refresh(prerequisite)
+        toast = reorder_delete(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         self.load_prerequisites()
-        return rx.toast.info("The prerequisite has been deleted")
+        return toast
 
     def move_prerequisite_up(self, prerequisite_id:int):
-        with rx.session() as session:
-            prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
-            old_order = prerequisite_going_up.order
-            if (old_order != 1):
-                prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order -1), PrerequisiteModel.case_id == self.case_id)).first()
-                new_order = prerequisite_going_down.order
-
-                prerequisite_going_up.order = new_order
-                session.add(prerequisite_going_up)
-                session.commit()
-                session.refresh(prerequisite_going_up)
-
-                prerequisite_going_down.order = old_order
-                session.add(prerequisite_going_down)
-                session.commit()
-                session.refresh(prerequisite_going_down)
-
-                self.load_prerequisites()
-            else:
-                return rx.toast.warning("The prerequisite has reached min")
+        toast = reorder_move_up(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
+        if toast is None:
+            self.load_prerequisites()
+        return toast
 
     def move_prerequisite_down(self, prerequisite_id:int):
-        with rx.session() as session:
-            prerequisite_going_down = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_id)).first()
-            old_order = prerequisite_going_down.order
-            prerequisite_going_up = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.order == (old_order +1), PrerequisiteModel.case_id == self.case_id)).first()
-
-            if (prerequisite_going_up is not None):
-                new_order = prerequisite_going_up.order
-
-                prerequisite_going_down.order = new_order
-                session.add(prerequisite_going_down)
-                session.commit()
-                session.refresh(prerequisite_going_down)
-
-                prerequisite_going_up.order = old_order
-                session.add(prerequisite_going_up)
-                session.commit()
-                session.refresh(prerequisite_going_up)
-
-                self.load_prerequisites()
-            else:
-                return rx.toast.warning("The prerequisite has reached max")
+        toast = reorder_move_down(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
+        if toast is None:
+            self.load_prerequisites()
+        return toast
             
     def ensure_utc(self, dt) -> datetime:
         return timing.ensure_utc(dt)
