@@ -27,11 +27,7 @@ class CycleState(rx.State):
 
     @rx.var(cache=True)
     def cycle_id(self) -> str:
-        try:
-            cycle_id = self.router.url.path.split('/')[2]
-        except Exception:
-            cycle_id = ""
-        return cycle_id
+        return self.router.page.params.get(consts.FIELD_ID, "")
 
     @rx.var(cache=True)
     def cycle_url(self) -> str:
@@ -550,7 +546,10 @@ class CycleState(rx.State):
                         break
 
     def fail_iteration_snapshot_step_and_create_issue(self, form_data: dict):
-        snapshot_item_id:int = form_data.pop("snapshot_item_id")
+        try:
+            snapshot_item_id:int = form_data.pop("snapshot_item_id")
+        except KeyError:
+            return rx.toast.error("Invalid snapshot item ID")
 
         self.fail_iteration_snapshot_step(snapshot_item_id)
 
@@ -849,9 +848,12 @@ class EditCycleState(CycleState):
     
     def handle_submit(self, form_data):
         self.form_data = form_data
-        cycle_id = form_data.pop("cycle_id")
+        try:
+            cycle_id = form_data.pop("cycle_id")
+        except KeyError:
+            return rx.toast.error("Invalid cycle ID")
         updated_data = {**form_data}
         result = self.save_cycle_edits(cycle_id, updated_data)
         if result != 0:
-            return rx.toast.error(f"{result} cannot be empty")        
+            return rx.toast.error(f"{result} cannot be empty")
         return rx.redirect(routes.CYCLES)

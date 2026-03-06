@@ -186,7 +186,10 @@ class EditScenarioState(ScenarioState):
     
     def handle_submit(self, form_data):
         self.form_data = form_data
-        scenario_id = form_data.pop("scenario_id")
+        try:
+            scenario_id = form_data.pop("scenario_id")
+        except KeyError:
+            return rx.toast.error("Invalid scenario ID")
         updated_data = {**form_data}
         result = self.save_scenario_edits(scenario_id, updated_data)
 
