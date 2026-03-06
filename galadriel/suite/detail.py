@@ -164,7 +164,7 @@ def suite_detail_page() -> rx.Component:
             rx.cond(
                 state.SuiteState.show_scenario_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden, number", name="suite_id", value=state.SuiteState.id), display="none",),
+                        rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Scenario to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_scenarios(value)),
                             __search_scenarios_table(),
@@ -182,7 +182,7 @@ def suite_detail_page() -> rx.Component:
             rx.cond(
                 state.SuiteState.show_case_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden, number", name="suite_id", value=state.SuiteState.id), display="none",),
+                        rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.id), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_test_cases(value)),
                             __search_cases_table(),
