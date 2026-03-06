@@ -125,7 +125,11 @@ class CycleState(rx.State):
 
                         if (iteration_finished == True):
                             cycle_status = ""
-                            if (iteration_passed_percentage >= int(single_result.threshold)):
+                            try:
+                                threshold_value = int(single_result.threshold)
+                            except (TypeError, ValueError):
+                                threshold_value = 0
+                            if (iteration_passed_percentage >= threshold_value):
                                 cycle_status = consts.STATUS_CYCLE_PASSED
                             else:
                                 cycle_status = consts.STATUS_CYCLE_FAILED
@@ -436,6 +440,8 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             if (iteration != None):
                 status_name = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
+                if status_name is None:
+                    return ""
                 return status_name.name
             else:
                 return ""
