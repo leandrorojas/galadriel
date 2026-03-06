@@ -22,9 +22,9 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
     if cycle_id is None: return rx.fragment(child)
 
     root_path = routes.CYCLES
-    case_detail_url = f"{root_path}/{cycle_id}"
+    cycle_detail_url = f"{root_path}/{cycle_id}"
 
-    return rx.link(child, href=case_detail_url)
+    return rx.link(child, href=cycle_detail_url)
 
 def __badge(text: str, color=""):
     if (color != ""):
@@ -146,5 +146,5 @@ def cycle_add_page() -> rx.Component:
 #region EDIT
 @reflex_local_auth.require_login
 def cycle_edit_page() -> rx.Component:
-    return edit_page(cycle_edit_form, "Edit Test Cycle", "beaker", "to Cycles", "back to Detail", routes.CYCLES, state.EditCycleState.cycle_url)
+    return edit_page(cycle_edit_form, "Edit Test Cycle", "flask-round", "to Cycles", "to Cycle Detail", routes.CYCLES, state.EditCycleState.cycle_url)
 #endregion

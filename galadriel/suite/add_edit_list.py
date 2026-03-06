@@ -70,4 +70,4 @@ def suite_add_page() -> rx.Component:
 
 @reflex_local_auth.require_login
 def suite_edit_page() -> rx.Component:
-    return edit_page(suite_edit_form, "Edit Test Suite", "route", "to Suites", "to Suite Detail", routes.SUITES, state.EditSuiteState.suite_url)
+    return edit_page(suite_edit_form, "Edit Test Suite", "beaker", "to Suites", "to Suite Detail", routes.SUITES, state.EditSuiteState.suite_url)
