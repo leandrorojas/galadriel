@@ -140,8 +140,8 @@ class CycleState(rx.State):
             self.cycles = results
 
     def add_cycle(self, form_data:dict):
-        if form_data["name"] == "": return "name"
-        if form_data["threshold"] == "": return "threshold"
+        if form_data["name"] == "": return None
+        if form_data["threshold"] == "": return None
         with rx.session() as session:
             cycle = CycleModel(**form_data)
             session.add(cycle)
@@ -152,8 +152,8 @@ class CycleState(rx.State):
             return RETURN_VALUE
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
-        if updated_data["name"] == "": return "name"
-        if updated_data["threshold"] == "": return "threshold"
+        if updated_data["name"] == "": return None
+        if updated_data["threshold"] == "": return None
         with rx.session() as session:
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
@@ -839,8 +839,8 @@ class AddCycleState(CycleState):
     def handle_submit(self, form_data):
         self.form_data = form_data
         result = self.add_cycle(form_data)
-        if result != 0:
-            return rx.toast.error(f"{result} cannot be empty")
+        if result is None:
+            return rx.toast.error("name and threshold cannot be empty")
         return rx.redirect(routes.CYCLES)
 
 class EditCycleState(CycleState):
@@ -854,6 +854,6 @@ class EditCycleState(CycleState):
             return rx.toast.error("Invalid cycle ID")
         updated_data = {**form_data}
         result = self.save_cycle_edits(cycle_id, updated_data)
-        if result != 0:
-            return rx.toast.error(f"{result} cannot be empty")
+        if result is None:
+            return rx.toast.error("name and threshold cannot be empty")
         return rx.redirect(routes.CYCLES)
