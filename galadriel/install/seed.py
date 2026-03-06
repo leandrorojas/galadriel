@@ -9,7 +9,7 @@ cycle_child_types: cycle.CycleChildTypeModel = []
 cycle_status: cycle.CycleStatusModel = []
 iteration_snapshot_status: iteration.IterationSnapshotStatusModel = []
 iteration_status: iteration.IterationStatusModel = []
-suite_tyoe: suite.SuiteChildTypeModel = []
+suite_types: suite.SuiteChildTypeModel = []
 
 galadriel_user_roles: user.GaladrielUserRole = []
 local_users: reflex_local_auth.LocalUser = []
@@ -43,12 +43,9 @@ iteration_statuses = [
     {"id":4, "name":"completed",},
 ]
 
-suite_tyoes = [
-    {"id":0, "type_name":"not started",},
-    {"id":1, "type_name":"in progress",},
-    {"id":2, "type_name":"on hold",},
-    {"id":3, "type_name":"closed",},
-    {"id":4, "type_name":"completed",},
+suite_types = [
+    {"id":1, "type_name":"Scenario",},
+    {"id":2, "type_name":"Case",},
 ]
 
 galadriel_user_roles = [
@@ -105,7 +102,7 @@ def __insert_seed_data():
         for item in iteration_statuses:
             session.add(iteration.IterationStatusModel(**item))
 
-        for item in suite_tyoes:
+        for item in suite_types:
             session.add(suite.SuiteChildTypeModel(**item))
 
         for local_user in local_users:
