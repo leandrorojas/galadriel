@@ -4,8 +4,9 @@ from sqlmodel import Field
 import reflex as rx
 
 from ..utils import timing
+from ..utils.mixins import TimestampMixin
 
-class ConfigModel(rx.Model, table=True):
+class ConfigModel(TimestampMixin, rx.Model, table=True):
     name:str
     value:str
     created: datetime = Field(
@@ -16,9 +17,3 @@ class ConfigModel(rx.Model, table=True):
         },
         nullable=False
     )
-
-    def dict(self, *args, **kwargs) -> dict:
-        """Serialize method."""
-        d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
-        return d

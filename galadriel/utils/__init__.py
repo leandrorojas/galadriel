@@ -11,6 +11,7 @@ This keeps imports lightweight and prevents circular import issues.
 
 __all__ = [
     "consts",
+    "mixins",
     "timing",
     "debug",
     "jira",
