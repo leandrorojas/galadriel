@@ -49,6 +49,5 @@ def write_setting(filename:str, section:str, key:str, value):
         with open(filename, "w") as galadriel_yaml:
             yaml.safe_dump(current_config, galadriel_yaml)
     except Exception:
-        # Silently ignore write errors, since this function does not create keys
-        # or sections that do not already exist.
+        # Silently ignore write errors (e.g. permission issues).
         pass

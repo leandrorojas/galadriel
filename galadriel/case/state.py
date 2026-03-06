@@ -169,9 +169,9 @@ class CaseState(rx.State):
 
             return len(case_steps) > 0
 
-    def has_prerequisite(self, prerequisite_id:int) -> bool:
+    def has_any_prerequisites(self, case_id:int) -> bool:
         with rx.session() as session:
-            child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).first()
+            child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == case_id)).first()
             return (child_prerequisites != None)
 
     def is_prerequisite_redundant(self, prerequisite_id: int, target_case_id: int) -> bool:
@@ -181,14 +181,14 @@ class CaseState(rx.State):
             for child_prerequisite in child_prerequisites:
                 if int(child_prerequisite.prerequisite_id) == int(target_case_id):
                     return True
-                if (self.has_prerequisite(child_prerequisite.prerequisite_id) and self.is_prerequisite_redundant(child_prerequisite.prerequisite_id, target_case_id)):
+                if (self.has_any_prerequisites(child_prerequisite.prerequisite_id) and self.is_prerequisite_redundant(child_prerequisite.prerequisite_id, target_case_id)):
                     return True
         return False
 
     def add_prerequisite(self, prerequisite_id:int):
         if (int(self.case_id) == prerequisite_id): return rx.toast.error("self cannot be prerequisite")
         
-        if self.has_prerequisite(prerequisite_id):
+        if self.has_any_prerequisites(prerequisite_id):
             if self.is_prerequisite_redundant(prerequisite_id, self.case_id):
                 return rx.toast.error("cannot add redundant prerequisite")
             
