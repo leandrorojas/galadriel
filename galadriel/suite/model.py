@@ -4,11 +4,12 @@ from sqlmodel import Field
 import reflex as rx
 
 from ..utils import timing, consts
+from ..utils.mixins import TimestampMixin
 
-class SuiteModel(rx.Model, table=True):
+class SuiteModel(TimestampMixin, rx.Model, table=True):
     name: str
     created: datetime = Field(
-        default_factory=timing.get_utc_now, 
+        default_factory=timing.get_utc_now,
         sa_type=sa.DateTime(timezone=True),
         sa_column_kwargs={
             'server_default': sa.func.now()
@@ -20,16 +21,10 @@ class SuiteModel(rx.Model, table=True):
         nullable=True
     )
 
-    def dict(self, *args, **kwargs) -> dict:
-        """Serialize method."""
-        d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
-        return d
-
-class SuiteChildTypeModel(rx.Model, table=True):
+class SuiteChildTypeModel(TimestampMixin, rx.Model, table=True):
     type_name:str
     created: datetime = Field(
-        default_factory=timing.get_utc_now, 
+        default_factory=timing.get_utc_now,
         sa_type=sa.DateTime(timezone=True),
         sa_column_kwargs={
             'server_default': sa.func.now()
@@ -37,13 +32,7 @@ class SuiteChildTypeModel(rx.Model, table=True):
         nullable=False
     )
 
-    def dict(self, *args, **kwargs) -> dict:
-        """Serialize method."""
-        d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
-        return d
-
-class SuiteChildModel(rx.Model, table=True):
+class SuiteChildModel(TimestampMixin, rx.Model, table=True):
     suite_id:int = Field(foreign_key="suitemodel.id")
     child_type_id:int = Field(foreign_key="suitechildtypemodel.id")
     child_id:int
@@ -51,16 +40,10 @@ class SuiteChildModel(rx.Model, table=True):
     child_name:str = Field(nullable=True)
     child_type_name:str = Field(nullable=True)
     created: datetime = Field(
-        default_factory=timing.get_utc_now, 
+        default_factory=timing.get_utc_now,
         sa_type=sa.DateTime(timezone=True),
         sa_column_kwargs={
             'server_default': sa.func.now()
         },
         nullable=False
     )
-
-    def dict(self, *args, **kwargs) -> dict:
-        """Serialize method."""
-        d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
-        return d

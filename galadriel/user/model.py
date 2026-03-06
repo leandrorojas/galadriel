@@ -5,8 +5,11 @@ from datetime import datetime
 from sqlmodel import Field
 
 from ..utils import timing
+from ..utils.mixins import TimestampMixin
 
-class GaladrielUser(rx.Model, table=True):
+class GaladrielUser(TimestampMixin, rx.Model, table=True):
+    __timestamp_fields__ = ("created", "updated")
+
     email:str
     user_id:int = Field(foreign_key="localuser.id")
     user_role:int = Field(foreign_key="galadrieluserrole.id")
@@ -28,12 +31,6 @@ class GaladrielUser(rx.Model, table=True):
         nullable=False
     )
 
-    def dict(self, *args, **kwargs) -> dict:
-        d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
-        d["updated"] = timing.ensure_utc(self.updated).replace(microsecond=0).isoformat(sep=" ")
-        return d
-
 class GaladrielUserDisplay(rx.Model):
     local_user_id:int
     galadriel_user_id:int
@@ -44,7 +41,9 @@ class GaladrielUserDisplay(rx.Model):
     created: datetime
     updated: datetime
 
-class GaladrielUserRole(rx.Model, table=True):
+class GaladrielUserRole(TimestampMixin, rx.Model, table=True):
+    __timestamp_fields__ = ("created", "updated")
+
     name:str
     description:str = Field(nullable = True)
     created: datetime = Field(
@@ -64,9 +63,3 @@ class GaladrielUserRole(rx.Model, table=True):
         },
         nullable=False
     )
-
-    def dict(self, *args, **kwargs) -> dict:
-        d = super().dict(*args, **kwargs)
-        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
-        d["updated"] = timing.ensure_utc(self.updated).replace(microsecond=0).isoformat(sep=" ")
-        return d

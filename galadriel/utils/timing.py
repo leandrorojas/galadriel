@@ -11,6 +11,9 @@ def ensure_utc(dt: datetime) -> datetime:
         return_dt = return_dt.replace(tzinfo=timezone.utc)
     return return_dt
 
+def format_datetime(dt: datetime) -> str:
+    return ensure_utc(dt).replace(microsecond=0).isoformat(sep=" ")
+
 def convert_utc_to_local(utc_dt: datetime) -> datetime:
     utc_dt = utc_dt.replace(tzinfo=tz.tzutc())
     return utc_dt.astimezone(tz.tzlocal())
