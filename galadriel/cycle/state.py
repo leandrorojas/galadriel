@@ -77,13 +77,13 @@ class CycleState(rx.State):
                     if (iteration_execution_status == None):
                         iteration_status_name = ""
                     else:
-                        iteration_finished = ((iteration_execution_status.id == 3) or (iteration_execution_status.id == 4))
-                        
+                        iteration_finished = ((iteration_execution_status.id == consts.ITERATION_STATUS_CLOSED) or (iteration_execution_status.id == consts.ITERATION_STATUS_COMPLETED))
+
                         iteration_in_progress = False
                         if (iteration_finished == False):
-                            iteration_in_progress = ((iteration_execution_status.id == 1) or (iteration_execution_status.id == 2))
+                            iteration_in_progress = ((iteration_execution_status.id == consts.ITERATION_STATUS_IN_PROGRESS) or (iteration_execution_status.id == consts.ITERATION_STATUS_ON_HOLD))
 
-                        if ((iteration_execution_status.id == 4) and self.can_edit_iteration(single_result.id)):
+                        if ((iteration_execution_status.id == consts.ITERATION_STATUS_COMPLETED) and self.can_edit_iteration(single_result.id)):
                             iteration_status_name = "[F] " + iteration_execution_status.name
                         else:
                             iteration_status_name = iteration_execution_status.name
@@ -92,11 +92,11 @@ class CycleState(rx.State):
                         all_steps_count = 0
                         failed_steps_count = 0
                         passed_steps_count = 0
-                        snapshot_all_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4)).all()
+                        snapshot_all_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP)).all()
 
                         if snapshot_all_steps != None:
                             all_steps_count = len(snapshot_all_steps)
-                            snapshot_failed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 2)).all()
+                            snapshot_failed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.child_status_id == consts.SNAPSHOT_STATUS_FAILED)).all()
 
                             if snapshot_failed_steps != None and all_steps_count > 0:
                                 failed_steps_count = len(snapshot_failed_steps)
@@ -106,7 +106,7 @@ class CycleState(rx.State):
                             else:
                                 iteration_failed_percentage = 0
 
-                            snapshot_passed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 3)).all()
+                            snapshot_passed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.child_status_id == consts.SNAPSHOT_STATUS_PASS)).all()
                             if snapshot_passed_steps != None and all_steps_count > 0:
                                 passed_steps_count = len(snapshot_passed_steps)
 
@@ -179,11 +179,11 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
 
             if (iteration != None):
-                if (iteration.iteration_status_id == 3): return False
+                if (iteration.iteration_status_id == consts.ITERATION_STATUS_CLOSED): return False
 
-                if (iteration.iteration_status_id == 4):
-                    all_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_type == 4)).all()
-                    passed_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 3)).all()
+                if (iteration.iteration_status_id == consts.ITERATION_STATUS_COMPLETED):
+                    all_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP)).all()
+                    passed_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.child_status_id == consts.SNAPSHOT_STATUS_PASS)).all()
 
                     if (all_steps != None) and (passed_steps != None):
                         if (len(all_steps) == len(passed_steps)): return False
@@ -219,11 +219,11 @@ class CycleState(rx.State):
             if (len(results) > 0):
                 for single_result in results:
                     child = None
-                    if (single_result.child_type_id == 1):
+                    if (single_result.child_type_id == consts.CHILD_TYPE_SUITE):
                         child = session.exec(SuiteModel.select().where(SuiteModel.id == single_result.child_id)).first()
-                    elif (single_result.child_type_id == 2):
+                    elif (single_result.child_type_id == consts.CHILD_TYPE_SCENARIO):
                         child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
-                    elif (single_result.child_type_id == 3):
+                    elif (single_result.child_type_id == consts.CHILD_TYPE_CASE):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
                     setattr(single_result, "child_name", child.name if child else "unknown")
             self.children = results
@@ -299,13 +299,13 @@ class CycleState(rx.State):
         new_case_order = 1
 
         if (len(self.cases_for_search) > 0):
-            new_case_order = self.get_max_child_order(case_id, 3)
+            new_case_order = self.get_max_child_order(case_id, consts.CHILD_TYPE_CASE)
 
             if new_case_order == -1:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_case_data.update({"cycle_id":self.cycle_id})
-        cycle_case_data.update({"child_type_id":3})
+        cycle_case_data.update({"child_type_id":consts.CHILD_TYPE_CASE})
         cycle_case_data.update({"child_id":case_id})
         cycle_case_data.update({"order":new_case_order})
 
@@ -354,13 +354,13 @@ class CycleState(rx.State):
         new_scenario_order = 1
 
         if (len(self.scenarios_for_search) > 0):
-            new_scenario_order = self.get_max_child_order(scenario_id, 2)
+            new_scenario_order = self.get_max_child_order(scenario_id, consts.CHILD_TYPE_SCENARIO)
 
             if new_scenario_order == -1:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_scenario_data.update({"cycle_id":self.cycle_id})
-        cycle_scenario_data.update({"child_type_id":2})
+        cycle_scenario_data.update({"child_type_id":consts.CHILD_TYPE_SCENARIO})
         cycle_scenario_data.update({"child_id":scenario_id})
         cycle_scenario_data.update({"order":new_scenario_order})
 
@@ -403,13 +403,13 @@ class CycleState(rx.State):
         new_suite_order = 1
 
         if (len(self.suites_for_search) > 0):
-            new_suite_order = self.get_max_child_order(suite_id, 1)
+            new_suite_order = self.get_max_child_order(suite_id, consts.CHILD_TYPE_SUITE)
 
             if new_suite_order == -1:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_suite_data.update({"cycle_id":self.cycle_id})
-        cycle_suite_data.update({"child_type_id":1})
+        cycle_suite_data.update({"child_type_id":consts.CHILD_TYPE_SUITE})
         cycle_suite_data.update({"child_id":suite_id})
         cycle_suite_data.update({"order":new_suite_order})
 
@@ -485,7 +485,7 @@ class CycleState(rx.State):
                 #add the cycle - iteration relationship
                 cycle_iteration_data:dict = {"cycle_id":cycle_id}
 
-                cycle_iteration_data.update({"iteration_status_id":0})
+                cycle_iteration_data.update({"iteration_status_id":consts.ITERATION_STATUS_NOT_STARTED})
                 cycle_iteration_data.update({"iteration_number":1})
 
                 iteration_to_add = IterationModel(**cycle_iteration_data)
@@ -496,11 +496,11 @@ class CycleState(rx.State):
                 #add the cycle's snapshot here
                 for cycle_child in children:
                     match cycle_child.child_type_id:
-                        case 1:
+                        case consts.CHILD_TYPE_SUITE:
                             self.add_suite_to_snapshot(iteration_to_add.id, cycle_child.child_id)
-                        case 2:
+                        case consts.CHILD_TYPE_SCENARIO:
                             self.add_scenario_to_snapshot(iteration_to_add.id, cycle_child.child_id)
-                        case 3:
+                        case consts.CHILD_TYPE_CASE:
                             self.add_case_to_snapshot(iteration_to_add.id, cycle_child.child_id)
 
                 self.load_cycles()
@@ -531,7 +531,7 @@ class CycleState(rx.State):
                     setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
 
     def fail_iteration_snapshot_step(self, snapshot_item_id:int):
-        self.__update_iteration_snapshot_step(snapshot_item_id, 2, True)
+        self.__update_iteration_snapshot_step(snapshot_item_id, consts.SNAPSHOT_STATUS_FAILED, True)
 
         #block the remainning steps on the case
         with rx.session() as session:
@@ -541,7 +541,7 @@ class CycleState(rx.State):
             if (next_steps != None):
                 for next_step in next_steps:
                     if next_step.child_name == None:
-                        self.__update_iteration_snapshot_step(next_step.id, 5, set_updated=True)
+                        self.__update_iteration_snapshot_step(next_step.id, consts.SNAPSHOT_STATUS_BLOCKED, set_updated=True)
                     else:
                         break
 
@@ -617,7 +617,7 @@ class CycleState(rx.State):
             session.commit()
     
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
-        self.__update_iteration_snapshot_step(snapshot_item_id, 3, True)
+        self.__update_iteration_snapshot_step(snapshot_item_id, consts.SNAPSHOT_STATUS_PASS, True)
 
         #if steps where blocked, restore the "To Do" status for the remainning steps on the case
         with rx.session() as session:
@@ -627,12 +627,12 @@ class CycleState(rx.State):
             if (next_steps != None):
                 for next_step in next_steps:
                     if next_step.child_name == None:
-                        self.__update_iteration_snapshot_step(next_step.id, 1, clear_updated=True)
+                        self.__update_iteration_snapshot_step(next_step.id, consts.SNAPSHOT_STATUS_TO_DO, clear_updated=True)
                     else:
                         break
 
     def skip_iteration_snapshot_step(self, snapshot_item_id:int):
-        self.__update_iteration_snapshot_step(snapshot_item_id, 4, True)
+        self.__update_iteration_snapshot_step(snapshot_item_id, consts.SNAPSHOT_STATUS_SKIPPED, True)
 
         #if steps where blocked, restore the "To Do" status for the remainning steps on the case
         with rx.session() as session:
@@ -642,9 +642,9 @@ class CycleState(rx.State):
             if (next_steps != None):
                 for next_step in next_steps:
                     if next_step.child_name == None:
-                        self.__update_iteration_snapshot_step(next_step.id, 1, clear_updated=True)
+                        self.__update_iteration_snapshot_step(next_step.id, consts.SNAPSHOT_STATUS_TO_DO, clear_updated=True)
                     else:
-                        break        
+                        break
 
     def get_max_iteration_snapshot_order(self, iteration_id:int):
         with rx.session() as session:
@@ -662,7 +662,7 @@ class CycleState(rx.State):
             snapshot_case = session.exec(IterationSnapshotModel.select().where(
                 IterationSnapshotModel.iteration_id == iteration_id,
                 IterationSnapshotModel.child_id == case_id,
-                IterationSnapshotModel.child_type == 3
+                IterationSnapshotModel.child_type == consts.CHILD_TYPE_CASE
             )).first()
 
             return (snapshot_case != None)
@@ -692,7 +692,7 @@ class CycleState(rx.State):
                     snapshot_case_data:dict = {
                         "iteration_id":iteration_id,
                         "order":max_order,
-                        "child_type":3,
+                        "child_type":consts.CHILD_TYPE_CASE,
                         "child_id":case_id,
                         "child_name": child_name
                     }
@@ -710,10 +710,10 @@ class CycleState(rx.State):
                         snapshot_step_data:dict = {
                             "iteration_id":iteration_id,
                             "order":max_order,
-                            "child_type":4,
+                            "child_type":consts.CHILD_TYPE_STEP,
                             "child_action": step.action,
                             "child_expected": step.expected,
-                            "child_status_id":1
+                            "child_status_id":consts.SNAPSHOT_STATUS_TO_DO
                         }
 
                         step_to_add = IterationSnapshotModel(**snapshot_step_data)
@@ -731,7 +731,7 @@ class CycleState(rx.State):
                 snapshot_scenario_data:dict = {
                     "iteration_id":iteration_id,
                     "order":max_order,
-                    "child_type":2,
+                    "child_type":consts.CHILD_TYPE_SCENARIO,
                     "child_id": scenario_id,
                     "child_name": child_scenario.name
                 }
@@ -757,7 +757,7 @@ class CycleState(rx.State):
                 snapshot_suite_data:dict = {
                     "iteration_id":iteration_id,
                     "order":max_order,
-                    "child_type":1,
+                    "child_type":consts.CHILD_TYPE_SUITE,
                     "child_id": suite_id,
                     "child_name": child_suite.name
                 }
@@ -771,9 +771,9 @@ class CycleState(rx.State):
 
                 for suite_child in suite_children_to_add:
                     match suite_child.child_type_id:
-                        case 1:
+                        case consts.SUITE_CHILD_TYPE_SCENARIO:
                             self.add_scenario_to_snapshot(iteration_id, suite_child.child_id)
-                        case 2:
+                        case consts.SUITE_CHILD_TYPE_CASE:
                             self.add_case_to_snapshot(iteration_id, suite_child.child_id)
     #endregion
 
@@ -808,16 +808,16 @@ class CycleState(rx.State):
 
     def __figure_and_update_iteration_execution_status(self, iteration_id:int):
         with rx.session() as session:
-            iteration_not_attempted_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 1)).all()
+            iteration_not_attempted_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.child_status_id == consts.SNAPSHOT_STATUS_TO_DO)).all()
 
             not_attempted_steps_count = len(iteration_not_attempted_steps)
 
             if (not_attempted_steps_count == 0):
-                self.__set_iteration_execution_status(iteration_id, 4)
+                self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_COMPLETED)
             else:
-                iteration_in_progress_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id != 1)).all()
+                iteration_in_progress_steps = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration_id, IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.child_status_id != consts.SNAPSHOT_STATUS_TO_DO)).all()
                 if len(iteration_in_progress_steps) == 1:
-                    self.__set_iteration_execution_status(iteration_id, 1)
+                    self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_IN_PROGRESS)
     
     def turn_on_fail_checkbox(self):
         self.__fail_checkbox = True
@@ -826,10 +826,10 @@ class CycleState(rx.State):
         self.__fail_checkbox = False
 
     def set_iteration_execution_status_on_hold(self, iteration_id:int):
-        self.__set_iteration_execution_status(iteration_id, 2)
+        self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_ON_HOLD)
 
     def set_iteration_execution_status_closed(self, iteration_id:int):
-        self.__set_iteration_execution_status(iteration_id, 3)
+        self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_CLOSED)
 
     #endregion
 
