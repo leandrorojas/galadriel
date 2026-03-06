@@ -7,6 +7,8 @@ def reorder_move_up(model_class, item_id, parent_field, parent_id, item_label="i
     """Swap an ordered item with the one above it. Returns toast on boundary."""
     with rx.session() as session:
         item = session.exec(model_class.select().where(model_class.id == item_id)).first()
+        if item is None:
+            return rx.toast.error(f"{item_label} not found")
         old_order = item.order
         if old_order == 1:
             return rx.toast.warning(f"The {item_label} has reached min")
@@ -15,6 +17,8 @@ def reorder_move_up(model_class, item_id, parent_field, parent_id, item_label="i
         neighbor = session.exec(
             model_class.select().where(model_class.order == (old_order - 1), parent_filter)
         ).first()
+        if neighbor is None:
+            return rx.toast.error(f"{item_label} neighbor not found")
 
         item.order = neighbor.order
         session.add(item)
@@ -33,6 +37,8 @@ def reorder_move_down(model_class, item_id, parent_field, parent_id, item_label=
     """Swap an ordered item with the one below it. Returns toast on boundary."""
     with rx.session() as session:
         item = session.exec(model_class.select().where(model_class.id == item_id)).first()
+        if item is None:
+            return rx.toast.error(f"{item_label} not found")
         old_order = item.order
 
         parent_filter = getattr(model_class, parent_field) == parent_id
