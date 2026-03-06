@@ -93,8 +93,8 @@ class TestSteps:
     def test_delete_step_reorders(self, patch_rx_session, make_case, make_step):
         case = make_case(name="C")
         s1 = make_step(case_id=case.id, order=1, action="first")
-        s2 = make_step(case_id=case.id, order=2, action="second")
-        s3 = make_step(case_id=case.id, order=3, action="third")
+        make_step(case_id=case.id, order=2, action="second")
+        make_step(case_id=case.id, order=3, action="third")
 
         state = _make_state(case_id_value=case.id)
         state.delete_step(s1.id)
@@ -109,7 +109,7 @@ class TestSteps:
         case = make_case(name="C")
         s = make_step(case_id=case.id, order=1)
         state = _make_state(case_id_value=case.id)
-        result = state.delete_step(s.id)
+        state.delete_step(s.id)
         session = patch_rx_session
         steps = session.exec(select(StepModel).where(StepModel.case_id == case.id)).all()
         assert len(steps) == 1

@@ -44,9 +44,9 @@ class TestPieChartData:
         state = _make_state()
         data = state.get_pie_chart_data
         names = {d["name"]: d["value"] for d in data}
-        assert names["Passed"] == 50.0
-        assert names["Failed"] == 25.0
-        assert names["Blocked"] == 25.0
+        assert names["Passed"] == pytest.approx(50.0)
+        assert names["Failed"] == pytest.approx(25.0)
+        assert names["Blocked"] == pytest.approx(25.0)
 
 
 class TestCaseCountByStatus:

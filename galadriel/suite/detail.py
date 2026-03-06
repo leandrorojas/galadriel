@@ -94,9 +94,9 @@ def __show_child(suite_child:model.SuiteChildModel):
         rx.table.cell(suite_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, consts.FIELD_ID))), 
-                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, consts.FIELD_ID))), 
-                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, consts.FIELD_ID))),
+                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.SuiteState.move_child_up(getattr(suite_child, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
+                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.SuiteState.move_child_down(getattr(suite_child, consts.FIELD_ID))),  # NOSONAR
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.SuiteState.unlink_child(getattr(suite_child, consts.FIELD_ID))),  # NOSONAR
                 spacing="2",
             )
         ),
