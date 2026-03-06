@@ -91,9 +91,9 @@ def __show_cycle(cycle:model.CycleModel):
                                 rx.button(rx.icon("eye"), color_scheme="jade", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, consts.FIELD_ID))))),
                         rx.button(rx.icon("list-todo"), color_scheme="lime", variant="soft", on_click=lambda: state.CycleState.view_iteration_snapshot(getattr(cycle, consts.FIELD_ID))),
                     ),
-                    rx.button(rx.icon("list-video"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, consts.FIELD_ID)))
+                    rx.button(rx.icon("list-video"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CycleState.add_iteration_snapshot(getattr(cycle, consts.FIELD_ID)))  # NOSONAR - Reflex event handler; self is implicit
                 ),
-                rx.button(rx.icon("copy-plus"), disabled=DISABLE_EDIT_MODE, variant="soft", on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, consts.FIELD_ID))), 
+                rx.button(rx.icon("copy-plus"), disabled=DISABLE_EDIT_MODE, variant="soft", on_click=lambda: state.CycleState.duplicate_cycle(getattr(cycle, consts.FIELD_ID))),  # NOSONAR 
                 spacing="2",
             )
         ),
