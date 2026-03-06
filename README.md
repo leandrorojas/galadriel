@@ -1,57 +1,75 @@
 # galadriel
-galadriel is a Test Management System
 
-A simple but yet straight to the point and functional Test Management System, which inherits inspiration from testlink and other existing tools.
+A simple, straight-to-the-point Test Management System, inspired by TestLink and other existing tools.
 
-See what galadriel does and how she is built in [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/leandrorojas/galadriel)
-
-# badges
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=leandrorojas_galadriel&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=leandrorojas_galadriel)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/leandrorojas/galadriel)
 
- ## requirements
-* reflex
-* reflex-local-auth
-* PyYAML
-* requests
-* pydantic
-* dateutil
+Built with [Reflex](https://reflex.dev).
 
-## first run
-* clone the repo and fetch the latest tag:
-    ```
+## Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+
+### Installation
+
+1. Clone the repo and check out the latest release:
+    ```bash
     git clone https://github.com/leandrorojas/galadriel.git
     cd galadriel
     git fetch --tags
     latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     git checkout $latestTag
     ```
-* create an virtual environment (i.e.: ```python -m venv .venv/```)
-* activate the virtual environment (```source .venv/bin/activate```)
-* install prerequisietes: ```pip install -r requirements.txt```
-* copy ```copy_me_into_galadriel.yaml``` into ```galadriel.yaml```
-    
-    ### configuring Jira
-    * get a Jira token for your account by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/)
-    * fill in the yaml configuration, the yaml file has sameple dummy data:
-        * _url_: the url of your jira instance, i.e.: _https://instance.atlassian.net_
-        * _user_: your Jira username, i.e: _yourmail@server.com_
-        * _token_: the token you got above
-        * _project_: the Jira project key in which the issues will be created, i.e: _TEST_
-        * _issue_type_: the issue types that will be created i.e: _Bug_
-        * _done_status_: the status in which the _issue_type_ is considered as Done by Jira
 
-        <u>Note</U>: galadriel does not validate on the Jira objects existence, yet.
+2. Create and activate a virtual environment:
+    ```bash
+    python -m venv .venv/
+    source .venv/bin/activate
+    ```
 
-* execute the command ```reflex db init```
-* execute the command ```reflex run```
-* done, enjoy galadriel
+3. Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## galadriel needs you
-Feel free to turn it into the perfect community product. The request is that you commit your changes to this repo for everyone to enjoy them.
+4. Copy `galadriel.yaml.template` into `galadriel.yaml` and configure it (see [Configuration](#configuration)).
 
-Built with Reflex, built to work.
+5. Initialize and run:
+    ```bash
+    reflex db init
+    reflex run
+    ```
+
+## Configuration
+
+### Jira Integration
+
+1. Get a Jira API token by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/).
+
+2. Fill in `galadriel.yaml` with your Jira settings:
+
+    | Key | Description | Example |
+    |-----|-------------|---------|
+    | `url` | Jira instance URL | `https://instance.atlassian.net` |
+    | `user` | Jira username | `yourmail@server.com` |
+    | `token` | API token from step 1 | |
+    | `project` | Project key for created issues | `TEST` |
+    | `issue_type` | Issue type to create | `Bug` |
+    | `done_status` | Status considered as Done | `Done` |
+
+    > **Note:** galadriel does not validate Jira object existence yet.
+
+## Contributing
+
+Feel free to turn galadriel into the perfect community product. The request is that you commit your changes to this repo for everyone to enjoy them.
 
 If you want to contribute, galadriel currently needs:
-* unit tests --> Soon to be done with Codex :D
-* code optimization/reusability
+- Additional test coverage
+- UI/UX improvements
 
+## License
+
+This project is licensed under the GPL-3.0 License. See [LICENSE](LICENSE) for details.
