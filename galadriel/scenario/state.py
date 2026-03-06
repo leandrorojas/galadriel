@@ -127,7 +127,7 @@ class ScenarioState(rx.State):
                 max_order = 0
                 for linked_case in linked_cases:
                     if (linked_case.case_id == case_id):
-                        return rx.toast.error(consts.MESSAGE_PREREQUISITE_ALREADY_IN_LIST)
+                        return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
                     
                     if linked_case.order > max_order:
                         max_order = linked_case.order
