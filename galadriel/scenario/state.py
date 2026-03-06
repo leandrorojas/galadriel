@@ -97,7 +97,7 @@ class ScenarioState(rx.State):
             if (len(results) > 0):
                 for single_result in results:
                     case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.case_id)).first()
-                    setattr(single_result, "case_name", case_name.name)
+                    setattr(single_result, "case_name", case_name.name if case_name else "unknown")
             self.test_cases = results
     
     def filter_test_cases(self, search_value):
@@ -150,6 +150,7 @@ class ScenarioState(rx.State):
     def unlink_case(self, scenario_case_id:int):
         with rx.session() as session:
             case_to_delete = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
+            if case_to_delete is None: return rx.toast.error("case not found")
             order_to_update = case_to_delete.order
             session.delete(case_to_delete)
             session.commit()

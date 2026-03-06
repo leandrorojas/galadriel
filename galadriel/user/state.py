@@ -44,14 +44,14 @@ class UserState(rx.State):
                 local_user = session.exec(reflex_local_auth.LocalUser.select().where(reflex_local_auth.LocalUser.id == single_user.user_id)).one_or_none()
 
                 if local_user:
-
+                    role = session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == single_user.user_role)).one_or_none()
                     self.users.append(
-                        GaladrielUserDisplay( 
+                        GaladrielUserDisplay(
                             local_user_id=local_user.id,
                             galadriel_user_id=single_user.id,
                             username=local_user.username,
                             email=single_user.email,
-                            role=session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == single_user.user_role)).one_or_none().name,
+                            role=role.name if role else "unknown",
                             enabled=local_user.enabled,
                             created=single_user.created,
                             updated=single_user.updated
@@ -64,13 +64,20 @@ class UserState(rx.State):
                 self.user = None
                 return
             galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.id == self.user_id)).one_or_none()
+            if galadriel_user is None:
+                self.user = None
+                return
             local_user = session.exec(reflex_local_auth.LocalUser.select().where(reflex_local_auth.LocalUser.id == galadriel_user.user_id)).one_or_none()
+            if local_user is None:
+                self.user = None
+                return
+            role = session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == galadriel_user.user_role)).one_or_none()
             self.user = GaladrielUserDisplay(
                 local_user_id=local_user.id,
                 galadriel_user_id=galadriel_user.id,
                 username=local_user.username,
                 email=galadriel_user.email,
-                role=session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == galadriel_user.user_role)).one_or_none().name,
+                role=role.name if role else "unknown",
                 enabled=local_user.enabled,
                 created=galadriel_user.created,
                 updated=galadriel_user.updated

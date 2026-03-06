@@ -82,6 +82,7 @@ class CycleState(rx.State):
                     else:
                         iteration_finished = ((iteration_execution_status.id == 3) or (iteration_execution_status.id == 4))
                         
+                        iteration_in_progress = False
                         if (iteration_finished == False):
                             iteration_in_progress = ((iteration_execution_status.id == 1) or (iteration_execution_status.id == 2))
 
@@ -96,11 +97,11 @@ class CycleState(rx.State):
                         passed_steps_count = 0
                         snapshot_all_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4)).all()
 
-                        if snapshot_all_steps != None: 
+                        if snapshot_all_steps != None:
                             all_steps_count = len(snapshot_all_steps)
                             snapshot_failed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 2)).all()
 
-                            if snapshot_failed_steps != None: 
+                            if snapshot_failed_steps != None and all_steps_count > 0:
                                 failed_steps_count = len(snapshot_failed_steps)
 
                                 iteration_failed_percentage = int((failed_steps_count*100)/all_steps_count)
@@ -109,7 +110,7 @@ class CycleState(rx.State):
                                 iteration_failed_percentage = 0
 
                             snapshot_passed_steps = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == cycle_iteration.id, IterationSnapshotModel.child_type == 4, IterationSnapshotModel.child_status_id == 3)).all()
-                            if snapshot_passed_steps != None:
+                            if snapshot_passed_steps != None and all_steps_count > 0:
                                 passed_steps_count = len(snapshot_passed_steps)
 
                                 iteration_passed_percentage = int((passed_steps_count*100)/all_steps_count)
@@ -223,12 +224,13 @@ class CycleState(rx.State):
                         child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
                     elif (single_result.child_type_id == 3):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
-                    setattr(single_result, "child_name", child.name)
+                    setattr(single_result, "child_name", child.name if child else "unknown")
             self.children = results
 
     def unlink_child(self, child_id:int):
         with rx.session() as session:
             child_to_delete = session.exec(CycleChildModel.select().where(CycleChildModel.id == child_id)).first()
+            if child_to_delete is None: return rx.toast.error("child not found")
             order_to_update = child_to_delete.order
             session.delete(child_to_delete)
             session.commit()
@@ -558,6 +560,9 @@ class CycleState(rx.State):
                 self.cycle = None
                 return
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
+            if iteration is None:
+                self.iteration_snapshot_items = []
+                return
             self.iteration_snapshot_items = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id).order_by(asc(IterationSnapshotModel.order))).all()
 
             #get all snapshot elements that have a linked issue
@@ -832,6 +837,7 @@ class CycleState(rx.State):
     def __set_iteration_execution_status(self, iteration_id:int, iteration_status_id:int):
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.id == iteration_id)).one_or_none()
+            if iteration is None: return
 
             setattr(iteration, "iteration_status_id", iteration_status_id)
 
