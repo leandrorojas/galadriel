@@ -107,30 +107,28 @@ class CaseState(rx.State):
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
-        if (form_data["action"] == ""): 
+        if (form_data["action"] == ""):
             return rx.toast.error("action cannot be empty")
-        
-        new_step_order = 1
 
-        if (len(self.steps) > 0):
-            with rx.session() as session:
+        with rx.session() as session:
+            new_step_order = 1
+            if (len(self.steps) > 0):
                 steps_order:StepModel = session.exec(StepModel.select().where(StepModel.case_id == self.case_id)).all()
                 max_order = 0
                 for step_order in steps_order:
                     if step_order.order > max_order:
                         max_order = step_order.order
                 new_step_order = max_order + 1
-            
-        form_data.update({"case_id":case_id})
-        form_data.update({"order":new_step_order})
 
-        with rx.session() as session:
+            form_data.update({"case_id":case_id})
+            form_data.update({"order":new_step_order})
+
             step_to_add = StepModel(**form_data)
             session.add(step_to_add)
             session.commit()
             session.refresh(step_to_add)
         self.load_steps()
-        
+
         return rx.toast.success("step added!")
         
     def delete_step(self, step_id:int):
@@ -194,33 +192,32 @@ class CaseState(rx.State):
             
         if not self.has_steps(prerequisite_id): return rx.toast.error("prerequisite must have at least one step")
         
-        prerequisite_data:dict = {"case_id": 0}
-        new_prerequisite_order = 1
-
-        if (len(self.prerequisites) > 0):
-            with rx.session() as session:
+        with rx.session() as session:
+            new_prerequisite_order = 1
+            if (len(self.prerequisites) > 0):
                 linked_prerequisites:PrerequisiteModel = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id)).all()
                 max_order = 0
                 for linked_prerequisite in linked_prerequisites:
                     if (linked_prerequisite.prerequisite_id == prerequisite_id): return rx.toast.error(consts.MESSAGE_PREREQUISITE_ALREADY_IN_LIST)
-                    
+
                     if linked_prerequisite.order > max_order:
                         max_order = linked_prerequisite.order
                 new_prerequisite_order = max_order + 1
 
-        prerequisite_data.update({"case_id":self.case_id})
-        prerequisite_data.update({"prerequisite_id":prerequisite_id})
-        prerequisite_data.update({"order":new_prerequisite_order})
-        prerequisite_data.update({"prerequisite_name":""})
+            prerequisite_data = {
+                "case_id": self.case_id,
+                "prerequisite_id": prerequisite_id,
+                "order": new_prerequisite_order,
+                "prerequisite_name": "",
+            }
 
-        with rx.session() as session:
             prerequisite_to_add = PrerequisiteModel(**prerequisite_data)
             session.add(prerequisite_to_add)
             session.commit()
             session.refresh(prerequisite_to_add)
         self.search_value = ""
         self.load_prerequisites()
-        
+
         return rx.toast.success("prerequisite added!")
 
     def toggle_search(self):
