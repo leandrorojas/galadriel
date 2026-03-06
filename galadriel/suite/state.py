@@ -249,7 +249,10 @@ class EditSuiteState(SuiteState):
     
     def handle_submit(self, form_data):
         self.form_data = form_data
-        suite_id = form_data.pop("suite_id")
+        try:
+            suite_id = form_data.pop("suite_id")
+        except KeyError:
+            return rx.toast.error("Invalid suite ID")
         updated_data = {**form_data}
         result = self.save_suite_edits(suite_id, updated_data)
 
