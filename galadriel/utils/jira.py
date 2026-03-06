@@ -35,7 +35,7 @@ def __jira_hit(type:str, url:str, payload:str = None):
             debug.log(f"JIRA Payload: {payload}")
             response = requests.request(type, url, data=payload, headers=headers, auth=auth, timeout=30)
     except Exception as err:
-        print(f"Error [create_issue]: {err}")
+        debug.log(f"Error [jira_hit]: {err}")
         response = None
 
     debug.log(f"JIRA response: {response}")
@@ -73,15 +73,13 @@ def create_issue(summary:str, description:str) -> str:
 
     response = __jira_hit(REQUEST_POST, API_ISSUE, payload)
 
-    if response is not None:
-        if (response.status_code != 201):
-            raise HTTPError(f"Error: {response.status_code} - {response.text}")
-        else:
-            issue_key = response.json()["key"]
-    else:
-        issue_key = ""
+    if response is None:
+        raise ConnectionError("Jira request failed: no response received")
 
-    return issue_key
+    if (response.status_code != 201):
+        raise HTTPError(f"Error: {response.status_code} - {response.text}")
+
+    return response.json()["key"]
 
 def get_issue_url(issue_key) -> str:
     return f"{config.jira_url}/browse/{issue_key}"

@@ -45,12 +45,12 @@ class TestCreateIssue:
             create_issue("title", "desc")
 
     @patch("galadriel.utils.jira.requests.request")
-    def test_connection_error_returns_empty(self, mock_request):
+    def test_connection_error_raises(self, mock_request):
         mock_request.side_effect = Exception("connection refused")
 
         from galadriel.utils.jira import create_issue
-        result = create_issue("title", "desc")
-        assert result == ""
+        with pytest.raises(ConnectionError):
+            create_issue("title", "desc")
 
 
 class TestGetIssue:
