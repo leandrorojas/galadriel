@@ -19,9 +19,9 @@ class IterationStatusModel(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d
-    
+
 class IterationModel(rx.Model, table=True):
     cycle_id:int = Field(foreign_key="cyclemodel.id")
     iteration_status_id:int = Field(foreign_key="iterationstatusmodel.id")
@@ -38,7 +38,7 @@ class IterationModel(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d
 
 class IterationSnapshotModel(rx.Model, table=True):
@@ -94,7 +94,7 @@ class IterationSnapshotStatusModel(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d
 
 class IterationSnapshotLinkedIssues(rx.Model, table=True):
@@ -113,5 +113,5 @@ class IterationSnapshotLinkedIssues(rx.Model, table=True):
     def dict(self, *args, **kwargs) -> dict:
         """Serialize method."""
         d = super().dict(*args, **kwargs)
-        d["created"] = self.created.replace(microsecond=0).isoformat(sep=" ")
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
         return d

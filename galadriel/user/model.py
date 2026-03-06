@@ -28,6 +28,12 @@ class GaladrielUser(rx.Model, table=True):
         nullable=False
     )
 
+    def dict(self, *args, **kwargs) -> dict:
+        d = super().dict(*args, **kwargs)
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
+        d["updated"] = timing.ensure_utc(self.updated).replace(microsecond=0).isoformat(sep=" ")
+        return d
+
 class GaladrielUserDisplay(rx.Model):
     local_user_id:int
     galadriel_user_id:int
@@ -58,3 +64,9 @@ class GaladrielUserRole(rx.Model, table=True):
         },
         nullable=False
     )
+
+    def dict(self, *args, **kwargs) -> dict:
+        d = super().dict(*args, **kwargs)
+        d["created"] = timing.ensure_utc(self.created).replace(microsecond=0).isoformat(sep=" ")
+        d["updated"] = timing.ensure_utc(self.updated).replace(microsecond=0).isoformat(sep=" ")
+        return d
