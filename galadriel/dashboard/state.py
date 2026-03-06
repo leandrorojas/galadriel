@@ -21,8 +21,8 @@ class DashboardState(rx.State):
         in_progress_iter = self.__get_in_progress_iterations()
         case_count = 0
 
-        for iteration in in_progress_iter:
-            with rx.session() as session:
+        with rx.session() as session:
+            for iteration in in_progress_iter:
                 case_count = case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == status_id)).all())
 
         return case_count
@@ -93,14 +93,13 @@ class DashboardState(rx.State):
 
         for linked_bug in all_linked_bugs:
             if (appended_bugs < 5):
-                with rx.session() as session:
-                    raw_issue = jira.get_issue(linked_bug.issue_key)
+                raw_issue = jira.get_issue(linked_bug.issue_key)
 
-                    if raw_issue is None:
-                        return rx.toast.error("there was an error while loading the linked bugs")
-                    if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
-                        self.linked_bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
-                        appended_bugs += 1
+                if raw_issue is None:
+                    return rx.toast.error("there was an error while loading the linked bugs")
+                if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
+                    self.linked_bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
+                    appended_bugs += 1
             else:
                 break
 
