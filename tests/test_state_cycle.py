@@ -34,15 +34,15 @@ class TestAddCycle:
         assert state.cycle is not None
         assert state.cycle.name == "Sprint 1"
 
-    def test_empty_name_returns_name(self, patch_rx_session):
+    def test_empty_name_returns_none(self, patch_rx_session):
         state = _make_state()
         result = state.add_cycle({"name": "", "threshold": "80"})
-        assert result == "name"
+        assert result is None
 
-    def test_empty_threshold_returns_threshold(self, patch_rx_session):
+    def test_empty_threshold_returns_none(self, patch_rx_session):
         state = _make_state()
         result = state.add_cycle({"name": "C", "threshold": ""})
-        assert result == "threshold"
+        assert result is None
 
 
 class TestSaveCycleEdits:
@@ -57,7 +57,7 @@ class TestSaveCycleEdits:
         cycle = make_cycle(name="C")
         state = _make_state(cycle_id_value=str(cycle.id))
         result = state.save_cycle_edits(cycle.id, {"name": "", "threshold": "80"})
-        assert result == "name"
+        assert result is None
 
     def test_edit_nonexistent(self, patch_rx_session):
         state = _make_state()
