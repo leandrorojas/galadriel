@@ -201,8 +201,11 @@ class TestPrerequisites:
         # Now try to make A depend on B — should be rejected (circular: A→B→A)
         state_a = _make_state(case_id_value=case_a.id)
         state_a.prerequisites = []
-        result = state_a.add_prerequisite(case_b.id)
-        assert result is not None
+        state_a.add_prerequisite(case_b.id)
+
+        session = patch_rx_session
+        prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
+        assert len(prereqs_a) == 0
 
     def test_deep_redundant_prerequisite_rejected(self, patch_rx_session, make_case, make_step):
         """A→C where C→B→A should be rejected (transitive circular)."""
@@ -226,8 +229,11 @@ class TestPrerequisites:
         # Now try to make A depend on C — should be rejected (circular: A→C→B→A)
         state_a = _make_state(case_id_value=case_a.id)
         state_a.prerequisites = []
-        result = state_a.add_prerequisite(case_c.id)
-        assert result is not None
+        state_a.add_prerequisite(case_c.id)
+
+        session = patch_rx_session
+        prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
+        assert len(prereqs_a) == 0
 
     def test_non_redundant_prerequisite_allowed(self, patch_rx_session, make_case, make_step):
         """A→C where C→B (no cycle) should be allowed."""
