@@ -11,14 +11,7 @@ class CycleModel(TimestampMixin, rx.Model, table=True):
     threshold:str = Field(nullable = True)
     iteration_status_name:str = Field(nullable=True)
     cycle_status_name: str = Field(nullable=True)
-    created: datetime = Field(
-        default_factory=timing.get_utc_now,
-        sa_type=sa.DateTime(timezone=True),
-        sa_column_kwargs={
-            'server_default': sa.func.now()
-        },
-        nullable=False
-    )
+    created: datetime = timing.created_field()
     deleted: datetime = Field(
         sa_type=sa.DateTime(timezone=True),
         nullable=True
@@ -26,25 +19,11 @@ class CycleModel(TimestampMixin, rx.Model, table=True):
 
 class CycleChildTypeModel(TimestampMixin, rx.Model, table=True):
     type_name:str
-    created: datetime = Field(
-        default_factory=timing.get_utc_now,
-        sa_type=sa.DateTime(timezone=True),
-        sa_column_kwargs={
-            'server_default': sa.func.now()
-        },
-        nullable=False
-    )
+    created: datetime = timing.created_field()
 
 class CycleStatusModel(TimestampMixin, rx.Model, table=True):
     status_name: str
-    created: datetime = Field(
-        default_factory=timing.get_utc_now,
-        sa_type=sa.DateTime(timezone=True),
-        sa_column_kwargs={
-            'server_default': sa.func.now()
-        },
-        nullable=False
-    )
+    created: datetime = timing.created_field()
 
 class CycleChildModel(TimestampMixin, rx.Model, table=True):
     cycle_id:int = Field(foreign_key="cyclemodel.id")
@@ -52,11 +31,4 @@ class CycleChildModel(TimestampMixin, rx.Model, table=True):
     child_id:int
     order:int
     child_name:str = Field(nullable=True)
-    created: datetime = Field(
-        default_factory=timing.get_utc_now,
-        sa_type=sa.DateTime(timezone=True),
-        sa_column_kwargs={
-            'server_default': sa.func.now()
-        },
-        nullable=False
-    )
+    created: datetime = timing.created_field()
