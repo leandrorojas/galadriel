@@ -116,7 +116,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         ),
         rx.table.cell(
             rx.cond(
-                snapshot_element.child_type == 4,
+                snapshot_element.child_type == consts.CHILD_TYPE_STEP,
                 rx.flex(
                     rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY), on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),  # NOSONAR
                     rx.cond(

@@ -107,9 +107,9 @@ class SuiteState(rx.State):
             if (len(results) > 0):
                 for single_result in results:
                     child = None
-                    if (single_result.child_type_id == 1):
+                    if (single_result.child_type_id == consts.SUITE_CHILD_TYPE_SCENARIO):
                         child = session.exec(ScenarioModel.select().where(ScenarioModel.id == single_result.child_id)).first()
-                    elif (single_result.child_type_id == 2):
+                    elif (single_result.child_type_id == consts.SUITE_CHILD_TYPE_CASE):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
                     setattr(single_result, "child_name", child.name if child else "unknown")
             self.children = results
@@ -170,7 +170,7 @@ class SuiteState(rx.State):
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         suite_case_data.update({"suite_id":self.suite_id})
-        suite_case_data.update({"child_type_id":2})
+        suite_case_data.update({"child_type_id":consts.SUITE_CHILD_TYPE_CASE})
         suite_case_data.update({"child_id":case_id})
         suite_case_data.update({"order":new_case_order})
 
@@ -219,7 +219,7 @@ class SuiteState(rx.State):
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         suite_scenario_data.update({"suite_id":self.suite_id})
-        suite_scenario_data.update({"child_type_id":1})
+        suite_scenario_data.update({"child_type_id":consts.SUITE_CHILD_TYPE_SCENARIO})
         suite_scenario_data.update({"child_id":scenario_id})
         suite_scenario_data.update({"order":new_scenario_order})
 

@@ -6,7 +6,7 @@ from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
 from sqlmodel import desc
-from ..utils import jira, timing
+from ..utils import jira, timing, consts
 from rxconfig import config
 
 class DashboardState(rx.State):
@@ -15,7 +15,7 @@ class DashboardState(rx.State):
 
     def __get_in_progress_iterations(self):
         with rx.session() as session:
-            return session.exec(IterationModel.select().where(IterationModel.iteration_status_id == 1)).all()
+            return session.exec(IterationModel.select().where(IterationModel.iteration_status_id == consts.ITERATION_STATUS_IN_PROGRESS)).all()
         
     def __get_case_count_by_status(self, status_id: int) -> int:
         in_progress_iter = self.__get_in_progress_iterations()
@@ -23,7 +23,7 @@ class DashboardState(rx.State):
 
         with rx.session() as session:
             for iteration in in_progress_iter:
-                case_count = case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == status_id)).all())
+                case_count = case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == status_id)).all())
 
         return case_count
 
@@ -33,7 +33,7 @@ class DashboardState(rx.State):
         
     @rx.var(cache=False)
     def skipped_cases(self) -> int:
-        return self.__get_case_count_by_status(4)
+        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_SKIPPED)
     
     @rx.var(cache=False)
     def cases_without_bug(self) -> int:
@@ -43,7 +43,7 @@ class DashboardState(rx.State):
 
         for iteration in in_progress_iter:
             with rx.session() as session:
-                failed_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == 4, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == 2)).all()
+                failed_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == consts.SNAPSHOT_STATUS_FAILED)).all()
                 if (failed_cases != None):
                     failed_cases_count += len(failed_cases)
 
@@ -55,13 +55,13 @@ class DashboardState(rx.State):
     
     @rx.var(cache=False)
     def blocked_cases(self) -> int:
-        return self.__get_case_count_by_status(5)
+        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_BLOCKED)
     
     def __get_passed_cases(self) -> int:
-        return self.__get_case_count_by_status(3)
+        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_PASS)
     
     def __get_failed_cases(self) -> int:
-        return self.__get_case_count_by_status(2)
+        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_FAILED)
     
     @rx.var(cache=False)
     def get_pie_chart_data(self) -> list:
@@ -112,7 +112,7 @@ class DashboardState(rx.State):
         return trend_data, current_utc_date
 
     def __apply_case_to_trend(self, trend_data, updated_case):
-        STATUS_MAP = {3: "passed", 2: "failed", 5: "blocked"}
+        STATUS_MAP = {consts.SNAPSHOT_STATUS_PASS: "passed", consts.SNAPSHOT_STATUS_FAILED: "failed", consts.SNAPSHOT_STATUS_BLOCKED: "blocked"}
         case_date = updated_case.updated.strftime("%Y-%m-%d")
 
         for trend_entry in trend_data:
@@ -130,7 +130,7 @@ class DashboardState(rx.State):
 
         with rx.session() as session:
             updated_cases = session.exec(IterationSnapshotModel.select().where(
-                IterationSnapshotModel.child_type == 4,
+                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP,
                 IterationSnapshotModel.updated >= cutoff_date)
             .order_by(desc(IterationSnapshotModel.updated))).all()
 
