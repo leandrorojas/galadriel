@@ -3,7 +3,7 @@ import reflex_local_auth
 
 from ..pages import base_page
 from ..navigation import routes
-from ..ui.components import Badge, Table
+from ..ui.components import Badge, Table, SearchTable
 from .state import CycleState
 from ..iteration import IterationSnapshotModel
 from ..utils import jira, consts
@@ -62,12 +62,6 @@ def __hold_iteration_snapshot_button() -> rx.Component:
         ), 
     )
 
-def __badge(icon: str, text: str, color=""):
-    if (color == ""):
-        return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
-    else:
-        return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3", color_scheme=color)
-
 def __element_type_badge(child_type: str):
     badge_mapping = {
         "Suite": ("beaker", "Suite"),
@@ -75,7 +69,7 @@ def __element_type_badge(child_type: str):
         "Case": (consts.ICON_TEST_TUBES, "Case"),
         "Step": ("test-tube", "Step"),
     }
-    return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
+    return SearchTable.badge_with_icon(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
 def __element_status_badge(child_status: str):
     badge_mapping = {
@@ -83,9 +77,9 @@ def __element_status_badge(child_status: str):
         "Failed": ("x", "Failed", "red"),
         "Passed": ("check", "Passed", "green"),
         "Skipped": ("list-x", "Skipped", "gray"),
-        "Blocked": ("cuboid", "Blocked", "gray") 
+        "Blocked": ("cuboid", "Blocked", "gray")
     }
-    return __badge(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
+    return SearchTable.badge_with_icon_and_color(*badge_mapping.get(child_status, ("circle-help", "Not Found")))
 
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
     READ_ONLY = ~CycleState.is_iteration_editable

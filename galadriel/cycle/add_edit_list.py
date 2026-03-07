@@ -10,7 +10,7 @@ from ..pages.add import add_page
 from ..pages.edit import edit_page
 from ..pages import base_page
 
-from ..ui.components import Table, PageHeader, Moment
+from ..ui.components import Table, PageHeader, Moment, SearchTable
 from ..utils import consts
 from ..auth.state import Session
 
@@ -26,12 +26,6 @@ def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
 
     return rx.link(child, href=cycle_detail_url)
 
-def __badge(text: str, color=""):
-    if (color != ""):
-        return rx.badge(text, radius="full", variant="soft", size="3", color_scheme=color)
-    else:
-        return rx.badge(text, radius="full", variant="soft", size="3")
-
 def __execution_status_badge(child_execution_status: str):
     badge_mapping = {
         consts.STATUS_EXECUTION_IN_PROGRESS: (consts.STATUS_EXECUTION_IN_PROGRESS, "blue"),
@@ -41,7 +35,7 @@ def __execution_status_badge(child_execution_status: str):
         consts.STATUS_EXECUTION_COMPLETED_FAILED: (consts.STATUS_EXECUTION_COMPLETED_FAILED, "orange"),
         consts.STATUS_EXECUTION_NOT_STARTED: (consts.STATUS_EXECUTION_NOT_STARTED, "")
     }
-    return __badge(*badge_mapping.get(child_execution_status, ("n/a", "")))
+    return SearchTable.badge_with_color(*badge_mapping.get(child_execution_status, ("n/a", "")))
 
 def __cycle_status_badge(cycle_status: str):
     badge_mapping = {
@@ -49,7 +43,7 @@ def __cycle_status_badge(cycle_status: str):
         consts.STATUS_CYCLE_FAILED: (consts.STATUS_CYCLE_FAILED, "red"),
         "testing": ("testing", "blue"),
     }
-    return __badge(*badge_mapping.get(cycle_status, ("n/a", "")))
+    return SearchTable.badge_with_color(*badge_mapping.get(cycle_status, ("n/a", "")))
 
 def __show_cycle(cycle:model.CycleModel):
     DISABLE_EDIT_MODE = ~Session.can_edit

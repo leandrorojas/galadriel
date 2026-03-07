@@ -536,6 +536,34 @@ class Chart():
             height=height,
         ),
 
+class SearchTable():
+    def header(self):
+        table_component = Table()
+        return rx.table.header(
+            rx.table.row(
+                table_component.header("", "ellipsis"),
+                table_component.header("name", "fingerprint"),
+                table_component.header("created", "calendar-check-2"),
+                table_component.header("selected_id", "search", hide_column=True),
+            ),
+        ),
+
+    @staticmethod
+    def badge_with_icon(icon: str, text: str):
+        return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
+
+    @staticmethod
+    def badge_with_color(text: str, color=""):
+        if color:
+            return rx.badge(text, radius="full", variant="soft", size="3", color_scheme=color)
+        return rx.badge(text, radius="full", variant="soft", size="3")
+
+    @staticmethod
+    def badge_with_icon_and_color(icon: str, text: str, color=""):
+        if color:
+            return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3", color_scheme=color)
+        return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
+
 class Moment():
     def moment(self, date) -> rx.Component:
         return rx.moment(date, local=True, format="YYYY-MM-DD HH:mm", from_now=True, from_now_during=15552000000)

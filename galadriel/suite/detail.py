@@ -4,7 +4,7 @@ import reflex_local_auth
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button, MomentBadge, Moment
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment, SearchTable
 from . import model
 from ..case.model import CaseModel
 from ..scenario.model import ScenarioModel
@@ -14,15 +14,7 @@ from ..utils import consts
 from ..auth.state import Session
 
 def __search_table_header():
-    table_component = Table()
-    return rx.table.header(
-        rx.table.row(
-            table_component.header("", "ellipsis"),
-            table_component.header("name", "fingerprint"),
-            table_component.header("created", "calendar-check-2"),
-            table_component.header("selected_id", "search", hide_column=True),
-        ),
-    ),
+    return SearchTable().header()
 
 def __show_test_cases_in_search(test_case:CaseModel):
     moment_component = Moment()
@@ -72,15 +64,12 @@ def __search_scenarios_table() -> rx.Component:
         ),
     )
 
-def __badge(icon: str, text: str):
-    return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
-
 def __child_type_badge(child_type: str):
     badge_mapping = {
         "Scenario": ("route", "Scenario"),
         "Case": (consts.ICON_TEST_TUBES, "Case")
     }
-    return __badge(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
+    return SearchTable.badge_with_icon(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
 def __show_child(suite_child:model.SuiteChildModel):
     DISABLE_EDIT_MODE = ~Session.can_edit
