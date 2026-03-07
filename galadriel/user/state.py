@@ -24,7 +24,7 @@ class UserState(rx.State):
     @rx.var(cache=True)
     def user_id(self) -> int:
         try:
-            return int(self.router.page.params.get(consts.FIELD_ID, "0"))
+            return int(self.router._page.params.get(consts.FIELD_ID, "0"))
         except ValueError:
             return -1
 
