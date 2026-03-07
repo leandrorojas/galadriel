@@ -2,7 +2,7 @@ import reflex as rx
 import reflex_local_auth
 
 from typing import List, Optional
-from sqlmodel import select, cast, String
+from sqlmodel import select
 
 from .model import GaladrielUser, GaladrielUserRole, GaladrielUserDisplay
 from ..navigation import routes

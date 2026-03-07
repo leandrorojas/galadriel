@@ -234,9 +234,6 @@ class CaseState(rx.State):
             self.load_prerequisites()
         return toast
             
-    def ensure_utc(self, dt) -> datetime:
-        return timing.ensure_utc(dt)
-
 class AddCaseState(CaseState):
     form_data:dict = {}
 
