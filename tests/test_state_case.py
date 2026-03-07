@@ -186,6 +186,89 @@ class TestPrerequisites:
         result = state.add_prerequisite(case_b.id)
         assert result is not None
 
+    def test_redundant_prerequisite_rejected(self, patch_rx_session, make_case, make_step):
+        """A→B where B already has prerequisite A should be rejected as redundant."""
+        case_a = make_case(name="A")
+        case_b = make_case(name="B")
+        make_step(case_id=case_a.id, order=1)
+        make_step(case_id=case_b.id, order=1)
+
+        session = patch_rx_session
+
+        # B depends on A
+        state_b = _make_state(case_id_value=case_b.id)
+        state_b.prerequisites = []
+        state_b.add_prerequisite(case_a.id)
+        prereqs_b = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_b.id)).all()
+        assert len(prereqs_b) == 1
+
+        # Now try to make A depend on B — should be rejected (circular: A→B→A)
+        state_a = _make_state(case_id_value=case_a.id)
+        state_a.prerequisites = []
+        state_a.add_prerequisite(case_b.id)
+
+        prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
+        assert len(prereqs_a) == 0
+
+    def test_deep_redundant_prerequisite_rejected(self, patch_rx_session, make_case, make_step):
+        """A→C where C→B→A should be rejected (transitive circular)."""
+        case_a = make_case(name="A")
+        case_b = make_case(name="B")
+        case_c = make_case(name="C")
+        make_step(case_id=case_a.id, order=1)
+        make_step(case_id=case_b.id, order=1)
+        make_step(case_id=case_c.id, order=1)
+
+        session = patch_rx_session
+
+        # B depends on A
+        state_b = _make_state(case_id_value=case_b.id)
+        state_b.prerequisites = []
+        state_b.add_prerequisite(case_a.id)
+        prereqs_b = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_b.id)).all()
+        assert len(prereqs_b) == 1
+
+        # C depends on B
+        state_c = _make_state(case_id_value=case_c.id)
+        state_c.prerequisites = []
+        state_c.add_prerequisite(case_b.id)
+        prereqs_c = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_c.id)).all()
+        assert len(prereqs_c) == 1
+
+        # Now try to make A depend on C — should be rejected (circular: A→C→B→A)
+        state_a = _make_state(case_id_value=case_a.id)
+        state_a.prerequisites = []
+        state_a.add_prerequisite(case_c.id)
+
+        prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
+        assert len(prereqs_a) == 0
+
+    def test_non_redundant_prerequisite_allowed(self, patch_rx_session, make_case, make_step):
+        """A→C where C→B (no cycle) should be allowed."""
+        case_a = make_case(name="A")
+        case_b = make_case(name="B")
+        case_c = make_case(name="C")
+        make_step(case_id=case_b.id, order=1)
+        make_step(case_id=case_c.id, order=1)
+
+        session = patch_rx_session
+
+        # C depends on B
+        state_c = _make_state(case_id_value=case_c.id)
+        state_c.prerequisites = []
+        state_c.add_prerequisite(case_b.id)
+        prereqs_c = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_c.id)).all()
+        assert len(prereqs_c) == 1
+
+        # A depends on C — should be allowed (no cycle back to A)
+        state_a = _make_state(case_id_value=case_a.id)
+        state_a.prerequisites = []
+        state_a.add_prerequisite(case_c.id)
+
+        prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
+        assert len(prereqs_a) == 1
+        assert prereqs_a[0].prerequisite_id == case_c.id
+
     def test_delete_prerequisite_reorders(self, patch_rx_session, make_case, make_step):
         case_a = make_case(name="A")
         case_b = make_case(name="B")
