@@ -92,6 +92,13 @@ def reorder_delete(model_class, item_id, parent_field, parent_id, item_label="it
     return rx.toast.info(f"The {item_label} has been deleted")
 
 
+def has_steps(step_model, case_id: int) -> bool:
+    """Check if a case has at least one step."""
+    with rx.session() as session:
+        case_steps = session.exec(step_model.select().where(step_model.case_id == case_id)).all()
+        return len(case_steps) > 0
+
+
 class TimestampMixin:
     __timestamp_fields__ = ("created",)
 

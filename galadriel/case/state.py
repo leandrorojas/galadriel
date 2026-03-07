@@ -4,7 +4,7 @@ from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 from ..utils import consts, timing
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
 
 from datetime import datetime
 
@@ -162,10 +162,7 @@ class CaseState(rx.State):
         self.load_cases()
 
     def has_steps(self, case_id:int) -> bool:
-        with rx.session() as session:
-            case_steps = session.exec(StepModel.select().where(StepModel.case_id == case_id)).all()
-
-            return len(case_steps) > 0
+        return _has_steps(StepModel, case_id)
 
     def has_any_prerequisites(self, case_id:int) -> bool:
         with rx.session() as session:

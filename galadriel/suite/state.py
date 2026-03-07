@@ -8,7 +8,7 @@ from ..scenario.model import ScenarioModel
 
 from sqlmodel import select, cast, String
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
 
 SUITES_ROUTE = routes.SUITES
 if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
@@ -186,10 +186,7 @@ class SuiteState(rx.State):
         return rx.toast.success("case added!")
     
     def has_steps(self, case_id:int) -> bool:
-        with rx.session() as session:
-            case_steps = session.exec(StepModel.select().where(StepModel.case_id == case_id)).all()
-
-            return len(case_steps) > 0
+        return _has_steps(StepModel, case_id)
 
     def toggle_scenario_search(self):
         self.show_scenario_search = not(self.show_scenario_search)
