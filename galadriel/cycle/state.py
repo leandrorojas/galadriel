@@ -15,12 +15,9 @@ from sqlmodel import select, asc, cast, String, desc
 from ..utils import jira, consts
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete
 
-CYCLES_ROUTE = routes.CYCLES
-if CYCLES_ROUTE.endswith("/"): CYCLES_ROUTE = CYCLES_ROUTE[:-1]
+CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
 SITE_URL = f"http://localhost:{config.frontend_port}/"
-
-RETURN_VALUE = 0
 class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
@@ -149,7 +146,7 @@ class CycleState(rx.State):
             session.refresh(cycle)
             self.cycle = cycle
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
         if updated_data["name"] == "": return None
@@ -167,7 +164,7 @@ class CycleState(rx.State):
             session.refresh(cycle)
             self.cycle = cycle
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
     
     def collapse_searches(self):
         self.show_case_search = False

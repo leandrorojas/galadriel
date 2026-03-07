@@ -10,8 +10,7 @@ from ..utils import consts
 
 from enum import Enum
 
-USERS_ROUTE = routes.USERS
-if USERS_ROUTE.endswith("/"): USERS_ROUTE = USERS_ROUTE[:-1]
+USERS_ROUTE = consts.normalize_route(routes.USERS)
 
 class UserRole(Enum):
     ADMIN = 0

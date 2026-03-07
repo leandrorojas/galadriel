@@ -1,5 +1,12 @@
 CASE_MODEL_ID = "casemodel.id"
 
+RETURN_VALUE = 0
+
+
+def normalize_route(route: str) -> str:
+    """Strip trailing slash from a route path."""
+    return route.rstrip("/")
+
 RELATIVE_VIEWPORT_85 = "85vh"
 RELATIVE_VIEWPORT_95 = "95vh"
 
