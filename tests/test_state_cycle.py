@@ -6,7 +6,11 @@ from sqlmodel import select
 
 from galadriel.cycle.state import CycleState
 from galadriel.cycle.model import CycleModel, CycleChildModel
+from galadriel.case.model import CaseModel, StepModel
+from galadriel.scenario.model import ScenarioModel, ScenarioCaseModel
+from galadriel.suite.model import SuiteModel, SuiteChildModel
 from galadriel.iteration.model import IterationModel, IterationSnapshotModel
+from galadriel.utils import consts
 from conftest import init_state
 
 pytestmark = pytest.mark.integration
@@ -204,6 +208,26 @@ class TestCanEditIteration:
         state = _make_state(cycle_id_value=str(cycle.id))
         assert state.can_edit_iteration(cycle.id) is True
 
+    def test_not_started_iteration_returns_true(self, patch_rx_session, make_cycle, seeded_db):
+        cycle = make_cycle(name="C")
+        session = patch_rx_session
+        iteration = IterationModel(cycle_id=cycle.id, iteration_status_id=consts.ITERATION_STATUS_NOT_STARTED, iteration_number=1)
+        session.add(iteration)
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        assert state.can_edit_iteration(cycle.id) is True
+
+    def test_on_hold_iteration_returns_true(self, patch_rx_session, make_cycle, seeded_db):
+        cycle = make_cycle(name="C")
+        session = patch_rx_session
+        iteration = IterationModel(cycle_id=cycle.id, iteration_status_id=consts.ITERATION_STATUS_ON_HOLD, iteration_number=1)
+        session.add(iteration)
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        assert state.can_edit_iteration(cycle.id) is True
+
     def test_completed_all_passed_returns_false(self, patch_rx_session, make_cycle, seeded_db):
         cycle = make_cycle(name="C")
         session = patch_rx_session
@@ -239,3 +263,244 @@ class TestCanEditIteration:
 
         state = _make_state(cycle_id_value=str(cycle.id))
         assert state.can_edit_iteration(cycle.id) is True
+
+
+class TestLinkCase:
+    def test_link_case_success(self, patch_rx_session, make_cycle, make_case, make_step):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1)
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.cases_for_search = [case]
+        state.link_case(case.id)
+
+        session = patch_rx_session
+        children = session.exec(select(CycleChildModel).where(CycleChildModel.cycle_id == cycle.id)).all()
+        assert len(children) == 1
+        assert children[0].child_id == case.id
+        assert children[0].child_type_id == consts.CHILD_TYPE_CASE
+
+    def test_link_case_without_steps_rejected(self, patch_rx_session, make_cycle, make_case):
+        cycle = make_cycle(name="C")
+        case = make_case(name="No Steps")
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        result = state.link_case(case.id)
+        assert result is not None
+
+    def test_link_duplicate_case_rejected(self, patch_rx_session, make_cycle, make_case, make_step):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1)
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.cases_for_search = [case]
+        state.link_case(case.id)
+        state.cases_for_search = [case]
+        result = state.link_case(case.id)
+        assert result is not None
+
+
+class TestLinkScenario:
+    def test_link_scenario_success(self, patch_rx_session, make_cycle, make_scenario):
+        cycle = make_cycle(name="C")
+        scenario = make_scenario(name="S")
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.scenarios_for_search = [scenario]
+        state.link_scenario(scenario.id)
+
+        session = patch_rx_session
+        children = session.exec(select(CycleChildModel).where(CycleChildModel.cycle_id == cycle.id)).all()
+        assert len(children) == 1
+        assert children[0].child_type_id == consts.CHILD_TYPE_SCENARIO
+
+    def test_link_duplicate_scenario_rejected(self, patch_rx_session, make_cycle, make_scenario):
+        cycle = make_cycle(name="C")
+        scenario = make_scenario(name="S")
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.scenarios_for_search = [scenario]
+        state.link_scenario(scenario.id)
+        state.scenarios_for_search = [scenario]
+        result = state.link_scenario(scenario.id)
+        assert result is not None
+
+
+class TestLinkSuite:
+    def test_link_suite_success(self, patch_rx_session, make_cycle, make_suite):
+        cycle = make_cycle(name="C")
+        suite = make_suite(name="Suite")
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.suites_for_search = [suite]
+        state.link_suite(suite.id)
+
+        session = patch_rx_session
+        children = session.exec(select(CycleChildModel).where(CycleChildModel.cycle_id == cycle.id)).all()
+        assert len(children) == 1
+        assert children[0].child_type_id == consts.CHILD_TYPE_SUITE
+
+
+class TestIterationSnapshot:
+    def test_add_iteration_snapshot_creates_iteration(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1, action="Click", expected="Page loads")
+
+        session = patch_rx_session
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.add_iteration_snapshot(cycle.id)
+
+        iterations = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).all()
+        assert len(iterations) == 1
+        assert iterations[0].iteration_status_id == consts.ITERATION_STATUS_NOT_STARTED
+
+    def test_snapshot_contains_case_and_steps(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1, action="Click", expected="Page loads")
+        make_step(case_id=case.id, order=2, action="Type", expected="Text appears")
+
+        session = patch_rx_session
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.add_iteration_snapshot(cycle.id)
+
+        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
+        snapshots = session.exec(
+            select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id)
+            .order_by(IterationSnapshotModel.order)
+        ).all()
+
+        # 1 case header + 2 steps
+        assert len(snapshots) == 3
+        assert snapshots[0].child_type == consts.CHILD_TYPE_CASE
+        assert snapshots[0].child_name == "TC"
+        assert snapshots[1].child_type == consts.CHILD_TYPE_STEP
+        assert snapshots[1].child_status_id == consts.SNAPSHOT_STATUS_TO_DO
+        assert snapshots[2].child_type == consts.CHILD_TYPE_STEP
+
+    def test_pass_step_updates_status(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1, action="Click", expected="Done")
+
+        session = patch_rx_session
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.add_iteration_snapshot(cycle.id)
+
+        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
+        step_snapshot = session.exec(
+            select(IterationSnapshotModel).where(
+                IterationSnapshotModel.iteration_id == iteration.id,
+                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
+            )
+        ).first()
+
+        state.pass_iteration_snapshot_step(step_snapshot.id)
+
+        session.expire_all()
+        updated = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == step_snapshot.id)).first()
+        assert updated.child_status_id == consts.SNAPSHOT_STATUS_PASS
+
+    def test_fail_step_blocks_following_steps(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1, action="Step 1", expected="E1")
+        make_step(case_id=case.id, order=2, action="Step 2", expected="E2")
+
+        session = patch_rx_session
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.add_iteration_snapshot(cycle.id)
+
+        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
+        steps = session.exec(
+            select(IterationSnapshotModel).where(
+                IterationSnapshotModel.iteration_id == iteration.id,
+                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
+            ).order_by(IterationSnapshotModel.order)
+        ).all()
+
+        state.fail_iteration_snapshot_step(steps[0].id)
+
+        session.expire_all()
+        failed = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == steps[0].id)).first()
+        blocked = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == steps[1].id)).first()
+        assert failed.child_status_id == consts.SNAPSHOT_STATUS_FAILED
+        assert blocked.child_status_id == consts.SNAPSHOT_STATUS_BLOCKED
+
+    def test_skip_step_updates_status(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
+        cycle = make_cycle(name="C")
+        case = make_case(name="TC")
+        make_step(case_id=case.id, order=1, action="Click", expected="Done")
+
+        session = patch_rx_session
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
+        session.commit()
+
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.add_iteration_snapshot(cycle.id)
+
+        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
+        step_snapshot = session.exec(
+            select(IterationSnapshotModel).where(
+                IterationSnapshotModel.iteration_id == iteration.id,
+                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
+            )
+        ).first()
+
+        state.skip_iteration_snapshot_step(step_snapshot.id)
+
+        session.expire_all()
+        updated = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == step_snapshot.id)).first()
+        assert updated.child_status_id == consts.SNAPSHOT_STATUS_SKIPPED
+
+    def test_empty_cycle_no_snapshot(self, patch_rx_session, make_cycle, seeded_db):
+        cycle = make_cycle(name="Empty")
+        state = _make_state(cycle_id_value=str(cycle.id))
+        state.add_iteration_snapshot(cycle.id)
+
+        session = patch_rx_session
+        iterations = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).all()
+        assert len(iterations) == 0
+
+
+class TestSearchFilter:
+    def test_filter_test_cases(self, patch_rx_session, make_case):
+        make_case(name="Login Test")
+        make_case(name="Logout Test")
+        make_case(name="Signup Flow")
+
+        state = _make_state()
+        state.filter_test_cases("login")
+        assert len(state.cases_for_search) == 1
+        assert state.cases_for_search[0].name == "Login Test"
+
+    def test_filter_scenarios(self, patch_rx_session, make_scenario):
+        make_scenario(name="Checkout Flow")
+        make_scenario(name="Login Flow")
+
+        state = _make_state()
+        state.filter_scenarios("checkout")
+        assert len(state.scenarios_for_search) == 1
+
+    def test_filter_suites(self, patch_rx_session, make_suite):
+        make_suite(name="Regression Suite")
+        make_suite(name="Smoke Suite")
+
+        state = _make_state()
+        state.filter_suites("smoke")
+        assert len(state.suites_for_search) == 1
