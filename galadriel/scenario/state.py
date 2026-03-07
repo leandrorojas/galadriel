@@ -9,10 +9,7 @@ from ..case.model import CaseModel, StepModel
 
 from sqlmodel import select, cast, String
 
-SCENARIO_ROUTE = routes.SCENARIOS
-if SCENARIO_ROUTE.endswith("/"): SCENARIO_ROUTE = SCENARIO_ROUTE[:-1]
-
-RETURN_VALUE = 0
+SCENARIO_ROUTE = consts.normalize_route(routes.SCENARIOS)
 
 class ScenarioState(rx.State):
     scenarios: List['ScenarioModel'] = []
@@ -63,7 +60,7 @@ class ScenarioState(rx.State):
             session.refresh(scenario)
             self.scenario = scenario
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
     
     def save_scenario_edits(self, scenario_id:int, updated_data:dict):
         if updated_data["name"] == "": return None
@@ -80,7 +77,7 @@ class ScenarioState(rx.State):
             session.refresh(scenario)
             self.scenario = scenario
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
 
     def to_scenario(self, edit_page=True):
         if not self.scenario:

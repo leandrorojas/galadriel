@@ -10,10 +10,7 @@ from sqlmodel import select, cast, String
 from ..utils import consts
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
 
-SUITES_ROUTE = routes.SUITES
-if SUITES_ROUTE.endswith("/"): SUITES_ROUTE = SUITES_ROUTE[:-1]
-
-RETURN_VALUE = 0
+SUITES_ROUTE = consts.normalize_route(routes.SUITES)
 
 class SuiteState(rx.State):
     suites: List['SuiteModel'] = []
@@ -68,7 +65,7 @@ class SuiteState(rx.State):
             session.refresh(suite)
             self.suite = suite
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
     
     def save_suite_edits(self, suite_id:int, updated_data:dict):
         if updated_data["name"] == "": return None
@@ -85,7 +82,7 @@ class SuiteState(rx.State):
             session.refresh(suite)
             self.suite = suite
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
 
     def to_suite(self, edit_page=True):
         if not self.suite:

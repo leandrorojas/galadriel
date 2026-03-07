@@ -10,10 +10,7 @@ from datetime import datetime
 
 from sqlmodel import select, cast, String
 
-CASE_ROUTE = routes.CASES
-if CASE_ROUTE.endswith("/"): CASE_ROUTE = CASE_ROUTE[:-1]
-
-RETURN_VALUE = 0
+CASE_ROUTE = consts.normalize_route(routes.CASES)
 
 class CaseState(rx.State):
     cases: List['CaseModel'] = []
@@ -74,7 +71,7 @@ class CaseState(rx.State):
             session.refresh(case)
             self.case = case
 
-        return RETURN_VALUE
+        return consts.RETURN_VALUE
     
     def save_case_edits(self, case_id:int, updated_data:dict):
         if (updated_data["name"] == ""): return None
@@ -92,7 +89,7 @@ class CaseState(rx.State):
             session.refresh(case)
             self.case = case
 
-            return RETURN_VALUE
+            return consts.RETURN_VALUE
 
     def to_case(self, edit_page=True):
         if not self.case:
