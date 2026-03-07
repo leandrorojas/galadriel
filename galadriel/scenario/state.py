@@ -118,34 +118,33 @@ class ScenarioState(rx.State):
     def link_case(self, case_id:int):
         if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
 
-        scenario_case_data:dict = {"scenario_id":""}
-        new_case_order = 1
-
-        if (len(self.test_cases) > 0):
-            with rx.session() as session:
+        with rx.session() as session:
+            new_case_order = 1
+            if (len(self.test_cases) > 0):
                 linked_cases:ScenarioCaseModel = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id)).all()
                 max_order = 0
                 for linked_case in linked_cases:
                     if (linked_case.case_id == case_id):
                         return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
-                    
+
                     if linked_case.order > max_order:
                         max_order = linked_case.order
                 new_case_order = max_order + 1
 
-        scenario_case_data.update({"scenario_id":self.scenario_id})
-        scenario_case_data.update({"case_id":case_id})
-        scenario_case_data.update({"order":new_case_order})
-        scenario_case_data.update({"case_name":""})
+            scenario_case_data = {
+                "scenario_id": self.scenario_id,
+                "case_id": case_id,
+                "order": new_case_order,
+                "case_name": "",
+            }
 
-        with rx.session() as session:
             case_to_add = ScenarioCaseModel(**scenario_case_data)
             session.add(case_to_add)
             session.commit()
             session.refresh(case_to_add)
         self.search_value = ""
         self.load_cases()
-        
+
         return rx.toast.success("case added!")
     
     def unlink_case(self, scenario_case_id:int):
