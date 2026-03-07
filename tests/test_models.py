@@ -80,7 +80,7 @@ def test_model_dict_has_created(db_session, model_cls, kwargs):
     db_session.add(obj)
     db_session.commit()
     db_session.refresh(obj)
-    d = obj.dict()
+    d = obj.model_dump()
     assert "created" in d
     assert isinstance(d["created"], str)
     # Should be ISO-formatted with space separator
@@ -99,7 +99,7 @@ class TestIterationSnapshotModelDict:
         db_session.add(obj)
         db_session.commit()
         db_session.refresh(obj)
-        d = obj.dict()
+        d = obj.model_dump()
         # updated could be None or a datetime depending on default_factory
         # The dict method handles None explicitly
         assert "updated" in d
@@ -112,7 +112,7 @@ class TestIterationSnapshotModelDict:
         db_session.add(obj)
         db_session.commit()
         db_session.refresh(obj)
-        d = obj.dict()
+        d = obj.model_dump()
         if d["updated"] is not None:
             assert isinstance(d["updated"], str)
 
@@ -123,7 +123,7 @@ class TestCaseModelDict:
         db_session.add(case)
         db_session.commit()
         db_session.refresh(case)
-        d = case.dict()
+        d = case.model_dump()
         # Should not have microseconds
         assert "." not in d["created"]
 
@@ -141,7 +141,7 @@ class TestGaladrielUserDict:
         db_session.add(user)
         db_session.commit()
         db_session.refresh(user)
-        d = user.dict()
+        d = user.model_dump()
         assert "created" in d
         assert "updated" in d
         assert isinstance(d["created"], str)
