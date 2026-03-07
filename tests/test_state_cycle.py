@@ -363,17 +363,17 @@ def _create_snapshot(session, make_cycle, make_case, make_step, num_steps=1):
     state = _make_state(cycle_id_value=str(cycle.id))
     state.add_iteration_snapshot(cycle.id)
     iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
-    return cycle, state, iteration
+    return state, iteration
 
 
 class TestIterationSnapshot:
     def test_add_iteration_snapshot_creates_iteration(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        cycle, _, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
+        _, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
         assert iteration is not None
         assert iteration.iteration_status_id == consts.ITERATION_STATUS_NOT_STARTED
 
     def test_snapshot_contains_case_and_steps(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        _, _, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step, num_steps=2)
+        _, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step, num_steps=2)
         snapshots = patch_rx_session.exec(
             select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id)
             .order_by(IterationSnapshotModel.order)
@@ -388,7 +388,7 @@ class TestIterationSnapshot:
         assert snapshots[2].child_type == consts.CHILD_TYPE_STEP
 
     def test_pass_step_updates_status(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        _, state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
+        state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
         session = patch_rx_session
         step = session.exec(select(IterationSnapshotModel).where(
             IterationSnapshotModel.iteration_id == iteration.id,
@@ -402,7 +402,7 @@ class TestIterationSnapshot:
         assert updated.child_status_id == consts.SNAPSHOT_STATUS_PASS
 
     def test_fail_step_blocks_following_steps(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        _, state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step, num_steps=2)
+        state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step, num_steps=2)
         session = patch_rx_session
         steps = session.exec(select(IterationSnapshotModel).where(
             IterationSnapshotModel.iteration_id == iteration.id,
@@ -418,7 +418,7 @@ class TestIterationSnapshot:
         assert blocked.child_status_id == consts.SNAPSHOT_STATUS_BLOCKED
 
     def test_skip_step_updates_status(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        _, state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
+        state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
         session = patch_rx_session
         step = session.exec(select(IterationSnapshotModel).where(
             IterationSnapshotModel.iteration_id == iteration.id,
