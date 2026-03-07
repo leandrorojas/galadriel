@@ -9,9 +9,6 @@ from .forms import step_add_form
 from ..utils import consts
 from ..auth.state import Session
 
-first_row:bool = True
-last_row:bool = False
-
 #prerequisites
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
     DISABLE_EDIT_MODE = ~Session.can_edit
