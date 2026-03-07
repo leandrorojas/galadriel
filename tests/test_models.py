@@ -52,6 +52,8 @@ def test_model_insert_and_retrieve(db_session, model_cls, kwargs):
     db_session.commit()
     db_session.refresh(obj)
     assert obj.id is not None
+    for field, value in kwargs.items():
+        assert getattr(obj, field) == value
 
 
 @pytest.mark.parametrize("model_cls,kwargs", [
@@ -92,17 +94,16 @@ def test_model_dict_has_created(db_session, model_cls, kwargs):
 # ---------------------------------------------------------------------------
 
 class TestIterationSnapshotModelDict:
-    def test_updated_none_serialized_as_none(self, db_session):
+    def test_updated_default_serialized_as_string(self, db_session):
         obj = IterationSnapshotModel(
-            iteration_id=1, order=1, child_type=4, updated=None,
+            iteration_id=1, order=1, child_type=4,
         )
         db_session.add(obj)
         db_session.commit()
         db_session.refresh(obj)
         d = obj.model_dump()
-        # updated could be None or a datetime depending on default_factory
-        # The dict method handles None explicitly
         assert "updated" in d
+        assert isinstance(d["updated"], str)
 
     def test_updated_present_serialized_as_string(self, db_session):
         obj = IterationSnapshotModel(
@@ -113,8 +114,8 @@ class TestIterationSnapshotModelDict:
         db_session.commit()
         db_session.refresh(obj)
         d = obj.model_dump()
-        if d["updated"] is not None:
-            assert isinstance(d["updated"], str)
+        assert d["updated"] is not None
+        assert isinstance(d["updated"], str)
 
 
 class TestCaseModelDict:
