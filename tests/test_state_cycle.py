@@ -286,8 +286,11 @@ class TestLinkCase:
         case = make_case(name="No Steps")
 
         state = _make_state(cycle_id_value=str(cycle.id))
-        result = state.link_case(case.id)
-        assert result is not None
+        state.link_case(case.id)
+
+        session = patch_rx_session
+        children = session.exec(select(CycleChildModel).where(CycleChildModel.cycle_id == cycle.id)).all()
+        assert len(children) == 0
 
     def test_link_duplicate_case_rejected(self, patch_rx_session, make_cycle, make_case, make_step):
         cycle = make_cycle(name="C")
@@ -298,8 +301,11 @@ class TestLinkCase:
         state.cases_for_search = [case]
         state.link_case(case.id)
         state.cases_for_search = [case]
-        result = state.link_case(case.id)
-        assert result is not None
+        state.link_case(case.id)
+
+        session = patch_rx_session
+        children = session.exec(select(CycleChildModel).where(CycleChildModel.cycle_id == cycle.id)).all()
+        assert len(children) == 1
 
 
 class TestLinkScenario:
@@ -324,8 +330,11 @@ class TestLinkScenario:
         state.scenarios_for_search = [scenario]
         state.link_scenario(scenario.id)
         state.scenarios_for_search = [scenario]
-        result = state.link_scenario(scenario.id)
-        assert result is not None
+        state.link_scenario(scenario.id)
+
+        session = patch_rx_session
+        children = session.exec(select(CycleChildModel).where(CycleChildModel.cycle_id == cycle.id)).all()
+        assert len(children) == 1
 
 
 class TestLinkSuite:
@@ -343,38 +352,29 @@ class TestLinkSuite:
         assert children[0].child_type_id == consts.CHILD_TYPE_SUITE
 
 
+def _create_snapshot(session, make_cycle, make_case, make_step, num_steps=1):
+    """Helper: create a cycle with one case and N steps, then generate its snapshot."""
+    cycle = make_cycle(name="C")
+    case = make_case(name="TC")
+    for i in range(1, num_steps + 1):
+        make_step(case_id=case.id, order=i, action=f"Step {i}", expected=f"E{i}")
+    session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
+    session.commit()
+    state = _make_state(cycle_id_value=str(cycle.id))
+    state.add_iteration_snapshot(cycle.id)
+    iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
+    return cycle, state, iteration
+
+
 class TestIterationSnapshot:
     def test_add_iteration_snapshot_creates_iteration(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        cycle = make_cycle(name="C")
-        case = make_case(name="TC")
-        make_step(case_id=case.id, order=1, action="Click", expected="Page loads")
-
-        session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
-        session.commit()
-
-        state = _make_state(cycle_id_value=str(cycle.id))
-        state.add_iteration_snapshot(cycle.id)
-
-        iterations = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).all()
-        assert len(iterations) == 1
-        assert iterations[0].iteration_status_id == consts.ITERATION_STATUS_NOT_STARTED
+        cycle, _, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
+        assert iteration is not None
+        assert iteration.iteration_status_id == consts.ITERATION_STATUS_NOT_STARTED
 
     def test_snapshot_contains_case_and_steps(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        cycle = make_cycle(name="C")
-        case = make_case(name="TC")
-        make_step(case_id=case.id, order=1, action="Click", expected="Page loads")
-        make_step(case_id=case.id, order=2, action="Type", expected="Text appears")
-
-        session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
-        session.commit()
-
-        state = _make_state(cycle_id_value=str(cycle.id))
-        state.add_iteration_snapshot(cycle.id)
-
-        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
-        snapshots = session.exec(
+        _, _, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step, num_steps=2)
+        snapshots = patch_rx_session.exec(
             select(IterationSnapshotModel).where(IterationSnapshotModel.iteration_id == iteration.id)
             .order_by(IterationSnapshotModel.order)
         ).all()
@@ -388,51 +388,26 @@ class TestIterationSnapshot:
         assert snapshots[2].child_type == consts.CHILD_TYPE_STEP
 
     def test_pass_step_updates_status(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        cycle = make_cycle(name="C")
-        case = make_case(name="TC")
-        make_step(case_id=case.id, order=1, action="Click", expected="Done")
-
+        _, state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
         session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
-        session.commit()
+        step = session.exec(select(IterationSnapshotModel).where(
+            IterationSnapshotModel.iteration_id == iteration.id,
+            IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
+        )).first()
 
-        state = _make_state(cycle_id_value=str(cycle.id))
-        state.add_iteration_snapshot(cycle.id)
-
-        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
-        step_snapshot = session.exec(
-            select(IterationSnapshotModel).where(
-                IterationSnapshotModel.iteration_id == iteration.id,
-                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
-            )
-        ).first()
-
-        state.pass_iteration_snapshot_step(step_snapshot.id)
+        state.pass_iteration_snapshot_step(step.id)
 
         session.expire_all()
-        updated = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == step_snapshot.id)).first()
+        updated = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == step.id)).first()
         assert updated.child_status_id == consts.SNAPSHOT_STATUS_PASS
 
     def test_fail_step_blocks_following_steps(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        cycle = make_cycle(name="C")
-        case = make_case(name="TC")
-        make_step(case_id=case.id, order=1, action="Step 1", expected="E1")
-        make_step(case_id=case.id, order=2, action="Step 2", expected="E2")
-
+        _, state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step, num_steps=2)
         session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
-        session.commit()
-
-        state = _make_state(cycle_id_value=str(cycle.id))
-        state.add_iteration_snapshot(cycle.id)
-
-        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
-        steps = session.exec(
-            select(IterationSnapshotModel).where(
-                IterationSnapshotModel.iteration_id == iteration.id,
-                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
-            ).order_by(IterationSnapshotModel.order)
-        ).all()
+        steps = session.exec(select(IterationSnapshotModel).where(
+            IterationSnapshotModel.iteration_id == iteration.id,
+            IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
+        ).order_by(IterationSnapshotModel.order)).all()
 
         state.fail_iteration_snapshot_step(steps[0].id)
 
@@ -443,29 +418,17 @@ class TestIterationSnapshot:
         assert blocked.child_status_id == consts.SNAPSHOT_STATUS_BLOCKED
 
     def test_skip_step_updates_status(self, patch_rx_session, make_cycle, make_case, make_step, seeded_db):
-        cycle = make_cycle(name="C")
-        case = make_case(name="TC")
-        make_step(case_id=case.id, order=1, action="Click", expected="Done")
-
+        _, state, iteration = _create_snapshot(patch_rx_session, make_cycle, make_case, make_step)
         session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1))
-        session.commit()
+        step = session.exec(select(IterationSnapshotModel).where(
+            IterationSnapshotModel.iteration_id == iteration.id,
+            IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
+        )).first()
 
-        state = _make_state(cycle_id_value=str(cycle.id))
-        state.add_iteration_snapshot(cycle.id)
-
-        iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).first()
-        step_snapshot = session.exec(
-            select(IterationSnapshotModel).where(
-                IterationSnapshotModel.iteration_id == iteration.id,
-                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP
-            )
-        ).first()
-
-        state.skip_iteration_snapshot_step(step_snapshot.id)
+        state.skip_iteration_snapshot_step(step.id)
 
         session.expire_all()
-        updated = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == step_snapshot.id)).first()
+        updated = session.exec(select(IterationSnapshotModel).where(IterationSnapshotModel.id == step.id)).first()
         assert updated.child_status_id == consts.SNAPSHOT_STATUS_SKIPPED
 
     def test_empty_cycle_no_snapshot(self, patch_rx_session, make_cycle, seeded_db):
@@ -473,8 +436,7 @@ class TestIterationSnapshot:
         state = _make_state(cycle_id_value=str(cycle.id))
         state.add_iteration_snapshot(cycle.id)
 
-        session = patch_rx_session
-        iterations = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).all()
+        iterations = patch_rx_session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle.id)).all()
         assert len(iterations) == 0
 
 
