@@ -8,7 +8,7 @@ from ..scenario.model import ScenarioModel
 
 from sqlmodel import select, cast, String
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order
 
 SUITES_ROUTE = consts.normalize_route(routes.SUITES)
 
@@ -129,16 +129,7 @@ class SuiteState(rx.State):
         return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
-        with rx.session() as session:
-            linked_scenarios:SuiteChildModel = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id)).all()
-            max_order = 0
-            for linked_scenario in linked_scenarios:
-                if ((linked_scenario.child_id == child_id) and (linked_scenario.child_type_id == child_type_id)):
-                    return -1
-                
-                if linked_scenario.order > max_order:
-                    max_order = linked_scenario.order
-            return max_order + 1
+        return _get_max_child_order(SuiteChildModel, "suite_id", self.suite_id, child_id, child_type_id)
 
     def filter_test_cases(self, search_case_value):
         self.search_case_value = search_case_value

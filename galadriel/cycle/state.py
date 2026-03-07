@@ -13,7 +13,7 @@ from ..iteration.model import IterationModel, IterationStatusModel, IterationSna
 from sqlmodel import select, asc, cast, String, desc
 
 from ..utils import jira, consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -243,16 +243,7 @@ class CycleState(rx.State):
         return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
-        with rx.session() as session:
-            linked_children:CycleChildModel = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id)).all()
-            max_order = 0
-            for linked_child in linked_children:
-                if ((linked_child.child_id == child_id) and (linked_child.child_type_id == child_type_id)):
-                    return -1
-                
-                if linked_child.order > max_order:
-                    max_order = linked_child.order
-            return max_order + 1
+        return _get_max_child_order(CycleChildModel, "cycle_id", self.cycle_id, child_id, child_type_id)
         
     def duplicate_cycle_children(self, origin_cycle_id:int, target_cycle_id:int):
         with rx.session() as session:
