@@ -29,7 +29,7 @@ class SuiteState(rx.State):
 
     @rx.var(cache=True)
     def suite_id(self) -> str:
-        return self.router.page.params.get(consts.FIELD_ID, "")
+        return self.router._page.params.get(consts.FIELD_ID, "")
     
     @rx.var(cache=True)
     def suite_url(self) -> str:

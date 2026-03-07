@@ -24,7 +24,7 @@ class CycleState(rx.State):
 
     @rx.var(cache=True)
     def cycle_id(self) -> str:
-        return self.router.page.params.get(consts.FIELD_ID, "")
+        return self.router._page.params.get(consts.FIELD_ID, "")
 
     @rx.var(cache=True)
     def cycle_url(self) -> str:
@@ -502,6 +502,7 @@ class CycleState(rx.State):
             if (self.cycle_id == ""):
                 self.cycle = None
                 return
+            self.cycle = session.exec(CycleModel.select().where(CycleModel.id == self.cycle_id)).one_or_none()
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             if iteration is None:
                 self.iteration_snapshot_items = []

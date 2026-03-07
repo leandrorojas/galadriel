@@ -24,7 +24,7 @@ def case_edit_form() -> rx.Component:
             rx.input(
                 type="hidden",
                 name="case_id",
-                value=case.id
+                value=rx.cond(case.id, case.id, "")
             ),
             display="none",
         ),
@@ -44,7 +44,7 @@ def step_add_form(disable_edit:bool) -> rx.Component:
     test_case = AddStepState.case
 
     return rx.form(
-        rx.box(rx.input(type="hidden", name="case_id", value=test_case.id), display="none",),
+        rx.box(rx.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, "")), display="none",),
         rx.hstack(
             rx.input(name="action", placeholder="Action", width="50%"),
             rx.input(name="expected", placeholder="Expected", width="50%"),

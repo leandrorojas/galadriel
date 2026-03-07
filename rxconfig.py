@@ -7,6 +7,7 @@ YAML_JIRA_SECTION = "jira"
 
 config = rx.Config(
     app_name="galadriel",
+    plugins=[rx.plugins.SitemapPlugin()],
     db_url="sqlite:///galadriel.db",
     img_src="/galadriel.320x320.jpg",
     tailwind=None,
