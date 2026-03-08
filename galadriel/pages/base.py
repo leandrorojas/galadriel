@@ -48,16 +48,16 @@ def private_page(content: rx.Component, *args) -> rx.Component:
 #galadriel home page
 def base_page(content: rx.Component, *args) -> rx.Component:
     top_navbar = TopNavBar()
-    return rx.fragment(
-        _sidebar_layout(
-            content,
-            display=rx.cond(Session.is_authenticated, "flex", "none"),
+    return rx.cond(
+        Session.is_authenticated,
+        rx.fragment(
+            _sidebar_layout(content),
+            *args,
         ),
-        rx.box(
+        rx.fragment(
             top_navbar.navbar(),
             rx.box(content),
             rx.color_mode.button(position="bottom-left"),
-            display=rx.cond(Session.is_authenticated, "none", "block"),
+            *args,
         ),
-        *args,
     )
