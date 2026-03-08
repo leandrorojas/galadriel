@@ -1,7 +1,10 @@
 import reflex as rx
+import logging
 from typing import List
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+logger = logging.getLogger(__name__)
 
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
@@ -131,6 +134,8 @@ class DashboardState(rx.State):
         ).all()
 
         for updated_case in updated_cases:
+            if updated_case.updated is None:
+                continue
             case_date = updated_case.updated.strftime("%Y-%m-%d")
             for trend_entry in trend_data:
                 trend_entry_date = datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")
@@ -178,10 +183,7 @@ class DashboardState(rx.State):
                     break
                 raw_issue = results.get(linked_bug.issue_key)
                 if raw_issue is None:
-                    async with self:
-                        self._loading_bugs = False
-                        self.linked_bugs = []
-                    return rx.toast.error("there was an error while loading the linked bugs")
+                    continue
                 if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
                     bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
 
@@ -189,5 +191,8 @@ class DashboardState(rx.State):
                 self._loading_bugs = False
                 self.linked_bugs = bugs
         except Exception:
+            logger.exception("Unexpected error loading linked bugs")
             async with self:
                 self._loading_bugs = False
+                self.linked_bugs = []
+            return rx.toast.error("there was an error while loading the linked bugs")
