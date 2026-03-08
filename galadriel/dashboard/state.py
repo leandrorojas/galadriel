@@ -46,6 +46,7 @@ class DashboardState(rx.State):
                 self.blocked_cases = 0
                 self.cases_without_bug = 0
                 self.pie_chart_data = []
+                self.linked_bugs = []
                 self.trend_data = self.__build_empty_trend_data()
                 return
 
@@ -78,15 +79,16 @@ class DashboardState(rx.State):
             self.skipped_cases = skipped
             self.blocked_cases = blocked
 
-            linked_count = 0
+            steps_with_bugs = 0
             if failed_step_ids:
-                linked_count = len(session.exec(
-                    select(IterationSnapshotLinkedIssues).where(
+                linked_issues = session.exec(
+                    select(IterationSnapshotLinkedIssues.iteration_snapshot_id).where(
                         col(IterationSnapshotLinkedIssues.iteration_snapshot_id).in_(failed_step_ids),
                         IterationSnapshotLinkedIssues.unlinked == None,
                     )
-                ).all())
-            self.cases_without_bug = failed - linked_count
+                ).all()
+                steps_with_bugs = len(set(linked_issues))
+            self.cases_without_bug = failed - steps_with_bugs
 
             total = passed + failed + blocked
             if total > 0:
@@ -175,7 +177,11 @@ class DashboardState(rx.State):
                 futures = {executor.submit(_fetch_issue, key): key for key in unique_keys}
                 for future in as_completed(futures):
                     key = futures[future]
-                    results[key] = future.result()
+                    try:
+                        results[key] = future.result()
+                    except Exception:
+                        logger.exception("Failed to fetch Jira issue %s", key)
+                        results[key] = None
 
             bugs = []
             for linked_bug in all_linked_bugs:
