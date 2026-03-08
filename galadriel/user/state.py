@@ -1,3 +1,5 @@
+"""User state management and event handlers."""
+
 import reflex as rx
 import reflex_local_auth
 
@@ -13,11 +15,15 @@ from enum import Enum
 USERS_ROUTE = consts.normalize_route(routes.USERS)
 
 class UserRole(Enum):
+    """Enumerates application-level user roles."""
+
     ADMIN = 0
     EDITOR = 2
     VIEWER = 1
 
 class UserState(rx.State):
+    """Manages user listing and detail retrieval."""
+
     users: List['GaladrielUserDisplay'] = []
     user: Optional['GaladrielUserDisplay'] = None
 
@@ -35,6 +41,7 @@ class UserState(rx.State):
         return f"{USERS_ROUTE}/{self.user.galadriel_user_id}/edit"
 
     def load_users(self):
+        """Load all users with their roles and display info."""
         self.users.clear()
         with rx.session() as session:
             all_users = session.exec(GaladrielUser.select()).all()
@@ -58,6 +65,7 @@ class UserState(rx.State):
                     )
 
     def get_user_detail(self):
+        """Load a single user by their route ID."""
         with rx.session() as session:
             if (self.user_id == -1):
                 self.user = None

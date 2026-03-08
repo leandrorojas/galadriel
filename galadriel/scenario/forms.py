@@ -1,7 +1,10 @@
+"""Forms for adding and editing test scenarios."""
+
 import reflex as rx
 from .state import AddScenarioState, EditScenarioState
 
 def scenario_add_form() -> rx.Component:
+    """Render the form for adding a new test scenario."""
     return rx.form(
         rx.vstack(
             rx.input(
@@ -16,6 +19,7 @@ def scenario_add_form() -> rx.Component:
     ),
 
 def scenario_edit_form() -> rx.Component:
+    """Render the form for editing an existing test scenario."""
     scenario = EditScenarioState.scenario
     scenario_name = scenario.name
 

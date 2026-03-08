@@ -1,3 +1,5 @@
+"""Authentication forms for user registration."""
+
 import reflex as rx
 import reflex_local_auth
 

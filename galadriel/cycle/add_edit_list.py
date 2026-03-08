@@ -1,3 +1,5 @@
+"""Test cycle list, add, and edit pages."""
+
 import reflex as rx
 from . import state, model
 from .forms import cycle_add_form, cycle_edit_form
@@ -118,6 +120,7 @@ def __table() -> rx.Component:
 #region LIST
 @require_login
 def cycle_list_page() -> rx.Component:
+    """Render the test cycles list page."""
     page_component = PageHeader()
 
     return base_page(
@@ -132,11 +135,13 @@ def cycle_list_page() -> rx.Component:
 #region ADD
 @require_login
 def cycle_add_page() -> rx.Component:
+    """Render the add test cycle page."""
     return add_page(cycle_add_form, "New Cycle", "flask-round", "to Cycles", routes.CYCLES)
 #endregion
 
 #region EDIT
 @require_login
 def cycle_edit_page() -> rx.Component:
+    """Render the edit test cycle page."""
     return edit_page(cycle_edit_form, "Edit Test Cycle", "flask-round", "to Cycles", "to Cycle Detail", routes.CYCLES, state.EditCycleState.cycle_url)
 #endregion

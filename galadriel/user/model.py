@@ -1,3 +1,5 @@
+"""User domain models."""
+
 import reflex as rx
 
 from datetime import datetime
@@ -7,6 +9,8 @@ from ..utils import timing
 from ..utils.mixins import TimestampMixin
 
 class GaladrielUser(TimestampMixin, rx.Model, table=True):
+    """Represents an application user."""
+
     __timestamp_fields__ = ("created", "updated")
 
     email:str
@@ -16,6 +20,8 @@ class GaladrielUser(TimestampMixin, rx.Model, table=True):
     updated: datetime = timing.updated_field(nullable=False)
 
 class GaladrielUserDisplay(rx.Model):
+    """Read-only view model for displaying user information."""
+
     local_user_id:int
     galadriel_user_id:int
     username:str
@@ -26,6 +32,8 @@ class GaladrielUserDisplay(rx.Model):
     updated: datetime
 
 class GaladrielUserRole(TimestampMixin, rx.Model, table=True):
+    """Represents a user role with permissions."""
+
     __timestamp_fields__ = ("created", "updated")
 
     name:str

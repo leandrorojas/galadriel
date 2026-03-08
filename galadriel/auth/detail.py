@@ -1,3 +1,5 @@
+"""User detail page."""
+
 import reflex as rx
 from ..navigation import routes
 from ..user import state
@@ -9,6 +11,7 @@ from ..auth.state import require_login, Session
 
 @require_login
 def user_detail_page() -> rx.Component:
+    """Render the user detail page."""
     title_badge = Badge()
     can_edit = Session.is_admin
     button_component = Button()

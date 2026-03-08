@@ -1,3 +1,5 @@
+"""Test suite list, add, and edit pages."""
+
 import reflex as rx
 from . import state, model
 from .forms import suite_add_form, suite_edit_form
@@ -52,6 +54,7 @@ def __table() -> rx.Component:
 
 @require_login
 def suites_list_page() -> rx.Component:
+    """Render the test suites list page."""
     header_component = PageHeader()
 
     return base_page(
@@ -64,8 +67,10 @@ def suites_list_page() -> rx.Component:
 
 @require_login
 def suite_add_page() -> rx.Component:
+    """Render the add test suite page."""
     return add_page(suite_add_form, "New Test Suite", "beaker", "to Suites", routes.SUITES)
 
 @require_login
 def suite_edit_page() -> rx.Component:
+    """Render the edit test suite page."""
     return edit_page(suite_edit_form, "Edit Test Suite", "beaker", "to Suites", "to Suite Detail", routes.SUITES, state.EditSuiteState.suite_url)

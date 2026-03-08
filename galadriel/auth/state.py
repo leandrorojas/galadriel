@@ -1,3 +1,5 @@
+"""Authentication state, session management, and role-based access control."""
+
 import reflex as rx
 import reflex_local_auth
 from reflex_local_auth.login import LoginState
@@ -30,8 +32,11 @@ def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     return protected_page
 
 class Register(reflex_local_auth.RegistrationState):
+    """Extends registration to create a Galadriel user with a default role."""
+
     # This event handler must be named something besides `handle_registration`!!!
     def handle_registration_email(self, form_data):
+        """Register a new user and assign the default viewer role."""
         registration_result = self.handle_registration(form_data)
         if self.new_user_id >= 0:
             with rx.session() as session:
@@ -43,6 +48,7 @@ class Register(reflex_local_auth.RegistrationState):
 
         return registration_result
 class Session(reflex_local_auth.LocalAuthState):
+    """Manages the authenticated session, user info, and role checks."""
 
     @rx.var(cache=True)
     def user_id(self) -> Optional[int]:
@@ -82,8 +88,10 @@ class Session(reflex_local_auth.LocalAuthState):
             return UserRole(galadriel_user.user_role)
 
     def on_load(self):
+        """Redirect unauthenticated users to the login page."""
         if not self.is_authenticated: return reflex_local_auth.LoginState.redir
 
     def perform_logout(self):
+        """Log out the current user and redirect to the home page."""
         self.do_logout()
         return rx.redirect("/")

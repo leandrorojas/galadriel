@@ -82,3 +82,4 @@ LocalUser → GaladrielUser → GaladrielUserRole
 
 - SonarQube/SonarCloud integration for static analysis
 - Alembic for database migrations (`alembic/` directory)
+- Docstrings on all modules, classes, and public functions/methods (one-liner style)

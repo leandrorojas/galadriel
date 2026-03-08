@@ -1,3 +1,5 @@
+"""Jira REST API integration for creating and retrieving issues."""
+
 from rxconfig import config
 
 import requests
@@ -45,7 +47,7 @@ def __get_issue_api_url(issue_key) -> str:
     return API_ISSUE + API_ISSUE_STATUS.format(issueIdOrKey=issue_key)
 
 def create_issue(summary:str, description:str) -> str:
-
+    """Create a Jira issue and return its key."""
     payload = json.dumps(
         {
         "fields": {
@@ -82,9 +84,11 @@ def create_issue(summary:str, description:str) -> str:
     return response.json()["key"]
 
 def get_issue_url(issue_key) -> str:
+    """Return the browsable URL for a Jira issue."""
     return f"{config.jira_url}/browse/{issue_key}"
 
 def get_issue(issue_key):
+    """Fetch a Jira issue by key and return its parsed JSON."""
     raw_response = __jira_hit(REQUEST_GET, __get_issue_api_url(issue_key))
     if raw_response is None:
         return None

@@ -1,3 +1,5 @@
+"""Test suite detail page with child management."""
+
 import reflex as rx
 from ..navigation import routes
 from . import state
@@ -111,6 +113,7 @@ def __suite_children_table() -> rx.Component:
 
 @require_login
 def suite_detail_page() -> rx.Component:
+    """Render the test suite detail page."""
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()

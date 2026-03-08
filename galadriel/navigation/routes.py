@@ -1,3 +1,5 @@
+"""Application route constants for all pages."""
+
 #galadriel
 import reflex_local_auth
 

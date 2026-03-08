@@ -1,3 +1,5 @@
+"""Shared constants and helper functions used across the application."""
+
 CASE_MODEL_ID = "casemodel.id"
 
 RETURN_VALUE = 0

@@ -1,3 +1,5 @@
+"""Test case state management and event handlers."""
+
 import reflex as rx
 
 from typing import List, Optional
@@ -13,6 +15,8 @@ from sqlmodel import select, cast, String
 CASE_ROUTE = consts.normalize_route(routes.CASES)
 
 class CaseState(rx.State):
+    """Manages test case CRUD, steps, and prerequisites."""
+
     cases: List['CaseModel'] = []
     case: Optional['CaseModel'] = None
 
@@ -43,6 +47,7 @@ class CaseState(rx.State):
         return f"{CASE_ROUTE}/{self.case.id}/edit"
 
     def get_case_detail(self):
+        """Load a single case by its route ID."""
         self.show_search = False
         with rx.session() as session:
             if (self.case_id == 0):
@@ -52,7 +57,8 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-      with rx.session() as session:
+        """Load all cases, optionally filtered by search value."""
+        with rx.session() as session:
             query = select(CaseModel)
             if self.search_value:
                 search_value = (f"%{str(self.search_value).lower()}%")
@@ -62,6 +68,7 @@ class CaseState(rx.State):
             self.cases = results
 
     def add_case(self, form_data:dict):
+        """Create a new test case from form data."""
         if (form_data["name"] == ""): return None
 
         with rx.session() as session:
@@ -74,6 +81,7 @@ class CaseState(rx.State):
         return consts.RETURN_VALUE
     
     def save_case_edits(self, case_id:int, updated_data:dict):
+        """Persist edits to an existing test case."""
         if (updated_data["name"] == ""): return None
 
         with rx.session() as session:
@@ -92,6 +100,7 @@ class CaseState(rx.State):
             return consts.RETURN_VALUE
 
     def to_case(self, edit_page=True):
+        """Redirect to the case detail or edit page."""
         if not self.case:
             return rx.redirect(routes.CASES)
         if edit_page:
@@ -99,11 +108,13 @@ class CaseState(rx.State):
         return rx.redirect(self.case_url)
     
     def load_steps(self):
+        """Load all steps for the current case, ordered by position."""
         with rx.session() as session:
             results = session.exec(StepModel.select().where(StepModel.case_id == self.case_id).order_by(StepModel.order)).all()
             self.steps = results
 
     def add_step(self, case_id:int, form_data:dict):
+        """Add a new step to the specified case."""
         if (form_data["action"] == ""):
             return rx.toast.error("action cannot be empty")
 
@@ -129,23 +140,27 @@ class CaseState(rx.State):
         return rx.toast.success("step added!")
         
     def delete_step(self, step_id:int):
+        """Delete a step and reorder remaining steps."""
         toast = reorder_delete(StepModel, step_id, "case_id", self.case_id, "step", min_count=1)
         self.load_steps()
         return toast
     
     def move_step_up(self, step_id:int):
+        """Move a step one position up in the order."""
         toast = reorder_move_up(StepModel, step_id, "case_id", self.case_id, "step")
         if toast is None:
             self.load_steps()
         return toast
 
     def move_step_down(self, step_id:int):
+        """Move a step one position down in the order."""
         toast = reorder_move_down(StepModel, step_id, "case_id", self.case_id, "step")
         if toast is None:
             self.load_steps()
         return toast
 
     def load_prerequisites(self):
+        """Load all prerequisites for the current case."""
         with rx.session() as session:
             results = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == self.case_id).order_by(PrerequisiteModel.order)).all()
             if (len(results) > 0):
@@ -155,18 +170,22 @@ class CaseState(rx.State):
             self.prerequisites = results 
 
     def filter_cases(self, search_value):
+        """Update the search filter and reload cases."""
         self.search_value = search_value
         self.load_cases()
 
     def has_steps(self, case_id:int) -> bool:
+        """Return True if the case has at least one step."""
         return _has_steps(StepModel, case_id)
 
     def has_any_prerequisites(self, case_id:int) -> bool:
+        """Return True if the case has any prerequisites."""
         with rx.session() as session:
             child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == case_id)).first()
             return (child_prerequisites != None)
 
     def is_prerequisite_redundant(self, prerequisite_id: int, target_case_id: int) -> bool:
+        """Check if adding the prerequisite would create a circular dependency."""
         with rx.session() as session:
             child_prerequisites = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.case_id == prerequisite_id)).all()
 
@@ -178,6 +197,7 @@ class CaseState(rx.State):
         return False
 
     def add_prerequisite(self, prerequisite_id:int):
+        """Link a prerequisite case to the current case."""
         if (int(self.case_id) == prerequisite_id): return rx.toast.error("self cannot be prerequisite")
         
         if self.has_any_prerequisites(prerequisite_id):
@@ -215,38 +235,48 @@ class CaseState(rx.State):
         return rx.toast.success("prerequisite added!")
 
     def toggle_search(self):
+        """Toggle the search panel visibility."""
         self.show_search = not(self.show_search)
 
     def delete_prerequisite(self, prerequisite_id:int):
+        """Delete a prerequisite and reorder remaining ones."""
         toast = reorder_delete(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         self.load_prerequisites()
         return toast
 
     def move_prerequisite_up(self, prerequisite_id:int):
+        """Move a prerequisite one position up in the order."""
         toast = reorder_move_up(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         if toast is None:
             self.load_prerequisites()
         return toast
 
     def move_prerequisite_down(self, prerequisite_id:int):
+        """Move a prerequisite one position down in the order."""
         toast = reorder_move_down(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         if toast is None:
             self.load_prerequisites()
         return toast
             
 class AddCaseState(CaseState):
+    """Handles the add-case form submission."""
+
     form_data:dict = {}
 
     def handle_submit(self, form_data):
+        """Validate and create a new case from the form."""
         self.form_data = form_data
         result = self.add_case(form_data)
         if result is None: return rx.toast.error("name cannot be empty")
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
+    """Handles the edit-case form submission."""
+
     form_data:dict = {}
-    
+
     def handle_submit(self, form_data):
+        """Validate and save case edits from the form."""
         try:
             case_id = int(form_data.pop("case_id"))
         except (ValueError, KeyError):
@@ -258,12 +288,16 @@ class EditCaseState(CaseState):
         return rx.redirect(self.case_url)
     
     def get_detail_url(self, id:int):
+        """Return the detail URL for a given case ID."""
         return f"{CASE_ROUTE}/{id}"
     
 class AddStepState(CaseState):
+    """Handles the add-step form submission."""
+
     form_data:dict = {}
-    
+
     def handle_submit(self, form_data):
+        """Validate and add a new step from the form."""
         try:
             case_id = int(form_data.pop("case_id"))
         except (ValueError, KeyError):

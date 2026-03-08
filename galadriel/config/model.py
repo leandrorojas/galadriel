@@ -1,3 +1,5 @@
+"""Application configuration domain models."""
+
 from datetime import datetime
 import sqlalchemy as sa
 from sqlmodel import Field
@@ -7,6 +9,8 @@ from ..utils import timing
 from ..utils.mixins import TimestampMixin
 
 class ConfigModel(TimestampMixin, rx.Model, table=True):
+    """Represents a key-value configuration entry."""
+
     name:str
     value:str
     created: datetime = Field(

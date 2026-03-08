@@ -1,7 +1,10 @@
+"""Forms for adding and editing test cases and steps."""
+
 import reflex as rx
 from .state import AddCaseState, EditCaseState, AddStepState
 
 def case_add_form() -> rx.Component:
+    """Render the form for adding a new test case."""
     return rx.form(
         rx.vstack(
             rx.input(
@@ -16,6 +19,7 @@ def case_add_form() -> rx.Component:
     ),
 
 def case_edit_form() -> rx.Component:
+    """Render the form for editing an existing test case."""
     case = EditCaseState.case
     case_name = case.name
 
@@ -41,6 +45,7 @@ def case_edit_form() -> rx.Component:
     ),
 
 def step_add_form(disable_edit:bool) -> rx.Component:
+    """Render the inline form for adding a step to a test case."""
     test_case = AddStepState.case
 
     return rx.form(

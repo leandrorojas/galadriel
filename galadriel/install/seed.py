@@ -1,3 +1,5 @@
+"""Database seeding logic for first-run initialization."""
+
 import reflex as rx
 import reflex_local_auth
 
@@ -63,11 +65,13 @@ galadriel_users = [
 ]
 
 def is_first_run() -> bool:
+    """Return True if the database has not been seeded yet."""
     with rx.session() as session:
         to_return = session.exec(ConfigModel.select().where(ConfigModel.name == "first_run")).one_or_none()
         return (to_return == None)
     
 def seed_db():
+    """Clear existing seed data and insert fresh seed records."""
     __clear_seed_data()
     __insert_seed_data()
 
@@ -118,6 +122,7 @@ def __insert_seed_data():
         session.commit()
 
 def set_first_run():
+    """Mark the database as seeded so seeding does not repeat."""
     first_run:dict = {"name":"first_run", "value": "1"}
 
     with rx.session() as session:

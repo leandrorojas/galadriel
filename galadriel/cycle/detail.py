@@ -1,3 +1,5 @@
+"""Test cycle detail page with child management."""
+
 import reflex as rx
 from ..navigation import routes
 from . import state
@@ -138,6 +140,7 @@ def __cycle_children_table() -> rx.Component:
 
 @require_login
 def cycle_detail_page() -> rx.Component:
+    """Render the test cycle detail page."""
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()

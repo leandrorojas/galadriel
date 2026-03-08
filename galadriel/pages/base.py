@@ -1,3 +1,5 @@
+"""Base page layouts for public and authenticated views."""
+
 import reflex as rx
 from ..ui.components import TopNavBar, SideBar
 from ..auth.state import Session
@@ -31,6 +33,7 @@ def _sidebar_layout(content: rx.Component, **kwargs) -> rx.hstack:
     )
 
 def public_page(content: rx.Component, *args) -> rx.Component:
+    """Render a public page with top navigation bar."""
     top_navbar = TopNavBar()
     return rx.fragment(
         top_navbar.navbar(),
@@ -40,13 +43,14 @@ def public_page(content: rx.Component, *args) -> rx.Component:
     )
 
 def private_page(content: rx.Component, *args) -> rx.Component:
+    """Render a private page with sidebar layout."""
     return rx.fragment(
         _sidebar_layout(content),
         *args,
     )
 
-#galadriel home page
 def base_page(content: rx.Component, *args) -> rx.Component:
+    """Render a page that adapts layout based on authentication status."""
     top_navbar = TopNavBar()
     return rx.cond(
         Session.is_authenticated,

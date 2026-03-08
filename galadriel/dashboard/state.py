@@ -1,3 +1,5 @@
+"""Dashboard state management, metrics computation, and linked bug loading."""
+
 import reflex as rx
 import logging
 from typing import List
@@ -22,6 +24,7 @@ def _fetch_issue(issue_key: str) -> dict | None:
 
 
 class DashboardState(rx.State):
+    """Computes dashboard metrics, trend data, and linked bug information."""
 
     linked_bugs: List[List[str]] = []
 
@@ -34,6 +37,7 @@ class DashboardState(rx.State):
     _loading_bugs: bool = False
 
     def load_dashboard(self):
+        """Load all dashboard metrics from in-progress iterations."""
         with rx.session() as session:
             in_progress = session.exec(
                 select(IterationModel).where(IterationModel.iteration_status_id == consts.ITERATION_STATUS_IN_PROGRESS)
@@ -156,6 +160,7 @@ class DashboardState(rx.State):
 
     @rx.event(background=True)
     async def load_linked_bugs(self):
+        """Fetch linked Jira bugs in the background."""
         async with self:
             if self._loading_bugs:
                 return

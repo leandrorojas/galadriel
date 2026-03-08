@@ -1,3 +1,5 @@
+"""Test scenario detail page with linked test cases."""
+
 import reflex as rx
 from ..navigation import routes
 from . import state
@@ -77,6 +79,7 @@ def __search_cases_table() -> rx.Component:
 
 @require_login
 def scenario_detail_page() -> rx.Component:
+    """Render the test scenario detail page."""
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()

@@ -1,3 +1,5 @@
+"""Iteration detail page for cycle test execution."""
+
 import reflex as rx
 from ..pages import base_page
 from ..navigation import routes
@@ -148,6 +150,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
 
 @require_login
 def iteration_page() -> rx.Component:
+    """Render the iteration snapshot execution page."""
     title_badge = Badge()
     table_component = Table()
 
