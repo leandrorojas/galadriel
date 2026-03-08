@@ -238,27 +238,27 @@ class CycleState(rx.State):
             self.children = results
 
     def unlink_child(self, child_id:int):
-        """Remove a child from the cycle and reorder remaining children."""
+        """Remove a child from this cycle and reorder siblings."""
         toast = reorder_delete(CycleChildModel, child_id, "cycle_id", self.cycle_id, "child")
         self.load_children()
         return toast
 
     def move_child_up(self, child_id:int):
-        """Move a child one position up in the order."""
+        """Move a cycle child one position up."""
         toast = reorder_move_up(CycleChildModel, child_id, "cycle_id", self.cycle_id, "child")
         if toast is None:
             self.load_children()
         return toast
 
     def move_child_down(self, child_id:int):
-        """Move a child one position down in the order."""
+        """Move a cycle child one position down."""
         toast = reorder_move_down(CycleChildModel, child_id, "cycle_id", self.cycle_id, "child")
         if toast is None:
             self.load_children()
         return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
-        """Return the next available order value for a new child."""
+        """Return the next order value for a new cycle child."""
         return _get_max_child_order(CycleChildModel, "cycle_id", self.cycle_id, child_id, child_type_id)
 
     def duplicate_cycle_children(self, origin_cycle_id:int, target_cycle_id:int):
@@ -330,7 +330,7 @@ class CycleState(rx.State):
         return rx.toast.success("case added!")
     
     def has_steps(self, case_id:int) -> bool:
-        """Return True if the case has at least one step."""
+        """Check whether the case has steps before linking to the cycle."""
         return _has_steps(StepModel, case_id)
     #endregion
 

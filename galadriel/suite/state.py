@@ -124,27 +124,27 @@ class SuiteState(rx.State):
             self.children = results
 
     def unlink_child(self, suite_child_id:int):
-        """Remove a child from the suite and reorder remaining children."""
+        """Remove a child from this suite and reorder siblings."""
         toast = reorder_delete(SuiteChildModel, suite_child_id, "suite_id", self.suite_id, "child")
         self.load_children()
         return toast
 
     def move_child_up(self, child_id:int):
-        """Move a child one position up in the order."""
+        """Move a suite child one position up."""
         toast = reorder_move_up(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
         if toast is None:
             self.load_children()
         return toast
 
     def move_child_down(self, child_id:int):
-        """Move a child one position down in the order."""
+        """Move a suite child one position down."""
         toast = reorder_move_down(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
         if toast is None:
             self.load_children()
         return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
-        """Return the next available order value for a new child."""
+        """Return the next order value for a new suite child."""
         return _get_max_child_order(SuiteChildModel, "suite_id", self.suite_id, child_id, child_type_id)
 
     def filter_test_cases(self, search_case_value):
@@ -193,7 +193,7 @@ class SuiteState(rx.State):
         return rx.toast.success("case added!")
     
     def has_steps(self, case_id:int) -> bool:
-        """Return True if the case has at least one step."""
+        """Check whether the given case contains any steps."""
         return _has_steps(StepModel, case_id)
 
     def toggle_scenario_search(self):
