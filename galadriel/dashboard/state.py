@@ -1,146 +1,204 @@
 import reflex as rx
+import logging
 from typing import List
 from datetime import datetime, timedelta, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+logger = logging.getLogger(__name__)
 
 from ..iteration.model import IterationModel
 from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIssues
 
-from sqlmodel import desc
+from sqlmodel import select, col, desc
 from ..utils import jira, timing, consts
 from rxconfig import config
 
+MAX_LINKED_BUGS = 5
+
+
+def _fetch_issue(issue_key: str) -> dict | None:
+    """Fetch a single Jira issue. Designed to run in a thread pool."""
+    return jira.get_issue(issue_key)
+
+
 class DashboardState(rx.State):
 
-    linked_bugs: List[str] = []
+    linked_bugs: List[List[str]] = []
 
-    def __get_in_progress_iterations(self):
+    cycle_count: int = 0
+    skipped_cases: int = 0
+    blocked_cases: int = 0
+    cases_without_bug: int = 0
+    pie_chart_data: list = []
+    trend_data: list = []
+    _loading_bugs: bool = False
+
+    def load_dashboard(self):
         with rx.session() as session:
-            return session.exec(IterationModel.select().where(IterationModel.iteration_status_id == consts.ITERATION_STATUS_IN_PROGRESS)).all()
-        
-    def __get_case_count_by_status(self, status_id: int) -> int:
-        in_progress_iter = self.__get_in_progress_iterations()
-        case_count = 0
+            in_progress = session.exec(
+                select(IterationModel).where(IterationModel.iteration_status_id == consts.ITERATION_STATUS_IN_PROGRESS)
+            ).all()
 
-        with rx.session() as session:
-            for iteration in in_progress_iter:
-                case_count = case_count + len(session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == status_id)).all())
+            self.cycle_count = len(in_progress)
 
-        return case_count
+            if not in_progress:
+                self.skipped_cases = 0
+                self.blocked_cases = 0
+                self.cases_without_bug = 0
+                self.pie_chart_data = []
+                self.linked_bugs = []
+                self.trend_data = self.__build_empty_trend_data()
+                return
 
-    @rx.var(cache=False)
-    def cycle_count(self) -> int:
-        return len(self.__get_in_progress_iterations())
-        
-    @rx.var(cache=False)
-    def skipped_cases(self) -> int:
-        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_SKIPPED)
-    
-    @rx.var(cache=False)
-    def cases_without_bug(self) -> int:
-        in_progress_iter = self.__get_in_progress_iterations()
-        cases_without_bug_count = 0
-        failed_cases_count = 0
+            iteration_ids = [it.id for it in in_progress]
 
-        for iteration in in_progress_iter:
-            with rx.session() as session:
-                failed_cases = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP, IterationSnapshotModel.iteration_id == iteration.id, IterationSnapshotModel.child_status_id == consts.SNAPSHOT_STATUS_FAILED)).all()
-                if (failed_cases != None):
-                    failed_cases_count += len(failed_cases)
+            all_steps = session.exec(
+                select(IterationSnapshotModel).where(
+                    IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP,
+                    col(IterationSnapshotModel.iteration_id).in_(iteration_ids),
+                )
+            ).all()
 
-                for failed_case in failed_cases:
-                    linked_issues = session.exec(IterationSnapshotLinkedIssues.select().where(IterationSnapshotLinkedIssues.iteration_snapshot_id == failed_case.id, IterationSnapshotLinkedIssues.unlinked == None)).all()
-                    cases_without_bug_count += len(linked_issues)
+            passed = 0
+            failed = 0
+            blocked = 0
+            skipped = 0
+            failed_step_ids = []
 
-        return failed_cases_count - cases_without_bug_count
-    
-    @rx.var(cache=False)
-    def blocked_cases(self) -> int:
-        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_BLOCKED)
-    
-    def __get_passed_cases(self) -> int:
-        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_PASS)
-    
-    def __get_failed_cases(self) -> int:
-        return self.__get_case_count_by_status(consts.SNAPSHOT_STATUS_FAILED)
-    
-    @rx.var(cache=False)
-    def get_pie_chart_data(self) -> list:
-        passed_cases = self.__get_passed_cases()
-        failed_cases = self.__get_failed_cases()
-        blocked_cases = self.blocked_cases
+            for step in all_steps:
+                if step.child_status_id == consts.SNAPSHOT_STATUS_PASS:
+                    passed += 1
+                elif step.child_status_id == consts.SNAPSHOT_STATUS_FAILED:
+                    failed += 1
+                    failed_step_ids.append(step.id)
+                elif step.child_status_id == consts.SNAPSHOT_STATUS_BLOCKED:
+                    blocked += 1
+                elif step.child_status_id == consts.SNAPSHOT_STATUS_SKIPPED:
+                    skipped += 1
 
-        total_cases = passed_cases + failed_cases + blocked_cases
+            self.skipped_cases = skipped
+            self.blocked_cases = blocked
 
-        passed_percentage = round((passed_cases / total_cases) * 100, 2) if total_cases > 0 else 0
-        failed_percentage = round((failed_cases / total_cases) * 100, 2) if total_cases > 0 else 0
-        blocked_percentage = round((blocked_cases / total_cases) * 100, 2) if total_cases > 0 else 0
-
-        return [
-            {"name": "Passed", "value": passed_percentage, "fill": "#71d083"},
-            {"name": "Failed", "value": failed_percentage, "fill": "#b0a9ff"},
-            {"name": "Blocked", "value": blocked_percentage, "fill": "#ff8a88"},
-        ]
-    
-    async def load_linked_bugs(self):
-        self.linked_bugs = []
-        appended_bugs = 0
-        with rx.session() as session:
-            all_linked_bugs = session.exec(
-                IterationSnapshotLinkedIssues.select()
-                    .where(IterationSnapshotLinkedIssues.unlinked == None)
-                    .order_by(desc(IterationSnapshotLinkedIssues.created))
+            steps_with_bugs = 0
+            if failed_step_ids:
+                linked_issues = session.exec(
+                    select(IterationSnapshotLinkedIssues.iteration_snapshot_id).where(
+                        col(IterationSnapshotLinkedIssues.iteration_snapshot_id).in_(failed_step_ids),
+                        IterationSnapshotLinkedIssues.unlinked == None,
+                    )
                 ).all()
+                steps_with_bugs = len(set(linked_issues))
+            self.cases_without_bug = failed - steps_with_bugs
 
-        for linked_bug in all_linked_bugs:
-            if (appended_bugs < 5):
-                raw_issue = jira.get_issue(linked_bug.issue_key)
-
-                if raw_issue is None:
-                    return rx.toast.error("there was an error while loading the linked bugs")
-                if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
-                    self.linked_bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
-                    appended_bugs += 1
+            total = passed + failed + blocked
+            if total > 0:
+                self.pie_chart_data = [
+                    {"name": "Passed", "value": round((passed / total) * 100, 2), "fill": "#71d083"},
+                    {"name": "Failed", "value": round((failed / total) * 100, 2), "fill": "#b0a9ff"},
+                    {"name": "Blocked", "value": round((blocked / total) * 100, 2), "fill": "#ff8a88"},
+                ]
             else:
-                break
+                self.pie_chart_data = []
 
-    def __build_trend_data(self):
+            self.trend_data = self.__compute_trend_data(session)
+
+        return DashboardState.load_linked_bugs
+
+    def __build_empty_trend_data(self) -> list:
         trend_data = []
         current_utc_date = datetime.now(timezone.utc)
         for _ in range(11):
+            trend_data.append({"date": timing.convert_utc_to_local(current_utc_date).strftime("%Y-%m-%d"), "exec": 0, "passed": 0, "failed": 0, "blocked": 0})
+            current_utc_date = current_utc_date - timedelta(days=1)
+        trend_data.reverse()
+        return trend_data
+
+    def __compute_trend_data(self, session) -> list:
+        trend_data = []
+        current_utc_date = datetime.now(timezone.utc)
+        cutoff_date = current_utc_date - timedelta(days=11)
+
+        for _ in range(11):
             trend_data.append({"date": current_utc_date.strftime("%Y-%m-%d %H:%M:%S"), "exec": 0, "passed": 0, "failed": 0, "blocked": 0})
             current_utc_date = current_utc_date - timedelta(days=1)
-        return trend_data, current_utc_date
 
-    def __apply_case_to_trend(self, trend_data, updated_case):
-        STATUS_MAP = {consts.SNAPSHOT_STATUS_PASS: "passed", consts.SNAPSHOT_STATUS_FAILED: "failed", consts.SNAPSHOT_STATUS_BLOCKED: "blocked"}
-        case_date = updated_case.updated.strftime("%Y-%m-%d")
+        status_map = {
+            consts.SNAPSHOT_STATUS_PASS: "passed",
+            consts.SNAPSHOT_STATUS_FAILED: "failed",
+            consts.SNAPSHOT_STATUS_BLOCKED: "blocked",
+        }
+
+        updated_cases = session.exec(
+            select(IterationSnapshotModel).where(
+                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP,
+                IterationSnapshotModel.updated >= cutoff_date,
+            ).order_by(desc(IterationSnapshotModel.updated))
+        ).all()
+
+        for updated_case in updated_cases:
+            if updated_case.updated is None:
+                continue
+            case_date = updated_case.updated.strftime("%Y-%m-%d")
+            for trend_entry in trend_data:
+                trend_entry_date = datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")
+                if trend_entry_date.strftime("%Y-%m-%d") == case_date:
+                    trend_entry["exec"] += 1
+                    status_key = status_map.get(updated_case.child_status_id)
+                    if status_key:
+                        trend_entry[status_key] += 1
+                    break
 
         for trend_entry in trend_data:
-            trend_entry_date = datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")
-            if trend_entry_date.strftime("%Y-%m-%d") == case_date:
-                trend_entry["exec"] += 1
-                status_key = STATUS_MAP.get(updated_case.child_status_id)
-                if status_key:
-                    trend_entry[status_key] += 1
-                break
+            trend_entry["date"] = timing.convert_utc_to_local(datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")).strftime("%Y-%m-%d")
 
-    @rx.var(cache=False)
-    def cases_trends(self) -> List:
-        trend_data, cutoff_date = self.__build_trend_data()
-
-        with rx.session() as session:
-            updated_cases = session.exec(IterationSnapshotModel.select().where(
-                IterationSnapshotModel.child_type == consts.CHILD_TYPE_STEP,
-                IterationSnapshotModel.updated >= cutoff_date)
-            .order_by(desc(IterationSnapshotModel.updated))).all()
-
-            if updated_cases is not None:
-                for updated_case in updated_cases:
-                    self.__apply_case_to_trend(trend_data, updated_case)
-
-                for trend_entry in trend_data:
-                    trend_entry["date"] = timing.convert_utc_to_local(datetime.strptime(trend_entry["date"], "%Y-%m-%d %H:%M:%S")).strftime("%Y-%m-%d")
-
-        list.reverse(trend_data)
+        trend_data.reverse()
         return trend_data
-    
+
+    @rx.event(background=True)
+    async def load_linked_bugs(self):
+        async with self:
+            if self._loading_bugs:
+                return
+            self._loading_bugs = True
+
+        try:
+            with rx.session() as session:
+                all_linked_bugs = session.exec(
+                    select(IterationSnapshotLinkedIssues)
+                        .where(IterationSnapshotLinkedIssues.unlinked == None)
+                        .order_by(desc(IterationSnapshotLinkedIssues.created))
+                        .limit(MAX_LINKED_BUGS * 2)
+                ).all()
+
+            unique_keys = list(dict.fromkeys(bug.issue_key for bug in all_linked_bugs))
+
+            results = {}
+            with ThreadPoolExecutor(max_workers=MAX_LINKED_BUGS) as executor:
+                futures = {executor.submit(_fetch_issue, key): key for key in unique_keys}
+                for future in as_completed(futures):
+                    key = futures[future]
+                    try:
+                        results[key] = future.result()
+                    except Exception:
+                        logger.exception("Failed to fetch Jira issue %s", key)
+                        results[key] = None
+
+            bugs = []
+            for linked_bug in all_linked_bugs:
+                if len(bugs) >= MAX_LINKED_BUGS:
+                    break
+                raw_issue = results.get(linked_bug.issue_key)
+                if raw_issue is None:
+                    continue
+                if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
+                    bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
+
+            async with self:
+                self._loading_bugs = False
+                self.linked_bugs = bugs
+        except Exception:
+            logger.exception("Unexpected error loading linked bugs")
+            async with self:
+                self._loading_bugs = False
+                self.linked_bugs = []
+            return rx.toast.error("there was an error while loading the linked bugs")

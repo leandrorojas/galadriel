@@ -94,7 +94,7 @@ app.add_page(cycle.cycle_edit_page, route=navigation.routes.CYCLE_EDIT, on_load=
 app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAIL)
 
 #Dashboard
-app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD)
+app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD, on_load=dashboard.DashboardState.load_dashboard)
 
 # Users
 app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=user.UserState.load_users)

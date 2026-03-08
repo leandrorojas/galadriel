@@ -27,7 +27,6 @@ def __table() -> rx.Component:
             ),
             rx.table.body(rx.foreach(DashboardState.linked_bugs, __show_linked_bug)),
             variant="surface", size="3", width="100%",
-            on_mount=DashboardState.load_linked_bugs,
         ),
 
 @require_login
@@ -55,7 +54,7 @@ def dashboard_page() -> rx.Component:
                         rx.text("Passed / Failed / Blocked Rate"),
                         rx.recharts.pie_chart(
                             rx.recharts.pie(
-                                data=DashboardState.get_pie_chart_data,
+                                data=DashboardState.pie_chart_data,
                                 data_key="value",
                                 name_key="name",
                                 fill="#8884d8",
@@ -68,7 +67,7 @@ def dashboard_page() -> rx.Component:
                     ),
                     rx.card(
                         rx.text("Trends"),
-                        charts.composed(DashboardState.cases_trends, "date", "exec", "passed", "failed"),
+                        charts.composed(DashboardState.trend_data, "date", "exec", "passed", "failed"),
                         width="36vw",
                     ),
                     spacing="4",
