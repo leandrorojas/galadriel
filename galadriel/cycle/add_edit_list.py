@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-
 from . import state, model
 from .forms import cycle_add_form, cycle_edit_form
 
@@ -12,7 +10,7 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment, SearchTable
 from ..utils import consts
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
     if cycle is None: return rx.fragment(child)
@@ -118,7 +116,7 @@ def __table() -> rx.Component:
     )
 
 #region LIST
-@reflex_local_auth.require_login
+@require_login
 def cycle_list_page() -> rx.Component:
     page_component = PageHeader()
 
@@ -132,13 +130,13 @@ def cycle_list_page() -> rx.Component:
 #endregion
 
 #region ADD
-@reflex_local_auth.require_login
+@require_login
 def cycle_add_page() -> rx.Component:
     return add_page(cycle_add_form, "New Cycle", "flask-round", "to Cycles", routes.CYCLES)
 #endregion
 
 #region EDIT
-@reflex_local_auth.require_login
+@require_login
 def cycle_edit_page() -> rx.Component:
     return edit_page(cycle_edit_form, "Edit Test Cycle", "flask-round", "to Cycles", "to Cycle Detail", routes.CYCLES, state.EditCycleState.cycle_url)
 #endregion

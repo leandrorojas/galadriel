@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-
 from ..navigation import routes
 from . import state
 from .. pages import base_page
@@ -11,7 +9,7 @@ from ..scenario.model import ScenarioModel
 
 from ..utils import consts
 
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 def __search_table_header():
     return SearchTable().header()
@@ -111,7 +109,7 @@ def __suite_children_table() -> rx.Component:
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def suite_detail_page() -> rx.Component:
     DISABLE_EDIT_MODE = ~Session.can_edit
 

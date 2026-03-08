@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-
 from .state import DashboardState
 
 from ..pages import base_page
@@ -8,6 +6,7 @@ from typing import List
 
 from ..ui.components import Badge, Table, Card, Chart
 from ..utils import consts
+from ..auth.state import require_login
 
 TEXT_CASES = " Case(s)"
 
@@ -31,7 +30,7 @@ def __table() -> rx.Component:
             on_mount=DashboardState.load_linked_bugs,
         ),
 
-@reflex_local_auth.require_login
+@require_login
 def dashboard_page() -> rx.Component:
     page_title = Badge()
     charts = Chart()
