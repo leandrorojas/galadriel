@@ -1,3 +1,5 @@
+"""Generic edit page layout for modifying existing entities."""
+
 import reflex as rx
 
 from ..ui.components import Badge
@@ -28,6 +30,7 @@ def __to_detail_button(to_detail_button:str, link:str) -> rx.Component:
     )
 
 def edit_page(form:rx.Component, title:str, title_icon:str, to_list_button:str, to_detail_button:str, list_link:str, detail_link:str) -> rx.Component:
+    """Render a generic edit page with a form and navigation buttons."""
     my_form = form()
     title_badge = Badge()
 

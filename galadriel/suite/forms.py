@@ -1,7 +1,10 @@
+"""Forms for adding and editing test suites."""
+
 import reflex as rx
 from .state import AddSuiteState, EditSuiteState
 
 def suite_add_form() -> rx.Component:
+    """Render the form for adding a new test suite."""
     return rx.form(
         rx.vstack(
             rx.input(
@@ -16,6 +19,7 @@ def suite_add_form() -> rx.Component:
     ),
 
 def suite_edit_form() -> rx.Component:
+    """Render the form for editing an existing test suite."""
     suite = EditSuiteState.suite
     suite_name = suite.name
 

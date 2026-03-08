@@ -1,9 +1,12 @@
+"""Generic add page layout for creating new entities."""
+
 import reflex as rx
 
 from ..ui.components import Badge, Button
 from . import base_page
 
 def add_page(form:rx.Component, title:str, title_icon:str, button:str, link:str) -> rx.Component:
+    """Render a generic add page with a form and back-to-list button."""
     title_badge = Badge()
     my_form = form()
     button_component = Button()

@@ -1,3 +1,5 @@
+"""Test cycle state management, iteration snapshots, and event handlers."""
+
 from typing import List, Optional
 from datetime import datetime, timezone
 import reflex as rx
@@ -19,6 +21,8 @@ CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
 SITE_URL = f"http://localhost:{config.frontend_port}/"
 class CycleState(rx.State):
+    """Manages cycle CRUD, child linking, iteration snapshots, and execution."""
+
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
 
@@ -51,6 +55,7 @@ class CycleState(rx.State):
         return f"{self.cycle.name}"
 
     def get_cycle_detail(self):
+        """Load a single cycle by its route ID."""
         with rx.session() as session:
             if (self.cycle_id == ""):
                 self.cycle = None
@@ -60,6 +65,7 @@ class CycleState(rx.State):
 
     #region CYCLES
     def load_cycles(self):
+        """Load all cycles with their iteration status and pass/fail metrics."""
         with rx.session() as session:
             results = session.exec(CycleModel.select().order_by(desc(CycleModel.created))).all()
 
@@ -137,6 +143,7 @@ class CycleState(rx.State):
             self.cycles = results
 
     def add_cycle(self, form_data:dict):
+        """Create a new cycle from form data."""
         if form_data["name"] == "": return None
         if form_data["threshold"] == "": return None
         with rx.session() as session:
@@ -149,6 +156,7 @@ class CycleState(rx.State):
             return consts.RETURN_VALUE
     
     def save_cycle_edits(self, cycle_id:int, updated_data:dict):
+        """Persist edits to an existing cycle."""
         if updated_data["name"] == "": return None
         if updated_data["threshold"] == "": return None
         with rx.session() as session:
@@ -167,11 +175,13 @@ class CycleState(rx.State):
             return consts.RETURN_VALUE
     
     def collapse_searches(self):
+        """Hide all child search panels."""
         self.show_case_search = False
         self.show_scenario_search = False
         self.show_suite_search = False
 
     def can_edit_iteration(self, cycle_id:int) -> bool:
+        """Return True if the cycle's iteration is still editable."""
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == cycle_id)).one_or_none()
 
@@ -190,6 +200,7 @@ class CycleState(rx.State):
                 return False
 
     def duplicate_cycle(self, origin_cycle_id:int):
+        """Create a copy of a cycle including all its children."""
         with rx.session() as session:
             origin_cycle = session.exec(CycleModel.select().where(CycleModel.id == origin_cycle_id)).one_or_none()
             if origin_cycle is None: return
@@ -211,6 +222,7 @@ class CycleState(rx.State):
     child: Optional['CycleChildModel'] = None
 
     def load_children(self):
+        """Load all children (suites, scenarios, cases) for the current cycle."""
         with rx.session() as session:
             results = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == self.cycle_id).order_by(CycleChildModel.order)).all()
             if (len(results) > 0):
@@ -226,26 +238,31 @@ class CycleState(rx.State):
             self.children = results
 
     def unlink_child(self, child_id:int):
+        """Remove a child from the cycle and reorder remaining children."""
         toast = reorder_delete(CycleChildModel, child_id, "cycle_id", self.cycle_id, "child")
         self.load_children()
         return toast
 
     def move_child_up(self, child_id:int):
+        """Move a child one position up in the order."""
         toast = reorder_move_up(CycleChildModel, child_id, "cycle_id", self.cycle_id, "child")
         if toast is None:
             self.load_children()
         return toast
 
     def move_child_down(self, child_id:int):
+        """Move a child one position down in the order."""
         toast = reorder_move_down(CycleChildModel, child_id, "cycle_id", self.cycle_id, "child")
         if toast is None:
             self.load_children()
         return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
+        """Return the next available order value for a new child."""
         return _get_max_child_order(CycleChildModel, "cycle_id", self.cycle_id, child_id, child_type_id)
-        
+
     def duplicate_cycle_children(self, origin_cycle_id:int, target_cycle_id:int):
+        """Copy all children from one cycle to another."""
         with rx.session() as session:
             linked_children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == origin_cycle_id)).all()
 
@@ -264,14 +281,17 @@ class CycleState(rx.State):
     cases_for_search: List['CaseModel'] = []
 
     def toggle_case_search(self):
+        """Toggle the case search panel visibility."""
         self.show_case_search = not(self.show_case_search)
 
     def filter_test_cases(self, search_case_value):
+        """Update the case search filter and reload results."""
         self.search_case_value = search_case_value
         self.load_cases_for_search()
 
     def load_cases_for_search(self):
-      with rx.session() as session:
+        """Load cases matching the current search filter."""
+        with rx.session() as session:
             query = select(CaseModel)
             if self.search_case_value:
                 search_case_value = (f"%{str(self.search_case_value).lower()}%")
@@ -281,6 +301,7 @@ class CycleState(rx.State):
             self.cases_for_search = results
 
     def link_case(self, case_id:int):
+        """Link a test case to the current cycle."""
         if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
         
         cycle_case_data:dict = {"cycle_id":""}
@@ -309,6 +330,7 @@ class CycleState(rx.State):
         return rx.toast.success("case added!")
     
     def has_steps(self, case_id:int) -> bool:
+        """Return True if the case has at least one step."""
         return _has_steps(StepModel, case_id)
     #endregion
 
@@ -318,14 +340,17 @@ class CycleState(rx.State):
     scenarios_for_search: List['ScenarioModel'] = []
 
     def toggle_scenario_search(self):
+        """Toggle the scenario search panel visibility."""
         self.show_scenario_search = not(self.show_scenario_search)
 
     def filter_scenarios(self, search_scenario_value):
+        """Update the scenario search filter and reload results."""
         self.search_scenario_value = search_scenario_value
         self.load_scenarios_for_search()
 
     def load_scenarios_for_search(self):
-      with rx.session() as session:
+        """Load scenarios matching the current search filter."""
+        with rx.session() as session:
             query = select(ScenarioModel)
             if self.search_scenario_value:
                 search_scenario_value = (f"%{str(self.search_scenario_value).lower()}%")
@@ -335,6 +360,7 @@ class CycleState(rx.State):
             self.scenarios_for_search = results
 
     def link_scenario(self, scenario_id:int):
+        """Link a scenario to the current cycle."""
         cycle_scenario_data:dict = {"cycle_id":""}
         new_scenario_order = 1
 
@@ -367,14 +393,17 @@ class CycleState(rx.State):
     suites_for_search: List['SuiteModel'] = []
 
     def toggle_suite_search(self):
+        """Toggle the suite search panel visibility."""
         self.show_suite_search = not(self.show_suite_search)
 
     def filter_suites(self, search_suite_value):
+        """Update the suite search filter and reload results."""
         self.search_suite_value = search_suite_value
         self.load_suites_for_search()
 
     def load_suites_for_search(self):
-      with rx.session() as session:
+        """Load suites matching the current search filter."""
+        with rx.session() as session:
             query = select(SuiteModel)
             if self.search_suite_value:
                 search_suite_value = (f"%{str(self.search_suite_value).lower()}%")
@@ -384,6 +413,7 @@ class CycleState(rx.State):
             self.suites_for_search = results
 
     def link_suite(self, suite_id:int):
+        """Link a suite to the current cycle."""
         cycle_suite_data:dict = {"cycle_id":""}
         new_suite_order = 1
 
@@ -464,6 +494,7 @@ class CycleState(rx.State):
             self.get_iteration_snapshot()
     
     def add_iteration_snapshot(self, cycle_id:int):
+        """Create a new iteration snapshot from the cycle's children."""
         with rx.session() as session:
             children = session.exec(CycleChildModel.select().where(CycleChildModel.cycle_id == cycle_id).order_by(CycleChildModel.order)).all()
             if (len(children) > 0):
@@ -492,12 +523,14 @@ class CycleState(rx.State):
                 return self.view_iteration_snapshot(cycle_id)
 
     def view_iteration_snapshot(self, cycle_id:int) -> rx.Component:
+        """Redirect to the iteration snapshot page for the given cycle."""
         with rx.session() as session:
             result = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
             self.cycle = result
         return rx.redirect(self.iteration_url)
     
     def get_iteration_snapshot(self):
+        """Load the iteration snapshot items for the current cycle."""
         with rx.session() as session:
             if (self.cycle_id == ""):
                 self.cycle = None
@@ -517,6 +550,7 @@ class CycleState(rx.State):
                     setattr(snapshot_item, "linked_issue", linked_issues.issue_key)
 
     def fail_iteration_snapshot_step(self, snapshot_item_id:int):
+        """Mark a snapshot step as failed and block subsequent steps."""
         self.__update_iteration_snapshot_step(snapshot_item_id, consts.SNAPSHOT_STATUS_FAILED, True)
 
         #block the remainning steps on the case
@@ -532,6 +566,7 @@ class CycleState(rx.State):
                         break
 
     def fail_iteration_snapshot_step_and_create_issue(self, form_data: dict):
+        """Fail a snapshot step and create a linked Jira issue."""
         try:
             snapshot_item_id:int = form_data.pop("snapshot_item_id")
         except KeyError:
@@ -585,6 +620,7 @@ class CycleState(rx.State):
                 return rx.toast.error("error creating the issue, please contact the administrator")
             
     def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):
+        """Unlink a Jira issue from a snapshot step."""
         with rx.session() as session:
             linked_issue = session.exec(IterationSnapshotLinkedIssues.select().where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item_id)).one_or_none()
             if (linked_issue != None):
@@ -596,6 +632,7 @@ class CycleState(rx.State):
                 return rx.toast.info("issue unlinked")
         
     def link_issue_to_snapshot_step(self, snapshot_item_id:int, issue_key:str):
+        """Link a Jira issue key to a snapshot step."""
         linked_issue:dict = {"iteration_snapshot_id": f"{snapshot_item_id}", "issue_key": issue_key}
         with rx.session() as session:
             issue_to_add = IterationSnapshotLinkedIssues(**linked_issue)
@@ -603,6 +640,7 @@ class CycleState(rx.State):
             session.commit()
     
     def pass_iteration_snapshot_step(self, snapshot_item_id:int):
+        """Mark a snapshot step as passed and unblock subsequent steps."""
         self.__update_iteration_snapshot_step(snapshot_item_id, consts.SNAPSHOT_STATUS_PASS, True)
 
         #if steps where blocked, restore the "To Do" status for the remainning steps on the case
@@ -618,6 +656,7 @@ class CycleState(rx.State):
                         break
 
     def skip_iteration_snapshot_step(self, snapshot_item_id:int):
+        """Mark a snapshot step as skipped and unblock subsequent steps."""
         self.__update_iteration_snapshot_step(snapshot_item_id, consts.SNAPSHOT_STATUS_SKIPPED, True)
 
         #if steps where blocked, restore the "To Do" status for the remainning steps on the case
@@ -633,6 +672,7 @@ class CycleState(rx.State):
                         break
 
     def get_max_iteration_snapshot_order(self, iteration_id:int):
+        """Return the next available order value for a snapshot item."""
         with rx.session() as session:
             snapshot_item = session.exec(IterationSnapshotModel.select().where(IterationSnapshotModel.iteration_id == iteration_id).order_by(desc(IterationSnapshotModel.order))).first()
 
@@ -644,6 +684,7 @@ class CycleState(rx.State):
         
     #validate that the case is not yet added to the snapshot
     def is_case_in_snapshot(self, iteration_id:int, case_id:int) -> bool:
+        """Return True if the case is already present in the snapshot."""
         with rx.session() as session:
             snapshot_case = session.exec(IterationSnapshotModel.select().where(
                 IterationSnapshotModel.iteration_id == iteration_id,
@@ -654,6 +695,7 @@ class CycleState(rx.State):
             return (snapshot_case != None)
 
     def add_case_to_snapshot(self, iteration_id:int, case_id:int, is_prerequisite:bool = False):
+        """Add a case and its steps to the iteration snapshot."""
         already_added = self.is_case_in_snapshot(iteration_id, case_id)
 
         if (already_added == False):
@@ -707,6 +749,7 @@ class CycleState(rx.State):
                         session.commit()
 
     def add_scenario_to_snapshot(self, iteration_id:int, scenario_id:int):
+        """Add a scenario and its cases to the iteration snapshot."""
         with rx.session() as session:
             child_scenario = session.exec(ScenarioModel.select().where(ScenarioModel.id == scenario_id)).first()
 
@@ -733,6 +776,7 @@ class CycleState(rx.State):
                     self.add_case_to_snapshot(iteration_id, case_to_add.case_id)
 
     def add_suite_to_snapshot(self, iteration_id:int, suite_id:int):
+        """Add a suite and its children to the iteration snapshot."""
         with rx.session() as session:
             child_suite = session.exec(SuiteModel.select().where(SuiteModel.id == suite_id)).first()
 
@@ -806,23 +850,30 @@ class CycleState(rx.State):
                     self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_IN_PROGRESS)
     
     def turn_on_fail_checkbox(self):
+        """Enable the fail-with-issue checkbox."""
         self.__fail_checkbox = True
 
     def turn_off_fail_checkbox(self):
+        """Disable the fail-with-issue checkbox."""
         self.__fail_checkbox = False
 
     def set_iteration_execution_status_on_hold(self, iteration_id:int):
+        """Set the iteration status to on-hold."""
         self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_ON_HOLD)
 
     def set_iteration_execution_status_closed(self, iteration_id:int):
+        """Set the iteration status to closed."""
         self.__set_iteration_execution_status(iteration_id, consts.ITERATION_STATUS_CLOSED)
 
     #endregion
 
 class AddCycleState(CycleState):
+    """Handles the add-cycle form submission."""
+
     form_data:dict = {}
 
     def handle_submit(self, form_data):
+        """Validate and create a new cycle from the form."""
         self.form_data = form_data
         result = self.add_cycle(form_data)
         if result is None:
@@ -830,9 +881,12 @@ class AddCycleState(CycleState):
         return rx.redirect(routes.CYCLES)
 
 class EditCycleState(CycleState):
+    """Handles the edit-cycle form submission."""
+
     form_data:dict = {}
-    
+
     def handle_submit(self, form_data):
+        """Validate and save cycle edits from the form."""
         self.form_data = form_data
         try:
             cycle_id = form_data.pop("cycle_id")

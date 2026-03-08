@@ -1,3 +1,5 @@
+"""User list page for administration."""
+
 import reflex as rx
 from ..user import state, model
 from ..navigation import routes
@@ -53,6 +55,7 @@ def __table() -> rx.Component:
 #region #LIST
 @require_login
 def users_list_page() -> rx.Component:
+    """Render the users list page."""
     header_component = PageHeader()
 
     return base_page(

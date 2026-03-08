@@ -1,3 +1,5 @@
+"""Iteration domain models."""
+
 from datetime import datetime
 import sqlalchemy as sa
 from sqlmodel import Field
@@ -7,16 +9,22 @@ from ..utils import timing, consts
 from ..utils.mixins import TimestampMixin
 
 class IterationStatusModel(TimestampMixin, rx.Model, table=True):
+    """Represents an iteration status option."""
+
     name: str
     created: datetime = timing.created_field()
 
 class IterationModel(TimestampMixin, rx.Model, table=True):
+    """Represents a single iteration within a cycle."""
+
     cycle_id:int = Field(foreign_key="cyclemodel.id")
     iteration_status_id:int = Field(foreign_key="iterationstatusmodel.id")
     iteration_number:int
     created: datetime = timing.created_field()
 
 class IterationSnapshotModel(TimestampMixin, rx.Model, table=True):
+    """Represents a point-in-time snapshot of an iteration's child items."""
+
     __timestamp_fields__ = ("created", "updated")
 
     iteration_id:int = Field(foreign_key="iterationmodel.id")
@@ -40,10 +48,14 @@ class IterationSnapshotModel(TimestampMixin, rx.Model, table=True):
     created: datetime = timing.created_field()
 
 class IterationSnapshotStatusModel(TimestampMixin, rx.Model, table=True):
+    """Represents a snapshot status option."""
+
     status_name:str
     created: datetime = timing.created_field()
 
 class IterationSnapshotLinkedIssues(TimestampMixin, rx.Model, table=True):
+    """Represents an issue linked to an iteration snapshot."""
+
     iteration_snapshot_id:int = Field(foreign_key="iterationsnapshotmodel.id")
     issue_key:str
     unlinked: bool = Field(nullable=True)

@@ -1,7 +1,10 @@
+"""Forms for adding and editing test cycles."""
+
 import reflex as rx
 from .state import AddCycleState, EditCycleState
 
 def cycle_add_form() -> rx.Component:
+    """Render the form for adding a new test cycle."""
     return rx.form(
         rx.vstack(
             rx.input(
@@ -23,6 +26,7 @@ def cycle_add_form() -> rx.Component:
     ),
 
 def cycle_edit_form() -> rx.Component:
+    """Render the form for editing an existing test cycle."""
     cycle = EditCycleState.cycle
     cycle_name = cycle.name
     cycle_threshold = EditCycleState.cycle_threshold

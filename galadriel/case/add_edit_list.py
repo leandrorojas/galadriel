@@ -1,3 +1,5 @@
+"""Test case list, add, and edit pages."""
+
 import reflex as rx
 from . import state, model
 from .forms import case_add_form, case_edit_form
@@ -53,6 +55,7 @@ def __table() -> rx.Component:
 #region #LIST
 @require_login
 def cases_list_page() -> rx.Component:
+    """Render the test cases list page."""
     header_component = PageHeader()
 
     return base_page(
@@ -67,11 +70,13 @@ def cases_list_page() -> rx.Component:
 #region ADD
 @require_login
 def case_add_page() -> rx.Component:
+    """Render the add test case page."""
     return add_page(case_add_form, "New Test Case", consts.ICON_TEST_TUBES, "to Cases", routes.CASES)
 #endregion
 
 #region EDIT
 @require_login
 def case_edit_page() -> rx.Component:
+    """Render the edit test case page."""
     return edit_page(case_edit_form, "Edit Test Case", consts.ICON_TEST_TUBES, "to Cases", "to Case Detail", routes.CASES, state.EditCaseState.case_url)
 #endregion

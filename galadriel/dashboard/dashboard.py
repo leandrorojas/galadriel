@@ -1,3 +1,5 @@
+"""Dashboard page with metrics, charts, and linked bugs."""
+
 import reflex as rx
 from .state import DashboardState
 
@@ -31,6 +33,7 @@ def __table() -> rx.Component:
 
 @require_login
 def dashboard_page() -> rx.Component:
+    """Render the dashboard page with metrics and charts."""
     page_title = Badge()
     charts = Chart()
 

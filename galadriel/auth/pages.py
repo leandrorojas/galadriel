@@ -1,3 +1,5 @@
+"""Authentication pages for login, registration, and logout."""
+
 import reflex as rx
 from reflex_local_auth.pages.login import LoginState, login_form
 from reflex_local_auth.pages.registration import RegistrationState
@@ -9,6 +11,7 @@ from .state import Session
 from ..utils import consts
 
 def login_page() -> rx.Component:
+    """Render the login page."""
     return base_page(
         rx.cond(
             ~LoginState.is_authenticated, # "~" equals "not" (in this case not authenticated)
@@ -24,6 +27,7 @@ def login_page() -> rx.Component:
     )
 
 def register_page() -> rx.Component:
+    """Render the registration page."""
     return base_page(
         rx.cond(
             ~LoginState.is_authenticated,
@@ -42,6 +46,7 @@ def register_page() -> rx.Component:
     )
 
 def logout_page() -> rx.Component:
+    """Render the logout confirmation page."""
     return base_page(
         rx.vstack(
             rx.heading("Are you sure you want to logout?", size="7"),

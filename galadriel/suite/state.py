@@ -1,3 +1,5 @@
+"""Suite state management and event handlers."""
+
 from typing import List, Optional
 import reflex as rx
 from .model import SuiteModel, SuiteChildModel
@@ -13,6 +15,8 @@ from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, h
 SUITES_ROUTE = consts.normalize_route(routes.SUITES)
 
 class SuiteState(rx.State):
+    """Manages suite CRUD and child linking operations."""
+
     suites: List['SuiteModel'] = []
     suite: Optional['SuiteModel'] = None
 
@@ -44,6 +48,7 @@ class SuiteState(rx.State):
         return f"{SUITES_ROUTE}/{self.suite.id}/edit"
 
     def get_suite_detail(self):
+        """Load a single suite by its route ID."""
         with rx.session() as session:
             if (self.suite_id == ""):
                 self.suite = None
@@ -52,11 +57,13 @@ class SuiteState(rx.State):
             self.suite = result
 
     def load_suites(self):
+        """Load all suites from the database."""
         with rx.session() as session:
             results = session.exec(SuiteModel.select()).all()
             self.suites = results
 
     def add_suite(self, form_data:dict):
+        """Create a new suite from form data."""
         if form_data["name"] == "": return None
         with rx.session() as session:
             suite = SuiteModel(**form_data)
@@ -68,6 +75,7 @@ class SuiteState(rx.State):
             return consts.RETURN_VALUE
     
     def save_suite_edits(self, suite_id:int, updated_data:dict):
+        """Persist edits to an existing suite."""
         if updated_data["name"] == "": return None
         with rx.session() as session:        
             suite = session.exec(SuiteModel.select().where(SuiteModel.id == suite_id)).one_or_none()
@@ -85,6 +93,7 @@ class SuiteState(rx.State):
             return consts.RETURN_VALUE
 
     def to_suite(self, edit_page=True):
+        """Redirect to the suite detail or edit page."""
         if not self.suite:
             return rx.redirect(routes.SUITES)
         if edit_page:
@@ -92,13 +101,16 @@ class SuiteState(rx.State):
         return rx.redirect(self.suite_url)
     
     def collapse_searches(self):
+        """Hide all child search panels."""
         self.show_case_search = False
         self.show_scenario_search = False
-    
+
     def toggle_case_search(self):
+        """Toggle the case search panel visibility."""
         self.show_case_search = not(self.show_case_search)
 
     def load_children(self):
+        """Load all children (scenarios, cases) for the current suite."""
         with rx.session() as session:
             results = session.exec(SuiteChildModel.select().where(SuiteChildModel.suite_id == self.suite_id).order_by(SuiteChildModel.order)).all()
             if (len(results) > 0):
@@ -112,31 +124,37 @@ class SuiteState(rx.State):
             self.children = results
 
     def unlink_child(self, suite_child_id:int):
+        """Remove a child from the suite and reorder remaining children."""
         toast = reorder_delete(SuiteChildModel, suite_child_id, "suite_id", self.suite_id, "child")
         self.load_children()
         return toast
 
     def move_child_up(self, child_id:int):
+        """Move a child one position up in the order."""
         toast = reorder_move_up(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
         if toast is None:
             self.load_children()
         return toast
 
     def move_child_down(self, child_id:int):
+        """Move a child one position down in the order."""
         toast = reorder_move_down(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
         if toast is None:
             self.load_children()
         return toast
     
     def get_max_child_order(self, child_id:int, child_type_id:int):
+        """Return the next available order value for a new child."""
         return _get_max_child_order(SuiteChildModel, "suite_id", self.suite_id, child_id, child_type_id)
 
     def filter_test_cases(self, search_case_value):
+        """Update the case search filter and reload results."""
         self.search_case_value = search_case_value
         self.load_cases_for_search()
 
     def load_cases_for_search(self):
-      with rx.session() as session:
+        """Load cases matching the current search filter."""
+        with rx.session() as session:
             query = select(CaseModel)
             if self.search_case_value:
                 search_case_value = (f"%{str(self.search_case_value).lower()}%")
@@ -146,6 +164,7 @@ class SuiteState(rx.State):
             self.cases_for_search = results
 
     def link_case(self, case_id:int):
+        """Link a test case to the current suite."""
         if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
 
         suite_case_data:dict = {"suite_id":""}
@@ -174,17 +193,21 @@ class SuiteState(rx.State):
         return rx.toast.success("case added!")
     
     def has_steps(self, case_id:int) -> bool:
+        """Return True if the case has at least one step."""
         return _has_steps(StepModel, case_id)
 
     def toggle_scenario_search(self):
+        """Toggle the scenario search panel visibility."""
         self.show_scenario_search = not(self.show_scenario_search)
 
     def filter_scenarios(self, search_scenario_value):
+        """Update the scenario search filter and reload results."""
         self.search_scenario_value = search_scenario_value
         self.load_scenarios_for_search()
 
     def load_scenarios_for_search(self):
-      with rx.session() as session:
+        """Load scenarios matching the current search filter."""
+        with rx.session() as session:
             query = select(ScenarioModel)
             if self.search_scenario_value:
                 search_scenario_value = (f"%{str(self.search_scenario_value).lower()}%")
@@ -194,6 +217,7 @@ class SuiteState(rx.State):
             self.scenarios_for_search = results
 
     def link_scenario(self, scenario_id:int):
+        """Link a scenario to the current suite."""
         suite_scenario_data:dict = {"suite_id":""}
         new_scenario_order = 1
 
@@ -220,9 +244,12 @@ class SuiteState(rx.State):
         return rx.toast.success("scenario added!")
     
 class AddSuiteState(SuiteState):
+    """Handles the add-suite form submission."""
+
     form_data:dict = {}
 
     def handle_submit(self, form_data):
+        """Validate and create a new suite from the form."""
         self.form_data = form_data
         result = self.add_suite(form_data)
         
@@ -230,9 +257,12 @@ class AddSuiteState(SuiteState):
         return rx.redirect(routes.SUITES)
 
 class EditSuiteState(SuiteState):
+    """Handles the edit-suite form submission."""
+
     form_data:dict = {}
-    
+
     def handle_submit(self, form_data):
+        """Validate and save suite edits from the form."""
         self.form_data = form_data
         try:
             suite_id = form_data.pop("suite_id")

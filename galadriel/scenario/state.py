@@ -1,3 +1,5 @@
+"""Scenario state management and event handlers."""
+
 from typing import List, Optional
 import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
@@ -12,6 +14,8 @@ from sqlmodel import select, cast, String
 SCENARIO_ROUTE = consts.normalize_route(routes.SCENARIOS)
 
 class ScenarioState(rx.State):
+    """Manages scenario CRUD and linked test case operations."""
+
     scenarios: List['ScenarioModel'] = []
     scenario: Optional['ScenarioModel'] = None
 
@@ -38,6 +42,7 @@ class ScenarioState(rx.State):
         return f"{SCENARIO_ROUTE}/{self.scenario.id}/edit"
 
     def get_scenario_detail(self):
+        """Load a single scenario by its route ID."""
         self.show_search = False
         with rx.session() as session:
             if (self.scenario_id == ""):
@@ -47,11 +52,13 @@ class ScenarioState(rx.State):
             self.scenario = result
 
     def load_scenarios(self):
+        """Load all scenarios from the database."""
         with rx.session() as session:
             results = session.exec(ScenarioModel.select()).all()
             self.scenarios = results
 
     def add_scenario(self, form_data:dict):
+        """Create a new scenario from form data."""
         if (form_data["name"] == ""): return None
         with rx.session() as session:
             scenario = ScenarioModel(**form_data)
@@ -63,6 +70,7 @@ class ScenarioState(rx.State):
             return consts.RETURN_VALUE
     
     def save_scenario_edits(self, scenario_id:int, updated_data:dict):
+        """Persist edits to an existing scenario."""
         if updated_data["name"] == "": return None
         with rx.session() as session:        
             scenario = session.exec(ScenarioModel.select().where(ScenarioModel.id == scenario_id)).one_or_none()
@@ -80,6 +88,7 @@ class ScenarioState(rx.State):
             return consts.RETURN_VALUE
 
     def to_scenario(self, edit_page=True):
+        """Redirect to the scenario detail or edit page."""
         if not self.scenario:
             return rx.redirect(routes.SCENARIOS)
         if edit_page:
@@ -87,9 +96,11 @@ class ScenarioState(rx.State):
         return rx.redirect(self.scenario_url)
     
     def toggle_search(self):
+        """Toggle the search panel visibility."""
         self.show_search = not(self.show_search)
 
     def load_cases(self):
+        """Load all cases linked to the current scenario."""
         with rx.session() as session:
             results = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.scenario_id == self.scenario_id).order_by(ScenarioCaseModel.order)).all()
             if (len(results) > 0):
@@ -99,11 +110,13 @@ class ScenarioState(rx.State):
             self.test_cases = results
     
     def filter_test_cases(self, search_value):
+        """Update the case search filter and reload results."""
         self.search_value = search_value
         self.load_cases_for_search()
 
     def load_cases_for_search(self):
-      with rx.session() as session:
+        """Load cases matching the current search filter."""
+        with rx.session() as session:
             query = select(CaseModel)
             if self.search_value:
                 search_value = (f"%{str(self.search_value).lower()}%")
@@ -113,6 +126,7 @@ class ScenarioState(rx.State):
             self.test_cases_for_search = results
 
     def link_case(self, case_id:int):
+        """Link a test case to the current scenario."""
         if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
 
         with rx.session() as session:
@@ -145,29 +159,36 @@ class ScenarioState(rx.State):
         return rx.toast.success("case added!")
     
     def unlink_case(self, scenario_case_id:int):
+        """Remove a case from the scenario and reorder remaining cases."""
         toast = reorder_delete(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         self.load_cases()
         return toast
 
     def move_case_up(self, scenario_case_id:int):
+        """Move a case one position up in the order."""
         toast = reorder_move_up(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         if toast is None:
             self.load_cases()
         return toast
 
     def move_case_down(self, scenario_case_id:int):
+        """Move a case one position down in the order."""
         toast = reorder_move_down(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         if toast is None:
             self.load_cases()
         return toast
 
     def has_steps(self, case_id:int) -> bool:
+        """Return True if the case has at least one step."""
         return _has_steps(StepModel, case_id)
 
 class AddScenarioState(ScenarioState):
+    """Handles the add-scenario form submission."""
+
     form_data:dict = {}
 
     def handle_submit(self, form_data):
+        """Validate and create a new scenario from the form."""
         self.form_data = form_data
         result = self.add_scenario(form_data)
 
@@ -175,9 +196,12 @@ class AddScenarioState(ScenarioState):
         return rx.redirect(routes.SCENARIOS)
 
 class EditScenarioState(ScenarioState):
+    """Handles the edit-scenario form submission."""
+
     form_data:dict = {}
-    
+
     def handle_submit(self, form_data):
+        """Validate and save scenario edits from the form."""
         self.form_data = form_data
         try:
             scenario_id = form_data.pop("scenario_id")

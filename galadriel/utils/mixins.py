@@ -1,3 +1,5 @@
+"""Shared utility functions for reordering, querying child items, and timestamp formatting."""
+
 import reflex as rx
 
 from .timing import format_datetime
@@ -114,6 +116,8 @@ def get_max_child_order(model_class, parent_field, parent_id, child_id, child_ty
 
 
 class TimestampMixin:
+    """Mixin that formats timestamp fields in model_dump output."""
+
     __timestamp_fields__ = ("created",)
 
     def model_dump(self, *args, **kwargs) -> dict:

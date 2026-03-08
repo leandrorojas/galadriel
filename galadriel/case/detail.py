@@ -1,9 +1,11 @@
+"""Test case detail page with prerequisites and steps."""
+
 import reflex as rx
 from ..navigation import routes
 from ..pages import base_page
 from ..ui.components import Badge, Table, Button, Moment, MomentBadge
 from . import model, state
-from .forms import step_add_form    
+from .forms import step_add_form
 from ..utils import consts
 from ..auth.state import require_login, Session
 
@@ -114,6 +116,7 @@ def __steps_table() -> rx.Component:
 
 @require_login
 def case_detail_page() -> rx.Component:
+    """Render the test case detail page."""
     title_badge = Badge()
     test_case = state.AddStepState.case
     button_component = Button()

@@ -1,8 +1,11 @@
+"""About page with project information and links."""
+
 import reflex as rx
 from .base import base_page
 from ..utils import consts
 
 def about_content() -> rx.Component:
+    """Render the about page content section."""
     about_content_var = rx.vstack(
         rx.heading("About galadriel"),
         rx.heading("galadriel is a Test Management System", size="4"),
@@ -25,5 +28,6 @@ def about_content() -> rx.Component:
     return about_content_var
 
 def about_page() -> rx.Component:
+    """Render the about page."""
     about_content_var = about_content()
     return base_page(about_content_var, rx.logo())

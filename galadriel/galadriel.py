@@ -1,3 +1,5 @@
+"""Main application entry point: page registration, theming, and first-run seeding."""
+
 import reflex as rx
 
 #old.galadriel
