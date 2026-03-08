@@ -1,15 +1,13 @@
 import reflex as rx
-import reflex_local_auth
-
 from ..navigation import routes
 from ..user import state
 from ..pages import base_page
 from ..ui.components import Badge, Button, MomentBadge
 
 from ..utils import consts
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
-@reflex_local_auth.require_login
+@require_login
 def user_detail_page() -> rx.Component:
     title_badge = Badge()
     can_edit = Session.is_admin

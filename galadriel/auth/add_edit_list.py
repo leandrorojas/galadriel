@@ -1,13 +1,11 @@
 import reflex as rx
-import reflex_local_auth
-
 from ..user import state, model
 from ..navigation import routes
 from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 def __user_detail_link(child: rx.Component, galadriel_user: model.GaladrielUserDisplay):
     if galadriel_user is None: return rx.fragment(child)
@@ -53,7 +51,7 @@ def __table() -> rx.Component:
     )
 
 #region #LIST
-@reflex_local_auth.require_login
+@require_login
 def users_list_page() -> rx.Component:
     header_component = PageHeader()
 
@@ -67,13 +65,13 @@ def users_list_page() -> rx.Component:
 #endregion
 
 # #region ADD
-# @reflex_local_auth.require_login
+# @require_login
 # def case_add_page() -> rx.Component:
 #     return add_page(case_add_form, "New Test Case", consts.ICON_TEST_TUBES, "to Cases", routes.CASES)
 # #endregion
 
 # #region EDIT
-# @reflex_local_auth.require_login
+# @require_login
 # def case_edit_page() -> rx.Component:
 #     return edit_page(case_edit_form, "Edit Test Case", consts.ICON_TEST_TUBES, "to Cases", "to Case Detail", routes.CASES, state.EditCaseState.case_url)
 # #endregion

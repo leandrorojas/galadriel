@@ -1,11 +1,33 @@
 import reflex as rx
 import reflex_local_auth
+from reflex_local_auth.login import LoginState
 import sqlmodel
 
 from typing import Optional
 
 from ..user.model import GaladrielUser, GaladrielUserRole
 from ..user.state import UserRole
+
+
+def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
+    """Custom require_login that preserves the sidebar layout during hydration."""
+    def protected_page():
+        from ..pages.base import private_page
+        return rx.fragment(
+            rx.cond(
+                LoginState.is_hydrated & LoginState.is_authenticated,
+                page(),
+                private_page(
+                    rx.center(
+                        rx.spinner(size="3"),
+                        min_height="85vh",
+                        on_mount=LoginState.redir,
+                    ),
+                ),
+            )
+        )
+    protected_page.__name__ = page.__name__
+    return protected_page
 
 class Register(reflex_local_auth.RegistrationState):
     # This event handler must be named something besides `handle_registration`!!!

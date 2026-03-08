@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-
 from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge, Table, SearchTable
@@ -8,7 +6,7 @@ from .state import CycleState
 from ..iteration import IterationSnapshotModel
 from ..utils import jira, consts
 
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 def __cycle_list_button() -> rx.Component:    
     return rx.fragment(
@@ -148,7 +146,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def iteration_page() -> rx.Component:
     title_badge = Badge()
     table_component = Table()

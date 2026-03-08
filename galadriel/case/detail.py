@@ -1,13 +1,11 @@
 import reflex as rx
-import reflex_local_auth
-
 from ..navigation import routes
 from ..pages import base_page
 from ..ui.components import Badge, Table, Button, Moment, MomentBadge
 from . import model, state
 from .forms import step_add_form    
 from ..utils import consts
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 #prerequisites
 def __show_prerequisite(prerequisite:model.PrerequisiteModel):
@@ -114,7 +112,7 @@ def __steps_table() -> rx.Component:
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def case_detail_page() -> rx.Component:
     title_badge = Badge()
     test_case = state.AddStepState.case

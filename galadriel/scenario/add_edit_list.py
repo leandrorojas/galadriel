@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-
 from . import state, model
 from .forms import scenario_add_form, scenario_edit_form
 
@@ -12,7 +10,7 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
     if scenario is None: return rx.fragment(child)
@@ -51,7 +49,7 @@ def __table() -> rx.Component:
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def scenarios_list_page() -> rx.Component:
     header_component = PageHeader()
 
@@ -63,10 +61,10 @@ def scenarios_list_page() -> rx.Component:
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def scenario_add_page() -> rx.Component:
     return add_page(scenario_add_form, "New Test Scenario", "route", "to Scenarios", routes.SCENARIOS)
 
-@reflex_local_auth.require_login
+@require_login
 def scenario_edit_page() -> rx.Component:
     return edit_page(scenario_edit_form, "Edit Test Scenario", "route", "to Scenarios", "to Scenario Detail", routes.SCENARIOS, state.EditScenarioState.scenario_url)

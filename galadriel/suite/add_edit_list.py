@@ -1,6 +1,4 @@
 import reflex as rx
-import reflex_local_auth
-
 from . import state, model
 from .forms import suite_add_form, suite_edit_form
 
@@ -12,7 +10,7 @@ from ..pages.edit import edit_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
-from ..auth.state import Session
+from ..auth.state import require_login, Session
 
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite is None: return rx.fragment(child)
@@ -52,7 +50,7 @@ def __table() -> rx.Component:
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def suites_list_page() -> rx.Component:
     header_component = PageHeader()
 
@@ -64,10 +62,10 @@ def suites_list_page() -> rx.Component:
         ),
     )
 
-@reflex_local_auth.require_login
+@require_login
 def suite_add_page() -> rx.Component:
     return add_page(suite_add_form, "New Test Suite", "beaker", "to Suites", routes.SUITES)
 
-@reflex_local_auth.require_login
+@require_login
 def suite_edit_page() -> rx.Component:
     return edit_page(suite_edit_form, "Edit Test Suite", "beaker", "to Suites", "to Suite Detail", routes.SUITES, state.EditSuiteState.suite_url)
