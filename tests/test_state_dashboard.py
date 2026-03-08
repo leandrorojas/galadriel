@@ -12,16 +12,14 @@ pytestmark = pytest.mark.integration
 
 
 def _make_state():
-    return init_state(DashboardState, linked_bugs=[])
+    return init_state(DashboardState, linked_bugs=[], pie_chart_data=[], trend_data=[])
 
 
 class TestPieChartData:
     def test_empty_data_returns_zeroes(self, patch_rx_session):
         state = _make_state()
-        data = state.get_pie_chart_data
-        assert len(data) == 3
-        for entry in data:
-            assert entry["value"] == 0
+        state.load_dashboard()
+        assert state.pie_chart_data == []
 
     def test_with_data(self, patch_rx_session, seeded_db):
         session = patch_rx_session
@@ -42,8 +40,8 @@ class TestPieChartData:
         session.commit()
 
         state = _make_state()
-        data = state.get_pie_chart_data
-        names = {d["name"]: d["value"] for d in data}
+        state.load_dashboard()
+        names = {d["name"]: d["value"] for d in state.pie_chart_data}
         assert names["Passed"] == pytest.approx(50.0)
         assert names["Failed"] == pytest.approx(25.0)
         assert names["Blocked"] == pytest.approx(25.0)
@@ -52,6 +50,7 @@ class TestPieChartData:
 class TestCaseCountByStatus:
     def test_cycle_count_zero_when_empty(self, patch_rx_session):
         state = _make_state()
+        state.load_dashboard()
         assert state.cycle_count == 0
 
     def test_blocked_cases_count(self, patch_rx_session, seeded_db):
@@ -75,4 +74,5 @@ class TestCaseCountByStatus:
         session.commit()
 
         state = _make_state()
+        state.load_dashboard()
         assert state.blocked_cases == 2
