@@ -4,61 +4,53 @@ from ..auth.state import Session
 from ..utils import consts
 from ..user.state import UserRole
 
+CONTENT_PADDING_X = ["1.5em", "1.5em", "3em"]
+
+def _content_box(content: rx.Component) -> rx.Component:
+    return rx.box(
+        content,
+        width="100%",
+        justify="center",
+        align="center",
+        min_height=consts.RELATIVE_VIEWPORT_85,
+        justify_content="center",
+        spacing="6",
+        padding_x=CONTENT_PADDING_X,
+        overflow_y="auto",
+        height="100vh",
+    )
+
+def _sidebar_layout(content: rx.Component, **kwargs) -> rx.hstack:
+    left_sidebar = SideBar()
+    return rx.hstack(
+        left_sidebar.sidebar(show_backoffice=(Session.role == UserRole.ADMIN)),
+        _content_box(content),
+        height="100vh",
+        overflow="hidden",
+        **kwargs,
+    )
+
 def public_page(content: rx.Component, *args) -> rx.Component:
     top_navbar = TopNavBar()
     return rx.fragment(
         top_navbar.navbar(),
-        rx.box( 
-            content,
-        ),
+        rx.box(content),
         rx.color_mode.button(position="bottom-left"),
         *args,
     )
 
 def private_page(content: rx.Component, *args) -> rx.Component:
-    left_sidebar = SideBar()
     return rx.fragment(
-        rx.hstack(
-            left_sidebar.sidebar(show_backoffice=(Session.role == UserRole.ADMIN)),
-            rx.box(
-                content,
-                width="100%",
-                justify="center",
-                align="center",
-                min_height=consts.RELATIVE_VIEWPORT_85,
-                justify_content="center",
-                spacing="6",
-                padding_x=["1.5em", "1.5em", "3em"],
-                overflow_y="auto",
-                height="100vh",
-            ),
-            height="100vh",
-            overflow="hidden",
-        ),
+        _sidebar_layout(content),
         *args,
     )
 
 #galadriel home page
 def base_page(content: rx.Component, *args) -> rx.Component:
     top_navbar = TopNavBar()
-    left_sidebar = SideBar()
     return rx.fragment(
-        rx.hstack(
-            left_sidebar.sidebar(show_backoffice=(Session.role == UserRole.ADMIN)),
-            rx.box(
-                content,
-                width="100%",
-                justify="center",
-                align="center",
-                min_height=consts.RELATIVE_VIEWPORT_85,
-                justify_content="center",
-                spacing="6",
-                padding_x=["1.5em", "1.5em", "3em"],
-                overflow_y="auto",
-                height="100vh",
-            ),
-            height="100vh",
-            overflow="hidden",
+        _sidebar_layout(
+            content,
             display=rx.cond(Session.is_authenticated, "flex", "none"),
         ),
         rx.box(
