@@ -20,6 +20,7 @@ class ScenarioState(rx.State):
     scenario: Optional['ScenarioModel'] = None
 
     test_cases: List['ScenarioCaseModel'] = []
+    test_case_count: int = 0
     test_cases_for_search: List['CaseModel'] = []
 
     show_search:bool = False
@@ -108,6 +109,7 @@ class ScenarioState(rx.State):
                     case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.case_id)).first()
                     setattr(single_result, "case_name", case_name.name if case_name else "unknown")
             self.test_cases = results
+            self.test_case_count = len(results)
     
     def filter_test_cases(self, search_value):
         """Update the case search filter and reload results."""

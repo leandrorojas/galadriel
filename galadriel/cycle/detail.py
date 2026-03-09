@@ -110,8 +110,8 @@ def __show_child(cycle_child:model.CycleChildModel):
         rx.table.cell(cycle_child.child_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=rx.cond(DISABLE_EDIT_MODE,DISABLE_EDIT_MODE, state.CycleState.has_iteration), on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
-                rx.button(rx.icon("arrow-big-down"), disabled=rx.cond(DISABLE_EDIT_MODE,DISABLE_EDIT_MODE, state.CycleState.has_iteration), on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, consts.FIELD_ID))),  # NOSONAR
+                rx.button(rx.icon("arrow-big-up"), disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, state.CycleState.has_iteration | (cycle_child.order == 1)), on_click=lambda: state.CycleState.move_child_up(getattr(cycle_child, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
+                rx.button(rx.icon("arrow-big-down"), disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, state.CycleState.has_iteration | (cycle_child.order == state.CycleState.child_count)), on_click=lambda: state.CycleState.move_child_down(getattr(cycle_child, consts.FIELD_ID))),  # NOSONAR
                 rx.button(rx.icon("trash-2"), color_scheme="red", disabled=rx.cond(DISABLE_EDIT_MODE,DISABLE_EDIT_MODE, state.CycleState.has_iteration), on_click=lambda: state.CycleState.unlink_child(getattr(cycle_child, consts.FIELD_ID))),  # NOSONAR
                 spacing="2",
             )

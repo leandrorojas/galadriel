@@ -17,8 +17,8 @@ def __show_prerequisite(prerequisite:model.PrerequisiteModel):
         rx.table.cell(prerequisite.prerequisite_name),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
-                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, consts.FIELD_ID))),  # NOSONAR
+                rx.button(rx.icon("arrow-big-up"), disabled=(DISABLE_EDIT_MODE | (prerequisite.order == 1)), on_click=lambda: state.CaseState.move_prerequisite_up(getattr(prerequisite, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
+                rx.button(rx.icon("arrow-big-down"), disabled=(DISABLE_EDIT_MODE | (prerequisite.order == state.CaseState.prerequisite_count)), on_click=lambda: state.CaseState.move_prerequisite_down(getattr(prerequisite, consts.FIELD_ID))),  # NOSONAR
                 rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.CaseState.delete_prerequisite(getattr(prerequisite, consts.FIELD_ID))),  # NOSONAR
                 spacing="2",
             )
@@ -86,8 +86,8 @@ def __show_step(test_step:model.StepModel):
         rx.table.cell(test_step.expected),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_step_up(getattr(test_step, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
-                rx.button(rx.icon("arrow-big-down"), disabled=DISABLE_EDIT_MODE, on_click=lambda: state.CaseState.move_step_down(getattr(test_step, consts.FIELD_ID))),  # NOSONAR
+                rx.button(rx.icon("arrow-big-up"), disabled=(DISABLE_EDIT_MODE | (test_step.order == 1)), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
+                rx.button(rx.icon("arrow-big-down"), disabled=(DISABLE_EDIT_MODE | (test_step.order == state.CaseState.step_count)), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, consts.FIELD_ID))),  # NOSONAR
                 rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, consts.FIELD_ID))),  # NOSONAR
                 spacing="2",
             )

@@ -21,8 +21,10 @@ class CaseState(rx.State):
     case: Optional['CaseModel'] = None
 
     steps: List['StepModel'] = []
+    step_count: int = 0
 
     prerequisites: List['PrerequisiteModel'] = []
+    prerequisite_count: int = 0
 
     search_value:str = ""
     show_search:bool = False
@@ -112,6 +114,7 @@ class CaseState(rx.State):
         with rx.session() as session:
             results = session.exec(StepModel.select().where(StepModel.case_id == self.case_id).order_by(StepModel.order)).all()
             self.steps = results
+            self.step_count = len(results)
 
     def add_step(self, case_id:int, form_data:dict):
         """Add a new step to the specified case."""
@@ -167,7 +170,8 @@ class CaseState(rx.State):
                 for single_result in results:
                     case_name = session.exec(CaseModel.select().where(CaseModel.id == single_result.prerequisite_id)).first()
                     setattr(single_result, "prerequisite_name", case_name.name if case_name else "unknown")
-            self.prerequisites = results 
+            self.prerequisites = results
+            self.prerequisite_count = len(results)
 
     def filter_cases(self, search_value):
         """Update the search filter and reload cases."""
