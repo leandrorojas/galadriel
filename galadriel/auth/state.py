@@ -31,6 +31,13 @@ def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     protected_page.__name__ = page.__name__
     return protected_page
 
+class Login(LoginState):
+    """Extends LoginState with additional event handlers."""
+
+    def clear_error(self):
+        """Clear the login error message."""
+        self.error_message = ""
+
 class Register(reflex_local_auth.RegistrationState):
     """Extends registration to create a Galadriel user with a default role."""
 
