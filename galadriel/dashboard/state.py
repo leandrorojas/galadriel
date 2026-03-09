@@ -40,6 +40,7 @@ class DashboardState(rx.State):
 
     def load_dashboard(self):
         """Load all dashboard metrics from in-progress iterations."""
+        self.loading = True
         self.loading_bugs = True
         self.linked_bugs = []
         with rx.session() as session:
