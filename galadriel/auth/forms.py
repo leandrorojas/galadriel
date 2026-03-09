@@ -1,8 +1,6 @@
 """Authentication forms for login and user registration."""
 
 import reflex as rx
-import reflex_local_auth
-
 from reflex_local_auth.pages.login import LoginState
 from reflex_local_auth.pages.registration import RegistrationState
 from reflex_local_auth.pages.components import input_100w, MIN_WIDTH
@@ -25,7 +23,7 @@ def login_form() -> rx.Component:
     """Render the login form with autofocus on the username field."""
     return rx.form(
         rx.vstack(
-            rx.heading("Login into your Account", size="7"),
+            rx.heading("Log in to your account", size="7"),
             __login_error(),
             rx.text("Username"),
             input_100w("username", auto_focus=True),
@@ -44,9 +42,9 @@ def login_form() -> rx.Component:
 def __register_error() -> rx.Component:
     """Render the registration error message."""
     return rx.cond(
-        reflex_local_auth.RegistrationState.error_message != "",
+        RegistrationState.error_message != "",
         rx.callout(
-            reflex_local_auth.RegistrationState.error_message,
+            RegistrationState.error_message,
             icon="triangle_alert",
             color_scheme="red",
             role="alert",
@@ -70,7 +68,7 @@ def register_form() -> rx.Component:
             input_100w("confirm_password", type="password"),
             rx.button("Sign up", width="100%"),
             rx.center(
-                rx.link("Login", on_click=lambda: rx.redirect(reflex_local_auth.routes.LOGIN_ROUTE)),
+                rx.link("Login", on_click=LoginState.redir),
                 width="100%",
             ),
             min_width=MIN_WIDTH,
