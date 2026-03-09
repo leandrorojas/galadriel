@@ -220,6 +220,7 @@ class CycleState(rx.State):
     #region CYCLE CHILDREN
     children: List['CycleChildModel'] = []
     child: Optional['CycleChildModel'] = None
+    child_count: int = 0
 
     def load_children(self):
         """Load all children (suites, scenarios, cases) for the current cycle."""
@@ -236,6 +237,7 @@ class CycleState(rx.State):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
                     setattr(single_result, "child_name", child.name if child else "unknown")
             self.children = results
+            self.child_count = len(results)
 
     def unlink_child(self, child_id:int):
         """Remove a child from this cycle and reorder siblings."""

@@ -22,6 +22,7 @@ class SuiteState(rx.State):
 
     children: List['SuiteChildModel'] = []
     child: Optional['SuiteChildModel'] = None
+    child_count: int = 0
 
     cases_for_search: List['CaseModel'] = []
     show_case_search:bool = False
@@ -122,6 +123,7 @@ class SuiteState(rx.State):
                         child = session.exec(CaseModel.select().where(CaseModel.id == single_result.child_id)).first()
                     setattr(single_result, "child_name", child.name if child else "unknown")
             self.children = results
+            self.child_count = len(results)
 
     def unlink_child(self, suite_child_id:int):
         """Remove a child from this suite and reorder siblings."""
