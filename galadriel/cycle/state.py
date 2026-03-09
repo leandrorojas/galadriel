@@ -19,6 +19,15 @@ from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, h
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
+def _format_iteration_status(session, iteration_status_id: int, can_edit: bool) -> str:
+    """Return the display name for an iteration status, prefixed with [F] when completed with failures."""
+    status = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration_status_id)).first()
+    if status is None:
+        return ""
+    if (status.id == consts.ITERATION_STATUS_COMPLETED) and can_edit:
+        return "[F] " + status.name
+    return status.name
+
 SITE_URL = f"http://localhost:{config.frontend_port}/"
 class CycleState(rx.State):
     """Manages cycle CRUD, child linking, iteration snapshots, and execution."""
@@ -76,20 +85,15 @@ class CycleState(rx.State):
 
                 cycle_iteration = session.exec(IterationModel.select().where(IterationModel.cycle_id == single_result.id)).one_or_none()
                 if (cycle_iteration != None):
+                    iteration_status_name = _format_iteration_status(session, cycle_iteration.iteration_status_id, self.can_edit_iteration(single_result.id))
+
                     iteration_execution_status = session.exec(IterationStatusModel.select().where(IterationStatusModel.id == cycle_iteration.iteration_status_id)).first()
-                    if (iteration_execution_status == None):
-                        iteration_status_name = ""
-                    else:
+                    if (iteration_execution_status != None):
                         iteration_finished = ((iteration_execution_status.id == consts.ITERATION_STATUS_CLOSED) or (iteration_execution_status.id == consts.ITERATION_STATUS_COMPLETED))
 
                         iteration_in_progress = False
                         if (iteration_finished == False):
                             iteration_in_progress = ((iteration_execution_status.id == consts.ITERATION_STATUS_IN_PROGRESS) or (iteration_execution_status.id == consts.ITERATION_STATUS_ON_HOLD))
-
-                        if ((iteration_execution_status.id == consts.ITERATION_STATUS_COMPLETED) and self.can_edit_iteration(single_result.id)):
-                            iteration_status_name = "[F] " + iteration_execution_status.name
-                        else:
-                            iteration_status_name = iteration_execution_status.name
 
                     if ((iteration_finished == True) or (iteration_in_progress == True)):
                         all_steps_count = 0
@@ -452,12 +456,7 @@ class CycleState(rx.State):
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             if (iteration != None):
-                status = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
-                if status is None:
-                    return ""
-                if (status.id == consts.ITERATION_STATUS_COMPLETED) and self.can_edit_iteration(self.cycle.id):
-                    return "[F] " + status.name
-                return status.name
+                return _format_iteration_status(session, iteration.iteration_status_id, self.can_edit_iteration(self.cycle.id))
             else:
                 return ""
 
