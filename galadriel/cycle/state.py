@@ -452,10 +452,12 @@ class CycleState(rx.State):
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             if (iteration != None):
-                status_name = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
-                if status_name is None:
+                status = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
+                if status is None:
                     return ""
-                return status_name.name
+                if (status.id == consts.ITERATION_STATUS_COMPLETED) and self.can_edit_iteration(self.cycle.id):
+                    return "[F] " + status.name
+                return status.name
             else:
                 return ""
 
