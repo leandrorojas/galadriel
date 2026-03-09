@@ -19,9 +19,11 @@ def about_content() -> rx.Component:
                     spacing="1"
             ),
         ),
+        rx.logo(),
         spacing="5",
         justify="center",
         align="center",
+        width="100%",
         min_height=consts.RELATIVE_VIEWPORT_85,
     ),
 
@@ -29,5 +31,4 @@ def about_content() -> rx.Component:
 
 def about_page() -> rx.Component:
     """Render the about page."""
-    about_content_var = about_content()
-    return base_page(about_content_var, rx.logo())
+    return base_page(about_content())
