@@ -17,8 +17,11 @@ def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
 
 def __table() -> rx.Component:
     table_component = Table()
-    
-    return rx.table.root(
+
+    return rx.cond(
+        DashboardState.loading_bugs,
+        rx.center(rx.spinner(size="3"), width="100%", min_height="10em"),
+        rx.table.root(
             rx.table.header(
                 rx.table.row(
                     table_component.header("key","fingerprint"),
@@ -30,6 +33,7 @@ def __table() -> rx.Component:
             rx.table.body(rx.foreach(DashboardState.linked_bugs, __show_linked_bug)),
             variant="surface", size="3", width="100%",
         ),
+    )
 
 @require_login
 def dashboard_page() -> rx.Component:
@@ -45,35 +49,43 @@ def dashboard_page() -> rx.Component:
                     flex_direction=["column", "column", "row"],
                     align="center", width="100%", top="0px", padding_top="2em", spacing="2",
                 ),
-                rx.hstack(
-                    Card().card(" Cycle(s)", DashboardState.cycle_count, "flask-round", "grass", suffix=" In Progress", header_size="5", subtext_size="3", icon_size=30),
-                    Card().card(TEXT_CASES, DashboardState.blocked_cases, "cuboid", "red", suffix=" Blocked", header_size="5", subtext_size="3", icon_size=30),
-                    Card().card(TEXT_CASES, DashboardState.skipped_cases, "test-tubes", "sky", suffix=" Skipped", header_size="5", subtext_size="3", icon_size=30),
-                    Card().card(TEXT_CASES + " w/o Bug", DashboardState.cases_without_bug, "bug-off", "iris", suffix=" Failed", header_size="5", subtext_size="3", icon_size=30),
-                    width="63vw", spacing="4",
+                rx.cond(
+                    DashboardState.loading,
+                    rx.center(rx.spinner(size="3"), width="63vw", min_height="5em"),
+                    rx.hstack(
+                        Card().card(" Cycle(s)", DashboardState.cycle_count, "flask-round", "grass", suffix=" In Progress", header_size="5", subtext_size="3", icon_size=30),
+                        Card().card(TEXT_CASES, DashboardState.blocked_cases, "cuboid", "red", suffix=" Blocked", header_size="5", subtext_size="3", icon_size=30),
+                        Card().card(TEXT_CASES, DashboardState.skipped_cases, "test-tubes", "sky", suffix=" Skipped", header_size="5", subtext_size="3", icon_size=30),
+                        Card().card(TEXT_CASES + " w/o Bug", DashboardState.cases_without_bug, "bug-off", "iris", suffix=" Failed", header_size="5", subtext_size="3", icon_size=30),
+                        width="63vw", spacing="4",
+                    ),
                 ),
-                rx.flex(
-                    rx.card(
-                        rx.text("Passed / Failed / Blocked Rate"),
-                        rx.recharts.pie_chart(
-                            rx.recharts.pie(
-                                data=DashboardState.pie_chart_data,
-                                data_key="value",
-                                name_key="name",
-                                fill="#8884d8",
-                                label=True,
+                rx.cond(
+                    DashboardState.loading,
+                    rx.center(rx.spinner(size="3"), width="63vw", min_height="15em"),
+                    rx.flex(
+                        rx.card(
+                            rx.text("Passed / Failed / Blocked Rate"),
+                            rx.recharts.pie_chart(
+                                rx.recharts.pie(
+                                    data=DashboardState.pie_chart_data,
+                                    data_key="value",
+                                    name_key="name",
+                                    fill="#8884d8",
+                                    label=True,
+                                ),
+                                rx.recharts.legend(),
+                                width="100%", height=350,
                             ),
-                            rx.recharts.legend(),
-                            width="100%", height=350,
+                            width="26vw",
                         ),
-                        width="26vw",
+                        rx.card(
+                            rx.text("Trends"),
+                            charts.composed(DashboardState.trend_data, "date", "exec", "passed", "failed"),
+                            width="36vw",
+                        ),
+                        spacing="4",
                     ),
-                    rx.card(
-                        rx.text("Trends"),
-                        charts.composed(DashboardState.trend_data, "date", "exec", "passed", "failed"),
-                        width="36vw",
-                    ),
-                    spacing="4",
                 ),
                 rx.flex(
                     rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": "33%"}, width="63vw",),

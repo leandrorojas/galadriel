@@ -34,10 +34,15 @@ class DashboardState(rx.State):
     cases_without_bug: int = 0
     pie_chart_data: list = []
     trend_data: list = []
+    loading: bool = True
+    loading_bugs: bool = True
     _loading_bugs: bool = False
 
     def load_dashboard(self):
         """Load all dashboard metrics from in-progress iterations."""
+        self.loading = True
+        self.loading_bugs = True
+        self.linked_bugs = []
         with rx.session() as session:
             in_progress = session.exec(
                 select(IterationModel).where(IterationModel.iteration_status_id == consts.ITERATION_STATUS_IN_PROGRESS)
@@ -51,6 +56,8 @@ class DashboardState(rx.State):
                 self.cases_without_bug = 0
                 self.pie_chart_data = []
                 self.linked_bugs = []
+                self.loading = False
+                self.loading_bugs = False
                 self.trend_data = self.__build_empty_trend_data()
                 return
 
@@ -106,6 +113,7 @@ class DashboardState(rx.State):
 
             self.trend_data = self.__compute_trend_data(session)
 
+        self.loading = False
         return DashboardState.load_linked_bugs
 
     def __build_empty_trend_data(self) -> list:
@@ -165,6 +173,7 @@ class DashboardState(rx.State):
             if self._loading_bugs:
                 return
             self._loading_bugs = True
+            self.loading_bugs = True
 
         try:
             with rx.session() as session:
@@ -200,10 +209,12 @@ class DashboardState(rx.State):
 
             async with self:
                 self._loading_bugs = False
+                self.loading_bugs = False
                 self.linked_bugs = bugs
         except Exception:
             logger.exception("Unexpected error loading linked bugs")
             async with self:
                 self._loading_bugs = False
+                self.loading_bugs = False
                 self.linked_bugs = []
             return rx.toast.error("there was an error while loading the linked bugs")
