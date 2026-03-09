@@ -12,6 +12,8 @@ def _content_box(content: rx.Component) -> rx.Component:
     return rx.box(
         content,
         width="100%",
+        flex="1",
+        min_width="0",
         justify="center",
         align="center",
         min_height=consts.RELATIVE_VIEWPORT_85,
