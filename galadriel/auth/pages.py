@@ -1,9 +1,9 @@
 """Authentication pages for login, registration, and logout."""
 
 import reflex as rx
-from reflex_local_auth.pages.login import LoginState, login_form
+from reflex_local_auth.pages.login import LoginState
 from reflex_local_auth.pages.registration import RegistrationState
-from .forms import register_form
+from .forms import login_form, register_form
 from ..pages.base import base_page
 from ..pages.about import about_content
 from .. import navigation

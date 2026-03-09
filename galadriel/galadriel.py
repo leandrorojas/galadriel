@@ -21,6 +21,7 @@ from .auth import detail as user_detail
 from .pages import base_page, about_page, about_content
 from .ui.components import Button
 from .auth.pages import login_page, register_page, logout_page
+from reflex_local_auth.pages.login import LoginState
 
 from .auth.state import Session
 
@@ -66,7 +67,7 @@ app.add_page(index, title="galadriel")
 
 #galadriel pages
 app.add_page(about_page, route=navigation.routes.ABOUT, title="About galadriel")
-app.add_page(login_page, route=navigation.routes.LOGIN, title="Login")
+app.add_page(login_page, route=navigation.routes.LOGIN, title="Login", on_load=LoginState.set_error_message(""))
 app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up")
 app.add_page(logout_page, route=navigation.routes.LOGOUT, title="Logout")
 
