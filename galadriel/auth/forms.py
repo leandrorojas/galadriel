@@ -1,10 +1,45 @@
-"""Authentication forms for user registration."""
+"""Authentication forms for login and user registration."""
 
 import reflex as rx
 import reflex_local_auth
 
+from reflex_local_auth.pages.login import LoginState
+from reflex_local_auth.pages.registration import RegistrationState
 from reflex_local_auth.pages.components import input_100w, MIN_WIDTH
 from .state import Register
+
+def __login_error() -> rx.Component:
+    """Render the login error message."""
+    return rx.cond(
+        LoginState.error_message != "",
+        rx.callout(
+            LoginState.error_message,
+            icon="triangle_alert",
+            color_scheme="red",
+            role="alert",
+            width="100%",
+        ),
+    )
+
+def login_form() -> rx.Component:
+    """Render the login form with autofocus on the username field."""
+    return rx.form(
+        rx.vstack(
+            rx.heading("Login into your Account", size="7"),
+            __login_error(),
+            rx.text("Username"),
+            input_100w("username", auto_focus=True),
+            rx.text("Password"),
+            input_100w("password", type="password"),
+            rx.button("Sign in", width="100%"),
+            rx.center(
+                rx.link("Register", on_click=RegistrationState.redir),
+                width="100%",
+            ),
+            min_width=MIN_WIDTH,
+        ),
+        on_submit=LoginState.on_submit,
+    )
 
 def __register_error() -> rx.Component:
     """Render the registration error message."""
