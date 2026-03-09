@@ -25,9 +25,9 @@ def login_form() -> rx.Component:
         rx.vstack(
             rx.heading("Log in to your account", size="7"),
             __login_error(),
-            rx.text("Username"),
+            rx.el.label("Username", html_for="username"),
             input_100w("username", auto_focus=True),
-            rx.text("Password"),
+            rx.el.label("Password", html_for="password"),
             input_100w("password", type="password"),
             rx.button("Sign in", width="100%"),
             rx.center(
@@ -58,13 +58,13 @@ def register_form() -> rx.Component:
         rx.vstack(
             rx.heading("Create an account", size="7"),
             __register_error(),
-            rx.text("Username"),
+            rx.el.label("Username", html_for="username"),
             input_100w("username"),
-            rx.text("Email"),
+            rx.el.label("Email", html_for="email"),
             input_100w("email", type="email"),
-            rx.text("Password"),
+            rx.el.label("Password", html_for="password"),
             input_100w("password", type="password"),
-            rx.text("Confirm Password"),
+            rx.el.label("Confirm Password", html_for="confirm_password"),
             input_100w("confirm_password", type="password"),
             rx.button("Sign up", width="100%"),
             rx.center(
