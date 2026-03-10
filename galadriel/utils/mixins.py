@@ -115,6 +115,27 @@ def get_max_child_order(model_class, parent_field, parent_id, child_id, child_ty
         return max_order + 1
 
 
+def toggle_sort_field(current_field: str, current_asc: bool, field: str) -> tuple:
+    """Cycle sort state: default → asc → desc → default. Returns (sort_by, sort_asc)."""
+    if current_field != field:
+        return field, True
+    elif current_asc:
+        return current_field, False
+    else:
+        return "", True
+
+
+def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
+    """Sort a list by field name. Returns original list when sort_by is empty."""
+    if not sort_by:
+        return items
+    return sorted(
+        items,
+        key=lambda item: getattr(item, sort_by, "") or "",
+        reverse=not sort_asc,
+    )
+
+
 class TimestampMixin:
     """Mixin that formats timestamp fields in model_dump output."""
 

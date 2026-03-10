@@ -10,7 +10,7 @@ from ..scenario.model import ScenarioModel
 
 from sqlmodel import select, cast, String
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items
 
 SUITES_ROUTE = consts.normalize_route(routes.SUITES)
 
@@ -71,58 +71,26 @@ class SuiteState(rx.State):
 
     def toggle_sort(self, field: str):
         """Cycle sort: default → asc → desc → default."""
-        if self.sort_by != field:
-            self.sort_by = field
-            self.sort_asc = True
-        elif self.sort_asc:
-            self.sort_asc = False
-        else:
-            self.sort_by = ""
-            self.sort_asc = True
+        self.sort_by, self.sort_asc = toggle_sort_field(self.sort_by, self.sort_asc, field)
 
     @rx.var(cache=True)
     def sorted_suites(self) -> List['SuiteModel']:
         """Return suites sorted by the current sort field and direction."""
-        if not self.sort_by:
-            return self.suites
-        return sorted(
-            self.suites,
-            key=lambda s: getattr(s, self.sort_by, "") or "",
-            reverse=not self.sort_asc,
-        )
+        return sort_items(self.suites, self.sort_by, self.sort_asc)
 
     def toggle_search_sort(self, field: str):
         """Cycle search sort: default → asc → desc → default."""
-        if self.search_sort_by != field:
-            self.search_sort_by = field
-            self.search_sort_asc = True
-        elif self.search_sort_asc:
-            self.search_sort_asc = False
-        else:
-            self.search_sort_by = ""
-            self.search_sort_asc = True
+        self.search_sort_by, self.search_sort_asc = toggle_sort_field(self.search_sort_by, self.search_sort_asc, field)
 
     @rx.var(cache=True)
     def sorted_cases_for_search(self) -> List['CaseModel']:
         """Return search cases sorted by the current search sort field."""
-        if not self.search_sort_by:
-            return self.cases_for_search
-        return sorted(
-            self.cases_for_search,
-            key=lambda c: getattr(c, self.search_sort_by, "") or "",
-            reverse=not self.search_sort_asc,
-        )
+        return sort_items(self.cases_for_search, self.search_sort_by, self.search_sort_asc)
 
     @rx.var(cache=True)
     def sorted_scenarios_for_search(self) -> List['ScenarioModel']:
         """Return search scenarios sorted by the current search sort field."""
-        if not self.search_sort_by:
-            return self.scenarios_for_search
-        return sorted(
-            self.scenarios_for_search,
-            key=lambda s: getattr(s, self.search_sort_by, "") or "",
-            reverse=not self.search_sort_asc,
-        )
+        return sort_items(self.scenarios_for_search, self.search_sort_by, self.search_sort_asc)
 
     def add_suite(self, form_data:dict):
         """Create a new suite from form data."""

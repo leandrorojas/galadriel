@@ -6,7 +6,7 @@ from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 from ..utils import consts, timing
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items
 
 from datetime import datetime
 
@@ -77,47 +77,21 @@ class CaseState(rx.State):
 
     def toggle_sort(self, field: str):
         """Cycle sort: default → asc → desc → default."""
-        if self.sort_by != field:
-            self.sort_by = field
-            self.sort_asc = True
-        elif self.sort_asc:
-            self.sort_asc = False
-        else:
-            self.sort_by = ""
-            self.sort_asc = True
+        self.sort_by, self.sort_asc = toggle_sort_field(self.sort_by, self.sort_asc, field)
 
     @rx.var(cache=True)
     def sorted_cases(self) -> List['CaseModel']:
         """Return cases sorted by the current sort field and direction."""
-        if not self.sort_by:
-            return self.cases
-        return sorted(
-            self.cases,
-            key=lambda c: getattr(c, self.sort_by, "") or "",
-            reverse=not self.sort_asc,
-        )
+        return sort_items(self.cases, self.sort_by, self.sort_asc)
 
     def toggle_search_sort(self, field: str):
         """Cycle search sort: default → asc → desc → default."""
-        if self.search_sort_by != field:
-            self.search_sort_by = field
-            self.search_sort_asc = True
-        elif self.search_sort_asc:
-            self.search_sort_asc = False
-        else:
-            self.search_sort_by = ""
-            self.search_sort_asc = True
+        self.search_sort_by, self.search_sort_asc = toggle_sort_field(self.search_sort_by, self.search_sort_asc, field)
 
     @rx.var(cache=True)
     def sorted_cases_for_search(self) -> List['CaseModel']:
         """Return prerequisite search cases sorted by the current search sort field."""
-        if not self.search_sort_by:
-            return self.cases
-        return sorted(
-            self.cases,
-            key=lambda c: getattr(c, self.search_sort_by, "") or "",
-            reverse=not self.search_sort_asc,
-        )
+        return sort_items(self.cases, self.search_sort_by, self.search_sort_asc)
 
     def add_case(self, form_data:dict):
         """Create a new test case from form data."""
