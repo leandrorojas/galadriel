@@ -12,10 +12,10 @@ from ..scenario.model import ScenarioModel, ScenarioCaseModel
 from ..suite.model import SuiteModel, SuiteChildModel
 from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel, IterationSnapshotLinkedIssues
 
-from sqlmodel import select, asc, cast, String, desc
+from sqlmodel import select, asc, desc
 
 from ..utils import jira, consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -33,6 +33,12 @@ class CycleState(rx.State):
 
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
+
+    sort_by: str = ""
+    sort_asc: bool = True
+
+    search_sort_by: str = ""
+    search_sort_asc: bool = True
 
     @rx.var(cache=True)
     def cycle_id(self) -> str:
@@ -143,6 +149,34 @@ class CycleState(rx.State):
                 setattr(single_result, "iteration_status_name", iteration_status_name)
 
             self.cycles = results
+
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        self.sort_by, self.sort_asc = toggle_sort_field(self.sort_by, self.sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_cycles(self) -> List['CycleModel']:
+        """Return cycles sorted by the current sort field and direction."""
+        return sort_items(self.cycles, self.sort_by, self.sort_asc)
+
+    def toggle_search_sort(self, field: str):
+        """Cycle search sort: default → asc → desc → default."""
+        self.search_sort_by, self.search_sort_asc = toggle_sort_field(self.search_sort_by, self.search_sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases sorted by the current search sort field."""
+        return sort_items(self.cases_for_search, self.search_sort_by, self.search_sort_asc)
+
+    @rx.var(cache=True)
+    def sorted_scenarios_for_search(self) -> List['ScenarioModel']:
+        """Return search scenarios sorted by the current search sort field."""
+        return sort_items(self.scenarios_for_search, self.search_sort_by, self.search_sort_asc)
+
+    @rx.var(cache=True)
+    def sorted_suites_for_search(self) -> List['SuiteModel']:
+        """Return search suites sorted by the current search sort field."""
+        return sort_items(self.suites_for_search, self.search_sort_by, self.search_sort_asc)
 
     def add_cycle(self, form_data:dict):
         """Create a new cycle from form data."""
@@ -286,27 +320,21 @@ class CycleState(rx.State):
 
     def toggle_case_search(self):
         """Toggle the case search panel visibility."""
-        self.show_case_search = not(self.show_case_search)
+        self.show_case_search = not self.show_case_search
+        if self.show_case_search:
+            self.show_scenario_search = False
+            self.show_suite_search = False
+            self.search_sort_by = ""
+            self.search_sort_asc = True
 
-    def filter_test_cases(self, search_case_value):
-        """Update the case search filter and reload results."""
-        self.search_case_value = search_case_value
-        self.load_cases_for_search()
-
-    def load_cases_for_search(self):
-        """Load cases matching the current search filter."""
-        with rx.session() as session:
-            query = select(CaseModel)
-            if self.search_case_value:
-                search_case_value = (f"%{str(self.search_case_value).lower()}%")
-                query = query.where(cast(CaseModel.name, String).ilike(search_case_value))
-
-            results = session.exec(query).all()
-            self.cases_for_search = results
+    def load_cases_for_search(self, search_case_value=None):
+        """Set the case search filter (if given) and reload matching cases."""
+        filter_and_load(self, CaseModel, "search_case_value", "cases_for_search", search_case_value)
 
     def link_case(self, case_id:int):
         """Link a test case to the current cycle."""
-        if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
+        if not _has_steps(StepModel, case_id):
+            return rx.toast.error("test case must have at least one step")
         
         cycle_case_data:dict = {"cycle_id":""}
         new_case_order = 1
@@ -333,9 +361,6 @@ class CycleState(rx.State):
         
         return rx.toast.success("case added!")
     
-    def has_steps(self, case_id:int) -> bool:
-        """Check whether the case has steps before linking to the cycle."""
-        return _has_steps(StepModel, case_id)
     #endregion
 
     #region SCENARIOS
@@ -345,23 +370,16 @@ class CycleState(rx.State):
 
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
-        self.show_scenario_search = not(self.show_scenario_search)
+        self.show_scenario_search = not self.show_scenario_search
+        if self.show_scenario_search:
+            self.show_case_search = False
+            self.show_suite_search = False
+            self.search_sort_by = ""
+            self.search_sort_asc = True
 
-    def filter_scenarios(self, search_scenario_value):
-        """Update the scenario search filter and reload results."""
-        self.search_scenario_value = search_scenario_value
-        self.load_scenarios_for_search()
-
-    def load_scenarios_for_search(self):
-        """Load scenarios matching the current search filter."""
-        with rx.session() as session:
-            query = select(ScenarioModel)
-            if self.search_scenario_value:
-                search_scenario_value = (f"%{str(self.search_scenario_value).lower()}%")
-                query = query.where(cast(ScenarioModel.name, String).ilike(search_scenario_value))
-
-            results = session.exec(query).all()
-            self.scenarios_for_search = results
+    def load_scenarios_for_search(self, search_scenario_value=None):
+        """Set the scenario search filter (if given) and reload matching scenarios."""
+        filter_and_load(self, ScenarioModel, "search_scenario_value", "scenarios_for_search", search_scenario_value)
 
     def link_scenario(self, scenario_id:int):
         """Link a scenario to the current cycle."""
@@ -398,23 +416,16 @@ class CycleState(rx.State):
 
     def toggle_suite_search(self):
         """Toggle the suite search panel visibility."""
-        self.show_suite_search = not(self.show_suite_search)
+        self.show_suite_search = not self.show_suite_search
+        if self.show_suite_search:
+            self.show_case_search = False
+            self.show_scenario_search = False
+            self.search_sort_by = ""
+            self.search_sort_asc = True
 
-    def filter_suites(self, search_suite_value):
-        """Update the suite search filter and reload results."""
-        self.search_suite_value = search_suite_value
-        self.load_suites_for_search()
-
-    def load_suites_for_search(self):
-        """Load suites matching the current search filter."""
-        with rx.session() as session:
-            query = select(SuiteModel)
-            if self.search_suite_value:
-                search_suite_value = (f"%{str(self.search_suite_value).lower()}%")
-                query = query.where(cast(SuiteModel.name, String).ilike(search_suite_value))
-
-            results = session.exec(query).all()
-            self.suites_for_search = results
+    def load_suites_for_search(self, search_suite_value=None):
+        """Set the suite search filter (if given) and reload matching suites."""
+        filter_and_load(self, SuiteModel, "search_suite_value", "suites_for_search", search_suite_value)
 
     def link_suite(self, suite_id:int):
         """Link a suite to the current cycle."""

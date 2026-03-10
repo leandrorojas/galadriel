@@ -1,6 +1,7 @@
 """Shared utility functions for reordering, querying child items, and timestamp formatting."""
 
 import reflex as rx
+from sqlmodel import select, cast, String
 
 from .timing import format_datetime
 
@@ -113,6 +114,45 @@ def get_max_child_order(model_class, parent_field, parent_id, child_id, child_ty
             if linked_child.order > max_order:
                 max_order = linked_child.order
         return max_order + 1
+
+
+def toggle_sort_field(current_field: str, current_asc: bool, field: str) -> tuple:
+    """Cycle sort state: default → asc → desc → default. Returns (sort_by, sort_asc)."""
+    if current_field != field:
+        return field, True
+    elif current_asc:
+        return current_field, False
+    else:
+        return "", True
+
+
+def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
+    """Sort a list by field name. Returns original list when sort_by is empty."""
+    if not sort_by:
+        return items
+    def sort_key(item):
+        val = getattr(item, sort_by, None)
+        return (val is None, val)
+
+    return sorted(items, key=sort_key, reverse=not sort_asc)
+
+
+def filter_and_load(state, model_class, search_attr: str, store_attr: str, new_value=None):
+    """Set the search value (if given) and load matching items by name into store_attr."""
+    if new_value is not None:
+        setattr(state, search_attr, new_value)
+    setattr(state, store_attr, search_by_name(model_class, getattr(state, search_attr)))
+
+
+def search_by_name(model_class, search_value: str) -> list:
+    """Search for items by name using ILIKE pattern matching. Ordered by name, id."""
+    with rx.session() as session:
+        query = select(model_class)
+        if search_value:
+            pattern = f"%{str(search_value).lower()}%"
+            query = query.where(cast(model_class.name, String).ilike(pattern))
+        query = query.order_by(model_class.name, model_class.id)
+        return session.exec(query).all()
 
 
 class TimestampMixin:

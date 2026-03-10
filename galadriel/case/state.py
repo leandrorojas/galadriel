@@ -6,11 +6,10 @@ from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 from ..utils import consts, timing
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name
 
 from datetime import datetime
 
-from sqlmodel import select, cast, String
 
 CASE_ROUTE = consts.normalize_route(routes.CASES)
 
@@ -28,6 +27,12 @@ class CaseState(rx.State):
 
     search_value:str = ""
     show_search:bool = False
+
+    sort_by: str = ""
+    sort_asc: bool = True
+
+    search_sort_by: str = ""
+    search_sort_asc: bool = True
 
     @rx.var(cache=True)
     def case_id(self) -> int:
@@ -60,14 +65,25 @@ class CaseState(rx.State):
 
     def load_cases(self):
         """Load all cases, optionally filtered by search value."""
-        with rx.session() as session:
-            query = select(CaseModel)
-            if self.search_value:
-                search_value = (f"%{str(self.search_value).lower()}%")
-                query = query.where(cast(CaseModel.name, String).ilike(search_value))
+        self.cases = search_by_name(CaseModel, self.search_value)
 
-            results = session.exec(query).all()
-            self.cases = results
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        self.sort_by, self.sort_asc = toggle_sort_field(self.sort_by, self.sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_cases(self) -> List['CaseModel']:
+        """Return cases sorted by the current sort field and direction."""
+        return sort_items(self.cases, self.sort_by, self.sort_asc)
+
+    def toggle_search_sort(self, field: str):
+        """Cycle search sort: default → asc → desc → default."""
+        self.search_sort_by, self.search_sort_asc = toggle_sort_field(self.search_sort_by, self.search_sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_cases_for_search(self) -> List['CaseModel']:
+        """Return prerequisite search cases sorted by the current search sort field."""
+        return sort_items(self.cases, self.search_sort_by, self.search_sort_asc)
 
     def add_case(self, form_data:dict):
         """Create a new test case from form data."""

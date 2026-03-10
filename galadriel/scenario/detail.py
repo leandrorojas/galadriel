@@ -63,12 +63,12 @@ def __search_cases_table() -> rx.Component:
                 rx.table.header(
                     rx.table.row(
                         table_component.header("", "ellipsis"),
-                        table_component.header("name", "fingerprint"),
-                        table_component.header("created", "calendar-check-2"),
-                        table_component.header("selected_id", "search", True),
+                        Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
+                        Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
+                        table_component.header("selected_id", "search", hide_column=True),
                     ),
                 ),
-                rx.table.body(rx.foreach(state.ScenarioState.test_cases_for_search, __show_test_cases_in_search)),
+                rx.table.body(rx.foreach(state.ScenarioState.sorted_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",

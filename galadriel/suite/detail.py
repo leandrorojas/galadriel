@@ -14,7 +14,15 @@ from ..utils import consts
 from ..auth.state import require_login, Session
 
 def __search_table_header():
-    return SearchTable().header()
+    table_component = Table()
+    return rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            Table.sortable_header("name", "fingerprint", "name", state.SuiteState.search_sort_by, state.SuiteState.search_sort_asc, state.SuiteState.toggle_search_sort),
+            Table.sortable_header("created", "calendar-check-2", "created", state.SuiteState.search_sort_by, state.SuiteState.search_sort_asc, state.SuiteState.toggle_search_sort),
+            table_component.header("selected_id", "search", hide_column=True),
+        ),
+    )
 
 def __show_test_cases_in_search(test_case:CaseModel):
     moment_component = Moment()
@@ -31,7 +39,7 @@ def __search_cases_table() -> rx.Component:
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.SuiteState.cases_for_search, __show_test_cases_in_search)),
+                rx.table.body(rx.foreach(state.SuiteState.sorted_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
@@ -55,7 +63,7 @@ def __search_scenarios_table() -> rx.Component:
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.SuiteState.scenarios_for_search, __show_scenarios_in_search)),
+                rx.table.body(rx.foreach(state.SuiteState.sorted_scenarios_for_search, __show_scenarios_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
@@ -156,7 +164,7 @@ def suite_detail_page() -> rx.Component:
                 rx.box(
                         rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.suite_id), display="none",),
                         rx.vstack(
-                            rx.input(placeholder="start typing to search a Scenario to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_scenarios(value)),
+                            rx.input(placeholder="start typing to search a Scenario to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.load_scenarios_for_search(value)),
                             __search_scenarios_table(),
                         ),
                     ),
@@ -174,7 +182,7 @@ def suite_detail_page() -> rx.Component:
                 rx.box(
                         rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.suite_id), display="none",),
                         rx.vstack(
-                            rx.input(placeholder="start typing to search a Test Case to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.filter_test_cases(value)),
+                            rx.input(placeholder="start typing to search a Test Case to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.load_cases_for_search(value)),
                             __search_cases_table(),
                         ),
                     ),

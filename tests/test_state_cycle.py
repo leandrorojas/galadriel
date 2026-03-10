@@ -447,7 +447,7 @@ class TestSearchFilter:
         make_case(name="Signup Flow")
 
         state = _make_state()
-        state.filter_test_cases("login")
+        state.load_cases_for_search("login")
         assert len(state.cases_for_search) == 1
         assert state.cases_for_search[0].name == "Login Test"
 
@@ -456,7 +456,7 @@ class TestSearchFilter:
         make_scenario(name="Login Flow")
 
         state = _make_state()
-        state.filter_scenarios("checkout")
+        state.load_scenarios_for_search("checkout")
         assert len(state.scenarios_for_search) == 1
 
     def test_filter_suites(self, patch_rx_session, make_suite):
@@ -464,7 +464,7 @@ class TestSearchFilter:
         make_suite(name="Smoke Suite")
 
         state = _make_state()
-        state.filter_suites("smoke")
+        state.load_suites_for_search("smoke")
         assert len(state.suites_for_search) == 1
 
 

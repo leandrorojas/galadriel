@@ -14,7 +14,15 @@ from ..utils import consts
 from ..auth.state import require_login, Session
 
 def __search_table_header():
-    return SearchTable().header()
+    table_component = Table()
+    return rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            Table.sortable_header("name", "fingerprint", "name", state.CycleState.search_sort_by, state.CycleState.search_sort_asc, state.CycleState.toggle_search_sort),
+            Table.sortable_header("created", "calendar-check-2", "created", state.CycleState.search_sort_by, state.CycleState.search_sort_asc, state.CycleState.toggle_search_sort),
+            table_component.header("selected_id", "search", hide_column=True),
+        ),
+    )
 
 def __show_test_cases_in_search(test_case:CaseModel):
     moment_component = Moment()
@@ -31,7 +39,7 @@ def __search_cases_table() -> rx.Component:
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.CycleState.cases_for_search, __show_test_cases_in_search)),
+                rx.table.body(rx.foreach(state.CycleState.sorted_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
@@ -55,7 +63,7 @@ def __search_scenarios_table() -> rx.Component:
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.CycleState.scenarios_for_search, __show_scenarios_in_search)),
+                rx.table.body(rx.foreach(state.CycleState.sorted_scenarios_for_search, __show_scenarios_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
@@ -79,7 +87,7 @@ def __search_suites_table() -> rx.Component:
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.CycleState.suites_for_search, __show_suites_in_search)),
+                rx.table.body(rx.foreach(state.CycleState.sorted_suites_for_search, __show_suites_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
@@ -204,7 +212,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(
                             rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.cycle_id), display="none",),
                             rx.vstack(
-                                rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_suites(value)),
+                                rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.load_suites_for_search(value)),
                                 __search_suites_table(),
                             ),
                         ),
@@ -222,7 +230,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(
                                 rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.cycle_id), display="none",),
                                 rx.vstack(
-                                    rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_scenarios(value)),
+                                    rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.load_scenarios_for_search(value)),
                                     __search_scenarios_table(),
                                 ),
                             ),
@@ -240,7 +248,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(
                                 rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.cycle_id), display="none",),
                                 rx.vstack(
-                                    rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_test_cases(value)),
+                                    rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.load_cases_for_search(value)),
                                     __search_cases_table(),
                                 ),
                             ),

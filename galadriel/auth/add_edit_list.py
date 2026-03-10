@@ -37,14 +37,14 @@ def __table() -> rx.Component:
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_component.header("username", "user-cog"),
-                    table_component.header("email", "mail"),
-                    table_component.header("role", "scan-eye"),
+                    Table.sortable_header("username", "user-cog", "username", state.UserState.sort_by, state.UserState.sort_asc, state.UserState.toggle_sort),
+                    Table.sortable_header("email", "mail", "email", state.UserState.sort_by, state.UserState.sort_asc, state.UserState.toggle_sort),
+                    Table.sortable_header("role", "scan-eye", "role", state.UserState.sort_by, state.UserState.sort_asc, state.UserState.toggle_sort),
                     table_component.header("enabled", "toggle-right"),
-                    table_component.header("created", "calendar-check-2"),
+                    Table.sortable_header("created", "calendar-check-2", "created", state.UserState.sort_by, state.UserState.sort_asc, state.UserState.toggle_sort),
                 ),
             ),
-            rx.table.body(rx.foreach(state.UserState.users, __show_user)),
+            rx.table.body(rx.foreach(state.UserState.sorted_users, __show_user)),
             variant="surface",
             size="3",
             width="100%",

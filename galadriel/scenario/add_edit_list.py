@@ -34,16 +34,15 @@ def __show_scenario(scenario:model.ScenarioModel):
     )
 
 def __table() -> rx.Component:
-    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_component.header("name", "fingerprint"),
-                    table_component.header("created", "calendar-check-2"),
+                    Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.sort_by, state.ScenarioState.sort_asc, state.ScenarioState.toggle_sort),
+                    Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.sort_by, state.ScenarioState.sort_asc, state.ScenarioState.toggle_sort),
                 ),
             ),
-            rx.table.body(rx.foreach(state.ScenarioState.scenarios, __show_scenario)),
+            rx.table.body(rx.foreach(state.ScenarioState.sorted_scenarios, __show_scenario)),
             variant="surface",
             size="3",
             width="100%",

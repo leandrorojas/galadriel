@@ -35,16 +35,15 @@ def __show_case(test_case:model.CaseModel):
     )
 
 def __table() -> rx.Component:
-    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_component.header("name", "fingerprint"),
-                    table_component.header("created", "calendar-check-2"),
+                    Table.sortable_header("name", "fingerprint", "name", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
+                    Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                 ),
             ),
-            rx.table.body(rx.foreach(state.CaseState.cases, __show_case)),
+            rx.table.body(rx.foreach(state.CaseState.sorted_cases, __show_case)),
             variant="surface",
             size="3",
             width="100%",

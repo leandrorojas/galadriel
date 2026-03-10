@@ -9,6 +9,7 @@ from sqlmodel import select
 from .model import GaladrielUser, GaladrielUserRole, GaladrielUserDisplay
 from ..navigation import routes
 from ..utils import consts
+from ..utils.mixins import toggle_sort_field, sort_items
 
 from enum import Enum
 
@@ -26,6 +27,9 @@ class UserState(rx.State):
 
     users: List['GaladrielUserDisplay'] = []
     user: Optional['GaladrielUserDisplay'] = None
+
+    sort_by: str = ""
+    sort_asc: bool = True
 
     @rx.var(cache=True)
     def user_id(self) -> int:
@@ -63,6 +67,15 @@ class UserState(rx.State):
                             updated=single_user.updated
                         )
                     )
+
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        self.sort_by, self.sort_asc = toggle_sort_field(self.sort_by, self.sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_users(self) -> List['GaladrielUserDisplay']:
+        """Return users sorted by the current sort field and direction."""
+        return sort_items(self.users, self.sort_by, self.sort_asc)
 
     def get_user_detail(self):
         """Load a single user by their route ID."""

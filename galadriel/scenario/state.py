@@ -5,11 +5,10 @@ import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name
 
 from ..case.model import CaseModel, StepModel
 
-from sqlmodel import select, cast, String
 
 SCENARIO_ROUTE = consts.normalize_route(routes.SCENARIOS)
 
@@ -25,6 +24,12 @@ class ScenarioState(rx.State):
 
     show_search:bool = False
     search_value:str = ""
+
+    sort_by: str = ""
+    sort_asc: bool = True
+
+    search_sort_by: str = ""
+    search_sort_asc: bool = True
 
     @rx.var(cache=True)
     def scenario_id(self) -> str:
@@ -55,8 +60,26 @@ class ScenarioState(rx.State):
     def load_scenarios(self):
         """Load all scenarios from the database."""
         with rx.session() as session:
-            results = session.exec(ScenarioModel.select()).all()
+            results = session.exec(ScenarioModel.select().order_by(ScenarioModel.name, ScenarioModel.id)).all()
             self.scenarios = results
+
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        self.sort_by, self.sort_asc = toggle_sort_field(self.sort_by, self.sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_scenarios(self) -> List['ScenarioModel']:
+        """Return scenarios sorted by the current sort field and direction."""
+        return sort_items(self.scenarios, self.sort_by, self.sort_asc)
+
+    def toggle_search_sort(self, field: str):
+        """Cycle search sort: default → asc → desc → default."""
+        self.search_sort_by, self.search_sort_asc = toggle_sort_field(self.search_sort_by, self.search_sort_asc, field)
+
+    @rx.var(cache=True)
+    def sorted_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases sorted by the current search sort field."""
+        return sort_items(self.test_cases_for_search, self.search_sort_by, self.search_sort_asc)
 
     def add_scenario(self, form_data:dict):
         """Create a new scenario from form data."""
@@ -118,14 +141,7 @@ class ScenarioState(rx.State):
 
     def load_cases_for_search(self):
         """Load cases matching the current search filter."""
-        with rx.session() as session:
-            query = select(CaseModel)
-            if self.search_value:
-                search_value = (f"%{str(self.search_value).lower()}%")
-                query = query.where(cast(CaseModel.name, String).ilike(search_value))
-
-            results = session.exec(query).all()
-            self.test_cases_for_search = results
+        self.test_cases_for_search = search_by_name(CaseModel, self.search_value)
 
     def link_case(self, case_id:int):
         """Link a test case to the current scenario."""
