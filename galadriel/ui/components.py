@@ -456,7 +456,7 @@ class Table():
         )
 
     @staticmethod
-    def sortable_header(text: str, icon: str, field: str, sort_by_var, sort_asc_var, on_click, info_tooltip: str = ""):
+    def sortable_header(text: str, icon: str, field: str, sort_by_var, sort_asc_var, on_click, info_tooltip: str = "") -> rx.Component:
         """Render a clickable table column header with sort direction indicator."""
         title_tooltip = Tooltip()
         return rx.table.column_header_cell(

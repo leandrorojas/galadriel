@@ -17,6 +17,7 @@ def _make_state(case_id_value=0):
         cases=[], case=None, steps=[], prerequisites=[],
         search_value="", show_search=False,
         sort_by="", sort_asc=True,
+        search_sort_by="", search_sort_asc=True,
     )
     type(state).case_id = PropertyMock(return_value=case_id_value)
     return state
@@ -295,7 +296,10 @@ class TestPrerequisites:
 
 
 class TestSorting:
+    """Verify list-page and search-table sorting behavior."""
+
     def test_default_sort_returns_original_order(self, patch_rx_session, make_case):
+        """Verify unsorted state returns cases in original insertion order."""
         make_case(name="Zebra")
         make_case(name="Alpha")
         state = _make_state()
@@ -304,19 +308,32 @@ class TestSorting:
         names = [c.name for c in state.sorted_cases]
         assert names == [c.name for c in state.cases]
 
-    def test_toggle_sort_cycles_asc_desc_default(self, patch_rx_session):
+    def test_toggle_sort_cycles_asc_desc_default(self, patch_rx_session, make_case):
+        """Verify toggle_sort cycles flags and visible order through asc, desc, default."""
+        make_case(name="Zebra")
+        make_case(name="Alpha")
+        make_case(name="Middle")
         state = _make_state()
+        state.load_cases()
+        original_order = [c.name for c in state.cases]
+
         state.toggle_sort("name")
         assert state.sort_by == "name"
         assert state.sort_asc is True
+        assert [c.name for c in state.sorted_cases] == ["Alpha", "Middle", "Zebra"]
+
         state.toggle_sort("name")
         assert state.sort_by == "name"
         assert state.sort_asc is False
+        assert [c.name for c in state.sorted_cases] == ["Zebra", "Middle", "Alpha"]
+
         state.toggle_sort("name")
         assert state.sort_by == ""
         assert state.sort_asc is True
+        assert [c.name for c in state.sorted_cases] == original_order
 
     def test_toggle_sort_different_field_resets(self, patch_rx_session):
+        """Verify switching to a different field resets to ascending."""
         state = _make_state()
         state.toggle_sort("name")
         state.toggle_sort("name")  # now desc
@@ -325,6 +342,7 @@ class TestSorting:
         assert state.sort_asc is True
 
     def test_sorted_cases_by_name_asc(self, patch_rx_session, make_case):
+        """Verify ascending sort returns alphabetical name order."""
         make_case(name="Zebra")
         make_case(name="Alpha")
         make_case(name="Middle")
@@ -335,6 +353,7 @@ class TestSorting:
         assert names == ["Alpha", "Middle", "Zebra"]
 
     def test_sorted_cases_by_name_desc(self, patch_rx_session, make_case):
+        """Verify descending sort returns reverse alphabetical name order."""
         make_case(name="Zebra")
         make_case(name="Alpha")
         state = _make_state()
@@ -342,4 +361,48 @@ class TestSorting:
         state.toggle_sort("name")
         state.toggle_sort("name")  # desc
         names = [c.name for c in state.sorted_cases]
+        assert names == ["Zebra", "Alpha"]
+
+    def test_search_sort_cycles_asc_desc_default(self, patch_rx_session):
+        """Verify toggle_search_sort cycles through asc, desc, default."""
+        state = _make_state()
+        state.toggle_search_sort("name")
+        assert state.search_sort_by == "name"
+        assert state.search_sort_asc is True
+        state.toggle_search_sort("name")
+        assert state.search_sort_by == "name"
+        assert state.search_sort_asc is False
+        state.toggle_search_sort("name")
+        assert state.search_sort_by == ""
+        assert state.search_sort_asc is True
+
+    def test_search_sort_different_field_resets(self, patch_rx_session):
+        """Verify switching search sort field resets to ascending."""
+        state = _make_state()
+        state.toggle_search_sort("name")
+        state.toggle_search_sort("name")  # desc
+        state.toggle_search_sort("created")
+        assert state.search_sort_by == "created"
+        assert state.search_sort_asc is True
+
+    def test_sorted_cases_for_search_asc(self, patch_rx_session, make_case):
+        """Verify search table ascending sort returns alphabetical order."""
+        make_case(name="Zebra")
+        make_case(name="Alpha")
+        make_case(name="Middle")
+        state = _make_state()
+        state.load_cases()
+        state.toggle_search_sort("name")
+        names = [c.name for c in state.sorted_cases_for_search]
+        assert names == ["Alpha", "Middle", "Zebra"]
+
+    def test_sorted_cases_for_search_desc(self, patch_rx_session, make_case):
+        """Verify search table descending sort returns reverse alphabetical order."""
+        make_case(name="Zebra")
+        make_case(name="Alpha")
+        state = _make_state()
+        state.load_cases()
+        state.toggle_search_sort("name")
+        state.toggle_search_sort("name")  # desc
+        names = [c.name for c in state.sorted_cases_for_search]
         assert names == ["Zebra", "Alpha"]

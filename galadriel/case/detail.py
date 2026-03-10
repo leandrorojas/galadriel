@@ -64,7 +64,7 @@ def __search_prerequisites_table() -> rx.Component:
                         table_component.header("", "ellipsis"),
                         Table.sortable_header("name", "fingerprint", "name", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
                         Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
-                        table_component.header("selected_id", "search", True),
+                        table_component.header("selected_id", "search", hide_column=True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CaseState.sorted_cases_for_search, __show_case_as_prerequisite)),
