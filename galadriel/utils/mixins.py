@@ -140,6 +140,13 @@ def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
     )
 
 
+def filter_and_load(state, model_class, search_attr: str, store_attr: str, new_value=None):
+    """Set the search value (if given) and load matching items by name into store_attr."""
+    if new_value is not None:
+        setattr(state, search_attr, new_value)
+    setattr(state, store_attr, search_by_name(model_class, getattr(state, search_attr)))
+
+
 def search_by_name(model_class, search_value: str) -> list:
     """Search for items by name using ILIKE pattern matching."""
     with rx.session() as session:

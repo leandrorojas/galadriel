@@ -212,7 +212,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(
                             rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.cycle_id), display="none",),
                             rx.vstack(
-                                rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_suites(value)),
+                                rx.input(placeholder="start typing to search a Suite to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.load_suites_for_search(value)),
                                 __search_suites_table(),
                             ),
                         ),
@@ -230,7 +230,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(
                                 rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.cycle_id), display="none",),
                                 rx.vstack(
-                                    rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_scenarios(value)),
+                                    rx.input(placeholder="start typing to search a Scenario to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.load_scenarios_for_search(value)),
                                     __search_scenarios_table(),
                                 ),
                             ),
@@ -248,7 +248,7 @@ def cycle_detail_page() -> rx.Component:
                         rx.box(
                                 rx.box(rx.input(type="hidden", name="cycle_id", value=state.CycleState.cycle_id), display="none",),
                                 rx.vstack(
-                                    rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.filter_test_cases(value)),
+                                    rx.input(placeholder="start typing to search a Test Case to add to the Cycle", width="77vw", on_change=lambda value: state.CycleState.load_cases_for_search(value)),
                                     __search_cases_table(),
                                 ),
                             ),

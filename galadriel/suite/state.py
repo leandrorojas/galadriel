@@ -9,7 +9,7 @@ from ..case.model import CaseModel, StepModel
 from ..scenario.model import ScenarioModel
 
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
 
 SUITES_ROUTE = consts.normalize_route(routes.SUITES)
 
@@ -181,18 +181,13 @@ class SuiteState(rx.State):
         """Return the next order value for a new suite child."""
         return _get_max_child_order(SuiteChildModel, "suite_id", self.suite_id, child_id, child_type_id)
 
-    def filter_test_cases(self, search_case_value):
-        """Update the case search filter and reload results."""
-        self.search_case_value = search_case_value
-        self.load_cases_for_search()
-
-    def load_cases_for_search(self):
-        """Load cases matching the current search filter."""
-        self.cases_for_search = search_by_name(CaseModel, self.search_case_value)
+    def load_cases_for_search(self, search_case_value=None):
+        """Set the case search filter (if given) and reload matching cases."""
+        filter_and_load(self, CaseModel, "search_case_value", "cases_for_search", search_case_value)
 
     def link_case(self, case_id:int):
         """Link a test case to the current suite."""
-        if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
+        if not _has_steps(StepModel, case_id): return rx.toast.error("test case must have at least one step")
 
         suite_case_data:dict = {"suite_id":""}
         new_case_order = 1
@@ -219,10 +214,6 @@ class SuiteState(rx.State):
         
         return rx.toast.success("case added!")
     
-    def has_steps(self, case_id:int) -> bool:
-        """Check whether the given case contains any steps."""
-        return _has_steps(StepModel, case_id)
-
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
         self.show_scenario_search = not self.show_scenario_search
@@ -231,14 +222,9 @@ class SuiteState(rx.State):
             self.search_sort_by = ""
             self.search_sort_asc = True
 
-    def filter_scenarios(self, search_scenario_value):
-        """Update the scenario search filter and reload results."""
-        self.search_scenario_value = search_scenario_value
-        self.load_scenarios_for_search()
-
-    def load_scenarios_for_search(self):
-        """Load scenarios matching the current search filter."""
-        self.scenarios_for_search = search_by_name(ScenarioModel, self.search_scenario_value)
+    def load_scenarios_for_search(self, search_scenario_value=None):
+        """Set the scenario search filter (if given) and reload matching scenarios."""
+        filter_and_load(self, ScenarioModel, "search_scenario_value", "scenarios_for_search", search_scenario_value)
 
     def link_scenario(self, scenario_id:int):
         """Link a scenario to the current suite."""
