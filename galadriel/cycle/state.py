@@ -15,7 +15,7 @@ from ..iteration.model import IterationModel, IterationStatusModel, IterationSna
 from sqlmodel import select, asc, desc
 
 from ..utils import jira, consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name, ChildSearchMixin
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -28,7 +28,7 @@ def format_iteration_status(status: 'IterationStatusModel', can_edit: bool) -> s
     return status.name
 
 SITE_URL = f"http://localhost:{config.frontend_port}/"
-class CycleState(ChildSearchMixin, rx.State):
+class CycleState(rx.State):
     """Manages cycle CRUD, child linking, iteration snapshots, and execution."""
 
     cycles: List['CycleModel'] = []
@@ -327,6 +327,15 @@ class CycleState(ChildSearchMixin, rx.State):
             self.search_sort_by = ""
             self.search_sort_asc = True
 
+    def filter_test_cases(self, search_case_value):
+        """Update the case search filter and reload results."""
+        self.search_case_value = search_case_value
+        self.load_cases_for_search()
+
+    def load_cases_for_search(self):
+        """Load cases matching the current search filter."""
+        self.cases_for_search = search_by_name(CaseModel, self.search_case_value)
+
     def link_case(self, case_id:int):
         """Link a test case to the current cycle."""
         if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
@@ -358,7 +367,7 @@ class CycleState(ChildSearchMixin, rx.State):
     
     def has_steps(self, case_id:int) -> bool:
         """Check whether the case has steps before linking to the cycle."""
-        return self._has_steps(case_id)
+        return _has_steps(StepModel, case_id)
     #endregion
 
     #region SCENARIOS
@@ -374,6 +383,15 @@ class CycleState(ChildSearchMixin, rx.State):
             self.show_suite_search = False
             self.search_sort_by = ""
             self.search_sort_asc = True
+
+    def filter_scenarios(self, search_scenario_value):
+        """Update the scenario search filter and reload results."""
+        self.search_scenario_value = search_scenario_value
+        self.load_scenarios_for_search()
+
+    def load_scenarios_for_search(self):
+        """Load scenarios matching the current search filter."""
+        self.scenarios_for_search = search_by_name(ScenarioModel, self.search_scenario_value)
 
     def link_scenario(self, scenario_id:int):
         """Link a scenario to the current cycle."""

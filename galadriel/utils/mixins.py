@@ -150,39 +150,6 @@ def search_by_name(model_class, search_value: str) -> list:
         return session.exec(query).all()
 
 
-class ChildSearchMixin:
-    """Mixin providing shared case/scenario search, filter, and step-check methods.
-
-    Used by SuiteState and CycleState to avoid duplicating identical search logic.
-    Model imports are deferred to method calls to prevent circular dependencies.
-    """
-
-    def filter_test_cases(self, search_case_value):
-        """Update the case search filter and reload results."""
-        self.search_case_value = search_case_value
-        self.load_cases_for_search()
-
-    def load_cases_for_search(self):
-        """Load cases matching the current search filter."""
-        from ..case.model import CaseModel
-        self.cases_for_search = search_by_name(CaseModel, self.search_case_value)
-
-    def filter_scenarios(self, search_scenario_value):
-        """Update the scenario search filter and reload results."""
-        self.search_scenario_value = search_scenario_value
-        self.load_scenarios_for_search()
-
-    def load_scenarios_for_search(self):
-        """Load scenarios matching the current search filter."""
-        from ..scenario.model import ScenarioModel
-        self.scenarios_for_search = search_by_name(ScenarioModel, self.search_scenario_value)
-
-    def _has_steps(self, case_id: int) -> bool:
-        """Return True if the case has at least one step."""
-        from ..case.model import StepModel
-        return has_steps(StepModel, case_id)
-
-
 class TimestampMixin:
     """Mixin that formats timestamp fields in model_dump output."""
 
