@@ -6,11 +6,10 @@ from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
 from ..navigation import routes
 from ..utils import consts, timing
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name
 
 from datetime import datetime
 
-from sqlmodel import select, cast, String
 
 CASE_ROUTE = consts.normalize_route(routes.CASES)
 
@@ -66,14 +65,7 @@ class CaseState(rx.State):
 
     def load_cases(self):
         """Load all cases, optionally filtered by search value."""
-        with rx.session() as session:
-            query = select(CaseModel)
-            if self.search_value:
-                search_value = (f"%{str(self.search_value).lower()}%")
-                query = query.where(cast(CaseModel.name, String).ilike(search_value))
-
-            results = session.exec(query).all()
-            self.cases = results
+        self.cases = search_by_name(CaseModel, self.search_value)
 
     def toggle_sort(self, field: str):
         """Cycle sort: default → asc → desc → default."""

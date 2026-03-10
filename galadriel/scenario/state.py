@@ -5,11 +5,10 @@ import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name
 
 from ..case.model import CaseModel, StepModel
 
-from sqlmodel import select, cast, String
 
 SCENARIO_ROUTE = consts.normalize_route(routes.SCENARIOS)
 
@@ -142,14 +141,7 @@ class ScenarioState(rx.State):
 
     def load_cases_for_search(self):
         """Load cases matching the current search filter."""
-        with rx.session() as session:
-            query = select(CaseModel)
-            if self.search_value:
-                search_value = (f"%{str(self.search_value).lower()}%")
-                query = query.where(cast(CaseModel.name, String).ilike(search_value))
-
-            results = session.exec(query).all()
-            self.test_cases_for_search = results
+        self.test_cases_for_search = search_by_name(CaseModel, self.search_value)
 
     def link_case(self, case_id:int):
         """Link a test case to the current scenario."""

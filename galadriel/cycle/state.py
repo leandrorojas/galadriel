@@ -12,10 +12,10 @@ from ..scenario.model import ScenarioModel, ScenarioCaseModel
 from ..suite.model import SuiteModel, SuiteChildModel
 from ..iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel, IterationSnapshotLinkedIssues
 
-from sqlmodel import select, asc, cast, String, desc
+from sqlmodel import select, asc, desc
 
 from ..utils import jira, consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -331,14 +331,7 @@ class CycleState(rx.State):
 
     def load_cases_for_search(self):
         """Load cases matching the current search filter."""
-        with rx.session() as session:
-            query = select(CaseModel)
-            if self.search_case_value:
-                search_case_value = (f"%{str(self.search_case_value).lower()}%")
-                query = query.where(cast(CaseModel.name, String).ilike(search_case_value))
-
-            results = session.exec(query).all()
-            self.cases_for_search = results
+        self.cases_for_search = search_by_name(CaseModel, self.search_case_value)
 
     def link_case(self, case_id:int):
         """Link a test case to the current cycle."""
@@ -392,14 +385,7 @@ class CycleState(rx.State):
 
     def load_scenarios_for_search(self):
         """Load scenarios matching the current search filter."""
-        with rx.session() as session:
-            query = select(ScenarioModel)
-            if self.search_scenario_value:
-                search_scenario_value = (f"%{str(self.search_scenario_value).lower()}%")
-                query = query.where(cast(ScenarioModel.name, String).ilike(search_scenario_value))
-
-            results = session.exec(query).all()
-            self.scenarios_for_search = results
+        self.scenarios_for_search = search_by_name(ScenarioModel, self.search_scenario_value)
 
     def link_scenario(self, scenario_id:int):
         """Link a scenario to the current cycle."""
@@ -447,14 +433,7 @@ class CycleState(rx.State):
 
     def load_suites_for_search(self):
         """Load suites matching the current search filter."""
-        with rx.session() as session:
-            query = select(SuiteModel)
-            if self.search_suite_value:
-                search_suite_value = (f"%{str(self.search_suite_value).lower()}%")
-                query = query.where(cast(SuiteModel.name, String).ilike(search_suite_value))
-
-            results = session.exec(query).all()
-            self.suites_for_search = results
+        self.suites_for_search = search_by_name(SuiteModel, self.search_suite_value)
 
     def link_suite(self, suite_id:int):
         """Link a suite to the current cycle."""

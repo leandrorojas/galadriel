@@ -1,6 +1,7 @@
 """Shared utility functions for reordering, querying child items, and timestamp formatting."""
 
 import reflex as rx
+from sqlmodel import select, cast, String
 
 from .timing import format_datetime
 
@@ -134,6 +135,16 @@ def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
         key=lambda item: getattr(item, sort_by, "") or "",
         reverse=not sort_asc,
     )
+
+
+def search_by_name(model_class, search_value: str) -> list:
+    """Search for items by name using ILIKE pattern matching."""
+    with rx.session() as session:
+        query = select(model_class)
+        if search_value:
+            pattern = f"%{str(search_value).lower()}%"
+            query = query.where(cast(model_class.name, String).ilike(pattern))
+        return session.exec(query).all()
 
 
 class TimestampMixin:
