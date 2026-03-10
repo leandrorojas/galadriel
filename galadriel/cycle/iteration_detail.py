@@ -165,8 +165,12 @@ def iteration_page() -> rx.Component:
             flex_direction=["column", "column", "row"],
             align="center",
             width="100%",
-            top="0px",
             padding_top="2em",
+            padding_bottom="0.5em",
+            position="sticky",
+            top="0",
+            z_index="2",
+            background_color="var(--color-background)",
         ),
         rx.table.root(
             rx.table.header(
