@@ -83,3 +83,9 @@ LocalUser → GaladrielUser → GaladrielUserRole
 - SonarQube/SonarCloud integration for static analysis
 - Alembic for database migrations (`alembic/` directory)
 - Docstrings on all modules, classes, and public functions/methods (one-liner style)
+
+### After Every Change
+
+- **Tests**: Always run `pytest` after each change, even if no tests were modified. Update or add tests when new logic, helpers, or state vars are introduced.
+- **README**: Evaluate whether `README.md` needs updating (e.g., new features, changed behavior).
+- **CLAUDE.md**: Evaluate whether this file needs updating (e.g., new patterns, architecture changes).
