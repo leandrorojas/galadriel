@@ -38,7 +38,7 @@ class TestReorderMoveUp:
     def test_does_not_affect_other_parents(self, patch_rx_session, make_case, make_step):
         case_a = make_case(name="A")
         case_b = make_case(name="B")
-        sa1 = make_step(case_id=case_a.id, order=1, action="a1")
+        make_step(case_id=case_a.id, order=1, action="a1")
         sa2 = make_step(case_id=case_a.id, order=2, action="a2")
         sb1 = make_step(case_id=case_b.id, order=1, action="b1")
 
