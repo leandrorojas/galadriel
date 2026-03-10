@@ -60,7 +60,7 @@ class ScenarioState(rx.State):
     def load_scenarios(self):
         """Load all scenarios from the database."""
         with rx.session() as session:
-            results = session.exec(ScenarioModel.select()).all()
+            results = session.exec(ScenarioModel.select().order_by(ScenarioModel.name, ScenarioModel.id)).all()
             self.scenarios = results
 
     def toggle_sort(self, field: str):

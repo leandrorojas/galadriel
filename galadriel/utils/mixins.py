@@ -148,12 +148,13 @@ def filter_and_load(state, model_class, search_attr: str, store_attr: str, new_v
 
 
 def search_by_name(model_class, search_value: str) -> list:
-    """Search for items by name using ILIKE pattern matching."""
+    """Search for items by name using ILIKE pattern matching. Ordered by name, id."""
     with rx.session() as session:
         query = select(model_class)
         if search_value:
             pattern = f"%{str(search_value).lower()}%"
             query = query.where(cast(model_class.name, String).ilike(pattern))
+        query = query.order_by(model_class.name, model_class.id)
         return session.exec(query).all()
 
 

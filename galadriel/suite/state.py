@@ -65,7 +65,7 @@ class SuiteState(rx.State):
     def load_suites(self):
         """Load all suites from the database."""
         with rx.session() as session:
-            results = session.exec(SuiteModel.select()).all()
+            results = session.exec(SuiteModel.select().order_by(SuiteModel.name, SuiteModel.id)).all()
             self.suites = results
 
     def toggle_sort(self, field: str):
