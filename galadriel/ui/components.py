@@ -420,22 +420,26 @@ class Tooltip():
 class PageHeader():
     """Page header components with title and action buttons."""
 
-    def list(self, title:str, icon:str, button:str, button_link:str, button_enabled:bool, tootip:str="") -> rx.Component:
+    def list(self, title:str, icon:str, button:str, button_link:str, button_enabled:bool, tooltip:str="") -> rx.Component:
         """Render a list page header with title badge and add button."""
         title_badge = Badge()
         title_tooltip = Tooltip()
         button_component = Button()
         return rx.flex(
             title_badge.title(icon, title),
-            rx.cond(tootip, title_tooltip.info(tootip), rx.fragment("")),
+            rx.cond(tooltip, title_tooltip.info(tooltip), rx.fragment("")),
             rx.spacer(),
             rx.hstack(button_component.add(button, button_link, button_enabled),),
             spacing="2",
             flex_direction=["column", "column", "row"],
             align="center",
             width="100%",
-            top="0px",
             padding_top="2em",
+            padding_bottom="0.5em",
+            position="sticky",
+            top="0",
+            z_index="2",
+            background_color="var(--color-background)",
         ),
 
 class Table():
