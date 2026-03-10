@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import PropertyMock
 from sqlmodel import select
 
-from galadriel.cycle.state import CycleState, _format_iteration_status
+from galadriel.cycle.state import CycleState, format_iteration_status
 from galadriel.cycle.model import CycleModel, CycleChildModel
 from galadriel.case.model import CaseModel, StepModel
 from galadriel.scenario.model import ScenarioModel, ScenarioCaseModel
@@ -470,20 +470,20 @@ class TestSearchFilter:
 
 class TestFormatIterationStatus:
     def test_none_status_returns_empty(self):
-        assert _format_iteration_status(None, can_edit=False) == ""
+        assert format_iteration_status(None, can_edit=False) == ""
 
     def test_regular_status_returns_name(self):
         status = IterationStatusModel(id=consts.ITERATION_STATUS_IN_PROGRESS, name="in progress")
-        assert _format_iteration_status(status, can_edit=False) == "in progress"
+        assert format_iteration_status(status, can_edit=False) == "in progress"
 
     def test_completed_all_passed_returns_completed(self):
         status = IterationStatusModel(id=consts.ITERATION_STATUS_COMPLETED, name="completed")
-        assert _format_iteration_status(status, can_edit=False) == "completed"
+        assert format_iteration_status(status, can_edit=False) == "completed"
 
     def test_completed_with_failures_returns_prefixed(self):
         status = IterationStatusModel(id=consts.ITERATION_STATUS_COMPLETED, name="completed")
-        assert _format_iteration_status(status, can_edit=True) == "[F] completed"
+        assert format_iteration_status(status, can_edit=True) == "[F] completed"
 
     def test_closed_status_returns_name(self):
         status = IterationStatusModel(id=consts.ITERATION_STATUS_CLOSED, name="closed")
-        assert _format_iteration_status(status, can_edit=True) == "closed"
+        assert format_iteration_status(status, can_edit=True) == "closed"

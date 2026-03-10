@@ -19,7 +19,7 @@ from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, h
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
-def _format_iteration_status(status: 'IterationStatusModel', can_edit: bool) -> str:
+def format_iteration_status(status: 'IterationStatusModel', can_edit: bool) -> str:
     """Return the display name for an iteration status, prefixed with [F] when completed with failures."""
     if status is None:
         return ""
@@ -85,7 +85,7 @@ class CycleState(rx.State):
                 cycle_iteration = session.exec(IterationModel.select().where(IterationModel.cycle_id == single_result.id)).one_or_none()
                 if (cycle_iteration != None):
                     iteration_execution_status = session.exec(IterationStatusModel.select().where(IterationStatusModel.id == cycle_iteration.iteration_status_id)).first()
-                    iteration_status_name = _format_iteration_status(iteration_execution_status, self.can_edit_iteration(single_result.id))
+                    iteration_status_name = format_iteration_status(iteration_execution_status, self.can_edit_iteration(single_result.id))
 
                     if (iteration_execution_status != None):
                         iteration_finished = ((iteration_execution_status.id == consts.ITERATION_STATUS_CLOSED) or (iteration_execution_status.id == consts.ITERATION_STATUS_COMPLETED))
@@ -455,7 +455,7 @@ class CycleState(rx.State):
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle_id)).one_or_none()
             if (iteration != None):
                 status = session.exec(select(IterationStatusModel).where(IterationStatusModel.id == iteration.iteration_status_id)).first()
-                return _format_iteration_status(status, self.can_edit_iteration(self.cycle.id))
+                return format_iteration_status(status, self.can_edit_iteration(self.cycle.id))
             else:
                 return ""
 
