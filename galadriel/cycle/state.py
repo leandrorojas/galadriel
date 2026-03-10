@@ -15,7 +15,7 @@ from ..iteration.model import IterationModel, IterationStatusModel, IterationSna
 from sqlmodel import select, asc, desc
 
 from ..utils import jira, consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name, toggle_search_panel
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -320,9 +320,7 @@ class CycleState(rx.State):
 
     def toggle_case_search(self):
         """Toggle the case search panel visibility."""
-        self.show_case_search = not(self.show_case_search)
-        self.search_sort_by = ""
-        self.search_sort_asc = True
+        self.show_case_search, self.search_sort_by, self.search_sort_asc = toggle_search_panel(self.show_case_search)
 
     def filter_test_cases(self, search_case_value):
         """Update the case search filter and reload results."""
@@ -374,9 +372,7 @@ class CycleState(rx.State):
 
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
-        self.show_scenario_search = not(self.show_scenario_search)
-        self.search_sort_by = ""
-        self.search_sort_asc = True
+        self.show_scenario_search, self.search_sort_by, self.search_sort_asc = toggle_search_panel(self.show_scenario_search)
 
     def filter_scenarios(self, search_scenario_value):
         """Update the scenario search filter and reload results."""
@@ -422,9 +418,7 @@ class CycleState(rx.State):
 
     def toggle_suite_search(self):
         """Toggle the suite search panel visibility."""
-        self.show_suite_search = not(self.show_suite_search)
-        self.search_sort_by = ""
-        self.search_sort_asc = True
+        self.show_suite_search, self.search_sort_by, self.search_sort_asc = toggle_search_panel(self.show_suite_search)
 
     def filter_suites(self, search_suite_value):
         """Update the suite search filter and reload results."""

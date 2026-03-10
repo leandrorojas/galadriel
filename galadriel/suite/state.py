@@ -9,7 +9,7 @@ from ..case.model import CaseModel, StepModel
 from ..scenario.model import ScenarioModel
 
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, search_by_name, toggle_search_panel
 
 SUITES_ROUTE = consts.normalize_route(routes.SUITES)
 
@@ -136,9 +136,7 @@ class SuiteState(rx.State):
 
     def toggle_case_search(self):
         """Toggle the case search panel visibility."""
-        self.show_case_search = not(self.show_case_search)
-        self.search_sort_by = ""
-        self.search_sort_asc = True
+        self.show_case_search, self.search_sort_by, self.search_sort_asc = toggle_search_panel(self.show_case_search)
 
     def load_children(self):
         """Load all children (scenarios, cases) for the current suite."""
@@ -223,9 +221,7 @@ class SuiteState(rx.State):
 
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
-        self.show_scenario_search = not(self.show_scenario_search)
-        self.search_sort_by = ""
-        self.search_sort_asc = True
+        self.show_scenario_search, self.search_sort_by, self.search_sort_asc = toggle_search_panel(self.show_scenario_search)
 
     def filter_scenarios(self, search_scenario_value):
         """Update the scenario search filter and reload results."""

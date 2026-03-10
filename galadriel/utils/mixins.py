@@ -137,6 +137,11 @@ def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
     )
 
 
+def toggle_search_panel(show: bool) -> tuple:
+    """Toggle search visibility and reset sort state. Returns (show, sort_by, sort_asc)."""
+    return not show, "", True
+
+
 def search_by_name(model_class, search_value: str) -> list:
     """Search for items by name using ILIKE pattern matching."""
     with rx.session() as session:
