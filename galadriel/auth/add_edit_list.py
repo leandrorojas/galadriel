@@ -43,6 +43,7 @@ def __table() -> rx.Component:
                     table_component.header("enabled", "toggle-right"),
                     Table.sortable_header("created", "calendar-check-2", "created", state.UserState.sort_by, state.UserState.sort_asc, state.UserState.toggle_sort),
                 ),
+
             ),
             rx.table.body(rx.foreach(state.UserState.sorted_users, __show_user)),
             variant="surface",
@@ -61,7 +62,7 @@ def users_list_page() -> rx.Component:
     return base_page(
         rx.vstack(
             header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.is_admin, "Galadriel Users"), # Add User button enabled only for admins
-            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            __table(),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     )
