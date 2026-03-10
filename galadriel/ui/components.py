@@ -434,8 +434,12 @@ class PageHeader():
             flex_direction=["column", "column", "row"],
             align="center",
             width="100%",
-            top="0px",
             padding_top="2em",
+            padding_bottom="0.5em",
+            position="sticky",
+            top="0",
+            z_index="2",
+            background_color="var(--color-background)",
         ),
 
 class Table():

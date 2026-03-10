@@ -42,6 +42,7 @@ def __table() -> rx.Component:
                     Table.sortable_header("name", "fingerprint", "name", state.SuiteState.sort_by, state.SuiteState.sort_asc, state.SuiteState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.SuiteState.sort_by, state.SuiteState.sort_asc, state.SuiteState.toggle_sort),
                 ),
+
             ),
             rx.table.body(rx.foreach(state.SuiteState.sorted_suites, __show_suite)),
             variant="surface",
@@ -59,7 +60,7 @@ def suites_list_page() -> rx.Component:
     return base_page(
         rx.vstack(
             header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, Session.can_edit, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
-            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            __table(),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     )

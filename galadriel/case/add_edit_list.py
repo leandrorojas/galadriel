@@ -42,6 +42,7 @@ def __table() -> rx.Component:
                     Table.sortable_header("name", "fingerprint", "name", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                 ),
+
             ),
             rx.table.body(rx.foreach(state.CaseState.sorted_cases, __show_case)),
             variant="surface",
@@ -60,7 +61,7 @@ def cases_list_page() -> rx.Component:
     return base_page(
         rx.vstack(
             header_component.list("Test Cases", consts.ICON_TEST_TUBES, "Add Case", routes.CASE_ADD, Session.can_edit, "Individual Test Cases to be executed"),
-            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            __table(),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     )

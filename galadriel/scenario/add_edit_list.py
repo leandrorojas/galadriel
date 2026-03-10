@@ -41,6 +41,7 @@ def __table() -> rx.Component:
                     Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.sort_by, state.ScenarioState.sort_asc, state.ScenarioState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.sort_by, state.ScenarioState.sort_asc, state.ScenarioState.toggle_sort),
                 ),
+
             ),
             rx.table.body(rx.foreach(state.ScenarioState.sorted_scenarios, __show_scenario)),
             variant="surface",
@@ -58,7 +59,7 @@ def scenarios_list_page() -> rx.Component:
     return base_page(
         rx.vstack(
             header_component.list("Test Scenarios", "route", "Add Scenario", routes.SCENARIO_ADD, Session.can_edit, "Group of Test Cases executed in a specific order"),
-            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            __table(),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85
         ),
     )

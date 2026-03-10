@@ -108,6 +108,7 @@ def __table() -> rx.Component:
                     table_component.header("","ellipsis"),
                     Table.sortable_header("created", "calendar-check-2", "created", state.CycleState.sort_by, state.CycleState.sort_asc, state.CycleState.toggle_sort),
                 ),
+
             ),
             rx.table.body(rx.foreach(state.CycleState.sorted_cycles, __show_cycle)),
             variant="surface",
@@ -126,7 +127,7 @@ def cycle_list_page() -> rx.Component:
     return base_page(
         rx.vstack(
             page_component.list("Cycles", "flask-round", "Add Cycle", routes.CYCLE_ADD, Session.can_edit, "List of Cycles to execute"),
-            rx.scroll_area(__table(), type="hover", scrollbars="vertical", style={"height": consts.RELATIVE_VIEWPORT_85},),
+            __table(),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     )

@@ -168,29 +168,22 @@ def iteration_page() -> rx.Component:
             top="0px",
             padding_top="2em",
         ),
-        rx.scroll_area(
-            rx.fragment(
-                rx.table.root(
-                    rx.table.header(
-                        rx.table.row(
-                            table_component.header("name/type", "tag",info_tooltip="[P]requisite"),
-                            table_component.header("action", "pickaxe"),
-                            table_component.header("expected", "gem"),
-                            table_component.header("status", "activity"),
-                            table_component.header("issue", "bug"),
-                            table_component.header("", "ellipsis"),
-                        ),
-                    ),
-                    rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),
-                    variant="surface",
-                    size="3",
-                    width="100%",
-                    on_mount=CycleState.get_iteration_snapshot,
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    table_component.header("name/type", "tag",info_tooltip="[P]requisite"),
+                    table_component.header("action", "pickaxe"),
+                    table_component.header("expected", "gem"),
+                    table_component.header("status", "activity"),
+                    table_component.header("issue", "bug"),
+                    table_component.header("", "ellipsis"),
                 ),
             ),
-            type="hover",
-            scrollbars="vertical",
-            style={"height": consts.RELATIVE_VIEWPORT_85},
+            rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),
+            variant="surface",
+            size="3",
+            width="100%",
+            on_mount=CycleState.get_iteration_snapshot,
         ),
         spacing="5",
         align="center",
