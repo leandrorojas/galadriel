@@ -455,6 +455,28 @@ class Table():
             hidden=hide_column,
         )
 
+    @staticmethod
+    def sortable_header(text: str, icon: str, field: str, sort_by_var, sort_asc_var, on_click, info_tooltip: str = ""):
+        """Render a clickable table column header with sort direction indicator."""
+        title_tooltip = Tooltip()
+        return rx.table.column_header_cell(
+            rx.hstack(
+                rx.icon(icon, size=18),
+                rx.text(text),
+                rx.cond(
+                    sort_by_var == field,
+                    rx.cond(sort_asc_var, rx.icon("arrow-up", size=14), rx.icon("arrow-down", size=14)),
+                    rx.icon("arrow-up-down", size=14, opacity=0.3),
+                ),
+                rx.cond(info_tooltip == "", rx.text(""), title_tooltip.info(info_tooltip)),
+                align="center",
+                spacing="2",
+                cursor="pointer",
+                on_click=on_click(field),
+                _hover={"opacity": 0.7},
+            ),
+        )
+
 class StatCard():
     """Statistic card with trend indicator."""
 

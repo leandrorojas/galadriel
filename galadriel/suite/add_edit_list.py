@@ -35,16 +35,15 @@ def __show_suite(suite:model.SuiteModel):
     )
 
 def __table() -> rx.Component:
-    table_component = Table()
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_component.header("name", "fingerprint"),
-                    table_component.header("created", "calendar-check-2"),
+                    Table.sortable_header("name", "fingerprint", "name", state.SuiteState.sort_by, state.SuiteState.sort_asc, state.SuiteState.toggle_sort),
+                    Table.sortable_header("created", "calendar-check-2", "created", state.SuiteState.sort_by, state.SuiteState.sort_asc, state.SuiteState.toggle_sort),
                 ),
             ),
-            rx.table.body(rx.foreach(state.SuiteState.suites, __show_suite)),
+            rx.table.body(rx.foreach(state.SuiteState.sorted_suites, __show_suite)),
             variant="surface",
             size="3",
             width="100%",

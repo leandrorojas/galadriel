@@ -34,6 +34,12 @@ class CycleState(rx.State):
     cycles: List['CycleModel'] = []
     cycle: Optional['CycleModel'] = None
 
+    sort_by: str = ""
+    sort_asc: bool = True
+
+    search_sort_by: str = ""
+    search_sort_asc: bool = True
+
     @rx.var(cache=True)
     def cycle_id(self) -> str:
         return self.router._page.params.get(consts.FIELD_ID, "")
@@ -143,6 +149,72 @@ class CycleState(rx.State):
                 setattr(single_result, "iteration_status_name", iteration_status_name)
 
             self.cycles = results
+
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        if self.sort_by != field:
+            self.sort_by = field
+            self.sort_asc = True
+        elif self.sort_asc:
+            self.sort_asc = False
+        else:
+            self.sort_by = ""
+            self.sort_asc = True
+
+    @rx.var(cache=True)
+    def sorted_cycles(self) -> List['CycleModel']:
+        """Return cycles sorted by the current sort field and direction."""
+        if not self.sort_by:
+            return self.cycles
+        return sorted(
+            self.cycles,
+            key=lambda c: getattr(c, self.sort_by, "") or "",
+            reverse=not self.sort_asc,
+        )
+
+    def toggle_search_sort(self, field: str):
+        """Cycle search sort: default → asc → desc → default."""
+        if self.search_sort_by != field:
+            self.search_sort_by = field
+            self.search_sort_asc = True
+        elif self.search_sort_asc:
+            self.search_sort_asc = False
+        else:
+            self.search_sort_by = ""
+            self.search_sort_asc = True
+
+    @rx.var(cache=True)
+    def sorted_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases sorted by the current search sort field."""
+        if not self.search_sort_by:
+            return self.cases_for_search
+        return sorted(
+            self.cases_for_search,
+            key=lambda c: getattr(c, self.search_sort_by, "") or "",
+            reverse=not self.search_sort_asc,
+        )
+
+    @rx.var(cache=True)
+    def sorted_scenarios_for_search(self) -> List['ScenarioModel']:
+        """Return search scenarios sorted by the current search sort field."""
+        if not self.search_sort_by:
+            return self.scenarios_for_search
+        return sorted(
+            self.scenarios_for_search,
+            key=lambda s: getattr(s, self.search_sort_by, "") or "",
+            reverse=not self.search_sort_asc,
+        )
+
+    @rx.var(cache=True)
+    def sorted_suites_for_search(self) -> List['SuiteModel']:
+        """Return search suites sorted by the current search sort field."""
+        if not self.search_sort_by:
+            return self.suites_for_search
+        return sorted(
+            self.suites_for_search,
+            key=lambda s: getattr(s, self.search_sort_by, "") or "",
+            reverse=not self.search_sort_asc,
+        )
 
     def add_cycle(self, form_data:dict):
         """Create a new cycle from form data."""
@@ -287,6 +359,8 @@ class CycleState(rx.State):
     def toggle_case_search(self):
         """Toggle the case search panel visibility."""
         self.show_case_search = not(self.show_case_search)
+        self.search_sort_by = ""
+        self.search_sort_asc = True
 
     def filter_test_cases(self, search_case_value):
         """Update the case search filter and reload results."""
@@ -346,6 +420,8 @@ class CycleState(rx.State):
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
         self.show_scenario_search = not(self.show_scenario_search)
+        self.search_sort_by = ""
+        self.search_sort_asc = True
 
     def filter_scenarios(self, search_scenario_value):
         """Update the scenario search filter and reload results."""
@@ -399,6 +475,8 @@ class CycleState(rx.State):
     def toggle_suite_search(self):
         """Toggle the suite search panel visibility."""
         self.show_suite_search = not(self.show_suite_search)
+        self.search_sort_by = ""
+        self.search_sort_asc = True
 
     def filter_suites(self, search_suite_value):
         """Update the suite search filter and reload results."""

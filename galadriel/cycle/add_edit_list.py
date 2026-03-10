@@ -96,20 +96,20 @@ def __show_cycle(cycle:model.CycleModel):
 
 def __table() -> rx.Component:
     table_component = Table()
-    
+
     return rx.fragment(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    table_component.header("name", "fingerprint"),
+                    Table.sortable_header("name", "fingerprint", "name", state.CycleState.sort_by, state.CycleState.sort_asc, state.CycleState.toggle_sort),
                     table_component.header("status", "activity"),
                     table_component.header("% t/p/f", "gauge", info_tooltip= "% of [t]hreshold / [p]assed / [f]ailed"),
-                    table_component.header("execution", "activity", info_tooltip=f"{consts.STATUS_EXECUTION_COMPLETED_FAILED} = completed with failed TCs"), 
+                    table_component.header("execution", "activity", info_tooltip=f"{consts.STATUS_EXECUTION_COMPLETED_FAILED} = completed with failed TCs"),
                     table_component.header("","ellipsis"),
-                    table_component.header("created", "calendar-check-2"),
+                    Table.sortable_header("created", "calendar-check-2", "created", state.CycleState.sort_by, state.CycleState.sort_asc, state.CycleState.toggle_sort),
                 ),
             ),
-            rx.table.body(rx.foreach(state.CycleState.cycles, __show_cycle)),
+            rx.table.body(rx.foreach(state.CycleState.sorted_cycles, __show_cycle)),
             variant="surface",
             size="3",
             width="100%",

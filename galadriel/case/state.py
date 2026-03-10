@@ -29,6 +29,12 @@ class CaseState(rx.State):
     search_value:str = ""
     show_search:bool = False
 
+    sort_by: str = ""
+    sort_asc: bool = True
+
+    search_sort_by: str = ""
+    search_sort_asc: bool = True
+
     @rx.var(cache=True)
     def case_id(self) -> int:
         try:
@@ -68,6 +74,50 @@ class CaseState(rx.State):
 
             results = session.exec(query).all()
             self.cases = results
+
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        if self.sort_by != field:
+            self.sort_by = field
+            self.sort_asc = True
+        elif self.sort_asc:
+            self.sort_asc = False
+        else:
+            self.sort_by = ""
+            self.sort_asc = True
+
+    @rx.var(cache=True)
+    def sorted_cases(self) -> List['CaseModel']:
+        """Return cases sorted by the current sort field and direction."""
+        if not self.sort_by:
+            return self.cases
+        return sorted(
+            self.cases,
+            key=lambda c: getattr(c, self.sort_by, "") or "",
+            reverse=not self.sort_asc,
+        )
+
+    def toggle_search_sort(self, field: str):
+        """Cycle search sort: default → asc → desc → default."""
+        if self.search_sort_by != field:
+            self.search_sort_by = field
+            self.search_sort_asc = True
+        elif self.search_sort_asc:
+            self.search_sort_asc = False
+        else:
+            self.search_sort_by = ""
+            self.search_sort_asc = True
+
+    @rx.var(cache=True)
+    def sorted_cases_for_search(self) -> List['CaseModel']:
+        """Return prerequisite search cases sorted by the current search sort field."""
+        if not self.search_sort_by:
+            return self.cases
+        return sorted(
+            self.cases,
+            key=lambda c: getattr(c, self.search_sort_by, "") or "",
+            reverse=not self.search_sort_asc,
+        )
 
     def add_case(self, form_data:dict):
         """Create a new test case from form data."""

@@ -32,6 +32,12 @@ class SuiteState(rx.State):
     show_scenario_search:bool = False
     search_scenario_value:str = ""
 
+    sort_by: str = ""
+    sort_asc: bool = True
+
+    search_sort_by: str = ""
+    search_sort_asc: bool = True
+
     @rx.var(cache=True)
     def suite_id(self) -> str:
         return self.router._page.params.get(consts.FIELD_ID, "")
@@ -62,6 +68,61 @@ class SuiteState(rx.State):
         with rx.session() as session:
             results = session.exec(SuiteModel.select()).all()
             self.suites = results
+
+    def toggle_sort(self, field: str):
+        """Cycle sort: default → asc → desc → default."""
+        if self.sort_by != field:
+            self.sort_by = field
+            self.sort_asc = True
+        elif self.sort_asc:
+            self.sort_asc = False
+        else:
+            self.sort_by = ""
+            self.sort_asc = True
+
+    @rx.var(cache=True)
+    def sorted_suites(self) -> List['SuiteModel']:
+        """Return suites sorted by the current sort field and direction."""
+        if not self.sort_by:
+            return self.suites
+        return sorted(
+            self.suites,
+            key=lambda s: getattr(s, self.sort_by, "") or "",
+            reverse=not self.sort_asc,
+        )
+
+    def toggle_search_sort(self, field: str):
+        """Cycle search sort: default → asc → desc → default."""
+        if self.search_sort_by != field:
+            self.search_sort_by = field
+            self.search_sort_asc = True
+        elif self.search_sort_asc:
+            self.search_sort_asc = False
+        else:
+            self.search_sort_by = ""
+            self.search_sort_asc = True
+
+    @rx.var(cache=True)
+    def sorted_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases sorted by the current search sort field."""
+        if not self.search_sort_by:
+            return self.cases_for_search
+        return sorted(
+            self.cases_for_search,
+            key=lambda c: getattr(c, self.search_sort_by, "") or "",
+            reverse=not self.search_sort_asc,
+        )
+
+    @rx.var(cache=True)
+    def sorted_scenarios_for_search(self) -> List['ScenarioModel']:
+        """Return search scenarios sorted by the current search sort field."""
+        if not self.search_sort_by:
+            return self.scenarios_for_search
+        return sorted(
+            self.scenarios_for_search,
+            key=lambda s: getattr(s, self.search_sort_by, "") or "",
+            reverse=not self.search_sort_asc,
+        )
 
     def add_suite(self, form_data:dict):
         """Create a new suite from form data."""
@@ -109,6 +170,8 @@ class SuiteState(rx.State):
     def toggle_case_search(self):
         """Toggle the case search panel visibility."""
         self.show_case_search = not(self.show_case_search)
+        self.search_sort_by = ""
+        self.search_sort_asc = True
 
     def load_children(self):
         """Load all children (scenarios, cases) for the current suite."""
@@ -201,6 +264,8 @@ class SuiteState(rx.State):
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
         self.show_scenario_search = not(self.show_scenario_search)
+        self.search_sort_by = ""
+        self.search_sort_asc = True
 
     def filter_scenarios(self, search_scenario_value):
         """Update the scenario search filter and reload results."""

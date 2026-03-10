@@ -16,6 +16,7 @@ def _make_state(case_id_value=0):
         CaseState,
         cases=[], case=None, steps=[], prerequisites=[],
         search_value="", show_search=False,
+        sort_by="", sort_asc=True,
     )
     type(state).case_id = PropertyMock(return_value=case_id_value)
     return state
@@ -291,3 +292,54 @@ class TestPrerequisites:
         remaining = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id).order_by(PrerequisiteModel.order)).all()
         assert len(remaining) == 1
         assert remaining[0].order == 1
+
+
+class TestSorting:
+    def test_default_sort_returns_original_order(self, patch_rx_session, make_case):
+        make_case(name="Zebra")
+        make_case(name="Alpha")
+        state = _make_state()
+        state.load_cases()
+        assert state.sort_by == ""
+        names = [c.name for c in state.sorted_cases]
+        assert names == [c.name for c in state.cases]
+
+    def test_toggle_sort_cycles_asc_desc_default(self, patch_rx_session):
+        state = _make_state()
+        state.toggle_sort("name")
+        assert state.sort_by == "name"
+        assert state.sort_asc is True
+        state.toggle_sort("name")
+        assert state.sort_by == "name"
+        assert state.sort_asc is False
+        state.toggle_sort("name")
+        assert state.sort_by == ""
+        assert state.sort_asc is True
+
+    def test_toggle_sort_different_field_resets(self, patch_rx_session):
+        state = _make_state()
+        state.toggle_sort("name")
+        state.toggle_sort("name")  # now desc
+        state.toggle_sort("created")
+        assert state.sort_by == "created"
+        assert state.sort_asc is True
+
+    def test_sorted_cases_by_name_asc(self, patch_rx_session, make_case):
+        make_case(name="Zebra")
+        make_case(name="Alpha")
+        make_case(name="Middle")
+        state = _make_state()
+        state.load_cases()
+        state.toggle_sort("name")
+        names = [c.name for c in state.sorted_cases]
+        assert names == ["Alpha", "Middle", "Zebra"]
+
+    def test_sorted_cases_by_name_desc(self, patch_rx_session, make_case):
+        make_case(name="Zebra")
+        make_case(name="Alpha")
+        state = _make_state()
+        state.load_cases()
+        state.toggle_sort("name")
+        state.toggle_sort("name")  # desc
+        names = [c.name for c in state.sorted_cases]
+        assert names == ["Zebra", "Alpha"]
