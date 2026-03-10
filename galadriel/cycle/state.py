@@ -333,7 +333,8 @@ class CycleState(rx.State):
 
     def link_case(self, case_id:int):
         """Link a test case to the current cycle."""
-        if not _has_steps(StepModel, case_id): return rx.toast.error("test case must have at least one step")
+        if not _has_steps(StepModel, case_id):
+            return rx.toast.error("test case must have at least one step")
         
         cycle_case_data:dict = {"cycle_id":""}
         new_case_order = 1

@@ -130,14 +130,11 @@ def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
     """Sort a list by field name. Returns original list when sort_by is empty."""
     if not sort_by:
         return items
-    return sorted(
-        items,
-        key=lambda item: (
-            (val := getattr(item, sort_by, None)) is None,
-            val,
-        ),
-        reverse=not sort_asc,
-    )
+    def sort_key(item):
+        val = getattr(item, sort_by, None)
+        return (val is None, val)
+
+    return sorted(items, key=sort_key, reverse=not sort_asc)
 
 
 def filter_and_load(state, model_class, search_attr: str, store_attr: str, new_value=None):

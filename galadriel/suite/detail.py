@@ -22,7 +22,7 @@ def __search_table_header():
             Table.sortable_header("created", "calendar-check-2", "created", state.SuiteState.search_sort_by, state.SuiteState.search_sort_asc, state.SuiteState.toggle_search_sort),
             table_component.header("selected_id", "search", hide_column=True),
         ),
-    ),
+    )
 
 def __show_test_cases_in_search(test_case:CaseModel):
     moment_component = Moment()
