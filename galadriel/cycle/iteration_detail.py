@@ -154,8 +154,6 @@ def iteration_page() -> rx.Component:
     title_badge = Badge()
     table_component = Table()
 
-    READ_ONLY = ~CycleState.is_iteration_editable
-
     cycle_edit_content = rx.vstack(
         rx.flex(
             title_badge.title("iteration-ccw", f"Iteration for {CycleState.cycle_name}"),
