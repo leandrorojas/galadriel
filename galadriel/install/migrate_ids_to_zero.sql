@@ -17,7 +17,7 @@ UPDATE cyclechildmodel SET child_type_id = child_type_id - 1 WHERE child_type_id
 UPDATE iterationsnapshotmodel SET child_type = child_type - 1 WHERE child_type >= 1;
 
 -- Recreate the reference table rows
-DELETE FROM cyclechildtypemodel;
+DELETE FROM cyclechildtypemodel WHERE id >= 0;
 INSERT INTO cyclechildtypemodel (id, type_name) VALUES (0, 'Suite');
 INSERT INTO cyclechildtypemodel (id, type_name) VALUES (1, 'Scenario');
 INSERT INTO cyclechildtypemodel (id, type_name) VALUES (2, 'Case');
@@ -31,7 +31,7 @@ INSERT INTO cyclechildtypemodel (id, type_name) VALUES (3, 'Step');
 UPDATE iterationsnapshotmodel SET child_status_id = child_status_id - 1 WHERE child_status_id >= 1;
 
 -- Recreate the reference table rows
-DELETE FROM iterationsnapshotstatusmodel;
+DELETE FROM iterationsnapshotstatusmodel WHERE id >= 0;
 INSERT INTO iterationsnapshotstatusmodel (id, status_name) VALUES (0, 'to do');
 INSERT INTO iterationsnapshotstatusmodel (id, status_name) VALUES (1, 'failed');
 INSERT INTO iterationsnapshotstatusmodel (id, status_name) VALUES (2, 'pass');
@@ -46,6 +46,6 @@ INSERT INTO iterationsnapshotstatusmodel (id, status_name) VALUES (4, 'blocked')
 UPDATE suitechildmodel SET child_type_id = child_type_id - 1 WHERE child_type_id >= 1;
 
 -- Recreate the reference table rows
-DELETE FROM suitechildtypemodel;
+DELETE FROM suitechildtypemodel WHERE id >= 0;
 INSERT INTO suitechildtypemodel (id, type_name) VALUES (0, 'Scenario');
 INSERT INTO suitechildtypemodel (id, type_name) VALUES (1, 'Case');
