@@ -86,10 +86,10 @@ def seeded_db(patch_rx_session):
 
     # Cycle child types
     for item in [
-        {"id": 0, "type_name": "Suite"},
-        {"id": 1, "type_name": "Scenario"},
-        {"id": 2, "type_name": "Case"},
-        {"id": 3, "type_name": "Step"},
+        {"id": 0, "type_name": "suite"},
+        {"id": 1, "type_name": "scenario"},
+        {"id": 2, "type_name": "case"},
+        {"id": 3, "type_name": "step"},
     ]:
         session.add(CycleChildTypeModel(**item))
 
@@ -122,8 +122,8 @@ def seeded_db(patch_rx_session):
 
     # Suite child types
     for item in [
-        {"id": 0, "type_name": "Scenario"},
-        {"id": 1, "type_name": "Case"},
+        {"id": 0, "type_name": "scenario"},
+        {"id": 1, "type_name": "case"},
     ]:
         session.add(SuiteChildTypeModel(**item))
 

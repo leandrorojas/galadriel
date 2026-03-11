@@ -25,7 +25,7 @@ BEGIN;
 -- Create a temporary table to hold the guard result.
 CREATE TEMP TABLE _migration_guard (already_migrated INTEGER);
 INSERT INTO _migration_guard (already_migrated)
-    SELECT COUNT(*) FROM cyclechildtypemodel WHERE id = 0 AND type_name = 'Suite';
+    SELECT COUNT(*) FROM cyclechildtypemodel WHERE id = 0 AND type_name = 'suite';
 
 -- If already migrated, roll back and stop.
 -- SQLite doesn't support conditional logic in scripts, so we use a
@@ -50,10 +50,10 @@ UPDATE iterationsnapshotmodel SET child_type = child_type - 1 WHERE child_type >
 
 -- Recreate the reference table rows
 DELETE FROM cyclechildtypemodel WHERE id >= 0;
-INSERT INTO cyclechildtypemodel (id, type_name) VALUES (0, 'Suite');
-INSERT INTO cyclechildtypemodel (id, type_name) VALUES (1, 'Scenario');
-INSERT INTO cyclechildtypemodel (id, type_name) VALUES (2, 'Case');
-INSERT INTO cyclechildtypemodel (id, type_name) VALUES (3, 'Step');
+INSERT INTO cyclechildtypemodel (id, type_name) VALUES (0, 'suite');
+INSERT INTO cyclechildtypemodel (id, type_name) VALUES (1, 'scenario');
+INSERT INTO cyclechildtypemodel (id, type_name) VALUES (2, 'case');
+INSERT INTO cyclechildtypemodel (id, type_name) VALUES (3, 'step');
 
 -- ============================================================
 -- 2. Iteration Snapshot Statuses: 1-5 → 0-4
@@ -79,8 +79,8 @@ UPDATE suitechildmodel SET child_type_id = child_type_id - 1 WHERE child_type_id
 
 -- Recreate the reference table rows
 DELETE FROM suitechildtypemodel WHERE id >= 0;
-INSERT INTO suitechildtypemodel (id, type_name) VALUES (0, 'Scenario');
-INSERT INTO suitechildtypemodel (id, type_name) VALUES (1, 'Case');
+INSERT INTO suitechildtypemodel (id, type_name) VALUES (0, 'scenario');
+INSERT INTO suitechildtypemodel (id, type_name) VALUES (1, 'case');
 
 COMMIT;
 
