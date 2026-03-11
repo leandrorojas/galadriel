@@ -98,9 +98,9 @@ def __search_suites_table() -> rx.Component:
 
 def __child_type_badge(child_type: str):
     badge_mapping = {
-        "Suite": ("beaker", "Suite"),
-        "Scenario": ("route", "Scenario"),
-        "Case": (consts.ICON_TEST_TUBES, "Case")
+        "suite": ("beaker", "Suite"),
+        "scenario": ("route", "Scenario"),
+        "case": (consts.ICON_TEST_TUBES, "Case"),
     }
     return SearchTable.badge_with_icon(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
@@ -111,9 +111,9 @@ def __show_child(cycle_child:model.CycleChildModel):
         rx.table.cell(cycle_child.order),
         rx.table.cell(rx.match(
             cycle_child.child_type_id,
-            (consts.CHILD_TYPE_SUITE, __child_type_badge("Suite")),
-            (consts.CHILD_TYPE_SCENARIO, __child_type_badge("Scenario")),
-            (consts.CHILD_TYPE_CASE, __child_type_badge("Case"))
+            (consts.CHILD_TYPE_SUITE, __child_type_badge("suite")),
+            (consts.CHILD_TYPE_SCENARIO, __child_type_badge("scenario")),
+            (consts.CHILD_TYPE_CASE, __child_type_badge("case"))
         )),
         rx.table.cell(cycle_child.child_name),
         rx.table.cell(

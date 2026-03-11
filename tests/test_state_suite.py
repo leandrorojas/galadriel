@@ -143,4 +143,4 @@ class TestSuiteChildren:
         session.add(SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=5, order=1, child_name="n", child_type_name="t"))
         session.commit()
         state = _make_state(suite_id_value=str(suite.id))
-        assert state.get_max_child_order(5, consts.SUITE_CHILD_TYPE_SCENARIO) == -1
+        assert state.get_max_child_order(5, consts.SUITE_CHILD_TYPE_SCENARIO) is None

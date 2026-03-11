@@ -342,7 +342,7 @@ class CycleState(rx.State):
         if (len(self.cases_for_search) > 0):
             new_case_order = self.get_max_child_order(case_id, consts.CHILD_TYPE_CASE)
 
-            if new_case_order == -1:
+            if new_case_order is None:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_case_data.update({"cycle_id":self.cycle_id})
@@ -389,7 +389,7 @@ class CycleState(rx.State):
         if (len(self.scenarios_for_search) > 0):
             new_scenario_order = self.get_max_child_order(scenario_id, consts.CHILD_TYPE_SCENARIO)
 
-            if new_scenario_order == -1:
+            if new_scenario_order is None:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_scenario_data.update({"cycle_id":self.cycle_id})
@@ -435,7 +435,7 @@ class CycleState(rx.State):
         if (len(self.suites_for_search) > 0):
             new_suite_order = self.get_max_child_order(suite_id, consts.CHILD_TYPE_SUITE)
 
-            if new_suite_order == -1:
+            if new_suite_order is None:
                 return rx.toast.error(consts.MESSAGE_ALREADY_IN_LIST)
 
         cycle_suite_data.update({"cycle_id":self.cycle_id})
@@ -822,14 +822,14 @@ class CycleState(rx.State):
 
     #region ITERATION
     @rx.var(cache=True)
-    def iteration_id(self) -> int:
+    def iteration_id(self) -> Optional[int]:
         if not self.cycle:
-            return -1
-        
+            return None
+
         with rx.session() as session:
             iteration = session.exec(select(IterationModel).where(IterationModel.cycle_id == self.cycle.id)).one_or_none()
             if not iteration:
-                return -1
+                return None
             return iteration.id
         
     __fail_checkbox = False

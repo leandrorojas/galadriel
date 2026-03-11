@@ -32,11 +32,11 @@ class UserState(rx.State):
     sort_asc: bool = True
 
     @rx.var(cache=True)
-    def user_id(self) -> int:
+    def user_id(self) -> Optional[int]:
         try:
             return int(self.router._page.params.get(consts.FIELD_ID, "0"))
         except ValueError:
-            return -1
+            return None
 
     @rx.var(cache=True)
     def user_edit_url(self) -> str:
@@ -80,7 +80,7 @@ class UserState(rx.State):
     def get_user_detail(self):
         """Load a single user by their route ID."""
         with rx.session() as session:
-            if (self.user_id == -1):
+            if self.user_id is None:
                 self.user = None
                 return
             galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.id == self.user_id)).one_or_none()

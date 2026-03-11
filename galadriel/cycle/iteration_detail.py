@@ -64,10 +64,10 @@ def __hold_iteration_snapshot_button() -> rx.Component:
 
 def __element_type_badge(child_type: str):
     badge_mapping = {
-        "Suite": ("beaker", "Suite"),
-        "Scenario": ("route", "Scenario"),
-        "Case": (consts.ICON_TEST_TUBES, "Case"),
-        "Step": ("test-tube", "Step"),
+        "suite": ("beaker", "Suite"),
+        "scenario": ("route", "Scenario"),
+        "case": (consts.ICON_TEST_TUBES, "Case"),
+        "step": ("test-tube", "Step"),
     }
     return SearchTable.badge_with_icon(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
@@ -89,19 +89,19 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
         rx.match(
             snapshot_element.child_type,
-            (1, __element_type_badge("Suite")),
-            (2, __element_type_badge("Scenario")),
-            (3, __element_type_badge("Case")) 
+            (consts.CHILD_TYPE_SUITE, __element_type_badge("suite")),
+            (consts.CHILD_TYPE_SCENARIO, __element_type_badge("scenario")),
+            (consts.CHILD_TYPE_CASE, __element_type_badge("case")) 
         )),
         rx.table.cell(snapshot_element.child_action),
         rx.table.cell(snapshot_element.child_expected),
         rx.table.cell(rx.match(
             snapshot_element.child_status_id,
-            (1, __element_status_badge(consts.STATUS_EXECUTION_TO_DO)),
-            (2, __element_status_badge("Failed")),
-            (3, __element_status_badge("Passed")),
-            (4, __element_status_badge("Skipped")),
-            (5, __element_status_badge("Blocked")),
+            (consts.SNAPSHOT_STATUS_TO_DO, __element_status_badge(consts.STATUS_EXECUTION_TO_DO)),
+            (consts.SNAPSHOT_STATUS_FAILED, __element_status_badge("Failed")),
+            (consts.SNAPSHOT_STATUS_PASS, __element_status_badge("Passed")),
+            (consts.SNAPSHOT_STATUS_SKIPPED, __element_status_badge("Skipped")),
+            (consts.SNAPSHOT_STATUS_BLOCKED, __element_status_badge("Blocked")),
         )),
         rx.cond(
             snapshot_element.linked_issue != None,

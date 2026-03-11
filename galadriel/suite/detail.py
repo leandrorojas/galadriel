@@ -74,8 +74,8 @@ def __search_scenarios_table() -> rx.Component:
 
 def __child_type_badge(child_type: str):
     badge_mapping = {
-        "Scenario": ("route", "Scenario"),
-        "Case": (consts.ICON_TEST_TUBES, "Case")
+        "scenario": ("route", "Scenario"),
+        "case": (consts.ICON_TEST_TUBES, "Case"),
     }
     return SearchTable.badge_with_icon(*badge_mapping.get(child_type, ("circle-help", "Not Found")))
 
@@ -85,8 +85,8 @@ def __show_child(suite_child:model.SuiteChildModel):
         rx.table.cell(suite_child.order),
         rx.table.cell(rx.match(
             suite_child.child_type_id,
-            (consts.SUITE_CHILD_TYPE_SCENARIO, __child_type_badge("Scenario")),
-            (consts.SUITE_CHILD_TYPE_CASE, __child_type_badge("Case"))
+            (consts.SUITE_CHILD_TYPE_SCENARIO, __child_type_badge("scenario")),
+            (consts.SUITE_CHILD_TYPE_CASE, __child_type_badge("case"))
         )),
         rx.table.cell(suite_child.child_name),
         rx.table.cell(

@@ -113,7 +113,7 @@ class TestCycleChildren:
         session.commit()
         state = _make_state(cycle_id_value=str(cycle.id))
         result = state.get_max_child_order(5, consts.CHILD_TYPE_CASE)
-        assert result == -1
+        assert result is None
 
     def test_get_max_child_order_increments(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")

@@ -1,5 +1,7 @@
 """Shared utility functions for reordering, querying child items, and timestamp formatting."""
 
+from typing import Optional
+
 import reflex as rx
 from sqlmodel import select, cast, String
 
@@ -102,15 +104,15 @@ def has_steps(step_model, case_id: int) -> bool:
         return len(case_steps) > 0
 
 
-def get_max_child_order(model_class, parent_field, parent_id, child_id, child_type_id):
-    """Get the next order value for a child. Returns -1 if already linked."""
+def get_max_child_order(model_class, parent_field, parent_id, child_id, child_type_id) -> Optional[int]:
+    """Get the next order value for a child. Returns None if already linked."""
     with rx.session() as session:
         parent_filter = getattr(model_class, parent_field) == parent_id
         linked_children = session.exec(model_class.select().where(parent_filter)).all()
         max_order = 0
         for linked_child in linked_children:
             if (linked_child.child_id == child_id) and (linked_child.child_type_id == child_type_id):
-                return -1
+                return None
             if linked_child.order > max_order:
                 max_order = linked_child.order
         return max_order + 1
