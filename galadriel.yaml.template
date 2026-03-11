@@ -1,5 +1,6 @@
 galadriel:
   first_run: 0
+  site_url: http://localhost:3000
 jira:
   url: https://instance.atlassian.net #without last slash
   user: yourmail@server.com
