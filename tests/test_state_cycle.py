@@ -86,7 +86,7 @@ class TestDuplicateCycle:
         case = make_case(name="TC")
         make_step(case_id=case.id, order=1)
         session = patch_rx_session
-        child = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=case.id, order=1)
+        child = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=case.id, order=1)
         session.add(child)
         session.commit()
 
@@ -103,34 +103,34 @@ class TestCycleChildren:
     def test_get_max_child_order_empty(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")
         state = _make_state(cycle_id_value=str(cycle.id))
-        result = state.get_max_child_order(99, 3)
+        result = state.get_max_child_order(99, consts.CHILD_TYPE_CASE)
         assert result == 1
 
     def test_get_max_child_order_duplicate_returns_neg1(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")
         session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=5, order=1))
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=5, order=1))
         session.commit()
         state = _make_state(cycle_id_value=str(cycle.id))
-        result = state.get_max_child_order(5, 3)
+        result = state.get_max_child_order(5, consts.CHILD_TYPE_CASE)
         assert result == -1
 
     def test_get_max_child_order_increments(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")
         session = patch_rx_session
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=1, order=1))
-        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=2, order=2))
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=1, order=1))
+        session.add(CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=2, order=2))
         session.commit()
         state = _make_state(cycle_id_value=str(cycle.id))
-        result = state.get_max_child_order(3, 3)
+        result = state.get_max_child_order(3, consts.CHILD_TYPE_CASE)
         assert result == 3
 
     def test_unlink_child_reorders(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")
         session = patch_rx_session
-        c1 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=1, order=1)
-        c2 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=2, order=2)
-        c3 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=3, order=3)
+        c1 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=1, order=1)
+        c2 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=2, order=2)
+        c3 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=3, order=3)
         session.add_all([c1, c2, c3])
         session.commit()
         session.refresh(c1)
@@ -150,8 +150,8 @@ class TestCycleChildren:
     def test_move_child_up(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")
         session = patch_rx_session
-        c1 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=1, order=1)
-        c2 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=2, order=2)
+        c1 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=1, order=1)
+        c2 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=2, order=2)
         session.add_all([c1, c2])
         session.commit()
         session.refresh(c1)
@@ -167,8 +167,8 @@ class TestCycleChildren:
     def test_move_child_down(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="C")
         session = patch_rx_session
-        c1 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=1, order=1)
-        c2 = CycleChildModel(cycle_id=cycle.id, child_type_id=3, child_id=2, order=2)
+        c1 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=1, order=1)
+        c2 = CycleChildModel(cycle_id=cycle.id, child_type_id=consts.CHILD_TYPE_CASE, child_id=2, order=2)
         session.add_all([c1, c2])
         session.commit()
         session.refresh(c1)
@@ -238,7 +238,7 @@ class TestCanEditIteration:
 
         for i in range(3):
             session.add(IterationSnapshotModel(
-                iteration_id=iteration.id, order=i, child_type=4, child_status_id=3
+                iteration_id=iteration.id, order=i, child_type=consts.CHILD_TYPE_STEP, child_status_id=consts.SNAPSHOT_STATUS_PASS
             ))
         session.commit()
 
@@ -254,10 +254,10 @@ class TestCanEditIteration:
         session.refresh(iteration)
 
         session.add(IterationSnapshotModel(
-            iteration_id=iteration.id, order=0, child_type=4, child_status_id=3
+            iteration_id=iteration.id, order=0, child_type=consts.CHILD_TYPE_STEP, child_status_id=consts.SNAPSHOT_STATUS_PASS
         ))
         session.add(IterationSnapshotModel(
-            iteration_id=iteration.id, order=1, child_type=4, child_status_id=2
+            iteration_id=iteration.id, order=1, child_type=consts.CHILD_TYPE_STEP, child_status_id=consts.SNAPSHOT_STATUS_FAILED
         ))
         session.commit()
 

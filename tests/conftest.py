@@ -86,10 +86,10 @@ def seeded_db(patch_rx_session):
 
     # Cycle child types
     for item in [
-        {"id": 1, "type_name": "Suite"},
-        {"id": 2, "type_name": "Scenario"},
-        {"id": 3, "type_name": "Case"},
-        {"id": 4, "type_name": "Step"},
+        {"id": 0, "type_name": "Suite"},
+        {"id": 1, "type_name": "Scenario"},
+        {"id": 2, "type_name": "Case"},
+        {"id": 3, "type_name": "Step"},
     ]:
         session.add(CycleChildTypeModel(**item))
 
@@ -102,11 +102,11 @@ def seeded_db(patch_rx_session):
 
     # Iteration snapshot statuses
     for item in [
-        {"id": 1, "status_name": "to do"},
-        {"id": 2, "status_name": "failed"},
-        {"id": 3, "status_name": "pass"},
-        {"id": 4, "status_name": "skipped"},
-        {"id": 5, "status_name": "blocked"},
+        {"id": 0, "status_name": "to do"},
+        {"id": 1, "status_name": "failed"},
+        {"id": 2, "status_name": "pass"},
+        {"id": 3, "status_name": "skipped"},
+        {"id": 4, "status_name": "blocked"},
     ]:
         session.add(IterationSnapshotStatusModel(**item))
 
@@ -122,11 +122,8 @@ def seeded_db(patch_rx_session):
 
     # Suite child types
     for item in [
-        {"id": 0, "type_name": "not started"},
-        {"id": 1, "type_name": "in progress"},
-        {"id": 2, "type_name": "on hold"},
-        {"id": 3, "type_name": "closed"},
-        {"id": 4, "type_name": "completed"},
+        {"id": 0, "type_name": "Scenario"},
+        {"id": 1, "type_name": "Case"},
     ]:
         session.add(SuiteChildTypeModel(**item))
 

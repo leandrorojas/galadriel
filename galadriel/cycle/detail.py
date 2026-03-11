@@ -111,9 +111,9 @@ def __show_child(cycle_child:model.CycleChildModel):
         rx.table.cell(cycle_child.order),
         rx.table.cell(rx.match(
             cycle_child.child_type_id,
-            (1, __child_type_badge("Suite")),
-            (2, __child_type_badge("Scenario")),
-            (3, __child_type_badge("Case"))
+            (consts.CHILD_TYPE_SUITE, __child_type_badge("Suite")),
+            (consts.CHILD_TYPE_SCENARIO, __child_type_badge("Scenario")),
+            (consts.CHILD_TYPE_CASE, __child_type_badge("Case"))
         )),
         rx.table.cell(cycle_child.child_name),
         rx.table.cell(

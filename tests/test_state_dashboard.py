@@ -6,6 +6,7 @@ from sqlmodel import select
 from galadriel.dashboard.state import DashboardState
 from galadriel.iteration.model import IterationModel, IterationSnapshotModel
 from galadriel.cycle.model import CycleModel
+from galadriel.utils import consts
 from conftest import init_state
 
 pytestmark = pytest.mark.integration
@@ -33,9 +34,9 @@ class TestPieChartData:
         session.commit()
         session.refresh(iteration)
 
-        for status_id in [3, 3, 2, 5]:
+        for status_id in [consts.SNAPSHOT_STATUS_PASS, consts.SNAPSHOT_STATUS_PASS, consts.SNAPSHOT_STATUS_FAILED, consts.SNAPSHOT_STATUS_BLOCKED]:
             session.add(IterationSnapshotModel(
-                iteration_id=iteration.id, order=0, child_type=4, child_status_id=status_id
+                iteration_id=iteration.id, order=0, child_type=consts.CHILD_TYPE_STEP, child_status_id=status_id
             ))
         session.commit()
 
@@ -66,10 +67,10 @@ class TestCaseCountByStatus:
         session.refresh(iteration)
 
         session.add(IterationSnapshotModel(
-            iteration_id=iteration.id, order=0, child_type=4, child_status_id=5
+            iteration_id=iteration.id, order=0, child_type=consts.CHILD_TYPE_STEP, child_status_id=consts.SNAPSHOT_STATUS_BLOCKED
         ))
         session.add(IterationSnapshotModel(
-            iteration_id=iteration.id, order=1, child_type=4, child_status_id=5
+            iteration_id=iteration.id, order=1, child_type=consts.CHILD_TYPE_STEP, child_status_id=consts.SNAPSHOT_STATUS_BLOCKED
         ))
         session.commit()
 
