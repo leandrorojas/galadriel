@@ -95,6 +95,11 @@ class Session(reflex_local_auth.LocalAuthState):
         """Redirect unauthenticated users to the login page."""
         if not self.is_authenticated: return reflex_local_auth.LoginState.redir
 
+    def require_admin(self):
+        """Redirect non-admin users to the dashboard."""
+        if not self.is_admin:
+            return rx.redirect("/dashboard")
+
     def perform_logout(self):
         """Log out the current user and redirect to the home page."""
         self.do_logout()
