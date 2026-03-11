@@ -85,8 +85,8 @@ def __show_child(suite_child:model.SuiteChildModel):
         rx.table.cell(suite_child.order),
         rx.table.cell(rx.match(
             suite_child.child_type_id,
-            (1, __child_type_badge("Scenario")),
-            (2, __child_type_badge("Case"))
+            (consts.SUITE_CHILD_TYPE_SCENARIO, __child_type_badge("Scenario")),
+            (consts.SUITE_CHILD_TYPE_CASE, __child_type_badge("Case"))
         )),
         rx.table.cell(suite_child.child_name),
         rx.table.cell(

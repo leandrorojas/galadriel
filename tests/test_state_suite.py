@@ -6,6 +6,7 @@ from sqlmodel import select
 
 from galadriel.suite.state import SuiteState
 from galadriel.suite.model import SuiteModel, SuiteChildModel
+from galadriel.utils import consts
 from conftest import init_state
 
 pytestmark = pytest.mark.integration
@@ -68,7 +69,7 @@ class TestSuiteChildren:
         session = patch_rx_session
         children = session.exec(select(SuiteChildModel).where(SuiteChildModel.suite_id == suite.id)).all()
         assert len(children) == 1
-        assert children[0].child_type_id == 2
+        assert children[0].child_type_id == consts.SUITE_CHILD_TYPE_CASE
         assert children[0].child_id == case.id
 
     def test_link_scenario_success(self, patch_rx_session, make_suite, make_scenario):
@@ -80,14 +81,14 @@ class TestSuiteChildren:
         session = patch_rx_session
         children = session.exec(select(SuiteChildModel).where(SuiteChildModel.suite_id == suite.id)).all()
         assert len(children) == 1
-        assert children[0].child_type_id == 1
+        assert children[0].child_type_id == consts.SUITE_CHILD_TYPE_SCENARIO
 
     def test_unlink_child_reorders(self, patch_rx_session, make_suite):
         suite = make_suite(name="S")
         session = patch_rx_session
-        c1 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=1, order=1, child_name="a", child_type_name="t")
-        c2 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=2, order=2, child_name="b", child_type_name="t")
-        c3 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=3, order=3, child_name="c", child_type_name="t")
+        c1 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=1, order=1, child_name="a", child_type_name="t")
+        c2 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=2, order=2, child_name="b", child_type_name="t")
+        c3 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=3, order=3, child_name="c", child_type_name="t")
         session.add_all([c1, c2, c3])
         session.commit()
         session.refresh(c1)
@@ -105,8 +106,8 @@ class TestSuiteChildren:
     def test_move_child_up(self, patch_rx_session, make_suite):
         suite = make_suite(name="S")
         session = patch_rx_session
-        c1 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=1, order=1, child_name="a", child_type_name="t")
-        c2 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=2, order=2, child_name="b", child_type_name="t")
+        c1 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=1, order=1, child_name="a", child_type_name="t")
+        c2 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=2, order=2, child_name="b", child_type_name="t")
         session.add_all([c1, c2])
         session.commit()
         session.refresh(c1)
@@ -122,8 +123,8 @@ class TestSuiteChildren:
     def test_move_child_down(self, patch_rx_session, make_suite):
         suite = make_suite(name="S")
         session = patch_rx_session
-        c1 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=1, order=1, child_name="a", child_type_name="t")
-        c2 = SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=2, order=2, child_name="b", child_type_name="t")
+        c1 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=1, order=1, child_name="a", child_type_name="t")
+        c2 = SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=2, order=2, child_name="b", child_type_name="t")
         session.add_all([c1, c2])
         session.commit()
         session.refresh(c1)
@@ -139,7 +140,7 @@ class TestSuiteChildren:
     def test_get_max_child_order_duplicate(self, patch_rx_session, make_suite):
         suite = make_suite(name="S")
         session = patch_rx_session
-        session.add(SuiteChildModel(suite_id=suite.id, child_type_id=1, child_id=5, order=1, child_name="n", child_type_name="t"))
+        session.add(SuiteChildModel(suite_id=suite.id, child_type_id=consts.SUITE_CHILD_TYPE_SCENARIO, child_id=5, order=1, child_name="n", child_type_name="t"))
         session.commit()
         state = _make_state(suite_id_value=str(suite.id))
-        assert state.get_max_child_order(5, 1) == -1
+        assert state.get_max_child_order(5, consts.SUITE_CHILD_TYPE_SCENARIO) == -1
