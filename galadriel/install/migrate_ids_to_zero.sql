@@ -8,10 +8,37 @@
 -- Strategy: disable FK checks, update FK references first, then delete and
 -- reinsert reference rows with new IDs. Everything runs in a single
 -- transaction for atomicity.
+--
+-- Idempotency: a guard checks that the DB is still in the original 1-based
+-- state. If it has already been migrated the transaction is rolled back.
 
 PRAGMA foreign_keys = OFF;
 
 BEGIN;
+
+-- ============================================================
+-- Rerun guard: abort if IDs are already 0-based.
+-- The original seed has cyclechildtypemodel starting at id=1 (Suite).
+-- After migration it starts at id=0. If id=0 already exists with
+-- type_name='Suite', the migration was already applied.
+-- ============================================================
+-- Create a temporary table to hold the guard result.
+CREATE TEMP TABLE _migration_guard (already_migrated INTEGER);
+INSERT INTO _migration_guard (already_migrated)
+    SELECT COUNT(*) FROM cyclechildtypemodel WHERE id = 0 AND type_name = 'Suite';
+
+-- If already migrated, roll back and stop.
+-- SQLite doesn't support conditional logic in scripts, so we use a
+-- constraint violation to abort: inserting into a CHECK-constrained
+-- table will fail and trigger a rollback.
+CREATE TEMP TABLE _migration_check (
+    val INTEGER CHECK (val = 0)
+);
+INSERT INTO _migration_check (val)
+    SELECT already_migrated FROM _migration_guard;
+
+DROP TABLE _migration_guard;
+DROP TABLE _migration_check;
 
 -- ============================================================
 -- 1. Cycle Child Types: 1-4 → 0-3
