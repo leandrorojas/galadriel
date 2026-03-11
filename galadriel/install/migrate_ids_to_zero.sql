@@ -5,8 +5,13 @@
 -- This script shifts IDs down by 1 for three reference tables and updates
 -- all foreign key references in data tables.
 --
--- Strategy: update FK references first, then delete and reinsert reference
--- rows with new IDs to avoid UNIQUE constraint collisions.
+-- Strategy: disable FK checks, update FK references first, then delete and
+-- reinsert reference rows with new IDs. Everything runs in a single
+-- transaction for atomicity.
+
+PRAGMA foreign_keys = OFF;
+
+BEGIN;
 
 -- ============================================================
 -- 1. Cycle Child Types: 1-4 → 0-3
@@ -49,3 +54,7 @@ UPDATE suitechildmodel SET child_type_id = child_type_id - 1 WHERE child_type_id
 DELETE FROM suitechildtypemodel WHERE id >= 0;
 INSERT INTO suitechildtypemodel (id, type_name) VALUES (0, 'Scenario');
 INSERT INTO suitechildtypemodel (id, type_name) VALUES (1, 'Case');
+
+COMMIT;
+
+PRAGMA foreign_keys = ON;
