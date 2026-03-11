@@ -12,19 +12,16 @@ from ..user.state import UserRole
 
 
 def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
-    """Custom require_login that preserves the sidebar layout during hydration."""
+    """Custom require_login that redirects unauthenticated users to login."""
     def protected_page():
-        from ..pages.base import private_page
         return rx.fragment(
             rx.cond(
                 LoginState.is_hydrated & LoginState.is_authenticated,
                 page(),
-                private_page(
-                    rx.center(
-                        rx.spinner(size="3"),
-                        min_height="85vh",
-                        on_mount=LoginState.redir,
-                    ),
+                rx.center(
+                    rx.spinner(size="3"),
+                    min_height="100vh",
+                    on_mount=LoginState.redir,
                 ),
             )
         )
