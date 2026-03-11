@@ -45,6 +45,15 @@ Built with [Reflex](https://reflex.dev).
 
 ## Configuration
 
+### Site URL
+
+Set `site_url` under the `galadriel` section in `galadriel.yaml` to the URL where the app is hosted. This is used when creating Jira issues to link back to the iteration page. Defaults to `http://localhost:3000` if not set.
+
+```yaml
+galadriel:
+  site_url: https://your-galadriel-instance.com
+```
+
 ### Jira Integration
 
 1. Get a Jira API token by following the official Atlassian documentation: [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/).

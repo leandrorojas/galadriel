@@ -75,3 +75,22 @@ def test_write_setting_creates_section_in_existing_file(tmp_path):
     yaml_utils.write_setting(str(cfg), "new_section", "key", "value")
     assert yaml_utils.read_setting(str(cfg), "new_section", "key") == "value"
     assert yaml_utils.read_setting(str(cfg), "existing", "k") == "v"
+
+
+def test_read_site_url_from_config(tmp_path):
+    cfg = tmp_path / "cfg.yaml"
+    yaml_utils.write_setting(str(cfg), "galadriel", "site_url", "https://my-instance.com")
+    result = yaml_utils.read_setting(str(cfg), "galadriel", "site_url")
+    assert result == "https://my-instance.com"
+
+
+def test_read_site_url_fallback_when_missing(tmp_path):
+    cfg = tmp_path / "cfg.yaml"
+    yaml_utils.write_setting(str(cfg), "galadriel", "first_run", 0)
+    result = yaml_utils.read_setting(str(cfg), "galadriel", "site_url") or "http://localhost:3000"
+    assert result == "http://localhost:3000"
+
+
+def test_read_site_url_fallback_when_no_file(tmp_path):
+    result = yaml_utils.read_setting(str(tmp_path / "nope.yaml"), "galadriel", "site_url") or "http://localhost:3000"
+    assert result == "http://localhost:3000"

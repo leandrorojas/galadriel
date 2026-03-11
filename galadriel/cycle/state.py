@@ -14,7 +14,7 @@ from ..iteration.model import IterationModel, IterationStatusModel, IterationSna
 
 from sqlmodel import select, asc, desc
 
-from ..utils import jira, consts
+from ..utils import jira, consts, yaml
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
@@ -27,7 +27,7 @@ def format_iteration_status(status: 'IterationStatusModel', can_edit: bool) -> s
         return "[F] " + status.name
     return status.name
 
-SITE_URL = f"http://localhost:{config.frontend_port}/"
+SITE_URL = yaml.read_setting("galadriel.yaml", "galadriel", "site_url") or f"http://localhost:{config.frontend_port}"
 class CycleState(rx.State):
     """Manages cycle CRUD, child linking, iteration snapshots, and execution."""
 
