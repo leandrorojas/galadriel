@@ -85,6 +85,7 @@ def __element_status_badge(child_status: str):
 def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
     READ_ONLY = ~CycleState.is_iteration_editable
     DISABLE_EDIT_MODE = ~Session.can_edit
+    CREATING_ISSUE = CycleState.creating_issue_snapshot_id == getattr(snapshot_element, consts.FIELD_ID)
 
     return rx.table.row(
         rx.table.cell(rx.cond(snapshot_element.child_name != None, snapshot_element.child_name + " ", ""),
@@ -109,7 +110,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), disabled=DISABLE_EDIT_MODE, color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))), align="center"),  # NOSONAR - Reflex event handler; self is implicit
             rx.table.cell(
                 rx.cond(
-                    CycleState.creating_issue_snapshot_id == getattr(snapshot_element, consts.FIELD_ID),
+                    CREATING_ISSUE,
                     rx.spinner(size="2"),
                     rx.text(""),
                 )
@@ -119,11 +120,11 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
             rx.cond(
                 snapshot_element.child_type == consts.CHILD_TYPE_STEP,
                 rx.flex(
-                    rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY), on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),  # NOSONAR
+                    rx.button(rx.icon("check"), color_scheme="green", size="1", disabled=rx.cond(CREATING_ISSUE, True, rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)), on_click=lambda: CycleState.pass_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),  # NOSONAR
                     rx.cond(
                         snapshot_element.linked_issue == None,
                         rx.dialog.root(
-                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)),),
+                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(CREATING_ISSUE, True, rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY))),),
                             rx.dialog.content(
                                 rx.hstack(rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",), rx.vstack(rx.dialog.title("Add New Issue", weight="bold", margin="0",), rx.dialog.description("Additional info will be auto-included in the report description", spacing="1", height="100%", align_items="start",),), height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",),
                                 rx.flex(
@@ -163,7 +164,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                         ),
                         rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=True),
                     ),
-                    rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY), on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),  # NOSONAR
+                    rx.button(rx.icon("list-x"), color_scheme="gray", size="1", disabled=rx.cond(CREATING_ISSUE, True, rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)), on_click=lambda: CycleState.skip_iteration_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))),  # NOSONAR
                     spacing="2",
                 ),
             ),
