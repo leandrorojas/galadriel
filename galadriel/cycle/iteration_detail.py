@@ -117,7 +117,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                     rx.cond(
                         snapshot_element.linked_issue == None,
                         rx.dialog.root(
-                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)),), 
+                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)),),
                             rx.dialog.content(
                                 rx.hstack(rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",), rx.vstack(rx.dialog.title("Add New Issue", weight="bold", margin="0",), rx.dialog.description("Additional info will be auto-included in the report description", spacing="1", height="100%", align_items="start",),), height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",),
                                 rx.flex(
@@ -136,7 +136,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                                                 ["bold", "italic", "underline", "strike"],
                                                                 ["list"],
                                                             ],
-                                                            height="150",
+                                                            height="150px",
                                                         ),
                                                         width="100%",
                                                     ),
@@ -154,6 +154,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                         ), reset_on_submit=False, on_submit=CycleState.fail_iteration_snapshot_step_and_create_issue,), width="100%", direction="column", spacing="4",
                                 ), max_width="450px", padding="1.5em", border=f"2px solid {rx.color('accent', 7)}", border_radius="25px",
                             ),
+                        on_open_change=CycleState.clear_bug_description,
                         ),
                         rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=True),
                     ),

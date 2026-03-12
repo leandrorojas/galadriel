@@ -9,6 +9,17 @@
 .sun-editor-dark .sun-editor .se-btn {
     color: var(--gray-12);
 }
+.sun-editor-dark .sun-editor .se-btn:hover {
+    background-color: var(--gray-5);
+    color: var(--gray-12);
+}
+.sun-editor-dark .sun-editor .se-btn:focus-visible {
+    outline: 2px solid var(--accent-8);
+    outline-offset: -2px;
+}
+.sun-editor-dark .sun-editor .se-btn:active {
+    background-color: var(--gray-6);
+}
 .sun-editor-dark .sun-editor .se-wrapper .se-wrapper-inner {
     background-color: var(--gray-2);
     color: var(--gray-12);

@@ -82,8 +82,8 @@ class TestCreateIssueWithAdfNodes:
         mock_response.json.return_value = {"key": "PROJ-99"}
         mock_request.return_value = mock_response
 
-        from galadriel.utils.jira import create_issue, _paragraph, _text_node
-        nodes = [_paragraph([_text_node("hello")])]
+        from galadriel.utils.jira import create_issue, paragraph, text_node
+        nodes = [paragraph([text_node("hello")])]
         result = create_issue("title", description_adf_nodes=nodes)
         assert result == "PROJ-99"
 

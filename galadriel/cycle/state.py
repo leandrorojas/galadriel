@@ -595,14 +595,14 @@ class CycleState(rx.State):
                 if (previous_steps != None):
                     #work summary & description to send to the issue creation
                     issue_summary:str = form_data.pop("summary")
-                    actual_result:str = self.__bug_description_html
+                    actual_result:str = self._bug_description_html
                     expected_result:str = form_data.pop("expected")
                     step_count = 0
                     
                     steps_text = ""
 
                     for prev_step in previous_steps:
-                        if prev_step.child_name != None:
+                        if prev_step.child_name is not None:
                             issue_summary = f"[{str(prev_step.child_name).replace('[P] ', '')}]: {issue_summary}"
                             break
 
@@ -620,14 +620,14 @@ class CycleState(rx.State):
                         adf_nodes.extend(jira.plain_text_to_adf_nodes(f"Expected Result: {expected_result}"))
 
                     if actual_result:
-                        adf_nodes.append(jira._paragraph([jira._text_node("Actual Result: ", ["strong"])]))
+                        adf_nodes.append(jira.paragraph([jira.text_node("Actual Result: ", ["strong"])]))
                         adf_nodes.extend(jira.html_to_adf_nodes(actual_result))
 
                     adf_nodes.extend(jira.plain_text_to_adf_nodes(f"\nsource: {SITE_URL}{self.iteration_url}"))
 
             #create ticket here
             self.turn_on_fail_checkbox()
-            self.__bug_description_html = ""
+            self._bug_description_html = ""
             try:
                 new_issue = jira.create_issue(issue_summary, description_adf_nodes=adf_nodes)
                 self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
@@ -837,15 +837,16 @@ class CycleState(rx.State):
             return iteration.id
         
     __fail_checkbox = False
-    __bug_description_html: str = ""
+    _bug_description_html: str = ""
 
     def set_bug_description(self, content: str):
         """Store the rich text editor content for the bug description."""
-        self.__bug_description_html = content
+        self._bug_description_html = content
 
-    def clear_bug_description(self):
-        """Reset the rich text editor content."""
-        self.__bug_description_html = ""
+    def clear_bug_description(self, is_open: bool = False):
+        """Reset the rich text editor content when the dialog closes."""
+        if not is_open:
+            self._bug_description_html = ""
 
     @rx.var(cache=True)
     def fail_checkbox(self) -> bool:

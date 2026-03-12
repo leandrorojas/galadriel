@@ -7,7 +7,7 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
 import json
 from html.parser import HTMLParser
-from typing import List
+from typing import ClassVar, Dict, List, Optional
 from ..utils import debug
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
@@ -47,7 +47,7 @@ def __jira_hit(type:str, url:str, payload:str = None):
 def __get_issue_api_url(issue_key) -> str:
     return API_ISSUE + API_ISSUE_STATUS.format(issueIdOrKey=issue_key)
 
-def _text_node(text: str, marks: list = None) -> dict:
+def text_node(text: str, marks: Optional[List[str]] = None) -> dict:
     """Build an ADF text node with optional marks."""
     node = {"type": "text", "text": text}
     if marks:
@@ -55,7 +55,7 @@ def _text_node(text: str, marks: list = None) -> dict:
     return node
 
 
-def _paragraph(content: list) -> dict:
+def paragraph(content: list) -> dict:
     """Build an ADF paragraph node."""
     return {"type": "paragraph", "content": content}
 
@@ -63,10 +63,12 @@ def _paragraph(content: list) -> dict:
 class _HtmlToAdfParser(HTMLParser):
     """Convert simple HTML from the rich text editor into Jira ADF nodes."""
 
-    _MARK_TAGS = {"b": "strong", "strong": "strong", "i": "em", "em": "em",
-                  "u": "underline", "s": "strike", "strike": "strike"}
-    _HEADING_TAGS = {f"h{i}": i for i in range(1, 7)}
-    _LIST_TAGS = {"ul": "bulletList", "ol": "orderedList"}
+    _MARK_TAGS: ClassVar[Dict[str, str]] = {
+        "b": "strong", "strong": "strong", "i": "em", "em": "em",
+        "u": "underline", "s": "strike", "strike": "strike",
+    }
+    _HEADING_TAGS: ClassVar[Dict[str, int]] = {f"h{i}": i for i in range(1, 7)}
+    _LIST_TAGS: ClassVar[Dict[str, str]] = {"ul": "bulletList", "ol": "orderedList"}
 
     def __init__(self):
         super().__init__()
@@ -87,7 +89,7 @@ class _HtmlToAdfParser(HTMLParser):
             self._current = []
         elif tag in self._LIST_TAGS:
             if self._current:
-                self.nodes.append(_paragraph(self._current))
+                self.nodes.append(paragraph(self._current))
                 self._current = []
             self._list_stack.append(self._LIST_TAGS[tag])
             self._list_items.append([])
@@ -97,7 +99,7 @@ class _HtmlToAdfParser(HTMLParser):
             self._current.append({"type": "hardBreak"})
         elif tag == "p":
             if self._current:
-                self.nodes.append(_paragraph(self._current))
+                self.nodes.append(paragraph(self._current))
                 self._current = []
 
     def handle_endtag(self, tag):
@@ -112,21 +114,21 @@ class _HtmlToAdfParser(HTMLParser):
             self._heading_level = 0
         elif tag == "li" and self._list_stack:
             self._list_items[-1].append(
-                {"type": "listItem", "content": [_paragraph(self._list_item_content)]}
+                {"type": "listItem", "content": [paragraph(self._list_item_content)]}
             )
         elif tag in self._LIST_TAGS and self._list_stack:
             list_type = self._list_stack.pop()
             items = self._list_items.pop()
             self.nodes.append({"type": list_type, "content": items})
         elif tag == "p":
-            self.nodes.append(_paragraph(self._current))
+            self.nodes.append(paragraph(self._current))
             self._current = []
 
     def handle_data(self, data):
         """Handle raw text data between tags."""
         if not data.strip() and not self._marks:
             return
-        node = _text_node(data, list(self._marks) if self._marks else None)
+        node = text_node(data, list(self._marks) if self._marks else None)
         if self._list_stack and not self._heading_level:
             self._list_item_content.append(node)
         else:
@@ -135,9 +137,9 @@ class _HtmlToAdfParser(HTMLParser):
     def get_adf_nodes(self) -> list:
         """Return the collected ADF content nodes."""
         if self._current:
-            self.nodes.append(_paragraph(self._current))
+            self.nodes.append(paragraph(self._current))
             self._current = []
-        return self.nodes if self.nodes else [_paragraph([_text_node("")])]
+        return self.nodes if self.nodes else [paragraph([text_node("")])]
 
 
 def html_to_adf_nodes(html: str) -> list:
@@ -155,11 +157,11 @@ def plain_text_to_adf_nodes(text: str) -> list:
     nodes = []
     for para in paragraphs:
         if para:
-            nodes.append(_paragraph([_text_node(para)]))
+            nodes.append(paragraph([text_node(para)]))
     return nodes
 
 
-def create_issue(summary: str, description_adf_nodes: list = None, description: str = None) -> str:
+def create_issue(summary: str, description_adf_nodes: Optional[list] = None, description: Optional[str] = None) -> str:
     """Create a Jira issue and return its key.
 
     Accepts either pre-built ADF nodes or a plain text description.
@@ -169,7 +171,7 @@ def create_issue(summary: str, description_adf_nodes: list = None, description: 
     elif description is not None:
         content = plain_text_to_adf_nodes(description)
     else:
-        content = [_paragraph([_text_node("")])]
+        content = [paragraph([text_node("")])]
 
     payload = json.dumps(
         {
