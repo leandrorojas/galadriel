@@ -96,7 +96,8 @@ class _HtmlToAdfParser(HTMLParser):
         elif tag == "li":
             self._list_item_content = []
         elif tag == "br":
-            self._current.append({"type": "hardBreak"})
+            target = self._list_item_content if self._list_stack else self._current
+            target.append({"type": "hardBreak"})
         elif tag == "p":
             if self._current:
                 self.nodes.append(paragraph(self._current))

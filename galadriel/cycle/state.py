@@ -627,11 +627,11 @@ class CycleState(rx.State):
 
             #create ticket here
             self.turn_on_fail_checkbox()
-            self._bug_description_html = ""
             try:
                 new_issue = jira.create_issue(issue_summary, description_adf_nodes=adf_nodes)
                 self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
                 self.get_iteration_snapshot()
+                self._bug_description_html = ""
                 return rx.toast.success(f"new issue created: {new_issue}")
             except Exception:
                 return rx.toast.error("error creating the issue, please contact the administrator")
@@ -843,10 +843,9 @@ class CycleState(rx.State):
         """Store the rich text editor content for the bug description."""
         self._bug_description_html = content
 
-    def clear_bug_description(self, is_open: bool = False):
-        """Reset the rich text editor content when the dialog closes."""
-        if not is_open:
-            self._bug_description_html = ""
+    def clear_bug_description(self):
+        """Reset the rich text editor content."""
+        self._bug_description_html = ""
 
     @rx.var(cache=True)
     def fail_checkbox(self) -> bool:

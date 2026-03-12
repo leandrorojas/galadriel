@@ -163,6 +163,12 @@ class TestHtmlToAdfNodes:
         assert nodes[0]["content"][0]["type"] == "listItem"
         assert nodes[0]["content"][1]["type"] == "listItem"
 
+    def test_br_inside_list_item(self):
+        from galadriel.utils.jira import html_to_adf_nodes
+        nodes = html_to_adf_nodes("<ul><li>line1<br>line2</li></ul>")
+        li_content = nodes[0]["content"][0]["content"][0]["content"]
+        assert any(n["type"] == "hardBreak" for n in li_content)
+
     def test_ordered_list(self):
         from galadriel.utils.jira import html_to_adf_nodes
         nodes = html_to_adf_nodes("<ol><li>first</li><li>second</li></ol>")
