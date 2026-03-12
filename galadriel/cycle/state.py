@@ -629,18 +629,24 @@ class CycleState(rx.State):
 
             #create ticket here
             self.turn_on_fail_checkbox()
+            self._creating_issue_snapshot_id = int(snapshot_item_id)
+            yield
             try:
                 new_issue = jira.create_issue(issue_summary, description_adf_nodes=adf_nodes)
             except (ConnectionError, HTTPError):
-                return rx.toast.error("error creating the issue, please contact the administrator")
+                self._creating_issue_snapshot_id = 0
+                yield rx.toast.error("error creating the issue, please contact the administrator")
+                return
 
             self._bug_description_html = ""
             try:
                 self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
                 self.get_iteration_snapshot()
-                return rx.toast.success(f"new issue created: {new_issue}")
+                yield rx.toast.success(f"new issue created: {new_issue}")
             except (ValueError, RuntimeError):
-                return rx.toast.warning(f"issue {new_issue} created but failed to link, please link it manually")
+                yield rx.toast.warning(f"issue {new_issue} created but failed to link, please link it manually")
+            finally:
+                self._creating_issue_snapshot_id = 0
             
     def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):
         """Unlink a Jira issue from a snapshot step."""
@@ -844,6 +850,7 @@ class CycleState(rx.State):
         
     __fail_checkbox = False
     _bug_description_html: str = ""
+    _creating_issue_snapshot_id: int = 0
 
     _EMPTY_HTML_RE = re.compile(r"^(<p>(\s|<br>|&nbsp;)*</p>\s*)+$", re.IGNORECASE)
 
@@ -857,6 +864,11 @@ class CycleState(rx.State):
     def clear_bug_description(self):
         """Reset the rich text editor content."""
         self._bug_description_html = ""
+
+    @rx.var(cache=True)
+    def creating_issue_snapshot_id(self) -> int:
+        """Return the snapshot ID currently being processed for Jira issue creation."""
+        return self._creating_issue_snapshot_id
 
     @rx.var(cache=True)
     def fail_checkbox(self) -> bool:

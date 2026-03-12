@@ -107,7 +107,13 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
         rx.cond(
             snapshot_element.linked_issue != None,
             rx.table.cell(rx.link(snapshot_element.linked_issue, href=jira.get_issue_url(snapshot_element.linked_issue), is_external=True), rx.button(rx.icon("circle-minus", size=15), disabled=DISABLE_EDIT_MODE, color_scheme="red", size="1", on_click= lambda: CycleState.unlink_issue_from_snapshot_step(getattr(snapshot_element, consts.FIELD_ID))), align="center"),  # NOSONAR - Reflex event handler; self is implicit
-            rx.table.cell("")
+            rx.table.cell(
+                rx.cond(
+                    CycleState.creating_issue_snapshot_id == getattr(snapshot_element, consts.FIELD_ID),
+                    rx.spinner(size="2"),
+                    rx.text(""),
+                )
+            )
         ),
         rx.table.cell(
             rx.cond(
