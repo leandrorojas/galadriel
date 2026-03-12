@@ -129,11 +129,11 @@ class _HtmlToAdfParser(HTMLParser):
         """Handle raw text data between tags."""
         if not data:
             return
+        target = self._list_item_content if self._list_stack and not self._heading_level else self._current
+        if not data.strip() and not target and not self._marks:
+            return
         node = text_node(data, list(self._marks) if self._marks else None)
-        if self._list_stack and not self._heading_level:
-            self._list_item_content.append(node)
-        else:
-            self._current.append(node)
+        target.append(node)
 
     def get_adf_nodes(self) -> list:
         """Return the collected ADF content nodes."""

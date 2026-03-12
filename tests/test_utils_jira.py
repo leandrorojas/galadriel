@@ -198,6 +198,20 @@ class TestHtmlToAdfNodes:
         assert "one" in combined
         assert "two" in combined
 
+    def test_no_extra_paragraphs_from_block_whitespace(self):
+        from galadriel.utils.jira import html_to_adf_nodes
+        nodes = html_to_adf_nodes("<p>first</p>\n<p>second</p>")
+        assert len(nodes) == 2
+        assert nodes[0]["content"][0]["text"] == "first"
+        assert nodes[1]["content"][0]["text"] == "second"
+
+    def test_inline_space_preserved_with_block_whitespace(self):
+        from galadriel.utils.jira import html_to_adf_nodes
+        nodes = html_to_adf_nodes("<p><b>one</b> <i>two</i></p>\n<p>three</p>")
+        assert len(nodes) == 2
+        texts = [n["text"] for n in nodes[0]["content"] if n.get("type") == "text"]
+        assert " " in "".join(texts)
+
 
 class TestPlainTextToAdfNodes:
     def test_single_line(self):

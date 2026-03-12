@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from datetime import datetime, timezone
+import re
 import reflex as rx
 from rxconfig import config
 from .model import CycleModel, CycleChildModel
@@ -843,9 +844,14 @@ class CycleState(rx.State):
     __fail_checkbox = False
     _bug_description_html: str = ""
 
+    _EMPTY_HTML_RE = re.compile(r"^(<p>(\s|<br>|&nbsp;)*</p>\s*)+$", re.IGNORECASE)
+
     def set_bug_description(self, content: str):
-        """Store the rich text editor content for the bug description."""
-        self._bug_description_html = content
+        """Store the rich text editor content, normalizing empty markup to ''."""
+        if not content or not content.strip() or self._EMPTY_HTML_RE.match(content):
+            self._bug_description_html = ""
+        else:
+            self._bug_description_html = content
 
     def clear_bug_description(self):
         """Reset the rich text editor content."""
