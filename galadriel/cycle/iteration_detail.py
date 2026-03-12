@@ -1,6 +1,7 @@
 """Iteration detail page for cycle test execution."""
 
 import reflex as rx
+from reflex_suneditor import editor, EditorOptions
 from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge, Table, SearchTable
@@ -116,7 +117,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                     rx.cond(
                         snapshot_element.linked_issue == None,
                         rx.dialog.root(
-                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)),), 
+                            rx.dialog.trigger(rx.button(rx.icon("x"), color_scheme="red", size="1", disabled=rx.cond(DISABLE_EDIT_MODE, DISABLE_EDIT_MODE, READ_ONLY)),),
                             rx.dialog.content(
                                 rx.hstack(rx.badge(rx.icon("bug", size=34), color_scheme="crimson", radius="full", padding="0.65rem",), rx.vstack(rx.dialog.title("Add New Issue", weight="bold", margin="0",), rx.dialog.description("Additional info will be auto-included in the report description", spacing="1", height="100%", align_items="start",),), height="100%", spacing="4", margin_bottom="1.5em", align_items="center", width="100%",),
                                 rx.flex(
@@ -126,13 +127,28 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                                 rx.box(rx.input(type="hidden",name="snapshot_item_id", value=rx.cond(snapshot_element.id, snapshot_element.id, "")),display="none",),
                                                 rx.box(rx.checkbox(type="hidden",name="just_fail", checked=CycleState.fail_checkbox),display="none",),
                                                 rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
-                                                rx.input(name="actual", placeholder="Actual Result", width="100%",),
+                                                rx.box(
+                                                    editor(
+                                                        set_contents="",
+                                                        on_change=CycleState.set_bug_description,
+                                                        set_options=EditorOptions(
+                                                            buttonList=[
+                                                                ["bold", "italic", "underline", "strike"],
+                                                                ["list"],
+                                                            ],
+                                                            height="150px",
+                                                        ),
+                                                        width="100%",
+                                                    ),
+                                                    class_name=rx.color_mode_cond("", "sun-editor-dark"),
+                                                    width="100%",
+                                                ),
                                                 rx.input(name="expected", placeholder="Expected Result", width="100%", default_value=f"{snapshot_element.child_expected}"),
                                             ), direction="column", spacing="3",
                                         ),
                                         rx.flex(
-                                            rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray",),),
-                                            rx.dialog.close(rx.button("Fail Case", color_scheme="gray", on_click=CycleState.turn_on_fail_checkbox)),
+                                            rx.dialog.close(rx.button("Cancel", variant="soft", color_scheme="gray", on_click=CycleState.clear_bug_description),),
+                                            rx.dialog.close(rx.button("Fail Case", color_scheme="gray", on_click=[CycleState.turn_on_fail_checkbox, CycleState.clear_bug_description])),
                                             rx.form.submit(rx.dialog.close(rx.button("Fail Case & Create Issue", type="submit", on_click=CycleState.turn_off_fail_checkbox,),),as_child=True,),
                                             padding_top="2em", spacing="3", mt="4", justify="end",
                                         ), reset_on_submit=False, on_submit=CycleState.fail_iteration_snapshot_step_and_create_issue,), width="100%", direction="column", spacing="4",

@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from datetime import datetime, timezone
+import re
 import reflex as rx
 from rxconfig import config
 from .model import CycleModel, CycleChildModel
@@ -14,6 +15,7 @@ from ..iteration.model import IterationModel, IterationStatusModel, IterationSna
 
 from sqlmodel import select, asc, desc
 
+from requests.exceptions import HTTPError
 from ..utils import jira, consts, yaml
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
 
@@ -595,42 +597,50 @@ class CycleState(rx.State):
                 if (previous_steps != None):
                     #work summary & description to send to the issue creation
                     issue_summary:str = form_data.pop("summary")
-                    actual_result:str = form_data.pop("actual")
+                    actual_result:str = self._bug_description_html
                     expected_result:str = form_data.pop("expected")
                     step_count = 0
                     
-                    issue_description = ""
-                    
+                    steps_text = ""
+
                     for prev_step in previous_steps:
-                        if prev_step.child_name != None: 
+                        if prev_step.child_name is not None:
                             issue_summary = f"[{str(prev_step.child_name).replace('[P] ', '')}]: {issue_summary}"
                             break
 
                         step_count = step_count + 1
-                        issue_description = f"{issue_description}{step_count}. {prev_step.child_action}"
+                        steps_text = f"{steps_text}{step_count}. {prev_step.child_action}"
 
                         if (prev_step.child_expected != ""):
-                            issue_description = f"{issue_description} --> {prev_step.child_expected}"
+                            steps_text = f"{steps_text} --> {prev_step.child_expected}"
 
-                        issue_description = f"{issue_description}\n"
+                        steps_text = f"{steps_text}\n"
 
-                    if actual_result != "":
-                        actual_result = f"\nActual Result: {actual_result}"
+                    adf_nodes = jira.plain_text_to_adf_nodes(steps_text)
 
-                    if expected_result != "":
-                        expected_result = f"\nExpected Result: {expected_result}"
+                    if expected_result:
+                        adf_nodes.extend(jira.plain_text_to_adf_nodes(f"Expected Result: {expected_result}"))
 
-                    issue_description = f"{issue_description}{expected_result}{actual_result}\n\nsource: {SITE_URL}{self.iteration_url}"
+                    if actual_result:
+                        adf_nodes.append(jira.paragraph([jira.text_node("Actual Result: ", ["strong"])]))
+                        adf_nodes.extend(jira.html_to_adf_nodes(actual_result))
+
+                    adf_nodes.extend(jira.plain_text_to_adf_nodes(f"\nsource: {SITE_URL}{self.iteration_url}"))
 
             #create ticket here
             self.turn_on_fail_checkbox()
             try:
-                new_issue = jira.create_issue(issue_summary, issue_description)
+                new_issue = jira.create_issue(issue_summary, description_adf_nodes=adf_nodes)
+            except (ConnectionError, HTTPError):
+                return rx.toast.error("error creating the issue, please contact the administrator")
+
+            self._bug_description_html = ""
+            try:
                 self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
                 self.get_iteration_snapshot()
                 return rx.toast.success(f"new issue created: {new_issue}")
-            except Exception:
-                return rx.toast.error("error creating the issue, please contact the administrator")
+            except (ValueError, RuntimeError):
+                return rx.toast.warning(f"issue {new_issue} created but failed to link, please link it manually")
             
     def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):
         """Unlink a Jira issue from a snapshot step."""
@@ -833,6 +843,20 @@ class CycleState(rx.State):
             return iteration.id
         
     __fail_checkbox = False
+    _bug_description_html: str = ""
+
+    _EMPTY_HTML_RE = re.compile(r"^(<p>(\s|<br>|&nbsp;)*</p>\s*)+$", re.IGNORECASE)
+
+    def set_bug_description(self, content: str):
+        """Store the rich text editor content, normalizing empty markup to ''."""
+        if not content or not content.strip() or self._EMPTY_HTML_RE.match(content):
+            self._bug_description_html = ""
+        else:
+            self._bug_description_html = content
+
+    def clear_bug_description(self):
+        """Reset the rich text editor content."""
+        self._bug_description_html = ""
 
     @rx.var(cache=True)
     def fail_checkbox(self) -> bool:

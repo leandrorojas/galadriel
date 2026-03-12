@@ -1,0 +1,33 @@
+.sun-editor-dark .sun-editor {
+    background-color: var(--gray-2);
+    border-color: var(--gray-6);
+}
+.sun-editor-dark .sun-editor .se-toolbar {
+    background-color: var(--gray-3);
+    border-bottom-color: var(--gray-6);
+}
+.sun-editor-dark .sun-editor .se-btn {
+    color: var(--gray-12);
+}
+.sun-editor-dark .sun-editor .se-btn:hover {
+    background-color: var(--gray-5);
+    color: var(--gray-12);
+}
+.sun-editor-dark .sun-editor .se-btn:focus-visible {
+    outline: 2px solid var(--accent-8);
+    outline-offset: -2px;
+}
+.sun-editor-dark .sun-editor .se-btn:active {
+    background-color: var(--gray-6);
+}
+.sun-editor-dark .sun-editor .se-wrapper .se-wrapper-inner {
+    background-color: var(--gray-2);
+    color: var(--gray-12);
+}
+.sun-editor-dark .sun-editor .se-resizing-bar {
+    background-color: var(--gray-3);
+    border-top-color: var(--gray-6);
+}
+.sun-editor-dark .sun-editor .se-resizing-bar .se-navigation {
+    color: var(--gray-11);
+}
