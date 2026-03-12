@@ -15,6 +15,7 @@ from ..iteration.model import IterationModel, IterationStatusModel, IterationSna
 
 from sqlmodel import select, asc, desc
 
+from requests.exceptions import HTTPError
 from ..utils import jira, consts, yaml
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
 
@@ -630,7 +631,7 @@ class CycleState(rx.State):
             self.turn_on_fail_checkbox()
             try:
                 new_issue = jira.create_issue(issue_summary, description_adf_nodes=adf_nodes)
-            except Exception:
+            except (ConnectionError, HTTPError):
                 return rx.toast.error("error creating the issue, please contact the administrator")
 
             self._bug_description_html = ""
@@ -638,7 +639,7 @@ class CycleState(rx.State):
                 self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
                 self.get_iteration_snapshot()
                 return rx.toast.success(f"new issue created: {new_issue}")
-            except Exception:
+            except (ValueError, RuntimeError):
                 return rx.toast.warning(f"issue {new_issue} created but failed to link, please link it manually")
             
     def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):

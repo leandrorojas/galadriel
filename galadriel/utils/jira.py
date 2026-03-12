@@ -7,7 +7,7 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
 import json
 from html.parser import HTMLParser
-from typing import ClassVar, Dict, List, Optional
+from typing import ClassVar, Optional
 from ..utils import debug
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
@@ -47,7 +47,7 @@ def __jira_hit(type:str, url:str, payload:str = None):
 def __get_issue_api_url(issue_key) -> str:
     return API_ISSUE + API_ISSUE_STATUS.format(issueIdOrKey=issue_key)
 
-def text_node(text: str, marks: Optional[List[str]] = None) -> dict:
+def text_node(text: str, marks: Optional[list[str]] = None) -> dict:
     """Build an ADF text node with optional marks."""
     node = {"type": "text", "text": text}
     if marks:
@@ -63,14 +63,14 @@ def paragraph(content: list) -> dict:
 class _HtmlToAdfParser(HTMLParser):
     """Convert simple HTML from the rich text editor into Jira ADF nodes."""
 
-    _MARK_TAGS: ClassVar[Dict[str, str]] = {
+    _MARK_TAGS: ClassVar[dict[str, str]] = {
         "b": "strong", "strong": "strong", "i": "em", "em": "em",
         "u": "underline", "s": "strike", "strike": "strike",
     }
-    _HEADING_TAGS: ClassVar[Dict[str, int]] = {f"h{i}": i for i in range(1, 7)}
-    _LIST_TAGS: ClassVar[Dict[str, str]] = {"ul": "bulletList", "ol": "orderedList"}
+    _HEADING_TAGS: ClassVar[dict[str, int]] = {f"h{i}": i for i in range(1, 7)}
+    _LIST_TAGS: ClassVar[dict[str, str]] = {"ul": "bulletList", "ol": "orderedList"}
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.nodes: list = []
         self._current: list = []
