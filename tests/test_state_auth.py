@@ -63,31 +63,36 @@ class TestSessionRole:
 class TestRequireAdminGuard:
     """Tests for Session.require_admin server-side on_load guard."""
 
-    def _make_session_state(self, is_admin_val):
+    @staticmethod
+    def _redirect_path(event_spec):
+        """Extract the redirect path from an rx.redirect EventSpec."""
+        return event_spec.args[0][1]._var_value
+
+    def _make_session_state(self, *, is_admin):
         state = MagicMock()
-        state.is_admin = is_admin_val
+        state.is_admin = is_admin
         return state
 
     def test_require_admin_allows_admin(self):
         """Admin users should not be redirected."""
-        state = self._make_session_state(True)
+        state = self._make_session_state(is_admin=True)
         result = Session.require_admin.fn(state)
         assert result is None
 
-    def test_require_admin_redirects_non_admin(self):
+    def test_require_admin_redirects_non_admin_to_dashboard(self):
         """Non-admin users should be redirected to /dashboard."""
-        state = self._make_session_state(False)
+        state = self._make_session_state(is_admin=False)
         result = Session.require_admin.fn(state)
-        assert result is not None
+        assert self._redirect_path(result) == "/dashboard"
 
     def test_require_non_admin_allows_non_admin(self):
         """Non-admin users should not be redirected."""
-        state = self._make_session_state(False)
+        state = self._make_session_state(is_admin=False)
         result = Session.require_non_admin.fn(state)
         assert result is None
 
-    def test_require_non_admin_redirects_admin(self):
+    def test_require_non_admin_redirects_admin_to_users(self):
         """Admin users should be redirected to /users."""
-        state = self._make_session_state(True)
+        state = self._make_session_state(is_admin=True)
         result = Session.require_non_admin.fn(state)
-        assert result is not None
+        assert self._redirect_path(result) == "/users"
