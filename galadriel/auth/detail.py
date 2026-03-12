@@ -7,9 +7,9 @@ from ..pages import base_page
 from ..ui.components import Badge, Button, MomentBadge
 
 from ..utils import consts
-from ..auth.state import require_login, Session
+from ..auth.state import require_admin, Session
 
-@require_login
+@require_admin
 def user_detail_page() -> rx.Component:
     """Render the user detail page."""
     title_badge = Badge()

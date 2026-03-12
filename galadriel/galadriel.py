@@ -72,33 +72,33 @@ app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up")
 app.add_page(logout_page, route=navigation.routes.LOGOUT, title="Logout")
 
 #Test Suites
-app.add_page(suite.suites_list_page, route=navigation.routes.SUITES, on_load=[Session.on_load, suite.SuiteState.load_suites])
-app.add_page(suite.suite_add_page, route=navigation.routes.SUITE_ADD, on_load=Session.on_load)
-app.add_page(suite.suite_detail_page, route=navigation.routes.SUITE_DETAIL, on_load=[Session.on_load, suite.SuiteState.get_suite_detail])
-app.add_page(suite.suite_edit_page, route=navigation.routes.SUITE_EDIT, on_load=[Session.on_load, suite.SuiteState.get_suite_detail])
+app.add_page(suite.suites_list_page, route=navigation.routes.SUITES, on_load=[Session.on_load, Session.require_non_admin, suite.SuiteState.load_suites])
+app.add_page(suite.suite_add_page, route=navigation.routes.SUITE_ADD, on_load=[Session.on_load, Session.require_non_admin])
+app.add_page(suite.suite_detail_page, route=navigation.routes.SUITE_DETAIL, on_load=[Session.on_load, Session.require_non_admin, suite.SuiteState.get_suite_detail])
+app.add_page(suite.suite_edit_page, route=navigation.routes.SUITE_EDIT, on_load=[Session.on_load, Session.require_non_admin, suite.SuiteState.get_suite_detail])
 
 #Test Scenarios
-app.add_page(scenario.scenarios_list_page, route=navigation.routes.SCENARIOS, on_load=[Session.on_load, scenario.ScenarioState.load_scenarios])
-app.add_page(scenario.scenario_add_page, route=navigation.routes.SCENARIO_ADD, on_load=Session.on_load)
-app.add_page(scenario.scenario_detail_page, route=navigation.routes.SCENARIO_DETAIL, on_load=[Session.on_load, scenario.ScenarioState.get_scenario_detail])
-app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT, on_load=[Session.on_load, scenario.ScenarioState.get_scenario_detail])
+app.add_page(scenario.scenarios_list_page, route=navigation.routes.SCENARIOS, on_load=[Session.on_load, Session.require_non_admin, scenario.ScenarioState.load_scenarios])
+app.add_page(scenario.scenario_add_page, route=navigation.routes.SCENARIO_ADD, on_load=[Session.on_load, Session.require_non_admin])
+app.add_page(scenario.scenario_detail_page, route=navigation.routes.SCENARIO_DETAIL, on_load=[Session.on_load, Session.require_non_admin, scenario.ScenarioState.get_scenario_detail])
+app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT, on_load=[Session.on_load, Session.require_non_admin, scenario.ScenarioState.get_scenario_detail])
 
 #Test Cases
-app.add_page(case.cases_list_page, route=navigation.routes.CASES, on_load=[Session.on_load, case.CaseState.load_cases])
-app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD, on_load=Session.on_load)
-app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=[Session.on_load, case.CaseState.get_case_detail])
-app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=[Session.on_load, case.CaseState.get_case_detail])
+app.add_page(case.cases_list_page, route=navigation.routes.CASES, on_load=[Session.on_load, Session.require_non_admin, case.CaseState.load_cases])
+app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD, on_load=[Session.on_load, Session.require_non_admin])
+app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=[Session.on_load, Session.require_non_admin, case.CaseState.get_case_detail])
+app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=[Session.on_load, Session.require_non_admin, case.CaseState.get_case_detail])
 
 #Test Cycles
-app.add_page(cycle.cycle_list_page, route=navigation.routes.CYCLES, on_load=[Session.on_load, cycle.CycleState.load_cycles])
-app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD, on_load=Session.on_load)
-app.add_page(cycle.cycle_detail_page, route=navigation.routes.CYCLE_DETAIL, on_load=[Session.on_load, cycle.CycleState.get_cycle_detail])
-app.add_page(cycle.cycle_edit_page, route=navigation.routes.CYCLE_EDIT, on_load=[Session.on_load, cycle.CycleState.get_cycle_detail])
-app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAIL, on_load=Session.on_load)
+app.add_page(cycle.cycle_list_page, route=navigation.routes.CYCLES, on_load=[Session.on_load, Session.require_non_admin, cycle.CycleState.load_cycles])
+app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD, on_load=[Session.on_load, Session.require_non_admin])
+app.add_page(cycle.cycle_detail_page, route=navigation.routes.CYCLE_DETAIL, on_load=[Session.on_load, Session.require_non_admin, cycle.CycleState.get_cycle_detail])
+app.add_page(cycle.cycle_edit_page, route=navigation.routes.CYCLE_EDIT, on_load=[Session.on_load, Session.require_non_admin, cycle.CycleState.get_cycle_detail])
+app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAIL, on_load=[Session.on_load, Session.require_non_admin])
 
 #Dashboard
-app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD, on_load=[Session.on_load, dashboard.DashboardState.load_dashboard])
+app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD, on_load=[Session.on_load, Session.require_non_admin, dashboard.DashboardState.load_dashboard])
 
 # Users
-app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=[Session.on_load, user.UserState.load_users])
-app.add_page(user_detail.user_detail_page, route=navigation.routes.USER_DETAIL, on_load=[Session.on_load, user.UserState.get_user_detail])
+app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=[Session.on_load, Session.require_admin, user.UserState.load_users])
+app.add_page(user_detail.user_detail_page, route=navigation.routes.USER_DETAIL, on_load=[Session.on_load, Session.require_admin, user.UserState.get_user_detail])
