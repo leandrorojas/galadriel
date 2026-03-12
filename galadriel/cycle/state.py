@@ -629,12 +629,16 @@ class CycleState(rx.State):
             self.turn_on_fail_checkbox()
             try:
                 new_issue = jira.create_issue(issue_summary, description_adf_nodes=adf_nodes)
-                self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
-                self.get_iteration_snapshot()
-                self._bug_description_html = ""
-                return rx.toast.success(f"new issue created: {new_issue}")
             except Exception:
                 return rx.toast.error("error creating the issue, please contact the administrator")
+
+            self._bug_description_html = ""
+            try:
+                self.link_issue_to_snapshot_step(snapshot_item_id, new_issue)
+                self.get_iteration_snapshot()
+                return rx.toast.success(f"new issue created: {new_issue}")
+            except Exception:
+                return rx.toast.warning(f"issue {new_issue} created but failed to link, please link it manually")
             
     def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):
         """Unlink a Jira issue from a snapshot step."""

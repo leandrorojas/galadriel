@@ -127,7 +127,7 @@ class _HtmlToAdfParser(HTMLParser):
 
     def handle_data(self, data):
         """Handle raw text data between tags."""
-        if not data.strip() and not self._marks:
+        if not data:
             return
         node = text_node(data, list(self._marks) if self._marks else None)
         if self._list_stack and not self._heading_level:

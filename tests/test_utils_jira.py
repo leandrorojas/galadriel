@@ -189,6 +189,16 @@ class TestHtmlToAdfNodes:
         assert any(n["type"] == "hardBreak" for n in content)
 
 
+    def test_space_between_adjacent_inline_tags(self):
+        from galadriel.utils.jira import html_to_adf_nodes
+        nodes = html_to_adf_nodes("<b>one</b> <i>two</i>")
+        texts = [n["text"] for n in nodes[0]["content"] if n.get("type") == "text"]
+        combined = "".join(texts)
+        assert " " in combined
+        assert "one" in combined
+        assert "two" in combined
+
+
 class TestPlainTextToAdfNodes:
     def test_single_line(self):
         from galadriel.utils.jira import plain_text_to_adf_nodes
