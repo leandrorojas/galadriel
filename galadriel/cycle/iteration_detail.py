@@ -1,6 +1,7 @@
 """Iteration detail page for cycle test execution."""
 
 import reflex as rx
+from reflex_suneditor import editor, EditorOptions
 from ..pages import base_page
 from ..navigation import routes
 from ..ui.components import Badge, Table, SearchTable
@@ -126,7 +127,22 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                                 rx.box(rx.input(type="hidden",name="snapshot_item_id", value=rx.cond(snapshot_element.id, snapshot_element.id, "")),display="none",),
                                                 rx.box(rx.checkbox(type="hidden",name="just_fail", checked=CycleState.fail_checkbox),display="none",),
                                                 rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
-                                                rx.input(name="actual", placeholder="Actual Result", width="100%",),
+                                                rx.box(
+                                                    editor(
+                                                        set_contents="",
+                                                        on_change=CycleState.set_bug_description,
+                                                        set_options=EditorOptions(
+                                                            buttonList=[
+                                                                ["bold", "italic", "underline", "strike"],
+                                                                ["list"],
+                                                            ],
+                                                            height="150",
+                                                        ),
+                                                        width="100%",
+                                                    ),
+                                                    class_name=rx.color_mode_cond("", "sun-editor-dark"),
+                                                    width="100%",
+                                                ),
                                                 rx.input(name="expected", placeholder="Expected Result", width="100%", default_value=f"{snapshot_element.child_expected}"),
                                             ), direction="column", spacing="3",
                                         ),
