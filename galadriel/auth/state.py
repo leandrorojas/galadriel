@@ -12,11 +12,11 @@ from ..user.state import UserRole
 
 
 def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
-    """Custom require_login that redirects unauthenticated users to login."""
+    """Custom require_login that redirects unauthenticated users to login and admin users to /users."""
     def protected_page():
         return rx.fragment(
             rx.cond(
-                LoginState.is_hydrated & LoginState.is_authenticated,
+                LoginState.is_hydrated & LoginState.is_authenticated & ~Session.is_admin,
                 page(),
                 rx.center(
                     rx.spinner(size="3"),
@@ -27,6 +27,23 @@ def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
         )
     protected_page.__name__ = page.__name__
     return protected_page
+
+
+def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
+    """Wrap a page so only admin users see it; others get a spinner then redirect."""
+    def admin_page():
+        return rx.fragment(
+            rx.cond(
+                LoginState.is_hydrated & LoginState.is_authenticated & Session.is_admin,
+                page(),
+                rx.center(
+                    rx.spinner(size="3"),
+                    min_height="100vh",
+                ),
+            )
+        )
+    admin_page.__name__ = page.__name__
+    return admin_page
 
 class Login(LoginState):
     """Extends LoginState with additional event handlers."""
@@ -99,6 +116,11 @@ class Session(reflex_local_auth.LocalAuthState):
         """Redirect non-admin users to the dashboard."""
         if not self.is_admin:
             return rx.redirect("/dashboard")
+
+    def require_non_admin(self):
+        """Redirect admin users to the users page."""
+        if self.is_admin:
+            return rx.redirect("/users")
 
     def perform_logout(self):
         """Log out the current user and redirect to the home page."""

@@ -1,11 +1,13 @@
-"""Tests for galadriel.auth.state — Session role lookup."""
+"""Tests for galadriel.auth.state — Session role lookup and access guards."""
 
 import pytest
 from unittest.mock import PropertyMock, patch, MagicMock
 from sqlmodel import select
 
+from galadriel.auth.state import Session
 from galadriel.user.model import GaladrielUser, GaladrielUserRole
 from galadriel.user.state import UserRole
+from conftest import init_state
 
 pytestmark = pytest.mark.integration
 
@@ -56,3 +58,36 @@ class TestSessionRole:
         assert "admin" in role_names
         assert "viewer" in role_names
         assert "editor" in role_names
+
+
+class TestRequireAdminGuard:
+    """Tests for Session.require_admin server-side on_load guard."""
+
+    def _make_session_state(self, is_admin_val):
+        state = MagicMock()
+        state.is_admin = is_admin_val
+        return state
+
+    def test_require_admin_allows_admin(self):
+        """Admin users should not be redirected."""
+        state = self._make_session_state(True)
+        result = Session.require_admin.fn(state)
+        assert result is None
+
+    def test_require_admin_redirects_non_admin(self):
+        """Non-admin users should be redirected to /dashboard."""
+        state = self._make_session_state(False)
+        result = Session.require_admin.fn(state)
+        assert result is not None
+
+    def test_require_non_admin_allows_non_admin(self):
+        """Non-admin users should not be redirected."""
+        state = self._make_session_state(False)
+        result = Session.require_non_admin.fn(state)
+        assert result is None
+
+    def test_require_non_admin_redirects_admin(self):
+        """Admin users should be redirected to /users."""
+        state = self._make_session_state(True)
+        result = Session.require_non_admin.fn(state)
+        assert result is not None

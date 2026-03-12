@@ -7,7 +7,7 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
-from ..auth.state import require_login, Session
+from ..auth.state import require_admin, Session
 
 def __user_detail_link(child: rx.Component, galadriel_user: model.GaladrielUserDisplay):
     if galadriel_user is None: return rx.fragment(child)
@@ -54,7 +54,7 @@ def __table() -> rx.Component:
     )
 
 #region #LIST
-@require_login
+@require_admin
 def users_list_page() -> rx.Component:
     """Render the users list page."""
     header_component = PageHeader()
