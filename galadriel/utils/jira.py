@@ -98,10 +98,9 @@ class _HtmlToAdfParser(HTMLParser):
         elif tag == "br":
             target = self._list_item_content if self._list_stack else self._current
             target.append({"type": "hardBreak"})
-        elif tag == "p":
-            if self._current:
-                self.nodes.append(paragraph(self._current))
-                self._current = []
+        elif tag == "p" and self._current:
+            self.nodes.append(paragraph(self._current))
+            self._current = []
 
     def handle_endtag(self, tag):
         """Handle a closing HTML tag."""
