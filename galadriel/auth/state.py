@@ -47,7 +47,6 @@ def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
                 rx.center(
                     rx.spinner(size="3"),
                     min_height="100vh",
-                    on_mount=Session.require_admin,
                 ),
             )
         )
