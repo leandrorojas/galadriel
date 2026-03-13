@@ -651,7 +651,7 @@ class CycleState(rx.State):
     def unlink_issue_from_snapshot_step(self, snapshot_item_id:int):
         """Unlink a Jira issue from a snapshot step."""
         with rx.session() as session:
-            linked_issue = session.exec(IterationSnapshotLinkedIssues.select().where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item_id)).one_or_none()
+            linked_issue = session.exec(IterationSnapshotLinkedIssues.select().where(IterationSnapshotLinkedIssues.iteration_snapshot_id == snapshot_item_id, IterationSnapshotLinkedIssues.unlinked.is_(None))).one_or_none()
             if (linked_issue != None):
                 setattr(linked_issue, "unlinked", True)
                 session.add(linked_issue)
