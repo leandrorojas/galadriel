@@ -119,9 +119,10 @@ class TestRequireEditorGuard:
         """Extract the redirect path from an rx.redirect EventSpec."""
         return event_spec.args[0][1]._var_value
 
-    def _make_session_state(self, *, role):
+    def _make_session_state(self, *, role, is_authenticated=True):
         state = MagicMock()
         state.role = role
+        state.is_authenticated = is_authenticated
         return state
 
     def test_require_editor_allows_editor(self):
@@ -147,3 +148,10 @@ class TestRequireEditorGuard:
         state = self._make_session_state(role=UserRole.VIEWER)
         result = Session.require_editor.fn(state)
         assert self._redirect_path(result) == "/dashboard"
+
+    def test_require_editor_redirects_unauthenticated_to_login(self):
+        """Unauthenticated users should be redirected to login."""
+        from reflex_local_auth.login import LoginState
+        state = self._make_session_state(role=None, is_authenticated=False)
+        result = Session.require_editor.fn(state)
+        assert result == LoginState.redir

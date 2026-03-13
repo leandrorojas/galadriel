@@ -157,7 +157,9 @@ class Session(reflex_local_auth.LocalAuthState):
         return None
 
     def require_editor(self):
-        """Redirect viewer users to the dashboard (only editors and above can add/edit)."""
+        """Redirect unauthenticated users to login and viewers to the dashboard."""
+        if not self.is_authenticated:
+            return reflex_local_auth.LoginState.redir
         if self.role == UserRole.VIEWER:
             return rx.redirect("/dashboard")
         return None
