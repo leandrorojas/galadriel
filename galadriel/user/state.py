@@ -23,6 +23,14 @@ PASSWORD_ALPHABET = string.ascii_letters + string.digits + string.punctuation
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s.]+\.[^@\s.]+$")
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9._-]+$")
 
+ERR_USERNAME_EMPTY = "Username cannot be empty"
+ERR_USERNAME_INVALID = "Username can only contain letters, numbers, dots, hyphens, and underscores"
+ERR_EMAIL_EMPTY = "Email cannot be empty"
+ERR_EMAIL_INVALID = "Please enter a valid email address"
+ERR_EMAIL_IN_USE = "Email address already in use"
+ERR_ROLE_EMPTY = "Please select a role"
+ERR_ROLE_INVALID = "Invalid role"
+
 
 def generate_password() -> str:
     """Generate a strong random password."""
@@ -132,9 +140,9 @@ class UserState(rx.State):
         role_name = form_data.get("role", "").strip()
 
         if not username:
-            return None, "Username cannot be empty"
+            return None, ERR_USERNAME_EMPTY
         if not email:
-            return None, "Email cannot be empty"
+            return None, ERR_EMAIL_EMPTY
 
         with rx.session() as session:
             existing = session.exec(
@@ -149,13 +157,13 @@ class UserState(rx.State):
                 GaladrielUser.select().where(GaladrielUser.email == email)
             ).one_or_none()
             if existing_email:
-                return None, "Email address already in use"
+                return None, ERR_EMAIL_IN_USE
 
             role = session.exec(
                 select(GaladrielUserRole).where(GaladrielUserRole.name == role_name)
             ).one_or_none()
             if role is None or role_name == "admin":
-                return None, "Invalid role"
+                return None, ERR_ROLE_INVALID
 
             password = generate_password()
             password_hash = reflex_local_auth.LocalUser.hash_password(password)
@@ -202,15 +210,15 @@ class AddUserState(UserState):
         role_name = form_data.get("role", "").strip()
 
         if not username:
-            return rx.toast.error("Username cannot be empty")
+            return rx.toast.error(ERR_USERNAME_EMPTY)
         if not USERNAME_RE.match(username):
-            return rx.toast.error("Username can only contain letters, numbers, dots, hyphens, and underscores")
+            return rx.toast.error(ERR_USERNAME_INVALID)
         if not email:
-            return rx.toast.error("Email cannot be empty")
+            return rx.toast.error(ERR_EMAIL_EMPTY)
         if not EMAIL_RE.match(email):
-            return rx.toast.error("Please enter a valid email address")
+            return rx.toast.error(ERR_EMAIL_INVALID)
         if not role_name:
-            return rx.toast.error("Please select a role")
+            return rx.toast.error(ERR_ROLE_EMPTY)
 
         password, error = self.add_user(form_data)
         if password is None:
@@ -252,11 +260,11 @@ class EditUserState(UserState):
         enabled = form_data.get("enabled") == "on"
 
         if not email:
-            return rx.toast.error("Email cannot be empty")
+            return rx.toast.error(ERR_EMAIL_EMPTY)
         if not EMAIL_RE.match(email):
-            return rx.toast.error("Please enter a valid email address")
+            return rx.toast.error(ERR_EMAIL_INVALID)
         if not role_name:
-            return rx.toast.error("Please select a role")
+            return rx.toast.error(ERR_ROLE_EMPTY)
 
         with rx.session() as session:
             galadriel_user = session.exec(
@@ -273,13 +281,13 @@ class EditUserState(UserState):
                 )
             ).one_or_none()
             if existing_email:
-                return rx.toast.error("Email address already in use")
+                return rx.toast.error(ERR_EMAIL_IN_USE)
 
             role = session.exec(
                 select(GaladrielUserRole).where(GaladrielUserRole.name == role_name)
             ).one_or_none()
             if role is None or role_name == "admin":
-                return rx.toast.error("Invalid role")
+                return rx.toast.error(ERR_ROLE_INVALID)
 
             galadriel_user.email = email
             galadriel_user.user_role = role.id
