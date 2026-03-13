@@ -20,7 +20,7 @@ USERS_ROUTE = consts.normalize_route(routes.USERS)
 
 PASSWORD_LENGTH = 16
 PASSWORD_ALPHABET = string.ascii_letters + string.digits + string.punctuation
-EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s.]+\.[^@\s.]+$")
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9._-]+$")
 
 
