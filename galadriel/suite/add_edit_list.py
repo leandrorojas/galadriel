@@ -12,7 +12,7 @@ from ..pages.edit import edit_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
-from ..auth.state import require_login, Session
+from ..auth.state import require_login, require_editor, Session
 
 def __suite_detail_link(child: rx.Component, suite: model.SuiteModel):
     if suite is None: return rx.fragment(child)
@@ -65,12 +65,12 @@ def suites_list_page() -> rx.Component:
         ),
     )
 
-@require_login
+@require_editor
 def suite_add_page() -> rx.Component:
     """Render the add test suite page."""
     return add_page(suite_add_form, "New Test Suite", "beaker", "to Suites", routes.SUITES)
 
-@require_login
+@require_editor
 def suite_edit_page() -> rx.Component:
     """Render the edit test suite page."""
     return edit_page(suite_edit_form, "Edit Test Suite", "beaker", "to Suites", "to Suite Detail", routes.SUITES, state.EditSuiteState.suite_url)

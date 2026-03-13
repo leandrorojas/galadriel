@@ -12,7 +12,7 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
-from ..auth.state import require_login, Session
+from ..auth.state import require_login, require_editor, Session
 
 def __scenario_detail_link(child: rx.Component, scenario: model.ScenarioModel):
     if scenario is None: return rx.fragment(child)
@@ -64,12 +64,12 @@ def scenarios_list_page() -> rx.Component:
         ),
     )
 
-@require_login
+@require_editor
 def scenario_add_page() -> rx.Component:
     """Render the add test scenario page."""
     return add_page(scenario_add_form, "New Test Scenario", "route", "to Scenarios", routes.SCENARIOS)
 
-@require_login
+@require_editor
 def scenario_edit_page() -> rx.Component:
     """Render the edit test scenario page."""
     return edit_page(scenario_edit_form, "Edit Test Scenario", "route", "to Scenarios", "to Scenario Detail", routes.SCENARIOS, state.EditScenarioState.scenario_url)

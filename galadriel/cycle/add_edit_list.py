@@ -12,7 +12,7 @@ from ..pages import base_page
 
 from ..ui.components import Table, PageHeader, Moment, SearchTable
 from ..utils import consts
-from ..auth.state import require_login, Session
+from ..auth.state import require_login, require_editor, Session
 
 def __cycle_detail_link(child: rx.Component, cycle: model.CycleModel):
     if cycle is None: return rx.fragment(child)
@@ -134,14 +134,14 @@ def cycle_list_page() -> rx.Component:
 #endregion
 
 #region ADD
-@require_login
+@require_editor
 def cycle_add_page() -> rx.Component:
     """Render the add test cycle page."""
     return add_page(cycle_add_form, "New Cycle", "flask-round", "to Cycles", routes.CYCLES)
 #endregion
 
 #region EDIT
-@require_login
+@require_editor
 def cycle_edit_page() -> rx.Component:
     """Render the edit test cycle page."""
     return edit_page(cycle_edit_form, "Edit Test Cycle", "flask-round", "to Cycles", "to Cycle Detail", routes.CYCLES, state.EditCycleState.cycle_url)

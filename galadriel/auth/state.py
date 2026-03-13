@@ -37,6 +37,24 @@ def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     return protected_page
 
 
+def require_editor(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
+    """Wrap a page so only editor (and above) users see it; viewers get a spinner then redirect."""
+    def editor_page():
+        return rx.fragment(
+            rx.cond(
+                LoginState.is_hydrated & LoginState.is_authenticated & (Session.role != UserRole.VIEWER),
+                page(),
+                rx.center(
+                    rx.spinner(size="3"),
+                    min_height="100vh",
+                    on_mount=Session.require_editor,
+                ),
+            )
+        )
+    editor_page.__name__ = page.__name__
+    return editor_page
+
+
 def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     """Wrap a page so only admin/user_admin users see it; others get a spinner then redirect."""
     def admin_page():
@@ -136,6 +154,12 @@ class Session(reflex_local_auth.LocalAuthState):
         """Redirect admin/user_admin users to the users page."""
         if self.is_admin:
             return rx.redirect("/users")
+        return None
+
+    def require_editor(self):
+        """Redirect viewer users to the dashboard (only editors and above can add/edit)."""
+        if self.role == UserRole.VIEWER:
+            return rx.redirect("/dashboard")
         return None
 
     def perform_logout(self):
