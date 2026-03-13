@@ -13,7 +13,7 @@ from ..pages.edit import edit_page
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
 
-from ..auth.state import require_login, Session
+from ..auth.state import require_login, require_editor, Session
 
 def __case_detail_link(child: rx.Component, test_case: model.CaseModel):
     if test_case is None: return rx.fragment(child)
@@ -68,14 +68,14 @@ def cases_list_page() -> rx.Component:
 #endregion
 
 #region ADD
-@require_login
+@require_editor
 def case_add_page() -> rx.Component:
     """Render the add test case page."""
     return add_page(case_add_form, "New Test Case", consts.ICON_TEST_TUBES, "to Cases", routes.CASES)
 #endregion
 
 #region EDIT
-@require_login
+@require_editor
 def case_edit_page() -> rx.Component:
     """Render the edit test case page."""
     return edit_page(case_edit_form, "Edit Test Case", consts.ICON_TEST_TUBES, "to Cases", "to Case Detail", routes.CASES, state.EditCaseState.case_url)

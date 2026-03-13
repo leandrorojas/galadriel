@@ -109,3 +109,49 @@ class TestRequireAdminGuard:
         state = self._make_session_state(is_admin=True)
         result = Session.require_non_admin.fn(state)
         assert self._redirect_path(result) == "/users"
+
+
+class TestRequireEditorGuard:
+    """Tests for Session.require_editor server-side on_load guard."""
+
+    @staticmethod
+    def _redirect_path(event_spec):
+        """Extract the redirect path from an rx.redirect EventSpec."""
+        return event_spec.args[0][1]._var_value
+
+    def _make_session_state(self, *, role, is_authenticated=True):
+        state = MagicMock()
+        state.role = role
+        state.is_authenticated = is_authenticated
+        return state
+
+    def test_require_editor_allows_editor(self):
+        """Editor users should not be redirected."""
+        state = self._make_session_state(role=UserRole.EDITOR)
+        result = Session.require_editor.fn(state)
+        assert result is None
+
+    def test_require_editor_allows_admin(self):
+        """Admin users should not be redirected."""
+        state = self._make_session_state(role=UserRole.ADMIN)
+        result = Session.require_editor.fn(state)
+        assert result is None
+
+    def test_require_editor_allows_user_admin(self):
+        """User admin users should not be redirected."""
+        state = self._make_session_state(role=UserRole.USER_ADMIN)
+        result = Session.require_editor.fn(state)
+        assert result is None
+
+    def test_require_editor_redirects_viewer_to_dashboard(self):
+        """Viewer users should be redirected to /dashboard."""
+        state = self._make_session_state(role=UserRole.VIEWER)
+        result = Session.require_editor.fn(state)
+        assert self._redirect_path(result) == "/dashboard"
+
+    def test_require_editor_redirects_unauthenticated_to_login(self):
+        """Unauthenticated users should be redirected to login."""
+        from reflex_local_auth.login import LoginState
+        state = self._make_session_state(role=None, is_authenticated=False)
+        result = Session.require_editor.fn(state)
+        assert result == LoginState.redir
