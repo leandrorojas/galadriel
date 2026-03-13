@@ -27,7 +27,7 @@ def _content_box(content: rx.Component) -> rx.Component:
 def _sidebar_layout(content: rx.Component, **kwargs) -> rx.hstack:
     left_sidebar = SideBar()
     return rx.hstack(
-        left_sidebar.sidebar(show_backoffice=(Session.role == UserRole.ADMIN)),
+        left_sidebar.sidebar(show_backoffice=Session.is_admin),
         _content_box(content),
         height="100vh",
         overflow="hidden",

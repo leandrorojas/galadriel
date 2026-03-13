@@ -132,6 +132,7 @@ def seeded_db(patch_rx_session):
         {"id": 0, "name": "admin", "description": "Manages user access"},
         {"id": 1, "name": "viewer", "description": "Can navigate through the galadriel instance"},
         {"id": 2, "name": "editor", "description": "Can perform any task in the galadriel instance, but manage users"},
+        {"id": 3, "name": "user manager", "description": "Can manage users but cannot assign or modify the admin role"},
     ]:
         session.add(GaladrielUserRole(**item))
 

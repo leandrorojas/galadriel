@@ -1,9 +1,10 @@
-"""User list page for administration."""
+"""User list and add pages for administration."""
 
 import reflex as rx
 from ..user import state, model
 from ..navigation import routes
 from ..pages import base_page
+from ..pages.add import add_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
@@ -61,21 +62,73 @@ def users_list_page() -> rx.Component:
 
     return base_page(
         rx.vstack(
-            header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.is_admin, "Galadriel Users"), # Add User button enabled only for admins
+            header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.is_admin, "Galadriel Users"),
             __table(),
             spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
         ),
     )
 #endregion
 
-# #region ADD
-# @require_login
-# def case_add_page() -> rx.Component:
-#     return add_page(case_add_form, "New Test Case", consts.ICON_TEST_TUBES, "to Cases", routes.CASES)
-# #endregion
+#region ADD
+def __user_add_form() -> rx.Component:
+    """Render the form for adding a new user."""
+    return rx.fragment(
+        rx.form(
+            rx.vstack(
+                rx.input(name="username", placeholder="Username", width="100%"),
+                rx.input(name="email", placeholder="Email", width="100%"),
+                rx.select(
+                    state.UserState.assignable_roles,
+                    name="role",
+                    placeholder="Select a role",
+                    width="100%",
+                ),
+                rx.callout(
+                    "A strong password will be auto-generated for the new user.",
+                    icon="info",
+                    color_scheme="blue",
+                    width="100%",
+                ),
+                rx.button("Add User", type="submit", width="100%"),
+                spacing="3",
+            ),
+            on_submit=state.AddUserState.handle_submit,
+            reset_on_submit=False,
+        ),
+        rx.dialog.root(
+            rx.dialog.content(
+                rx.dialog.title("User Created"),
+                rx.dialog.description("Copy the generated password and send it to the new user. This password will not be shown again."),
+                rx.vstack(
+                    rx.text("Generated password:", weight="bold", size="2"),
+                    rx.flex(
+                        rx.code(state.AddUserState.generated_password, size="3"),
+                        rx.icon_button(
+                            rx.icon("copy", size=16),
+                            size="1",
+                            variant="ghost",
+                            on_click=rx.set_clipboard(state.AddUserState.generated_password),
+                        ),
+                        align="center",
+                        spacing="2",
+                    ),
+                    spacing="2",
+                    width="100%",
+                    padding_top="1em",
+                    padding_bottom="1em",
+                ),
+                rx.dialog.close(
+                    rx.button("Done", width="100%", on_click=state.AddUserState.close_password_dialog),
+                ),
+                padding="1.5em",
+            ),
+            open=state.AddUserState.show_password_dialog,
+        ),
+    )
 
-# #region EDIT
-# @require_login
-# def case_edit_page() -> rx.Component:
-#     return edit_page(case_edit_form, "Edit Test Case", consts.ICON_TEST_TUBES, "to Cases", "to Case Detail", routes.CASES, state.EditCaseState.case_url)
-# #endregion
+
+@require_admin
+def user_add_page() -> rx.Component:
+    """Render the add user page."""
+    return add_page(__user_add_form, "New User", consts.ICON_USERS, "to Users", routes.USERS)
+#endregion
