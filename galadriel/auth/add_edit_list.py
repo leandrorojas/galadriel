@@ -5,6 +5,7 @@ from ..user import state, model
 from ..navigation import routes
 from ..pages import base_page
 from ..pages.add import add_page
+from ..pages.edit import edit_page
 
 from ..ui.components import Table, PageHeader, Moment
 from ..utils import consts
@@ -131,4 +132,46 @@ def __user_add_form() -> rx.Component:
 def user_add_page() -> rx.Component:
     """Render the add user page."""
     return add_page(__user_add_form, "New User", consts.ICON_USERS, "to Users", routes.USERS)
+#endregion
+
+#region EDIT
+def __user_edit_form() -> rx.Component:
+    """Render the form for editing an existing user."""
+    return rx.form(
+        rx.vstack(
+            rx.text(f"Username: {state.EditUserState.user.username}", size="4", weight="bold"),
+            rx.input(
+                default_value=state.EditUserState.edit_email,
+                name="email",
+                placeholder="Email",
+                width="100%",
+            ),
+            rx.select(
+                state.UserState.assignable_roles,
+                default_value=state.EditUserState.edit_role,
+                name="role",
+                placeholder="Select a role",
+                width="100%",
+            ),
+            rx.flex(
+                rx.switch(
+                    default_checked=state.EditUserState.edit_enabled,
+                    name="enabled",
+                ),
+                rx.text("Enabled", size="3"),
+                align="center",
+                spacing="2",
+            ),
+            rx.button("Save User", type="submit", width="100%"),
+            spacing="3",
+        ),
+        on_submit=state.EditUserState.handle_submit,
+        reset_on_submit=False,
+    )
+
+
+@require_admin
+def user_edit_page() -> rx.Component:
+    """Render the edit user page."""
+    return edit_page(__user_edit_form, "Edit User", consts.ICON_USERS, "to Users", "to User Detail", routes.USERS, state.UserState.user_edit_url)
 #endregion

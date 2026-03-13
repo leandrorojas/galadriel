@@ -225,3 +225,73 @@ class AddUserState(UserState):
         self.show_password_dialog = False
         self.generated_password = ""
         return rx.redirect(routes.USERS)
+
+
+class EditUserState(UserState):
+    """Handles the edit-user form submission."""
+
+    edit_email: str = ""
+    edit_role: str = ""
+    edit_enabled: bool = True
+
+    def load_edit_user(self):
+        """Load the current user data into form fields."""
+        self.get_user_detail()
+        if self.user is None:
+            return rx.redirect(routes.USERS)
+        self.edit_email = self.user.email
+        self.edit_role = self.user.role
+        self.edit_enabled = self.user.enabled
+        self.load_assignable_roles()
+        return None
+
+    def handle_submit(self, form_data: dict):
+        """Validate and save user edits."""
+        email = form_data.get("email", "").strip()
+        role_name = form_data.get("role", "").strip()
+        enabled = form_data.get("enabled") == "on"
+
+        if not email:
+            return rx.toast.error("Email cannot be empty")
+        if not EMAIL_RE.match(email):
+            return rx.toast.error("Please enter a valid email address")
+        if not role_name:
+            return rx.toast.error("Please select a role")
+
+        with rx.session() as session:
+            galadriel_user = session.exec(
+                GaladrielUser.select().where(GaladrielUser.id == self.user_id)
+            ).one_or_none()
+            if galadriel_user is None:
+                return rx.toast.error("User not found")
+
+            # Check email uniqueness (excluding current user)
+            existing_email = session.exec(
+                select(GaladrielUser).where(
+                    GaladrielUser.email == email,
+                    GaladrielUser.id != self.user_id,
+                )
+            ).one_or_none()
+            if existing_email:
+                return rx.toast.error("Email address already in use")
+
+            role = session.exec(
+                select(GaladrielUserRole).where(GaladrielUserRole.name == role_name)
+            ).one_or_none()
+            if role is None or role_name == "admin":
+                return rx.toast.error("Invalid role")
+
+            galadriel_user.email = email
+            galadriel_user.user_role = role.id
+
+            local_user = session.exec(
+                reflex_local_auth.LocalUser.select().where(
+                    reflex_local_auth.LocalUser.id == galadriel_user.user_id
+                )
+            ).one_or_none()
+            if local_user:
+                local_user.enabled = enabled
+
+            session.commit()
+
+        return rx.redirect(f"{USERS_ROUTE}/{self.user_id}")
