@@ -1,5 +1,5 @@
 from .model import GaladrielUser, GaladrielUserRole, GaladrielUserDisplay
-from .state import UserState, AddUserState
+from .state import UserState, AddUserState, EditUserState
 
 __all__ = [
     'GaladrielUserDisplay',
@@ -7,4 +7,5 @@ __all__ = [
     'GaladrielUserRole',
     'UserState',
     'AddUserState',
+    'EditUserState',
 ]

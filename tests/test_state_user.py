@@ -5,7 +5,7 @@ import string
 from unittest.mock import PropertyMock, patch, MagicMock
 from sqlmodel import select
 
-from galadriel.user.state import UserState, AddUserState, generate_password, PASSWORD_LENGTH, EMAIL_RE, USERNAME_RE
+from galadriel.user.state import UserState, AddUserState, EditUserState, generate_password, PASSWORD_LENGTH, EMAIL_RE, USERNAME_RE
 from galadriel.user.model import GaladrielUser, GaladrielUserRole, GaladrielUserDisplay
 from conftest import init_state
 
@@ -218,6 +218,147 @@ class TestAddUser:
                 GaladrielUser.select().where(GaladrielUser.email == "new@t.com")
             ).one_or_none()
             assert created is None
+
+
+class TestEditUser:
+    """Tests for editing existing users."""
+
+    def _make_edit_state(self, user_id_value=0):
+        parent = init_state(UserState, users=[], user=None)
+        type(parent).user_id = PropertyMock(return_value=user_id_value)
+        state = init_state(
+            EditUserState,
+            edit_email="", edit_role="", edit_enabled=True,
+        )
+        object.__setattr__(state, "parent_state", parent)
+        type(state).user_id = PropertyMock(return_value=user_id_value)
+        return state
+
+    def _seed_user(self, session, email="edit@test.com", user_role=1):
+        """Create a GaladrielUser and return it refreshed."""
+        user = GaladrielUser(email=email, user_id=200, user_role=user_role)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+
+    def test_edit_user_empty_email(self, patch_rx_session, seeded_db):
+        """Empty email should return error toast."""
+        user = self._seed_user(patch_rx_session)
+        state = self._make_edit_state(user_id_value=user.id)
+        result = state.handle_submit({"email": "", "role": "viewer", "enabled": "on"})
+        assert "empty" in str(result).lower()
+
+    def test_edit_user_invalid_email(self, patch_rx_session, seeded_db):
+        """Invalid email should return error toast."""
+        user = self._seed_user(patch_rx_session)
+        state = self._make_edit_state(user_id_value=user.id)
+        result = state.handle_submit({"email": "bad", "role": "viewer", "enabled": "on"})
+        assert "valid email" in str(result).lower()
+
+    def test_edit_user_invalid_role(self, patch_rx_session, seeded_db):
+        """Nonexistent role should return error toast."""
+        user = self._seed_user(patch_rx_session)
+        state = self._make_edit_state(user_id_value=user.id)
+
+        with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
+            mock_auth.LocalUser.select.return_value.where.return_value = MagicMock()
+            original_exec = patch_rx_session.exec
+
+            def patched_exec(query):
+                query_str = str(query)
+                if "localuser" in query_str.lower():
+                    result = MagicMock()
+                    result.one_or_none.return_value = None
+                    return result
+                return original_exec(query)
+
+            patch_rx_session.exec = patched_exec
+            result = state.handle_submit({"email": "new@test.com", "role": "nonexistent", "enabled": "on"})
+            assert "Invalid role" in str(result)
+
+    def test_edit_user_admin_role_rejected(self, patch_rx_session, seeded_db):
+        """Assigning admin role via edit should return error."""
+        user = self._seed_user(patch_rx_session)
+        state = self._make_edit_state(user_id_value=user.id)
+
+        with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
+            mock_auth.LocalUser.select.return_value.where.return_value = MagicMock()
+            original_exec = patch_rx_session.exec
+
+            def patched_exec(query):
+                query_str = str(query)
+                if "localuser" in query_str.lower():
+                    result = MagicMock()
+                    result.one_or_none.return_value = None
+                    return result
+                return original_exec(query)
+
+            patch_rx_session.exec = patched_exec
+            result = state.handle_submit({"email": "new@test.com", "role": "admin", "enabled": "on"})
+            assert "Invalid role" in str(result)
+
+    def test_edit_user_duplicate_email(self, patch_rx_session, seeded_db):
+        """Duplicate email (from another user) should return error."""
+        session = patch_rx_session
+        self._seed_user(session, email="taken@test.com", user_role=1)
+        target = GaladrielUser(email="target@test.com", user_id=201, user_role=1)
+        session.add(target)
+        session.commit()
+        session.refresh(target)
+
+        state = self._make_edit_state(user_id_value=target.id)
+
+        with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
+            mock_auth.LocalUser.select.return_value.where.return_value = MagicMock()
+            original_exec = session.exec
+
+            def patched_exec(query):
+                query_str = str(query)
+                if "localuser" in query_str.lower():
+                    result = MagicMock()
+                    result.one_or_none.return_value = None
+                    return result
+                return original_exec(query)
+
+            session.exec = patched_exec
+            result = state.handle_submit({"email": "taken@test.com", "role": "viewer", "enabled": "on"})
+            assert "Email" in str(result)
+
+    def test_edit_user_success(self, patch_rx_session, seeded_db):
+        """Valid edit should update the user and redirect."""
+        session = patch_rx_session
+        user = self._seed_user(session, email="old@test.com", user_role=1)
+        state = self._make_edit_state(user_id_value=user.id)
+
+        with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
+            mock_local_user = MagicMock()
+            mock_local_user.id = 200
+            mock_local_user.enabled = True
+            mock_auth.LocalUser.select.return_value.where.return_value = MagicMock()
+            original_exec = session.exec
+
+            def patched_exec(query):
+                query_str = str(query)
+                if "localuser" in query_str.lower():
+                    result = MagicMock()
+                    result.one_or_none.return_value = mock_local_user
+                    return result
+                return original_exec(query)
+
+            session.exec = patched_exec
+            result = state.handle_submit({"email": "new@test.com", "role": "editor", "enabled": "on"})
+
+            # Should redirect to user detail
+            assert "redirect" in str(type(result)).lower() or result is not None
+
+            # Verify DB was updated
+            session.exec = original_exec
+            updated = session.exec(
+                GaladrielUser.select().where(GaladrielUser.id == user.id)
+            ).one_or_none()
+            assert updated.email == "new@test.com"
+            assert updated.user_role == 2  # editor
 
 
 class TestEmailValidation:
