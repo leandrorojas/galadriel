@@ -58,6 +58,19 @@ class TestSessionRole:
         assert "admin" in role_names
         assert "viewer" in role_names
         assert "editor" in role_names
+        assert "user manager" in role_names
+
+    def test_user_admin_role(self, patch_rx_session, seeded_db):
+        """user_admin role should map correctly."""
+        session = patch_rx_session
+        user = GaladrielUser(email="useradmin@test.com", user_id=4, user_role=3)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(
+            select(GaladrielUser).where(GaladrielUser.user_id == 4)
+        ).one_or_none()
+        assert UserRole(found.user_role) == UserRole.USER_ADMIN
 
 
 class TestRequireAdminGuard:
@@ -74,7 +87,7 @@ class TestRequireAdminGuard:
         return state
 
     def test_require_admin_allows_admin(self):
-        """Admin users should not be redirected."""
+        """Admin/user_admin users should not be redirected."""
         state = self._make_session_state(is_admin=True)
         result = Session.require_admin.fn(state)
         assert result is None
@@ -92,7 +105,7 @@ class TestRequireAdminGuard:
         assert result is None
 
     def test_require_non_admin_redirects_admin_to_users(self):
-        """Admin users should be redirected to /users."""
+        """Admin/user_admin users should be redirected to /users."""
         state = self._make_session_state(is_admin=True)
         result = Session.require_non_admin.fn(state)
         assert self._redirect_path(result) == "/users"

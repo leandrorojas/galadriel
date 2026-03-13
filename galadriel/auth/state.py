@@ -12,7 +12,7 @@ from ..user.state import UserRole
 
 
 def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
-    """Custom require_login that redirects unauthenticated users to login and admin users to /users."""
+    """Custom require_login that redirects unauthenticated users to login and admin/user_admin users to /users."""
     def protected_page():
         return rx.fragment(
             rx.cond(
@@ -38,7 +38,7 @@ def require_login(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
 
 
 def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
-    """Wrap a page so only admin users see it; others get a spinner then redirect."""
+    """Wrap a page so only admin/user_admin users see it; others get a spinner then redirect."""
     def admin_page():
         return rx.fragment(
             rx.cond(
@@ -47,7 +47,6 @@ def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
                 rx.center(
                     rx.spinner(size="3"),
                     min_height="100vh",
-                    on_mount=Session.require_admin,
                 ),
             )
         )
@@ -102,11 +101,18 @@ class Session(reflex_local_auth.LocalAuthState):
     @rx.var(cache=True)
     def can_edit(self) -> bool:
         return self.role == UserRole.EDITOR
-    
+
     @rx.var(cache=True)
     def is_admin(self) -> bool:
-        return self.role == UserRole.ADMIN
-    
+        """True for admin and user manager roles."""
+        with rx.session() as session:
+            if self.authenticated_user.id < 0:
+                return False
+            galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.user_id == self.user_id)).one_or_none()
+            if not galadriel_user:
+                return False
+            return galadriel_user.user_role in (UserRole.ADMIN.value, UserRole.USER_ADMIN.value)
+
     @rx.var(cache=True)
     def role(self) -> UserRole:
         with rx.session() as session:
@@ -122,12 +128,12 @@ class Session(reflex_local_auth.LocalAuthState):
         if not self.is_authenticated: return reflex_local_auth.LoginState.redir
 
     def require_admin(self):
-        """Redirect non-admin users to the dashboard."""
+        """Redirect non-admin/user_admin users to the dashboard."""
         if not self.is_admin:
             return rx.redirect("/dashboard")
 
     def require_non_admin(self):
-        """Redirect admin users to the users page."""
+        """Redirect admin/user_admin users to the users page."""
         if self.is_admin:
             return rx.redirect("/users")
 
