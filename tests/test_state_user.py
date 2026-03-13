@@ -172,7 +172,7 @@ class TestAddUser:
                 return original_exec(query)
 
             patch_rx_session.exec = patched_exec
-            password, error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "admin"})
+            password, _error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "admin"})
             assert password is None
 
     def test_add_user_invalid_role(self, patch_rx_session, seeded_db):
@@ -192,7 +192,7 @@ class TestAddUser:
                 return original_exec(query)
 
             patch_rx_session.exec = patched_exec
-            password, error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "nonexistent"})
+            password, _error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "nonexistent"})
             assert password is None
 
 
