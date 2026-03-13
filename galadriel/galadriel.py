@@ -101,5 +101,5 @@ app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD, on_loa
 
 # Users
 app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=[Session.on_load, Session.require_admin, user.UserState.load_users])
-app.add_page(user_add_edit_list.user_add_page, route=navigation.routes.USER_ADD, on_load=[Session.on_load, Session.require_admin])
+app.add_page(user_add_edit_list.user_add_page, route=navigation.routes.USER_ADD, on_load=[Session.on_load, Session.require_admin, user.UserState.load_assignable_roles])
 app.add_page(user_detail.user_detail_page, route=navigation.routes.USER_DETAIL, on_load=[Session.on_load, Session.require_admin, user.UserState.get_user_detail])

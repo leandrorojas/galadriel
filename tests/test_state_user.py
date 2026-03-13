@@ -19,6 +19,8 @@ def _make_state(user_id_value=0):
 
 
 class TestLoadUsers:
+    """Tests for loading and listing users."""
+
     def test_empty_db(self, patch_rx_session, seeded_db):
         state = _make_state()
         with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
@@ -32,6 +34,8 @@ class TestLoadUsers:
 
 
 class TestGetUserDetail:
+    """Tests for retrieving a single user's details."""
+
     def test_invalid_user_id_sets_none(self, patch_rx_session):
         state = _make_state(user_id_value=-1)
         state.get_user_detail()
@@ -78,6 +82,8 @@ class TestGetUserDetail:
 
 
 class TestGeneratePassword:
+    """Tests for secure password generation."""
+
     pytestmark = pytest.mark.unit
 
     def test_length(self):
@@ -111,6 +117,8 @@ class TestGeneratePassword:
 
 
 class TestAddUser:
+    """Tests for user creation logic and validation."""
+
     def _make_add_state(self):
         parent = init_state(UserState, users=[], user=None)
         state = init_state(AddUserState, form_data={}, generated_password="", show_password_dialog=False)
@@ -157,11 +165,12 @@ class TestAddUser:
 
     def test_add_user_admin_role_rejected(self, patch_rx_session, seeded_db):
         """Attempting to assign admin role should return error."""
+        session = patch_rx_session
         state = self._make_add_state()
         with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
             mock_auth.LocalUser.select.return_value.where.return_value = MagicMock()
             mock_auth.LocalUser.hash_password.return_value = b"hash"
-            original_exec = patch_rx_session.exec
+            original_exec = session.exec
 
             def patched_exec(query):
                 query_str = str(query)
@@ -171,17 +180,25 @@ class TestAddUser:
                     return result
                 return original_exec(query)
 
-            patch_rx_session.exec = patched_exec
-            password, _error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "admin"})
+            session.exec = patched_exec
+            password, error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "admin"})
             assert password is None
+            assert "Invalid role" in error
+
+            # Verify no GaladrielUser was created for this username
+            created = session.exec(
+                GaladrielUser.select().where(GaladrielUser.email == "new@t.com")
+            ).one_or_none()
+            assert created is None
 
     def test_add_user_invalid_role(self, patch_rx_session, seeded_db):
         """Nonexistent role should return error."""
+        session = patch_rx_session
         state = self._make_add_state()
         with patch("galadriel.user.state.reflex_local_auth") as mock_auth:
             mock_auth.LocalUser.select.return_value.where.return_value = MagicMock()
 
-            original_exec = patch_rx_session.exec
+            original_exec = session.exec
 
             def patched_exec(query):
                 query_str = str(query)
@@ -191,56 +208,67 @@ class TestAddUser:
                     return result
                 return original_exec(query)
 
-            patch_rx_session.exec = patched_exec
-            password, _error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "nonexistent"})
+            session.exec = patched_exec
+            password, error = state.add_user({"username": "newuser", "email": "new@t.com", "role": "nonexistent"})
             assert password is None
+            assert "Invalid role" in error
+
+            # Verify no GaladrielUser was created for this username
+            created = session.exec(
+                GaladrielUser.select().where(GaladrielUser.email == "new@t.com")
+            ).one_or_none()
+            assert created is None
 
 
 class TestEmailValidation:
+    """Tests for email regex validation."""
+
     pytestmark = pytest.mark.unit
 
     def test_valid_email(self):
         """Standard email should match."""
-        assert EMAIL_RE.match("user@example.com")
+        assert EMAIL_RE.fullmatch("user@example.com")
 
     def test_missing_at(self):
         """Email without @ should not match."""
-        assert not EMAIL_RE.match("userexample.com")
+        assert not EMAIL_RE.fullmatch("userexample.com")
 
     def test_missing_domain(self):
         """Email without domain should not match."""
-        assert not EMAIL_RE.match("user@")
+        assert not EMAIL_RE.fullmatch("user@")
 
     def test_spaces_rejected(self):
         """Email with spaces should not match."""
-        assert not EMAIL_RE.match("mor di o!!@ doiadioaij")
+        assert not EMAIL_RE.fullmatch("mor di o!!@ doiadioaij")
 
     def test_missing_tld(self):
         """Email without TLD should not match."""
-        assert not EMAIL_RE.match("user@example")
+        assert not EMAIL_RE.fullmatch("user@example")
 
 
 class TestUsernameValidation:
+    """Tests for username regex validation."""
+
     pytestmark = pytest.mark.unit
 
     def test_valid_alphanumeric(self):
         """Simple alphanumeric username should match."""
-        assert USERNAME_RE.match("john123")
+        assert USERNAME_RE.fullmatch("john123")
 
     def test_valid_with_dots_hyphens_underscores(self):
         """Username with dots, hyphens, and underscores should match."""
-        assert USERNAME_RE.match("john.doe-smith_jr")
+        assert USERNAME_RE.fullmatch("john.doe-smith_jr")
 
     def test_spaces_rejected(self):
         """Username with spaces should not match."""
-        assert not USERNAME_RE.match("rick sanchez")
+        assert not USERNAME_RE.fullmatch("rick sanchez")
 
     def test_special_chars_rejected(self):
         """Username with special characters should not match."""
-        assert not USERNAME_RE.match("user<script>")
-        assert not USERNAME_RE.match("user'; DROP TABLE")
-        assert not USERNAME_RE.match("user@name")
+        assert not USERNAME_RE.fullmatch("user<script>")
+        assert not USERNAME_RE.fullmatch("user'; DROP TABLE")
+        assert not USERNAME_RE.fullmatch("user@name")
 
     def test_empty_rejected(self):
         """Empty username should not match."""
-        assert not USERNAME_RE.match("")
+        assert not USERNAME_RE.fullmatch("")

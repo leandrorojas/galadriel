@@ -136,6 +136,7 @@ class Session(reflex_local_auth.LocalAuthState):
         """Redirect admin/user_admin users to the users page."""
         if self.is_admin:
             return rx.redirect("/users")
+        return None
 
     def perform_logout(self):
         """Log out the current user and redirect to the home page."""

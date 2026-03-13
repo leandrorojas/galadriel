@@ -177,18 +177,19 @@ class UserState(rx.State):
 
         return password, ""
 
-    @rx.var(cache=True)
-    def assignable_roles(self) -> list[str]:
-        """Return role names that can be assigned (excludes admin)."""
+    assignable_roles: list[str] = []
+
+    def load_assignable_roles(self):
+        """Load role names that can be assigned (excludes admin)."""
         with rx.session() as session:
             roles = session.exec(select(GaladrielUserRole)).all()
-            return [r.name for r in roles if r.name != "admin"]
+            self.assignable_roles = [r.name for r in roles if r.name != "admin"]
 
 
 class AddUserState(UserState):
     """Handles the add-user form submission."""
 
-    form_data: dict = {}
+    form_data: dict = rx.Field(default_factory=dict)
     generated_password: str = ""
     show_password_dialog: bool = False
 
@@ -217,6 +218,7 @@ class AddUserState(UserState):
 
         self.generated_password = password
         self.show_password_dialog = True
+        return None
 
     def close_password_dialog(self):
         """Close the password dialog and redirect to users list."""
