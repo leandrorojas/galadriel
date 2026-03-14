@@ -28,6 +28,7 @@ ERR_USERNAME_INVALID = "Username can only contain letters, numbers, dots, hyphen
 ERR_EMAIL_EMPTY = "Email cannot be empty"
 ERR_EMAIL_INVALID = "Please enter a valid email address"
 ERR_EMAIL_IN_USE = "Email address already in use"
+ERR_USERNAME_IN_USE = "Username already exists"
 ERR_ROLE_EMPTY = "Please select a role"
 ERR_ROLE_INVALID = "Invalid role"
 
@@ -151,7 +152,7 @@ class UserState(rx.State):
                 )
             ).one_or_none()
             if existing:
-                return None, "Username already exists"
+                return None, ERR_USERNAME_IN_USE
 
             existing_email = session.exec(
                 GaladrielUser.select().where(GaladrielUser.email == email)
