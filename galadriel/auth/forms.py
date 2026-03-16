@@ -3,7 +3,9 @@
 import reflex as rx
 from reflex_local_auth.pages.login import LoginState
 from reflex_local_auth.pages.registration import RegistrationState
-from reflex_local_auth.pages.components import input_100w, MIN_WIDTH
+from reflex_local_auth.pages.components import input_100w
+
+FORM_MIN_WIDTH = "30vw"
 from .state import Register, Login
 
 def __login_error() -> rx.Component:
@@ -48,12 +50,12 @@ def login_form() -> rx.Component:
             input_100w("username", auto_focus=True),
             rx.el.label("Password", html_for="password"),
             input_100w("password", type="password"),
-            rx.button("Sign in", width="100%"),
+            rx.center(rx.button("Log In", size="3", margin_top="1.5em"), width="100%"),
             rx.center(
-                rx.link("Register", on_click=RegistrationState.redir),
+                rx.link("Sign Up", on_click=RegistrationState.redir),
                 width="100%",
             ),
-            min_width=MIN_WIDTH,
+            min_width="25vw",
         ),
         on_submit=Login.on_submit,
     )
@@ -85,12 +87,13 @@ def register_form() -> rx.Component:
             input_100w("password", type="password"),
             rx.el.label("Confirm Password", html_for="confirm_password"),
             input_100w("confirm_password", type="password"),
-            rx.button("Sign up", width="100%"),
+            rx.center(rx.button("Sign Up", size="3", margin_top="1.5em"), width="100%"),
             rx.center(
-                rx.link("Login", on_click=LoginState.redir),
+                rx.link("Log In", on_click=LoginState.redir),
                 width="100%",
             ),
-            min_width=MIN_WIDTH,
+            min_width=FORM_MIN_WIDTH,
         ),
         on_submit=Register.handle_registration_email,
     )
+    
