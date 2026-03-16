@@ -298,6 +298,33 @@ class TestEditUser:
             result = state.handle_submit({"email": "new@test.com", "role": "admin", "enabled": "on"})
             assert "Invalid role" in str(result)
 
+    def test_edit_admin_email_allowed(self, patch_rx_session, seeded_db):
+        """Changing the admin email should succeed."""
+        session = patch_rx_session
+        user = self._seed_user(session, email="admin@test.com", user_role=0)
+        state = self._make_edit_state(user_id_value=user.id)
+        result = state.handle_submit({"email": "newadmin@test.com", "role": "admin", "enabled": "on"})
+        # Should redirect (success)
+        assert result is not None
+        updated = session.exec(
+            GaladrielUser.select().where(GaladrielUser.id == user.id)
+        ).one_or_none()
+        assert updated.email == "newadmin@test.com"
+
+    def test_edit_admin_role_change_rejected(self, patch_rx_session, seeded_db):
+        """Changing the admin role should return error toast."""
+        user = self._seed_user(patch_rx_session, email="admin@test.com", user_role=0)
+        state = self._make_edit_state(user_id_value=user.id)
+        result = state.handle_submit({"email": "admin@test.com", "role": "viewer", "enabled": "on"})
+        assert "cannot be changed" in str(result).lower()
+
+    def test_edit_admin_deactivation_rejected(self, patch_rx_session, seeded_db):
+        """Deactivating the admin account should return error toast."""
+        user = self._seed_user(patch_rx_session, email="admin@test.com", user_role=0)
+        state = self._make_edit_state(user_id_value=user.id)
+        result = state.handle_submit({"email": "admin@test.com", "role": "admin", "enabled": ""})
+        assert "cannot be changed" in str(result).lower()
+
     def test_edit_user_duplicate_email(self, patch_rx_session, seeded_db):
         """Duplicate email (from another user) should return error."""
         session = patch_rx_session
