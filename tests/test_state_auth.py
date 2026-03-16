@@ -160,6 +160,8 @@ class TestRequireEditorGuard:
 class TestRegistrationDisabled:
     """Tests for self-registered users being created as disabled."""
 
+    FAKE_CREDENTIAL = "pass"  # noqa: S105 — test-only dummy value
+
     def test_registration_creates_disabled_user(self, patch_rx_session, seeded_db):
         """Self-registered users should be disabled and assigned the viewer role."""
         import reflex_local_auth
@@ -175,7 +177,7 @@ class TestRegistrationDisabled:
         local_user = reflex_local_auth.LocalUser(
             id=10,
             username="newuser",
-            password_hash=reflex_local_auth.LocalUser.hash_password("pass"),
+            password_hash=reflex_local_auth.LocalUser.hash_password(self.FAKE_CREDENTIAL),
             enabled=True,
         )
         session.add(local_user)
@@ -183,7 +185,12 @@ class TestRegistrationDisabled:
 
         # Call our handler directly
         Register.handle_registration_email.fn(
-            state, {"username": "newuser", "email": "new@test.com", "password": "pass", "confirm_password": "pass"}
+            state, {
+                "username": "newuser",
+                "email": "new@test.com",
+                "password": self.FAKE_CREDENTIAL,
+                "confirm_password": self.FAKE_CREDENTIAL,
+            }
         )
 
         # Verify user is disabled
