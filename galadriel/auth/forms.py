@@ -87,7 +87,7 @@ def register_form() -> rx.Component:
             input_100w("password", type="password"),
             rx.el.label("Confirm Password", html_for="confirm_password"),
             input_100w("confirm_password", type="password"),
-            rx.center(rx.button("Sign up", size="3", margin_top="1.5em"), width="100%"),
+            rx.center(rx.button("Sign Up", size="3", margin_top="1.5em"), width="100%"),
             rx.center(
                 rx.link("Log In", on_click=LoginState.redir),
                 width="100%",
