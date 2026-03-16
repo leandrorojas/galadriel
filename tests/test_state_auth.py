@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import PropertyMock, patch, MagicMock
 from sqlmodel import select
 
-from galadriel.auth.state import Session, Register
+from galadriel.auth.state import Session, Register, Login
 from galadriel.user.model import GaladrielUser, GaladrielUserRole
 from galadriel.user.state import UserRole
 from conftest import init_state
@@ -184,7 +184,7 @@ class TestRegistrationDisabled:
         session.commit()
 
         # Call our handler directly
-        Register.handle_registration_email.fn(
+        result = Register.handle_registration_email.fn(
             state, {
                 "username": "newuser",
                 "email": "new@test.com",
@@ -192,6 +192,12 @@ class TestRegistrationDisabled:
                 "confirm_password": self.FAKE_CREDENTIAL,
             }
         )
+
+        # Verify redirect to login and pending-approval banner
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert result[0].args[0][1]._var_value == "/login"
+        assert result[1] == Login.show_pending_approval
 
         # Verify user is disabled
         updated = session.exec(

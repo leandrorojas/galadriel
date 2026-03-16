@@ -55,7 +55,7 @@ def login_form() -> rx.Component:
             ),
             min_width=MIN_WIDTH,
         ),
-        on_submit=LoginState.on_submit,
+        on_submit=Login.on_submit,
     )
 
 def __register_error() -> rx.Component:
