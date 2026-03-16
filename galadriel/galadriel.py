@@ -68,7 +68,7 @@ app.add_page(index, title="galadriel")
 #galadriel pages
 app.add_page(about_page, route=navigation.routes.ABOUT, title="About galadriel")
 app.add_page(login_page, route=navigation.routes.LOGIN, title="Login", on_load=Login.clear_error)
-app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up")
+app.add_page(register_page, route=navigation.routes.SIGNUP, title="Sign up", on_load=Login.clear_pending_approval)
 app.add_page(logout_page, route=navigation.routes.LOGOUT, title="Logout")
 
 #Test Suites

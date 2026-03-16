@@ -71,29 +71,63 @@ def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     admin_page.__name__ = page.__name__
     return admin_page
 
+PENDING_APPROVAL_MESSAGE = "Registration successful! Your account is pending admin approval. You will be able to log in once an administrator activates your account."
+
 class Login(LoginState):
     """Extends LoginState with additional event handlers."""
+
+    pending_approval: bool = False
 
     def clear_error(self):
         """Clear the login error message."""
         self.error_message = ""
+
+    def clear_pending_approval(self):
+        """Clear the pending approval banner."""
+        self.pending_approval = False
+
+    def on_submit(self, form_data):
+        """Clear the pending approval banner and handle login."""
+        self.pending_approval = False
+        return super().on_submit(form_data)
+
+    def show_pending_approval(self):
+        """Show the pending-approval banner on the login page."""
+        self.pending_approval = True
 
 class Register(reflex_local_auth.RegistrationState):
     """Extends registration to create a Galadriel user with a default role."""
 
     # This event handler must be named something besides `handle_registration`!!!
     def handle_registration_email(self, form_data):
-        """Register a new user and assign the default viewer role."""
-        registration_result = self.handle_registration(form_data)
+        """Register a new user as a disabled viewer pending admin activation."""
+        self.handle_registration(form_data)
         if self.new_user_id >= 0:
             with rx.session() as session:
+                # Disable the account first — before any early returns
+                local_user = session.exec(
+                    reflex_local_auth.LocalUser.select().where(
+                        reflex_local_auth.LocalUser.id == self.new_user_id
+                    )
+                ).one_or_none()
+                if local_user:
+                    local_user.enabled = False
+
                 role = session.exec(GaladrielUserRole.select().where(GaladrielUserRole.name == "viewer")).one_or_none()
                 if role is None:
+                    session.commit()
                     return rx.toast.error("default role not found")
                 session.add(GaladrielUser(email=form_data["email"], user_id=self.new_user_id, user_role=role.id))
+
                 session.commit()
 
-        return registration_result
+            # Redirect to login and show the pending-approval banner there
+            self.error_message = ""
+            self.new_user_id = -1
+            return [rx.redirect(reflex_local_auth.routes.LOGIN_ROUTE), Login.show_pending_approval]
+
+        # Registration failed — return validation errors from parent
+        return None
 class Session(reflex_local_auth.LocalAuthState):
     """Manages the authenticated session, user info, and role checks."""
 
