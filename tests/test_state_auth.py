@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import PropertyMock, patch, MagicMock
 from sqlmodel import select
 
-from galadriel.auth.state import Session
+from galadriel.auth.state import Session, Register
 from galadriel.user.model import GaladrielUser, GaladrielUserRole
 from galadriel.user.state import UserRole
 from conftest import init_state
@@ -155,3 +155,47 @@ class TestRequireEditorGuard:
         state = self._make_session_state(role=None, is_authenticated=False)
         result = Session.require_editor.fn(state)
         assert result == LoginState.redir
+
+
+class TestRegistrationDisabled:
+    """Tests for self-registered users being created as disabled."""
+
+    def test_registration_creates_disabled_user(self, patch_rx_session, seeded_db):
+        """Self-registered users should be disabled and assigned the viewer role."""
+        import reflex_local_auth
+
+        session = patch_rx_session
+        state = MagicMock(spec=Register)
+        state.new_user_id = 10
+
+        # Simulate handle_registration succeeding
+        state.handle_registration = MagicMock(return_value=None)
+
+        # Create the LocalUser that handle_registration would have created
+        local_user = reflex_local_auth.LocalUser(
+            id=10,
+            username="newuser",
+            password_hash=reflex_local_auth.LocalUser.hash_password("pass"),
+            enabled=True,
+        )
+        session.add(local_user)
+        session.commit()
+
+        # Call our handler directly
+        Register.handle_registration_email.fn(
+            state, {"username": "newuser", "email": "new@test.com", "password": "pass", "confirm_password": "pass"}
+        )
+
+        # Verify user is disabled
+        updated = session.exec(
+            reflex_local_auth.LocalUser.select().where(reflex_local_auth.LocalUser.id == 10)
+        ).one_or_none()
+        assert updated is not None
+        assert updated.enabled is False
+
+        # Verify GaladrielUser was created with viewer role
+        galadriel_user = session.exec(
+            GaladrielUser.select().where(GaladrielUser.user_id == 10)
+        ).one_or_none()
+        assert galadriel_user is not None
+        assert galadriel_user.user_role == UserRole.VIEWER.value

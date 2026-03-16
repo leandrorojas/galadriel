@@ -2,7 +2,6 @@
 
 import reflex as rx
 from reflex_local_auth.pages.login import LoginState
-from reflex_local_auth.pages.registration import RegistrationState
 from .forms import login_form, register_form
 from ..pages.base import base_page
 from ..pages.about import about_content
@@ -32,13 +31,7 @@ def register_page() -> rx.Component:
         rx.cond(
             ~LoginState.is_authenticated,
             rx.center(
-                rx.cond(
-                    RegistrationState.success,
-                    rx.vstack(
-                        rx.text("Registration successful!"),
-                    ),
-                    rx.card(register_form()),
-                ),
+                rx.card(register_form()),
                 min_height=consts.RELATIVE_VIEWPORT_85,
             ),
             rx.container(about_content())

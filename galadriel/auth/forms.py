@@ -4,7 +4,7 @@ import reflex as rx
 from reflex_local_auth.pages.login import LoginState
 from reflex_local_auth.pages.registration import RegistrationState
 from reflex_local_auth.pages.components import input_100w, MIN_WIDTH
-from .state import Register
+from .state import Register, Login
 
 def __login_error() -> rx.Component:
     """Render the login error message."""
@@ -19,11 +19,30 @@ def __login_error() -> rx.Component:
         ),
     )
 
+def __pending_approval() -> rx.Component:
+    """Render the pending approval callout after self-registration."""
+    return rx.cond(
+        Login.pending_approval,
+        rx.callout(
+            rx.vstack(
+                rx.text("Registration successful!", weight="bold", size="2"),
+                rx.text("Your account is pending admin approval.", size="2"),
+                rx.text("You will be able to log in once an administrator activates your account.", size="2"),
+                spacing="1",
+            ),
+            icon="info",
+            color_scheme="blue",
+            size="1",
+            width="100%",
+        ),
+    )
+
 def login_form() -> rx.Component:
     """Render the login form with autofocus on the username field."""
     return rx.form(
         rx.vstack(
             rx.heading("Log in to your account", size="7"),
+            __pending_approval(),
             __login_error(),
             rx.el.label("Username", html_for="username"),
             input_100w("username", auto_focus=True),
@@ -75,4 +94,3 @@ def register_form() -> rx.Component:
         ),
         on_submit=Register.handle_registration_email,
     )
-    
