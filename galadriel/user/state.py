@@ -95,7 +95,12 @@ class UserState(rx.State):
 
                 if local_user:
                     role = session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == single_user.user_role)).one_or_none()
-                    role_display = ADMIN_DISPLAY_ROLE if role and role.name == "admin" else (role.name if role else "unknown")
+                    if role and role.name == "admin":
+                        role_display = ADMIN_DISPLAY_ROLE
+                    elif role:
+                        role_display = role.name
+                    else:
+                        role_display = "unknown"
                     self.users.append(
                         GaladrielUserDisplay(
                             local_user_id=local_user.id,
@@ -133,7 +138,12 @@ class UserState(rx.State):
                 self.user = None
                 return
             role = session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == galadriel_user.user_role)).one_or_none()
-            role_display = ADMIN_DISPLAY_ROLE if role and role.name == "admin" else (role.name if role else "unknown")
+            if role and role.name == "admin":
+                role_display = ADMIN_DISPLAY_ROLE
+            elif role:
+                role_display = role.name
+            else:
+                role_display = "unknown"
             self.user = GaladrielUserDisplay(
                 local_user_id=local_user.id,
                 galadriel_user_id=galadriel_user.id,

@@ -161,10 +161,13 @@ def __user_edit_form() -> rx.Component:
                 ),
             ),
             rx.flex(
-                rx.switch(
-                    default_checked=state.EditUserState.edit_enabled,
-                    name="enabled",
-                    disabled=state.EditUserState.is_admin_user,
+                rx.cond(
+                    state.EditUserState.is_admin_user,
+                    rx.fragment(
+                        rx.switch(default_checked=True, name="enabled", disabled=True),
+                        rx.el.input(type="hidden", name="enabled", value="on"),
+                    ),
+                    rx.switch(default_checked=state.EditUserState.edit_enabled, name="enabled"),
                 ),
                 rx.text("Enabled", size="3"),
                 align="center",
