@@ -35,6 +35,15 @@ ERR_ADMIN_ROLE_PROTECTED = "The admin role and status cannot be changed"
 ADMIN_DISPLAY_ROLE = "built-in administrator"
 
 
+def _get_role_display(role) -> str:
+    """Return the display name for a role, using the friendly label for admin."""
+    if role and role.name == "admin":
+        return ADMIN_DISPLAY_ROLE
+    if role:
+        return role.name
+    return "unknown"
+
+
 def generate_password() -> str:
     """Generate a strong random password."""
     while True:
@@ -95,19 +104,13 @@ class UserState(rx.State):
 
                 if local_user:
                     role = session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == single_user.user_role)).one_or_none()
-                    if role and role.name == "admin":
-                        role_display = ADMIN_DISPLAY_ROLE
-                    elif role:
-                        role_display = role.name
-                    else:
-                        role_display = "unknown"
                     self.users.append(
                         GaladrielUserDisplay(
                             local_user_id=local_user.id,
                             galadriel_user_id=single_user.id,
                             username=local_user.username,
                             email=single_user.email,
-                            role=role_display,
+                            role=_get_role_display(role),
                             enabled=local_user.enabled,
                             created=single_user.created,
                             updated=single_user.updated
@@ -138,18 +141,12 @@ class UserState(rx.State):
                 self.user = None
                 return
             role = session.exec(select(GaladrielUserRole).where(GaladrielUserRole.id == galadriel_user.user_role)).one_or_none()
-            if role and role.name == "admin":
-                role_display = ADMIN_DISPLAY_ROLE
-            elif role:
-                role_display = role.name
-            else:
-                role_display = "unknown"
             self.user = GaladrielUserDisplay(
                 local_user_id=local_user.id,
                 galadriel_user_id=galadriel_user.id,
                 username=local_user.username,
                 email=galadriel_user.email,
-                role=role_display,
+                role=_get_role_display(role),
                 enabled=local_user.enabled,
                 created=galadriel_user.created,
                 updated=galadriel_user.updated
@@ -307,7 +304,10 @@ class EditUserState(UserState):
             if existing_email:
                 return rx.toast.error(ERR_EMAIL_IN_USE)
 
-            is_admin = galadriel_user.user_role == UserRole.ADMIN.value
+            current_role = session.exec(
+                select(GaladrielUserRole).where(GaladrielUserRole.id == galadriel_user.user_role)
+            ).one_or_none()
+            is_admin = current_role is not None and current_role.name == "admin"
 
             # Admin: only allow email changes, block role and enabled
             if is_admin and (role_name != "admin" or not enabled):
