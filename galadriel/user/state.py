@@ -35,7 +35,7 @@ ERR_ADMIN_ROLE_PROTECTED = "The admin role and status cannot be changed"
 ADMIN_DISPLAY_ROLE = "built-in administrator"
 
 
-def _get_role_display(role) -> str:
+def _get_role_display(role: Optional[GaladrielUserRole]) -> str:
     """Return the display name for a role, using the friendly label for admin."""
     if role and role.name == "admin":
         return ADMIN_DISPLAY_ROLE
