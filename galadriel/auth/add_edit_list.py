@@ -146,17 +146,28 @@ def __user_edit_form() -> rx.Component:
                 placeholder="Email",
                 width="100%",
             ),
-            rx.select(
-                state.UserState.assignable_roles,
-                default_value=state.EditUserState.edit_role,
-                name="role",
-                placeholder="Select a role",
-                width="100%",
+            rx.cond(
+                state.EditUserState.is_admin_user,
+                rx.fragment(
+                    rx.text("built-in administrator", size="3", weight="medium", color=rx.color("gray", 10)),
+                    rx.el.input(type="hidden", name="role", value="admin"),
+                ),
+                rx.select(
+                    state.UserState.assignable_roles,
+                    default_value=state.EditUserState.edit_role,
+                    name="role",
+                    placeholder="Select a role",
+                    width="100%",
+                ),
             ),
             rx.flex(
-                rx.switch(
-                    default_checked=state.EditUserState.edit_enabled,
-                    name="enabled",
+                rx.cond(
+                    state.EditUserState.is_admin_user,
+                    rx.fragment(
+                        rx.switch(default_checked=True, name="enabled", disabled=True),
+                        rx.el.input(type="hidden", name="enabled", value="on"),
+                    ),
+                    rx.switch(default_checked=state.EditUserState.edit_enabled, name="enabled"),
                 ),
                 rx.text("Enabled", size="3"),
                 align="center",
@@ -173,5 +184,5 @@ def __user_edit_form() -> rx.Component:
 @require_admin
 def user_edit_page() -> rx.Component:
     """Render the edit user page."""
-    return edit_page(__user_edit_form, "Edit User", consts.ICON_USERS, "to Users", "to User Detail", routes.USERS, state.UserState.user_edit_url)
+    return edit_page(__user_edit_form, "Edit User", consts.ICON_USERS, "to Users", "to User Detail", routes.USERS, state.UserState.user_detail_url)
 #endregion
