@@ -83,9 +83,11 @@ class UserState(rx.State):
     @rx.var(cache=True)
     def user_detail_url(self) -> str:
         """URL to the user detail page."""
-        if not self.user:
-            return f"{USERS_ROUTE}"
-        return f"{USERS_ROUTE}/{self.user.galadriel_user_id}"
+        if self.user:
+            return f"{USERS_ROUTE}/{self.user.galadriel_user_id}"
+        if self.user_id is not None:
+            return f"{USERS_ROUTE}/{self.user_id}"
+        return USERS_ROUTE
 
     @rx.var(cache=True)
     def user_edit_url(self) -> str:
@@ -268,8 +270,19 @@ class EditUserState(UserState):
         if self.user is None:
             return rx.redirect(routes.USERS)
         self.edit_email = self.user.email
-        self.is_admin_user = self.user.role == ADMIN_DISPLAY_ROLE
-        self.edit_role = "admin" if self.is_admin_user else self.user.role
+        with rx.session() as session:
+            galadriel_user = session.exec(
+                GaladrielUser.select().where(GaladrielUser.id == self.user.galadriel_user_id)
+            ).one_or_none()
+            if galadriel_user:
+                role = session.exec(
+                    select(GaladrielUserRole).where(GaladrielUserRole.id == galadriel_user.user_role)
+                ).one_or_none()
+                self.is_admin_user = role is not None and role.name == "admin"
+                self.edit_role = role.name if role else self.user.role
+            else:
+                self.is_admin_user = False
+                self.edit_role = self.user.role
         self.edit_enabled = self.user.enabled
         self.load_assignable_roles()
         return None
