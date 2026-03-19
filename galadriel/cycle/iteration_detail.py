@@ -195,26 +195,33 @@ def iteration_page() -> rx.Component:
             z_index="2",
             background_color="var(--color-background)",
         ),
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    table_component.header("name/type", "tag",info_tooltip="[P]requisite"),
-                    table_component.header("action", "pickaxe"),
-                    table_component.header("expected", "gem"),
-                    table_component.header("status", "activity"),
-                    table_component.header("issue", "bug"),
-                    table_component.header("", "ellipsis"),
+        rx.box(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        table_component.header("name/type", "tag",info_tooltip="[P]requisite"),
+                        table_component.header("action", "pickaxe"),
+                        table_component.header("expected", "gem"),
+                        table_component.header("status", "activity"),
+                        table_component.header("issue", "bug"),
+                        table_component.header("", "ellipsis"),
+                    ),
                 ),
+                rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),
+                variant="surface",
+                size="3",
+                width="100%",
+                on_mount=CycleState.get_iteration_snapshot,
             ),
-            rx.table.body(rx.foreach(CycleState.iteration_snapshot_items, __show_snapshot_element)),
-            variant="surface",
-            size="3",
+            class_name="sticky-table",
+            overflow_y="auto",
+            flex="1",
+            min_height="0",
             width="100%",
-            on_mount=CycleState.get_iteration_snapshot,
         ),
         spacing="5",
         align="center",
-        min_height="95vh",
+        height="100%",
     ),
     
     return base_page(cycle_edit_content)

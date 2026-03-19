@@ -1,0 +1,31 @@
+/* Override ALL Radix intermediate containers that block position:sticky */
+.sticky-table .rt-TableRoot {
+    overflow: visible !important;
+}
+
+.sticky-table .rt-ScrollAreaRoot {
+    overflow: visible !important;
+}
+
+.sticky-table .rt-ScrollAreaViewport {
+    overflow: visible !important;
+}
+
+/* Radix forces display:block on table children - restore table display */
+.sticky-table .rt-ScrollAreaViewport > * {
+    display: table !important;
+    width: 100% !important;
+}
+
+/* Override variant=surface overflow:hidden on the table element */
+.sticky-table .rt-TableRootTable {
+    overflow: visible !important;
+}
+
+/* Make thead sticky */
+.sticky-table .rt-TableHeader {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    background-color: var(--color-background) !important;
+}

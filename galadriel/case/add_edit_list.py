@@ -35,14 +35,13 @@ def __show_case(test_case:model.CaseModel):
     )
 
 def __table() -> rx.Component:
-    return rx.fragment(
+    return rx.box(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
                     Table.sortable_header("name", "fingerprint", "name", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                 ),
-
             ),
             rx.table.body(rx.foreach(state.CaseState.sorted_cases, __show_case)),
             variant="surface",
@@ -50,6 +49,11 @@ def __table() -> rx.Component:
             width="100%",
             on_mount=state.CaseState.load_cases,
         ),
+        class_name="sticky-table",
+        overflow_y="auto",
+        flex="1",
+        min_height="0",
+        width="100%",
     )
 
 #region #LIST
@@ -62,7 +66,7 @@ def cases_list_page() -> rx.Component:
         rx.vstack(
             header_component.list("Test Cases", consts.ICON_TEST_TUBES, "Add Case", routes.CASE_ADD, Session.can_edit, "Individual Test Cases to be executed"),
             __table(),
-            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
+            spacing="5", align="center", width="100%", height="100%",
         ),
     )
 #endregion

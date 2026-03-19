@@ -47,7 +47,7 @@ app = rx.App(
     theme = rx.theme(
         accent_color="violet",
     ),
-    stylesheets=["https://fonts.googleapis.com/css?family=Montserrat", "suneditor-dark.css"],
+    stylesheets=["https://fonts.googleapis.com/css?family=Montserrat", "suneditor-dark.css", "sticky-table.css"],
     style = {
         "font_family": "Montserrat",
         "font_size": "16px",

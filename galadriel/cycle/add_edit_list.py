@@ -97,7 +97,7 @@ def __show_cycle(cycle:model.CycleModel):
 def __table() -> rx.Component:
     table_component = Table()
 
-    return rx.fragment(
+    return rx.box(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
@@ -108,7 +108,6 @@ def __table() -> rx.Component:
                     table_component.header("","ellipsis"),
                     Table.sortable_header("created", "calendar-check-2", "created", state.CycleState.sort_by, state.CycleState.sort_asc, state.CycleState.toggle_sort),
                 ),
-
             ),
             rx.table.body(rx.foreach(state.CycleState.sorted_cycles, __show_cycle)),
             variant="surface",
@@ -116,6 +115,11 @@ def __table() -> rx.Component:
             width="100%",
             on_mount=state.CycleState.load_cycles,
         ),
+        class_name="sticky-table",
+        overflow_y="auto",
+        flex="1",
+        min_height="0",
+        width="100%",
     )
 
 #region LIST
@@ -128,7 +132,7 @@ def cycle_list_page() -> rx.Component:
         rx.vstack(
             page_component.list("Cycles", "flask-round", "Add Cycle", routes.CYCLE_ADD, Session.can_edit, "List of Cycles to execute"),
             __table(),
-            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
+            spacing="5", align="center", width="100%", height="100%",
         ),
     )
 #endregion
