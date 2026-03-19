@@ -35,14 +35,17 @@ def __show_suite(suite:model.SuiteModel):
     )
 
 def __table() -> rx.Component:
-    return rx.fragment(
+    return rx.box(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
                     Table.sortable_header("name", "fingerprint", "name", state.SuiteState.sort_by, state.SuiteState.sort_asc, state.SuiteState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.SuiteState.sort_by, state.SuiteState.sort_asc, state.SuiteState.toggle_sort),
                 ),
-
+                position="sticky",
+                top="0",
+                z_index="1",
+                background_color="var(--color-background)",
             ),
             rx.table.body(rx.foreach(state.SuiteState.sorted_suites, __show_suite)),
             variant="surface",
@@ -50,6 +53,9 @@ def __table() -> rx.Component:
             width="100%",
             on_mount=state.SuiteState.load_suites,
         ),
+        overflow_y="auto",
+        flex="1",
+        width="100%",
     )
 
 @require_login
@@ -61,7 +67,7 @@ def suites_list_page() -> rx.Component:
         rx.vstack(
             header_component.list("Test Suites", "beaker", "Add Suite", routes.SUITE_ADD, Session.can_edit, "Label for a group of Test Cases based on some criteria (i.e.: project)"),
             __table(),
-            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
+            spacing="5", align="center", width="100%",
         ),
     )
 

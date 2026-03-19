@@ -35,7 +35,7 @@ def __show_user(galadriel_user:model.GaladrielUserDisplay):
 
 def __table() -> rx.Component:
     table_component = Table()
-    return rx.fragment(
+    return rx.box(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
@@ -45,7 +45,7 @@ def __table() -> rx.Component:
                     table_component.header("enabled", "toggle-right"),
                     Table.sortable_header("created", "calendar-check-2", "created", state.UserState.sort_by, state.UserState.sort_asc, state.UserState.toggle_sort),
                 ),
-
+                style={"position": "sticky", "top": "0", "z_index": "1", "background_color": "var(--color-background)"},
             ),
             rx.table.body(rx.foreach(state.UserState.sorted_users, __show_user)),
             variant="surface",
@@ -53,6 +53,9 @@ def __table() -> rx.Component:
             width="100%",
             on_mount=state.UserState.load_users,
         ),
+        overflow_y="auto",
+        flex="1",
+        width="100%",
     )
 
 #region #LIST
@@ -65,7 +68,7 @@ def users_list_page() -> rx.Component:
         rx.vstack(
             header_component.list("Users", consts.ICON_USERS, "Add User", routes.USER_ADD, Session.is_admin, "Galadriel Users"),
             __table(),
-            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85,
+            spacing="5", align="center", width="100%",
         ),
     )
 #endregion

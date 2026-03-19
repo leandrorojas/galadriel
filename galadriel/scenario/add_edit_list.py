@@ -34,14 +34,14 @@ def __show_scenario(scenario:model.ScenarioModel):
     )
 
 def __table() -> rx.Component:
-    return rx.fragment(
+    return rx.box(
         rx.table.root(
             rx.table.header(
                 rx.table.row(
                     Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.sort_by, state.ScenarioState.sort_asc, state.ScenarioState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.sort_by, state.ScenarioState.sort_asc, state.ScenarioState.toggle_sort),
                 ),
-
+                style={"position": "sticky", "top": "0", "z_index": "1", "background_color": "var(--color-background)"},
             ),
             rx.table.body(rx.foreach(state.ScenarioState.sorted_scenarios, __show_scenario)),
             variant="surface",
@@ -49,6 +49,9 @@ def __table() -> rx.Component:
             width="100%",
             on_mount=state.ScenarioState.load_scenarios,
         ),
+        overflow_y="auto",
+        flex="1",
+        width="100%",
     )
 
 @require_login
@@ -60,7 +63,7 @@ def scenarios_list_page() -> rx.Component:
         rx.vstack(
             header_component.list("Test Scenarios", "route", "Add Scenario", routes.SCENARIO_ADD, Session.can_edit, "Group of Test Cases executed in a specific order"),
             __table(),
-            spacing="5", align="center", min_height=consts.RELATIVE_VIEWPORT_85
+            spacing="5", align="center", width="100%"
         ),
     )
 

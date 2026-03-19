@@ -16,7 +16,6 @@ def _content_box(content: rx.Component) -> rx.Component:
         min_width="0",
         justify="center",
         align="center",
-        min_height=consts.RELATIVE_VIEWPORT_85,
         justify_content="center",
         spacing="6",
         padding_x=CONTENT_PADDING_X,
