@@ -51,7 +51,7 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, consts.FIELD_ID)))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(moment_component.moment(prerequisite.created)),
-            rx.table.cell(rx.form(rx.el.input(type="hidden", name="prerequisite_id", value=rx.cond(prerequisite.id, prerequisite.id, ""))), hidden=True),
+            rx.table.cell(rx.el.input(type="hidden", name="prerequisite_id", value=rx.cond(prerequisite.id, prerequisite.id, "")), hidden=True),
     )
 
 def __search_prerequisites_table() -> rx.Component:

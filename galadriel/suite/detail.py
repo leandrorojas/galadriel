@@ -31,7 +31,7 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
             rx.table.cell(moment_component.moment(test_case.created)),
-            rx.table.cell(rx.form(rx.el.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, ""))), hidden=True),
+            rx.table.cell(rx.el.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, "")), hidden=True),
     )
 
 def __search_cases_table() -> rx.Component:
@@ -55,7 +55,7 @@ def __show_scenarios_in_search(scenario:ScenarioModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, consts.FIELD_ID)))),
             rx.table.cell(scenario.name),
             rx.table.cell(moment_component.moment(scenario.created)),
-            rx.table.cell(rx.form(rx.el.input(type="hidden", name="scenario_id", value=rx.cond(scenario.id, scenario.id, ""))), hidden=True),
+            rx.table.cell(rx.el.input(type="hidden", name="scenario_id", value=rx.cond(scenario.id, scenario.id, "")), hidden=True),
     )
 
 def __search_scenarios_table() -> rx.Component:
