@@ -1,6 +1,7 @@
 """Base page layouts for public and authenticated views."""
 
 import reflex as rx
+from reflex_local_auth import LoginState
 from ..ui.components import TopNavBar, SideBar
 from ..auth.state import Session
 from ..utils import consts
@@ -54,15 +55,19 @@ def base_page(content: rx.Component, *args) -> rx.Component:
     """Render a page that adapts layout based on authentication status."""
     top_navbar = TopNavBar()
     return rx.cond(
-        Session.is_authenticated,
-        rx.fragment(
-            _sidebar_layout(content),
-            *args,
+        LoginState.is_hydrated,
+        rx.cond(
+            Session.is_authenticated,
+            rx.fragment(
+                _sidebar_layout(content),
+                *args,
+            ),
+            rx.fragment(
+                top_navbar.navbar(),
+                rx.box(content),
+                rx.color_mode.button(position="bottom-left"),
+                *args,
+            ),
         ),
-        rx.fragment(
-            top_navbar.navbar(),
-            rx.box(content),
-            rx.color_mode.button(position="bottom-left"),
-            *args,
-        ),
+        rx.fragment(),
     )
