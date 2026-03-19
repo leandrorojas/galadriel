@@ -30,7 +30,7 @@ def index() -> rx.Component:
     
     index_content = rx.cond(
         Session.is_authenticated,
-        rx.container(about_content()),
+        about_content(),
         rx.vstack(
             rx.heading("Welcome to galadriel", size="9"),
             buttons.signup_and_login(),
