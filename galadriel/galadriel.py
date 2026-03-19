@@ -18,7 +18,7 @@ from .auth import add_edit_list as user_add_edit_list
 from .auth import detail as user_detail
 
 #galadriel
-from .pages import base_page, about_page, about_content
+from .pages import base_page, about_page, about_content, not_found_page
 from .ui.components import Button
 from .auth.pages import login_page, register_page, logout_page
 from .auth.state import Login
@@ -30,7 +30,7 @@ def index() -> rx.Component:
     
     index_content = rx.cond(
         Session.is_authenticated,
-        rx.container(about_content()),
+        about_content(),
         rx.vstack(
             rx.heading("Welcome to galadriel", size="9"),
             buttons.signup_and_login(),
@@ -104,3 +104,6 @@ app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, 
 app.add_page(user_add_edit_list.user_add_page, route=navigation.routes.USER_ADD, on_load=[Session.on_load, Session.require_admin, user.UserState.load_assignable_roles])
 app.add_page(user_detail.user_detail_page, route=navigation.routes.USER_DETAIL, on_load=[Session.on_load, Session.require_admin, user.UserState.get_user_detail])
 app.add_page(user_add_edit_list.user_edit_page, route=navigation.routes.USER_EDIT, on_load=[Session.on_load, Session.require_admin, user.EditUserState.load_edit_user])
+
+# Custom 404
+app.add_page(not_found_page, route="/404", title="404 - Not Found")
