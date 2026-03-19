@@ -438,7 +438,7 @@ class PageHeader():
             padding_bottom="0.5em",
             position="sticky",
             top="0",
-            z_index="2",
+            z_index="3",
             background_color="var(--color-background)",
         ),
 
