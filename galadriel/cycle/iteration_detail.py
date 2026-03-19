@@ -131,7 +131,7 @@ def __show_snapshot_element(snapshot_element:IterationSnapshotModel):
                                     rx.form.root(
                                         rx.flex(
                                             rx.vstack(
-                                                rx.box(rx.input(type="hidden",name="snapshot_item_id", value=rx.cond(snapshot_element.id, snapshot_element.id, "")),display="none",),
+                                                rx.box(rx.el.input(type="hidden",name="snapshot_item_id", value=rx.cond(snapshot_element.id, snapshot_element.id, "")),display="none",),
                                                 rx.box(rx.checkbox(type="hidden",name="just_fail", checked=CycleState.fail_checkbox),display="none",),
                                                 rx.input(name="summary", placeholder="Summary", width="100%", default_value=f"{snapshot_element.child_action} is failing"),
                                                 rx.box(

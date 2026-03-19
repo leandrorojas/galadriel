@@ -51,7 +51,7 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, consts.FIELD_ID)))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(moment_component.moment(prerequisite.created)),
-            rx.table.cell(rx.form(rx.input(name="prerequisite_id", value=rx.cond(prerequisite.id, prerequisite.id, ""), read_only=True)), hidden=True),
+            rx.table.cell(rx.form(rx.el.input(type="hidden", name="prerequisite_id", value=rx.cond(prerequisite.id, prerequisite.id, ""))), hidden=True),
     )
 
 def __search_prerequisites_table() -> rx.Component:
@@ -157,7 +157,7 @@ def case_detail_page() -> rx.Component:
             rx.cond(
                 state.CaseState.show_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, ""), read_only=True), display="none"),
+                        rx.box(rx.el.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, "")), display="none"),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
                             __search_prerequisites_table(),
