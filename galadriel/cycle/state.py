@@ -928,6 +928,10 @@ class AddCycleState(CycleState):
     form_data:dict = {}
     cycle_name_input: str = ""
 
+    def clear_form(self):
+        """Clear the add cycle form inputs."""
+        self.cycle_name_input = ""
+
     def set_cycle_name(self, value: str):
         """Update the cycle name input value."""
         self.cycle_name_input = value

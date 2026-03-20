@@ -308,6 +308,10 @@ class AddCaseState(CaseState):
     form_data:dict = {}
     case_name_input: str = ""
 
+    def clear_form(self):
+        """Clear the add case form inputs."""
+        self.case_name_input = ""
+
     def set_case_name(self, value: str):
         """Update the case name input value."""
         self.case_name_input = value

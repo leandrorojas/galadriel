@@ -85,13 +85,13 @@ app.add_page(scenario.scenario_edit_page, route=navigation.routes.SCENARIO_EDIT,
 
 #Test Cases
 app.add_page(case.cases_list_page, route=navigation.routes.CASES, on_load=[Session.on_load, Session.require_non_admin, case.CaseState.load_cases])
-app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD, on_load=[Session.on_load, Session.require_non_admin, Session.require_editor])
+app.add_page(case.case_add_page, route=navigation.routes.CASE_ADD, on_load=[Session.on_load, Session.require_non_admin, Session.require_editor, case.AddCaseState.clear_form])
 app.add_page(case.case_detail_page, route=navigation.routes.CASE_DETAIL, on_load=[Session.on_load, Session.require_non_admin, case.CaseState.get_case_detail])
 app.add_page(case.case_edit_page, route=navigation.routes.CASE_EDIT, on_load=[Session.on_load, Session.require_non_admin, Session.require_editor, case.CaseState.get_case_detail])
 
 #Test Cycles
 app.add_page(cycle.cycle_list_page, route=navigation.routes.CYCLES, on_load=[Session.on_load, Session.require_non_admin, cycle.CycleState.load_cycles])
-app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD, on_load=[Session.on_load, Session.require_non_admin, Session.require_editor])
+app.add_page(cycle.cycle_add_page, route=navigation.routes.CYCLE_ADD, on_load=[Session.on_load, Session.require_non_admin, Session.require_editor, cycle.AddCycleState.clear_form])
 app.add_page(cycle.cycle_detail_page, route=navigation.routes.CYCLE_DETAIL, on_load=[Session.on_load, Session.require_non_admin, cycle.CycleState.get_cycle_detail])
 app.add_page(cycle.cycle_edit_page, route=navigation.routes.CYCLE_EDIT, on_load=[Session.on_load, Session.require_non_admin, Session.require_editor, cycle.CycleState.get_cycle_detail])
 app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAIL, on_load=[Session.on_load, Session.require_non_admin])
