@@ -608,7 +608,6 @@ class SearchTable():
                 table_component.header("", "ellipsis"),
                 table_component.header("name", "fingerprint"),
                 table_component.header("created", "calendar-check-2"),
-                table_component.header("selected_id", "search", hide_column=True),
             ),
         ),
 
@@ -636,7 +635,7 @@ class Moment():
 
     def moment(self, date) -> rx.Component:
         """Render a date with relative time display."""
-        return rx.moment(date.to(str) + "Z", local=True, format="YYYY-MM-DD HH:mm", from_now=True, from_now_during=15552000000)
+        return rx.moment(date.to(str), local=True, format="YYYY-MM-DD HH:mm", from_now=True, from_now_during=15552000000)
     
 class MomentBadge():
     """Badge displaying a date with tooltip for full timestamp."""

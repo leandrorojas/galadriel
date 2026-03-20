@@ -52,7 +52,6 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.ScenarioState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
             rx.table.cell(moment_component.moment(test_case.created)),
-            rx.table.cell(rx.form(rx.input(name="case_id", value=rx.cond(test_case.id, test_case.id, ""))), hidden=True),
     )
 
 def __search_cases_table() -> rx.Component:
@@ -65,7 +64,6 @@ def __search_cases_table() -> rx.Component:
                         table_component.header("", "ellipsis"),
                         Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
                         Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
-                        table_component.header("selected_id", "search", hide_column=True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.ScenarioState.sorted_cases_for_search, __show_test_cases_in_search)),
@@ -83,7 +81,6 @@ def scenario_detail_page() -> rx.Component:
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()
-    scenario = state.AddScenarioState.scenario
     button_component = Button()
     moment_badge_component = MomentBadge()
 
@@ -120,7 +117,6 @@ def scenario_detail_page() -> rx.Component:
             rx.cond(
                 state.ScenarioState.show_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden", name="scenario_id", value=rx.cond(scenario.id, scenario.id, "")), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add to the Scenario", width="77vw", on_change=lambda value: state.ScenarioState.filter_test_cases(value)),
                             __search_cases_table(),
