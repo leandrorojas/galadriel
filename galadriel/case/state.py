@@ -312,6 +312,7 @@ class AddCaseState(CaseState):
         self.form_data = form_data
         result = self.add_case(form_data)
         if result is None: return rx.toast.error("name cannot be empty")
+        if result != consts.RETURN_VALUE: return result
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
@@ -329,6 +330,7 @@ class EditCaseState(CaseState):
         updated_data = {**form_data}
         result = self.save_case_edits(case_id, updated_data)
         if result is None: return rx.toast.error("name cannot be empty")
+        if result != consts.RETURN_VALUE: return result
         return rx.redirect(self.case_url)
     
     def get_detail_url(self, id:int):

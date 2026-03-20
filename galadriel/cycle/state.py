@@ -933,6 +933,8 @@ class AddCycleState(CycleState):
         result = self.add_cycle(form_data)
         if result is None:
             return rx.toast.error("name and threshold cannot be empty")
+        if result != consts.RETURN_VALUE:
+            return result
         return rx.redirect(routes.CYCLES)
 
 class EditCycleState(CycleState):
@@ -951,4 +953,6 @@ class EditCycleState(CycleState):
         result = self.save_cycle_edits(cycle_id, updated_data)
         if result is None:
             return rx.toast.error("name and threshold cannot be empty")
+        if result != consts.RETURN_VALUE:
+            return result
         return rx.redirect(routes.CYCLES)
