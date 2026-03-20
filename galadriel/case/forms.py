@@ -15,8 +15,8 @@ def case_add_form() -> rx.Component:
                 width="100%",
             ),
             rx.hstack(
-                rx.button("Add Case", type="submit", width="100%"),
-                rx.button("Add & Configure", type="submit", width="100%", variant="outline", on_click=AddCaseState.set_navigate_to_edit),
+                rx.button("Add Case", type="submit", flex="1"),
+                rx.button("Add & Configure", type="submit", flex="1", variant="outline", on_click=AddCaseState.set_navigate_to_edit),
                 width="100%",
             ),
         ),
