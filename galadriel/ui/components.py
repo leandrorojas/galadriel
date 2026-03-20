@@ -643,11 +643,19 @@ class SearchTable():
     @staticmethod
     def empty_cases_section(empty_cases_var) -> rx.Component:
         """Render a conditional section for cases without steps."""
+        table_component = Table()
         return rx.cond(
             empty_cases_var.length() > 0,
             rx.vstack(
                 rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
                 rx.table.root(
+                    rx.table.header(
+                        rx.table.row(
+                            table_component.header("", "ellipsis"),
+                            table_component.header("name", "fingerprint"),
+                            table_component.header("created", "calendar-check-2"),
+                        ),
+                    ),
                     rx.table.body(rx.foreach(empty_cases_var, SearchTable.empty_case_row)),
                     variant="surface",
                     size="3",

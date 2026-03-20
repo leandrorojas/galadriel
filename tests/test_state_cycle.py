@@ -77,7 +77,7 @@ class TestUniqueNameValidation:
         make_cycle(name="Sprint 1")
         state = _make_state()
         result = state.add_cycle({"name": "Sprint 1", "threshold": "80"})
-        assert result is not None  # toast error, not RETURN_VALUE
+        assert result != 0  # toast error, not RETURN_VALUE
         session = patch_rx_session
         all_cycles = session.exec(select(CycleModel)).all()
         assert len(all_cycles) == 1
@@ -88,7 +88,7 @@ class TestUniqueNameValidation:
         cycle_b = make_cycle(name="Sprint 2")
         state = _make_state(cycle_id_value=str(cycle_b.id))
         result = state.save_cycle_edits(cycle_b.id, {"name": "Sprint 1", "threshold": "80"})
-        assert result is not None  # toast error
+        assert result != 0  # toast error
         session = patch_rx_session
         session.expire_all()
         updated = session.exec(select(CycleModel).where(CycleModel.id == cycle_b.id)).first()

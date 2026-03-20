@@ -18,8 +18,8 @@ class CaseModel(TimestampMixin, rx.Model, table=True):
         sa_type=sa.DateTime(timezone=True),
         nullable=True
     )
-    step_count: int = Field(default=0, nullable=True)
-    prerequisite_count: int = Field(default=0, nullable=True)
+    step_count: int = Field(default=0)
+    prerequisite_count: int = Field(default=0)
 
 class StepModel(TimestampMixin, rx.Model, table=True):
     """Represents a single step within a test case."""
