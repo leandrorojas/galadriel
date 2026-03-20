@@ -108,6 +108,9 @@ class CaseState(rx.State):
         if (form_data["name"] == ""): return None
 
         with rx.session() as session:
+            existing = session.exec(CaseModel.select().where(CaseModel.name == form_data["name"])).first()
+            if existing:
+                return rx.toast.error("A test case with this name already exists")
             case = CaseModel(**form_data)
             session.add(case)
             session.commit()
@@ -121,6 +124,9 @@ class CaseState(rx.State):
         if (updated_data["name"] == ""): return None
 
         with rx.session() as session:
+            existing = session.exec(CaseModel.select().where(CaseModel.name == updated_data["name"], CaseModel.id != case_id)).first()
+            if existing:
+                return rx.toast.error("A test case with this name already exists")
             case = session.exec(CaseModel.select().where(CaseModel.id == case_id)).one_or_none()
 
             if (case is None):

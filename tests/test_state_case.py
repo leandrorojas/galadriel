@@ -295,6 +295,39 @@ class TestPrerequisites:
         assert remaining[0].order == 1
 
 
+class TestUniqueNameValidation:
+    """Verify that case names must be unique."""
+
+    def test_add_case_duplicate_name_rejected(self, patch_rx_session, make_case):
+        """Adding a case with an existing name should be rejected."""
+        make_case(name="Login Test")
+        state = _make_state()
+        result = state.add_case({"name": "Login Test"})
+        assert result is not None  # toast error
+        session = patch_rx_session
+        all_cases = session.exec(select(CaseModel)).all()
+        assert len(all_cases) == 1
+
+    def test_edit_case_duplicate_name_rejected(self, patch_rx_session, make_case):
+        """Editing a case to use another case's name should be rejected."""
+        make_case(name="Case A")
+        case_b = make_case(name="Case B")
+        state = _make_state(case_id_value=case_b.id)
+        result = state.save_case_edits(case_b.id, {"name": "Case A"})
+        assert result is not None  # toast error
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(CaseModel).where(CaseModel.id == case_b.id)).first()
+        assert updated.name == "Case B"
+
+    def test_edit_case_same_name_allowed(self, patch_rx_session, make_case):
+        """Saving a case with its own current name should succeed."""
+        case = make_case(name="Case A")
+        state = _make_state(case_id_value=case.id)
+        result = state.save_case_edits(case.id, {"name": "Case A"})
+        assert result == 0
+
+
 class TestLoadCasesCounts:
     """Verify load_cases populates step and prerequisite counts."""
 
