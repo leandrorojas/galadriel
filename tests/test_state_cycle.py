@@ -24,6 +24,8 @@ def _make_state(cycle_id_value=""):
         show_scenario_search=False, search_scenario_value="", scenarios_for_search=[],
         show_suite_search=False, search_suite_value="", suites_for_search=[],
         iteration_snapshot_items=[],
+        sort_by="", sort_asc=True,
+        search_sort_by="", search_sort_asc=True,
     )
     object.__setattr__(state, "_CycleState__fail_checkbox", False)
     type(state).cycle_id = PropertyMock(return_value=cycle_id_value)
@@ -524,3 +526,34 @@ class TestFormatIterationStatus:
     def test_closed_status_returns_name(self):
         status = IterationStatusModel(id=consts.ITERATION_STATUS_CLOSED, name="closed")
         assert format_iteration_status(status, can_edit=True) == "closed"
+
+
+class TestLinkableAndEmptyCasesForSearch:
+    """Verify search results split into linkable and empty cases."""
+
+    def test_linkable_cases_have_steps(self, patch_rx_session, make_case, make_step):
+        """Cases with steps appear only in linkable list."""
+        case = make_case(name="Has Steps")
+        make_step(case_id=case.id, order=1, action="a")
+        state = _make_state()
+        state.load_cases_for_search()
+        assert len(state.linkable_cases_for_search) == 1
+        assert len(state.empty_cases_for_search) == 0
+
+    def test_empty_cases_have_no_steps(self, patch_rx_session, make_case):
+        """Cases without steps appear only in empty list."""
+        make_case(name="No Steps")
+        state = _make_state()
+        state.load_cases_for_search()
+        assert len(state.empty_cases_for_search) == 1
+        assert len(state.linkable_cases_for_search) == 0
+
+    def test_mixed_cases_split(self, patch_rx_session, make_case, make_step):
+        """Mixed cases split correctly between linkable and empty."""
+        case_with = make_case(name="With")
+        make_case(name="Without")
+        make_step(case_id=case_with.id, order=1, action="a")
+        state = _make_state()
+        state.load_cases_for_search()
+        assert [c.name for c in state.linkable_cases_for_search] == ["With"]
+        assert [c.name for c in state.empty_cases_for_search] == ["Without"]
