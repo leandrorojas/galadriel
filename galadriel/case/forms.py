@@ -14,7 +14,11 @@ def case_add_form() -> rx.Component:
                 on_change=AddCaseState.set_case_name,
                 width="100%",
             ),
-            rx.button("Add Case", type="submit", width="100%",),
+            rx.hstack(
+                rx.button("Add Case", type="submit", width="100%"),
+                rx.button("Add & Configure", type="submit", width="100%", variant="outline", on_click=AddCaseState.set_navigate_to_edit),
+                width="100%",
+            ),
         ),
         on_submit=AddCaseState.handle_submit,
         reset_on_submit=False,

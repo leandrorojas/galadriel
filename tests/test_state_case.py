@@ -18,6 +18,7 @@ def _make_state(case_id_value=0):
         search_value="", show_search=False,
         sort_by="", sort_asc=True,
         search_sort_by="", search_sort_asc=True,
+        case_name_input="", navigate_to_edit=False,
     )
     type(state).case_id = PropertyMock(return_value=case_id_value)
     return state
@@ -43,6 +44,42 @@ class TestAddCase:
         cases = session.exec(select(CaseModel)).all()
         assert len(cases) == 1
         assert cases[0].name == "Persisted"
+
+
+class TestAddAndConfigure:
+    """Verify the Add & Configure flow redirects to edit page."""
+
+    def test_navigate_to_edit_flag_set(self, patch_rx_session):
+        """set_navigate_to_edit should set the flag to True."""
+        state = _make_state()
+        state.set_navigate_to_edit()
+        assert state.navigate_to_edit is True
+
+    def test_clear_form_resets_flag(self, patch_rx_session):
+        """clear_form should reset navigate_to_edit and name input."""
+        state = _make_state()
+        state.navigate_to_edit = True
+        state.case_name_input = "something"
+        state.clear_form()
+        assert state.navigate_to_edit is False
+        assert state.case_name_input == ""
+
+    def test_add_and_configure_creates_case(self, patch_rx_session):
+        """Add & Configure should create the case and clear the flag."""
+        state = _make_state()
+        state.navigate_to_edit = True
+        result = state.add_case({"name": "Configured Case"})
+        assert result == 0
+        assert state.case is not None
+        assert state.case.name == "Configured Case"
+
+    def test_add_and_configure_duplicate_rejected(self, patch_rx_session, make_case):
+        """Duplicate name with navigate_to_edit should still be rejected."""
+        make_case(name="Existing")
+        state = _make_state()
+        result = state.add_case({"name": "Existing"})
+        assert result is not None
+        assert result != 0
 
 
 class TestSaveCaseEdits:

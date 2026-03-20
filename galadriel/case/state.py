@@ -29,6 +29,9 @@ class CaseState(rx.State):
     search_value:str = ""
     show_search:bool = False
 
+    case_name_input: str = ""
+    navigate_to_edit: bool = False
+
     sort_by: str = ""
     sort_asc: bool = True
 
@@ -102,6 +105,19 @@ class CaseState(rx.State):
     def sorted_cases_for_search(self) -> List['CaseModel']:
         """Return prerequisite search cases sorted by the current search sort field."""
         return sort_items(self.cases, self.search_sort_by, self.search_sort_asc)
+
+    def clear_form(self):
+        """Clear the add case form inputs."""
+        self.case_name_input = ""
+        self.navigate_to_edit = False
+
+    def set_case_name(self, value: str):
+        """Update the case name input value."""
+        self.case_name_input = value
+
+    def set_navigate_to_edit(self):
+        """Flag the next submit to redirect to the edit page."""
+        self.navigate_to_edit = True
 
     def add_case(self, form_data:dict):
         """Create a new test case from form data."""
@@ -306,23 +322,21 @@ class AddCaseState(CaseState):
     """Handles the add-case form submission."""
 
     form_data:dict = {}
-    case_name_input: str = ""
-
-    def clear_form(self):
-        """Clear the add case form inputs."""
-        self.case_name_input = ""
-
-    def set_case_name(self, value: str):
-        """Update the case name input value."""
-        self.case_name_input = value
 
     def handle_submit(self, form_data):
         """Validate and create a new case from the form."""
         self.form_data = form_data
         result = self.add_case(form_data)
-        if result is None: return rx.toast.error("name cannot be empty")
-        if result != consts.RETURN_VALUE: return result
+        if result is None:
+            self.navigate_to_edit = False
+            return rx.toast.error("name cannot be empty")
+        if result != consts.RETURN_VALUE:
+            self.navigate_to_edit = False
+            return result
         self.case_name_input = ""
+        if self.navigate_to_edit:
+            self.navigate_to_edit = False
+            return rx.redirect(self.case_edit_url)
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
