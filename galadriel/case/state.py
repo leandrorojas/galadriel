@@ -336,7 +336,7 @@ class AddCaseState(CaseState):
         self.case_name_input = ""
         if self.navigate_to_edit:
             self.navigate_to_edit = False
-            return rx.redirect(self.case_edit_url)
+            return rx.redirect(self.case_url)
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
