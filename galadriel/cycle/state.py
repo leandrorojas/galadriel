@@ -926,6 +926,11 @@ class AddCycleState(CycleState):
     """Handles the add-cycle form submission."""
 
     form_data:dict = {}
+    cycle_name_input: str = ""
+
+    def set_cycle_name(self, value: str):
+        """Update the cycle name input value."""
+        self.cycle_name_input = value
 
     def handle_submit(self, form_data):
         """Validate and create a new cycle from the form."""
@@ -935,6 +940,7 @@ class AddCycleState(CycleState):
             return rx.toast.error("name and threshold cannot be empty")
         if result != consts.RETURN_VALUE:
             return result
+        self.cycle_name_input = ""
         return rx.redirect(routes.CYCLES)
 
 class EditCycleState(CycleState):

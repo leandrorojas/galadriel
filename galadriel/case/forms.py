@@ -10,6 +10,8 @@ def case_add_form() -> rx.Component:
             rx.input(
                 name="name",
                 placeholder="Case name",
+                value=AddCaseState.case_name_input,
+                on_change=AddCaseState.set_case_name,
                 width="100%",
             ),
             rx.button("Add Case", type="submit", width="100%",),

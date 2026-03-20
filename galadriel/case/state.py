@@ -306,6 +306,11 @@ class AddCaseState(CaseState):
     """Handles the add-case form submission."""
 
     form_data:dict = {}
+    case_name_input: str = ""
+
+    def set_case_name(self, value: str):
+        """Update the case name input value."""
+        self.case_name_input = value
 
     def handle_submit(self, form_data):
         """Validate and create a new case from the form."""
@@ -313,6 +318,7 @@ class AddCaseState(CaseState):
         result = self.add_case(form_data)
         if result is None: return rx.toast.error("name cannot be empty")
         if result != consts.RETURN_VALUE: return result
+        self.case_name_input = ""
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
