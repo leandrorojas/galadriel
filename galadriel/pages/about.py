@@ -10,12 +10,12 @@ def about_content() -> rx.Component:
         rx.heading("About galadriel"),
         rx.heading("galadriel is a Test Management System", size="4"),
         rx.vstack(
-            rx.text("A simple but yet straight to the point and functional Test Management System. Inspiration drawn from ", rx.link(rx.code("testlink™"), href="https://testlink.org/")),
+            rx.text("A simple but yet straight to the point and functional Test Management System. Inspiration drawn from ", rx.link(rx.code("testlink™"), href="https://testlink.org/", is_external=True)),
             rx.spacer(), rx.spacer(),
             rx.text("want to contribute? have a question? need attention and tender love?"),
             rx.flex(
                 rx.text("visit us on"), rx.icon("github"),
-                    rx.link(rx.code("https://github.com/leandrorojas/galadriel"), href="https://github.com/leandrorojas/galadriel"),
+                    rx.link(rx.code("https://github.com/leandrorojas/galadriel"), href="https://github.com/leandrorojas/galadriel", is_external=True),
                     spacing="1"
             ),
         ),

@@ -88,6 +88,7 @@ LocalUser → GaladrielUser → GaladrielUserRole
 
 - **Tests**: Always run `pytest` after each change, even if no tests were modified. Always add or update tests when new logic, helpers, or state vars are introduced — tests are mandatory, not optional.
 - **Docstrings**: Always add docstrings to new modules, classes, and public functions/methods (one-liner style). Update existing docstrings when behavior changes.
+- **Dead code**: After removing UI elements or refactoring, check for variables, imports, or helpers that became unused and remove them.
 - **README**: Evaluate whether `README.md` needs updating (e.g., new features, changed behavior).
 - **CLAUDE.md**: Evaluate whether this file needs updating (e.g., new patterns, architecture changes).
 
