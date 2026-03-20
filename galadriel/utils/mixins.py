@@ -3,6 +3,7 @@
 from typing import Optional
 
 import reflex as rx
+import sqlmodel
 from sqlmodel import select, cast, String
 
 from .timing import format_datetime
@@ -137,6 +138,22 @@ def sort_items(items: list, sort_by: str, sort_asc: bool) -> list:
         return (val is None, val)
 
     return sorted(items, key=sort_key, reverse=not sort_asc)
+
+
+def populate_step_counts(cases: list, step_model) -> list:
+    """Populate step_count on each CaseModel in the list via a bulk COUNT query."""
+    if not cases:
+        return cases
+    case_ids = [case.id for case in cases]
+    with rx.session() as session:
+        step_counts = dict(session.exec(
+            sqlmodel.select(step_model.case_id, sqlmodel.func.count(step_model.id))
+            .where(step_model.case_id.in_(case_ids))
+            .group_by(step_model.case_id)
+        ).all())
+        for case in cases:
+            case.step_count = step_counts.get(case.id, 0)
+    return cases
 
 
 def filter_and_load(state, model_class, search_attr: str, store_attr: str, new_value=None):

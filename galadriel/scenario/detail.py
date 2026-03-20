@@ -54,23 +54,46 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(moment_component.moment(test_case.created)),
     )
 
+def __show_empty_case_in_search(test_case:CaseModel):
+    moment_component = Moment()
+
+    return rx.table.row(
+            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
+            rx.table.cell(rx.text(test_case.name, color="var(--gray-8)")),
+            rx.table.cell(rx.text(moment_component.moment(test_case.created), color="var(--gray-8)")),
+    )
+
 def __search_cases_table() -> rx.Component:
     table_component = Table()
+    search_header = rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
+            Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
+        ),
+    )
     return rx.fragment(
         rx.form(
             rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        table_component.header("", "ellipsis"),
-                        Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
-                        Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
-                    ),
-                ),
-                rx.table.body(rx.foreach(state.ScenarioState.sorted_cases_for_search, __show_test_cases_in_search)),
+                search_header,
+                rx.table.body(rx.foreach(state.ScenarioState.linkable_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
                 on_mount=state.ScenarioState.load_cases_for_search,
+            ),
+            rx.cond(
+                state.ScenarioState.empty_cases_for_search.length() > 0,
+                rx.vstack(
+                    rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
+                    rx.table.root(
+                        rx.table.body(rx.foreach(state.ScenarioState.empty_cases_for_search, __show_empty_case_in_search)),
+                        variant="surface",
+                        size="3",
+                        width="100%",
+                    ),
+                    width="100%",
+                ),
             ),
         ),
     )

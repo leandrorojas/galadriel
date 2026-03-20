@@ -32,16 +32,38 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(moment_component.moment(test_case.created)),
     )
 
+def __show_empty_case_in_search(test_case:CaseModel):
+    moment_component = Moment()
+
+    return rx.table.row(
+            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
+            rx.table.cell(rx.text(test_case.name, color="var(--gray-8)")),
+            rx.table.cell(rx.text(moment_component.moment(test_case.created), color="var(--gray-8)")),
+    )
+
 def __search_cases_table() -> rx.Component:
     return rx.fragment(
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.SuiteState.sorted_cases_for_search, __show_test_cases_in_search)),
+                rx.table.body(rx.foreach(state.SuiteState.linkable_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
                 on_mount=state.SuiteState.load_cases_for_search,
+            ),
+            rx.cond(
+                state.SuiteState.empty_cases_for_search.length() > 0,
+                rx.vstack(
+                    rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
+                    rx.table.root(
+                        rx.table.body(rx.foreach(state.SuiteState.empty_cases_for_search, __show_empty_case_in_search)),
+                        variant="surface",
+                        size="3",
+                        width="100%",
+                    ),
+                    width="100%",
+                ),
             ),
         ),
     )

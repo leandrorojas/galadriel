@@ -17,7 +17,7 @@ from sqlmodel import select, asc, desc
 
 from requests.exceptions import HTTPError
 from ..utils import jira, consts, yaml
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load, populate_step_counts
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -169,6 +169,16 @@ class CycleState(rx.State):
     def sorted_cases_for_search(self) -> List['CaseModel']:
         """Return search cases sorted by the current search sort field."""
         return sort_items(self.cases_for_search, self.search_sort_by, self.search_sort_asc)
+
+    @rx.var(cache=True)
+    def linkable_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have steps (can be linked)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count > 0]
+
+    @rx.var(cache=True)
+    def empty_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have no steps (cannot be linked)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count == 0]
 
     @rx.var(cache=True)
     def sorted_scenarios_for_search(self) -> List['ScenarioModel']:
@@ -336,8 +346,9 @@ class CycleState(rx.State):
             self.search_sort_asc = True
 
     def load_cases_for_search(self, search_case_value=None):
-        """Set the case search filter (if given) and reload matching cases."""
+        """Set the case search filter (if given) and reload matching cases with step counts."""
         filter_and_load(self, CaseModel, "search_case_value", "cases_for_search", search_case_value)
+        self.cases_for_search = populate_step_counts(self.cases_for_search, StepModel)
 
     def link_case(self, case_id:int):
         """Link a test case to the current cycle."""

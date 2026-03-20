@@ -53,23 +53,46 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
             rx.table.cell(moment_component.moment(prerequisite.created)),
     )
 
+def __show_empty_case_as_prerequisite(prerequisite:model.CaseModel):
+    moment_component = Moment()
+
+    return rx.table.row(
+            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
+            rx.table.cell(rx.text(prerequisite.name, color="var(--gray-8)")),
+            rx.table.cell(rx.text(moment_component.moment(prerequisite.created), color="var(--gray-8)")),
+    )
+
 def __search_prerequisites_table() -> rx.Component:
     table_component = Table()
+    search_header = rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            Table.sortable_header("name", "fingerprint", "name", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
+            Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
+        ),
+    )
     return rx.fragment(
         rx.form(
             rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        table_component.header("", "ellipsis"),
-                        Table.sortable_header("name", "fingerprint", "name", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
-                        Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
-                    ),
-                ),
-                rx.table.body(rx.foreach(state.CaseState.sorted_cases_for_search, __show_case_as_prerequisite)),
+                search_header,
+                rx.table.body(rx.foreach(state.CaseState.linkable_cases_for_search, __show_case_as_prerequisite)),
                 variant="surface",
                 size="3",
                 width="100%",
                 on_mount=state.CaseState.load_cases,
+            ),
+            rx.cond(
+                state.CaseState.empty_cases_for_search.length() > 0,
+                rx.vstack(
+                    rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
+                    rx.table.root(
+                        rx.table.body(rx.foreach(state.CaseState.empty_cases_for_search, __show_empty_case_as_prerequisite)),
+                        variant="surface",
+                        size="3",
+                        width="100%",
+                    ),
+                    width="100%",
+                ),
             ),
         ),
     )

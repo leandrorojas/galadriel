@@ -32,8 +32,8 @@ class CaseState(rx.State):
     case_name_input: str = ""
     navigate_to_edit: bool = False
 
-    sort_by: str = ""
-    sort_asc: bool = True
+    sort_by: str = "created"
+    sort_asc: bool = False
 
     search_sort_by: str = ""
     search_sort_asc: bool = True
@@ -68,7 +68,7 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-        """Load all cases with step and prerequisite counts."""
+        """Load all cases with step and prerequisite counts, ordered by created desc."""
         cases = search_by_name(CaseModel, self.search_value)
         if cases:
             case_ids = [case.id for case in cases]
@@ -86,6 +86,7 @@ class CaseState(rx.State):
                 for case in cases:
                     case.step_count = step_counts.get(case.id, 0)
                     case.prerequisite_count = prereq_counts.get(case.id, 0)
+            cases.sort(key=lambda c: c.created, reverse=True)
         self.cases = cases
 
     def toggle_sort(self, field: str):
@@ -105,6 +106,16 @@ class CaseState(rx.State):
     def sorted_cases_for_search(self) -> List['CaseModel']:
         """Return prerequisite search cases sorted by the current search sort field."""
         return sort_items(self.cases, self.search_sort_by, self.search_sort_asc)
+
+    @rx.var(cache=True)
+    def linkable_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have steps (can be added as prerequisites)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count > 0]
+
+    @rx.var(cache=True)
+    def empty_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have no steps (cannot be added as prerequisites)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count == 0]
 
     def clear_form(self):
         """Clear the add case form inputs."""
@@ -375,4 +386,4 @@ class AddStepState(CaseState):
         self.form_data = form_data
         updated_data = {**form_data}
         result = self.add_step(case_id, updated_data)
-        return result
+        return [result, rx.call_script("document.getElementById('step-action-input').focus()")]
