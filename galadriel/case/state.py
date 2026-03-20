@@ -1,6 +1,7 @@
 """Test case state management and event handlers."""
 
 import reflex as rx
+import sqlmodel
 
 from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
@@ -64,8 +65,25 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-        """Load all cases, optionally filtered by search value."""
-        self.cases = search_by_name(CaseModel, self.search_value)
+        """Load all cases with step and prerequisite counts."""
+        cases = search_by_name(CaseModel, self.search_value)
+        if cases:
+            case_ids = [case.id for case in cases]
+            with rx.session() as session:
+                step_counts = dict(session.exec(
+                    sqlmodel.select(StepModel.case_id, sqlmodel.func.count(StepModel.id))
+                    .where(StepModel.case_id.in_(case_ids))
+                    .group_by(StepModel.case_id)
+                ).all())
+                prereq_counts = dict(session.exec(
+                    sqlmodel.select(PrerequisiteModel.case_id, sqlmodel.func.count(PrerequisiteModel.id))
+                    .where(PrerequisiteModel.case_id.in_(case_ids))
+                    .group_by(PrerequisiteModel.case_id)
+                ).all())
+                for case in cases:
+                    case.step_count = step_counts.get(case.id, 0)
+                    case.prerequisite_count = prereq_counts.get(case.id, 0)
+        self.cases = cases
 
     def toggle_sort(self, field: str):
         """Cycle sort: default → asc → desc → default."""

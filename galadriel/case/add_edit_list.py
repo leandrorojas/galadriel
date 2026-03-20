@@ -31,7 +31,9 @@ def __show_case(test_case:model.CaseModel):
     moment_component = Moment()
     return rx.table.row(
         rx.table.cell(__case_detail_link(test_case.name, test_case)),
-        rx.table.cell(moment_component.moment(test_case.created)) 
+        rx.table.cell(test_case.prerequisite_count),
+        rx.table.cell(test_case.step_count),
+        rx.table.cell(moment_component.moment(test_case.created))
     )
 
 def __table() -> rx.Component:
@@ -40,6 +42,8 @@ def __table() -> rx.Component:
             rx.table.header(
                 rx.table.row(
                     Table.sortable_header("name", "fingerprint", "name", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
+                    Table.sortable_header("prerequisites", consts.ICON_TEST_TUBES, "prerequisite_count", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
+                    Table.sortable_header("steps", "test-tube", "step_count", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                     Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.sort_by, state.CaseState.sort_asc, state.CaseState.toggle_sort),
                 ),
             ),

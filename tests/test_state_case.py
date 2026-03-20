@@ -295,6 +295,64 @@ class TestPrerequisites:
         assert remaining[0].order == 1
 
 
+class TestLoadCasesCounts:
+    """Verify load_cases populates step and prerequisite counts."""
+
+    def test_load_cases_with_no_steps_or_prerequisites(self, patch_rx_session, make_case):
+        """Cases with no steps or prerequisites should have zero counts."""
+        make_case(name="Empty Case")
+        state = _make_state()
+        state.load_cases()
+        assert len(state.cases) == 1
+        assert state.cases[0].step_count == 0
+        assert state.cases[0].prerequisite_count == 0
+
+    def test_load_cases_with_steps(self, patch_rx_session, make_case, make_step):
+        """Cases with steps should reflect the correct step count."""
+        case = make_case(name="With Steps")
+        make_step(case_id=case.id, order=1, action="a1")
+        make_step(case_id=case.id, order=2, action="a2")
+        make_step(case_id=case.id, order=3, action="a3")
+        state = _make_state()
+        state.load_cases()
+        assert state.cases[0].step_count == 3
+        assert state.cases[0].prerequisite_count == 0
+
+    def test_load_cases_with_prerequisites(self, patch_rx_session, make_case, make_step):
+        """Cases with prerequisites should reflect the correct prerequisite count."""
+        case_a = make_case(name="Case A")
+        case_b = make_case(name="Case B")
+        case_c = make_case(name="Case C")
+        make_step(case_id=case_b.id, order=1)
+        make_step(case_id=case_c.id, order=1)
+
+        state = _make_state(case_id_value=case_a.id)
+        state.prerequisites = []
+        state.add_prerequisite(case_b.id)
+        state.load_prerequisites()
+        state.add_prerequisite(case_c.id)
+
+        state2 = _make_state()
+        state2.load_cases()
+        case_a_loaded = next(c for c in state2.cases if c.name == "Case A")
+        assert case_a_loaded.prerequisite_count == 2
+
+    def test_load_cases_counts_independent_per_case(self, patch_rx_session, make_case, make_step):
+        """Each case should have its own independent counts."""
+        case1 = make_case(name="One Step")
+        case2 = make_case(name="Three Steps")
+        make_step(case_id=case1.id, order=1, action="a")
+        make_step(case_id=case2.id, order=1, action="a")
+        make_step(case_id=case2.id, order=2, action="b")
+        make_step(case_id=case2.id, order=3, action="c")
+
+        state = _make_state()
+        state.load_cases()
+        cases_by_name = {c.name: c for c in state.cases}
+        assert cases_by_name["One Step"].step_count == 1
+        assert cases_by_name["Three Steps"].step_count == 3
+
+
 class TestSorting:
     """Verify list-page and search-table sorting behavior."""
 
