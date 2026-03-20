@@ -185,6 +185,9 @@ class CycleState(rx.State):
         if form_data["name"] == "": return None
         if form_data["threshold"] == "": return None
         with rx.session() as session:
+            existing = session.exec(CycleModel.select().where(CycleModel.name == form_data["name"])).first()
+            if existing:
+                return rx.toast.error("A cycle with this name already exists")
             cycle = CycleModel(**form_data)
             session.add(cycle)
             session.commit()
@@ -198,6 +201,9 @@ class CycleState(rx.State):
         if updated_data["name"] == "": return None
         if updated_data["threshold"] == "": return None
         with rx.session() as session:
+            existing = session.exec(CycleModel.select().where(CycleModel.name == updated_data["name"], CycleModel.id != cycle_id)).first()
+            if existing:
+                return rx.toast.error("A cycle with this name already exists")
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
             if (cycle is None):

@@ -69,6 +69,39 @@ class TestSaveCycleEdits:
         assert result is None
 
 
+class TestUniqueNameValidation:
+    """Verify that cycle names must be unique."""
+
+    def test_add_cycle_duplicate_name_rejected(self, patch_rx_session, make_cycle):
+        """Adding a cycle with an existing name should be rejected."""
+        make_cycle(name="Sprint 1")
+        state = _make_state()
+        result = state.add_cycle({"name": "Sprint 1", "threshold": "80"})
+        assert result is not None  # toast error, not RETURN_VALUE
+        session = patch_rx_session
+        all_cycles = session.exec(select(CycleModel)).all()
+        assert len(all_cycles) == 1
+
+    def test_edit_cycle_duplicate_name_rejected(self, patch_rx_session, make_cycle):
+        """Editing a cycle to use another cycle's name should be rejected."""
+        make_cycle(name="Sprint 1")
+        cycle_b = make_cycle(name="Sprint 2")
+        state = _make_state(cycle_id_value=str(cycle_b.id))
+        result = state.save_cycle_edits(cycle_b.id, {"name": "Sprint 1", "threshold": "80"})
+        assert result is not None  # toast error
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(CycleModel).where(CycleModel.id == cycle_b.id)).first()
+        assert updated.name == "Sprint 2"
+
+    def test_edit_cycle_same_name_allowed(self, patch_rx_session, make_cycle):
+        """Saving a cycle with its own current name should succeed."""
+        cycle = make_cycle(name="Sprint 1")
+        state = _make_state(cycle_id_value=str(cycle.id))
+        result = state.save_cycle_edits(cycle.id, {"name": "Sprint 1", "threshold": "90"})
+        assert result == 0
+
+
 class TestDuplicateCycle:
     def test_duplicate_creates_copy(self, patch_rx_session, make_cycle):
         cycle = make_cycle(name="Original", threshold="75")
