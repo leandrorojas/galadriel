@@ -5,7 +5,7 @@ import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
 from ..utils import consts
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name, populate_step_counts
 
 from ..case.model import CaseModel, StepModel
 
@@ -81,6 +81,16 @@ class ScenarioState(rx.State):
         """Return search cases sorted by the current search sort field."""
         return sort_items(self.test_cases_for_search, self.search_sort_by, self.search_sort_asc)
 
+    @rx.var(cache=True)
+    def linkable_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have steps (can be linked)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count > 0]
+
+    @rx.var(cache=True)
+    def empty_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have no steps (cannot be linked)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count == 0]
+
     def add_scenario(self, form_data:dict):
         """Create a new scenario from form data."""
         if (form_data["name"] == ""): return None
@@ -140,8 +150,8 @@ class ScenarioState(rx.State):
         self.load_cases_for_search()
 
     def load_cases_for_search(self):
-        """Load cases matching the current search filter."""
-        self.test_cases_for_search = search_by_name(CaseModel, self.search_value)
+        """Load cases matching the current search filter, with step counts."""
+        self.test_cases_for_search = populate_step_counts(search_by_name(CaseModel, self.search_value), StepModel)
 
     def link_case(self, case_id:int):
         """Link a test case to the current scenario."""

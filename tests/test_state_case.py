@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from galadriel.case.state import CaseState
 from galadriel.case.model import CaseModel, StepModel, PrerequisiteModel
-from conftest import init_state
+from conftest import init_state, LinkableEmptyCasesTests
 
 pytestmark = pytest.mark.integration
 
@@ -16,8 +16,9 @@ def _make_state(case_id_value=0):
         CaseState,
         cases=[], case=None, steps=[], prerequisites=[],
         search_value="", show_search=False,
-        sort_by="", sort_asc=True,
+        sort_by="created", sort_asc=False,
         search_sort_by="", search_sort_asc=True,
+        case_name_input="", navigate_to_edit=False,
     )
     type(state).case_id = PropertyMock(return_value=case_id_value)
     return state
@@ -43,6 +44,42 @@ class TestAddCase:
         cases = session.exec(select(CaseModel)).all()
         assert len(cases) == 1
         assert cases[0].name == "Persisted"
+
+
+class TestAddAndConfigure:
+    """Verify the Add & Configure flow redirects to edit page."""
+
+    def test_navigate_to_edit_flag_set(self, patch_rx_session):
+        """set_navigate_to_edit should set the flag to True."""
+        state = _make_state()
+        state.set_navigate_to_edit()
+        assert state.navigate_to_edit is True
+
+    def test_clear_form_resets_flag(self, patch_rx_session):
+        """clear_form should reset navigate_to_edit and name input."""
+        state = _make_state()
+        state.navigate_to_edit = True
+        state.case_name_input = "something"
+        state.clear_form()
+        assert state.navigate_to_edit is False
+        assert state.case_name_input == ""
+
+    def test_add_and_configure_creates_case(self, patch_rx_session):
+        """Add & Configure should create the case and clear the flag."""
+        state = _make_state()
+        state.navigate_to_edit = True
+        result = state.add_case({"name": "Configured Case"})
+        assert result == 0
+        assert state.case is not None
+        assert state.case.name == "Configured Case"
+
+    def test_add_and_configure_duplicate_rejected(self, patch_rx_session, make_case):
+        """Duplicate name with navigate_to_edit should still be rejected."""
+        make_case(name="Existing")
+        state = _make_state()
+        result = state.add_case({"name": "Existing"})
+        assert result is not None
+        assert result != 0
 
 
 class TestSaveCaseEdits:
@@ -295,18 +332,110 @@ class TestPrerequisites:
         assert remaining[0].order == 1
 
 
+class TestUniqueNameValidation:
+    """Verify that case names must be unique."""
+
+    def test_add_case_duplicate_name_rejected(self, patch_rx_session, make_case):
+        """Adding a case with an existing name should be rejected."""
+        make_case(name="Login Test")
+        state = _make_state()
+        result = state.add_case({"name": "Login Test"})
+        assert result is not None  # toast error
+        session = patch_rx_session
+        all_cases = session.exec(select(CaseModel)).all()
+        assert len(all_cases) == 1
+
+    def test_edit_case_duplicate_name_rejected(self, patch_rx_session, make_case):
+        """Editing a case to use another case's name should be rejected."""
+        make_case(name="Case A")
+        case_b = make_case(name="Case B")
+        state = _make_state(case_id_value=case_b.id)
+        result = state.save_case_edits(case_b.id, {"name": "Case A"})
+        assert result is not None  # toast error
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(CaseModel).where(CaseModel.id == case_b.id)).first()
+        assert updated.name == "Case B"
+
+    def test_edit_case_same_name_allowed(self, patch_rx_session, make_case):
+        """Saving a case with its own current name should succeed."""
+        case = make_case(name="Case A")
+        state = _make_state(case_id_value=case.id)
+        result = state.save_case_edits(case.id, {"name": "Case A"})
+        assert result == 0
+
+
+class TestLoadCasesCounts:
+    """Verify load_cases populates step and prerequisite counts."""
+
+    def test_load_cases_with_no_steps_or_prerequisites(self, patch_rx_session, make_case):
+        """Cases with no steps or prerequisites should have zero counts."""
+        make_case(name="Empty Case")
+        state = _make_state()
+        state.load_cases()
+        assert len(state.cases) == 1
+        assert state.cases[0].step_count == 0
+        assert state.cases[0].prerequisite_count == 0
+
+    def test_load_cases_with_steps(self, patch_rx_session, make_case, make_step):
+        """Cases with steps should reflect the correct step count."""
+        case = make_case(name="With Steps")
+        make_step(case_id=case.id, order=1, action="a1")
+        make_step(case_id=case.id, order=2, action="a2")
+        make_step(case_id=case.id, order=3, action="a3")
+        state = _make_state()
+        state.load_cases()
+        assert state.cases[0].step_count == 3
+        assert state.cases[0].prerequisite_count == 0
+
+    def test_load_cases_with_prerequisites(self, patch_rx_session, make_case, make_step):
+        """Cases with prerequisites should reflect the correct prerequisite count."""
+        case_a = make_case(name="Case A")
+        case_b = make_case(name="Case B")
+        case_c = make_case(name="Case C")
+        make_step(case_id=case_b.id, order=1)
+        make_step(case_id=case_c.id, order=1)
+
+        state = _make_state(case_id_value=case_a.id)
+        state.prerequisites = []
+        state.add_prerequisite(case_b.id)
+        state.load_prerequisites()
+        state.add_prerequisite(case_c.id)
+
+        state2 = _make_state()
+        state2.load_cases()
+        case_a_loaded = next(c for c in state2.cases if c.name == "Case A")
+        assert case_a_loaded.prerequisite_count == 2
+
+    def test_load_cases_counts_independent_per_case(self, patch_rx_session, make_case, make_step):
+        """Each case should have its own independent counts."""
+        case1 = make_case(name="One Step")
+        case2 = make_case(name="Three Steps")
+        make_step(case_id=case1.id, order=1, action="a")
+        make_step(case_id=case2.id, order=1, action="a")
+        make_step(case_id=case2.id, order=2, action="b")
+        make_step(case_id=case2.id, order=3, action="c")
+
+        state = _make_state()
+        state.load_cases()
+        cases_by_name = {c.name: c for c in state.cases}
+        assert cases_by_name["One Step"].step_count == 1
+        assert cases_by_name["Three Steps"].step_count == 3
+
+
 class TestSorting:
     """Verify list-page and search-table sorting behavior."""
 
-    def test_default_sort_returns_original_order(self, patch_rx_session, make_case):
-        """Verify unsorted state returns cases in original insertion order."""
+    def test_default_sort_is_created_desc(self, patch_rx_session, make_case):
+        """Verify default sort is by created descending (newest first)."""
         make_case(name="Zebra")
         make_case(name="Alpha")
         state = _make_state()
         state.load_cases()
-        assert state.sort_by == ""
+        assert state.sort_by == "created"
+        assert state.sort_asc is False
         names = [c.name for c in state.sorted_cases]
-        assert names == [c.name for c in state.cases]
+        assert names == ["Alpha", "Zebra"]
 
     def test_toggle_sort_cycles_asc_desc_default(self, patch_rx_session, make_case):
         """Verify toggle_sort cycles flags and visible order through asc, desc, default."""
@@ -315,7 +444,6 @@ class TestSorting:
         make_case(name="Middle")
         state = _make_state()
         state.load_cases()
-        original_order = [c.name for c in state.cases]
 
         state.toggle_sort("name")
         assert state.sort_by == "name"
@@ -330,7 +458,6 @@ class TestSorting:
         state.toggle_sort("name")
         assert state.sort_by == ""
         assert state.sort_asc is True
-        assert [c.name for c in state.sorted_cases] == original_order
 
     def test_toggle_sort_different_field_resets(self, patch_rx_session):
         """Verify switching to a different field resets to ascending."""
@@ -406,3 +533,16 @@ class TestSorting:
         state.toggle_search_sort("name")  # desc
         names = [c.name for c in state.sorted_cases_for_search]
         assert names == ["Zebra", "Alpha"]
+
+
+class TestLinkableAndEmptyCases(LinkableEmptyCasesTests):
+    """Verify linkable_cases_for_search and empty_cases_for_search split."""
+
+    def _make_and_load(self, patch_rx_session, make_case, make_step, cases):
+        for c in cases:
+            case = make_case(name=c["name"])
+            for i in range(c.get("steps", 0)):
+                make_step(case_id=case.id, order=i + 1, action=f"a{i}")
+        state = _make_state()
+        state.load_cases()
+        return state

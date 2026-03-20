@@ -37,12 +37,13 @@ def __search_cases_table() -> rx.Component:
         rx.form(
             rx.table.root(
                 __search_table_header(),
-                rx.table.body(rx.foreach(state.SuiteState.sorted_cases_for_search, __show_test_cases_in_search)),
+                rx.table.body(rx.foreach(state.SuiteState.linkable_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
                 on_mount=state.SuiteState.load_cases_for_search,
             ),
+            SearchTable.empty_cases_section(state.SuiteState.empty_cases_for_search),
         ),
     )
 

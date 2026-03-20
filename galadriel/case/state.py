@@ -1,6 +1,7 @@
 """Test case state management and event handlers."""
 
 import reflex as rx
+import sqlmodel
 
 from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
@@ -28,8 +29,11 @@ class CaseState(rx.State):
     search_value:str = ""
     show_search:bool = False
 
-    sort_by: str = ""
-    sort_asc: bool = True
+    case_name_input: str = ""
+    navigate_to_edit: bool = False
+
+    sort_by: str = "created"
+    sort_asc: bool = False
 
     search_sort_by: str = ""
     search_sort_asc: bool = True
@@ -64,8 +68,26 @@ class CaseState(rx.State):
             self.case = result
 
     def load_cases(self):
-        """Load all cases, optionally filtered by search value."""
-        self.cases = search_by_name(CaseModel, self.search_value)
+        """Load all cases with step and prerequisite counts, ordered by created desc."""
+        cases = search_by_name(CaseModel, self.search_value)
+        if cases:
+            case_ids = [case.id for case in cases]
+            with rx.session() as session:
+                step_counts = dict(session.exec(
+                    sqlmodel.select(StepModel.case_id, sqlmodel.func.count(StepModel.id))
+                    .where(StepModel.case_id.in_(case_ids))
+                    .group_by(StepModel.case_id)
+                ).all())
+                prereq_counts = dict(session.exec(
+                    sqlmodel.select(PrerequisiteModel.case_id, sqlmodel.func.count(PrerequisiteModel.id))
+                    .where(PrerequisiteModel.case_id.in_(case_ids))
+                    .group_by(PrerequisiteModel.case_id)
+                ).all())
+                for case in cases:
+                    case.step_count = step_counts.get(case.id, 0)
+                    case.prerequisite_count = prereq_counts.get(case.id, 0)
+            cases.sort(key=lambda c: c.created, reverse=True)
+        self.cases = cases
 
     def toggle_sort(self, field: str):
         """Cycle sort: default → asc → desc → default."""
@@ -85,11 +107,37 @@ class CaseState(rx.State):
         """Return prerequisite search cases sorted by the current search sort field."""
         return sort_items(self.cases, self.search_sort_by, self.search_sort_asc)
 
+    @rx.var(cache=True)
+    def linkable_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have steps (can be added as prerequisites)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count > 0]
+
+    @rx.var(cache=True)
+    def empty_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have no steps (cannot be added as prerequisites)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count == 0]
+
+    def clear_form(self):
+        """Clear the add case form inputs."""
+        self.case_name_input = ""
+        self.navigate_to_edit = False
+
+    def set_case_name(self, value: str):
+        """Update the case name input value."""
+        self.case_name_input = value
+
+    def set_navigate_to_edit(self):
+        """Flag the next submit to redirect to the edit page."""
+        self.navigate_to_edit = True
+
     def add_case(self, form_data:dict):
         """Create a new test case from form data."""
         if (form_data["name"] == ""): return None
 
         with rx.session() as session:
+            existing = session.exec(CaseModel.select().where(CaseModel.name == form_data["name"])).first()
+            if existing:
+                return rx.toast.error("A test case with this name already exists")
             case = CaseModel(**form_data)
             session.add(case)
             session.commit()
@@ -103,6 +151,9 @@ class CaseState(rx.State):
         if (updated_data["name"] == ""): return None
 
         with rx.session() as session:
+            existing = session.exec(CaseModel.select().where(CaseModel.name == updated_data["name"], CaseModel.id != case_id)).first()
+            if existing:
+                return rx.toast.error("A test case with this name already exists")
             case = session.exec(CaseModel.select().where(CaseModel.id == case_id)).one_or_none()
 
             if (case is None):
@@ -287,7 +338,16 @@ class AddCaseState(CaseState):
         """Validate and create a new case from the form."""
         self.form_data = form_data
         result = self.add_case(form_data)
-        if result is None: return rx.toast.error("name cannot be empty")
+        if result is None:
+            self.navigate_to_edit = False
+            return rx.toast.error("name cannot be empty")
+        if result != consts.RETURN_VALUE:
+            self.navigate_to_edit = False
+            return result
+        self.case_name_input = ""
+        if self.navigate_to_edit:
+            self.navigate_to_edit = False
+            return rx.redirect(self.case_url)
         return rx.redirect(routes.CASES)
 
 class EditCaseState(CaseState):
@@ -305,6 +365,7 @@ class EditCaseState(CaseState):
         updated_data = {**form_data}
         result = self.save_case_edits(case_id, updated_data)
         if result is None: return rx.toast.error("name cannot be empty")
+        if result != consts.RETURN_VALUE: return result
         return rx.redirect(self.case_url)
     
     def get_detail_url(self, id:int):
@@ -325,4 +386,4 @@ class AddStepState(CaseState):
         self.form_data = form_data
         updated_data = {**form_data}
         result = self.add_step(case_id, updated_data)
-        return result
+        return [result, rx.call_script("document.getElementById('step-action-input').focus()")]

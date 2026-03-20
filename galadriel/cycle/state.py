@@ -17,7 +17,7 @@ from sqlmodel import select, asc, desc
 
 from requests.exceptions import HTTPError
 from ..utils import jira, consts, yaml
-from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load
+from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load, populate_step_counts
 
 CYCLES_ROUTE = consts.normalize_route(routes.CYCLES)
 
@@ -171,6 +171,16 @@ class CycleState(rx.State):
         return sort_items(self.cases_for_search, self.search_sort_by, self.search_sort_asc)
 
     @rx.var(cache=True)
+    def linkable_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have steps (can be linked)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count > 0]
+
+    @rx.var(cache=True)
+    def empty_cases_for_search(self) -> List['CaseModel']:
+        """Return search cases that have no steps (cannot be linked)."""
+        return [c for c in self.sorted_cases_for_search if c.step_count == 0]
+
+    @rx.var(cache=True)
     def sorted_scenarios_for_search(self) -> List['ScenarioModel']:
         """Return search scenarios sorted by the current search sort field."""
         return sort_items(self.scenarios_for_search, self.search_sort_by, self.search_sort_asc)
@@ -185,6 +195,9 @@ class CycleState(rx.State):
         if form_data["name"] == "": return None
         if form_data["threshold"] == "": return None
         with rx.session() as session:
+            existing = session.exec(CycleModel.select().where(CycleModel.name == form_data["name"])).first()
+            if existing:
+                return rx.toast.error("A cycle with this name already exists")
             cycle = CycleModel(**form_data)
             session.add(cycle)
             session.commit()
@@ -198,6 +211,9 @@ class CycleState(rx.State):
         if updated_data["name"] == "": return None
         if updated_data["threshold"] == "": return None
         with rx.session() as session:
+            existing = session.exec(CycleModel.select().where(CycleModel.name == updated_data["name"], CycleModel.id != cycle_id)).first()
+            if existing:
+                return rx.toast.error("A cycle with this name already exists")
             cycle = session.exec(CycleModel.select().where(CycleModel.id == cycle_id)).one_or_none()
 
             if (cycle is None):
@@ -330,8 +346,9 @@ class CycleState(rx.State):
             self.search_sort_asc = True
 
     def load_cases_for_search(self, search_case_value=None):
-        """Set the case search filter (if given) and reload matching cases."""
+        """Set the case search filter (if given) and reload matching cases with step counts."""
         filter_and_load(self, CaseModel, "search_case_value", "cases_for_search", search_case_value)
+        self.cases_for_search = populate_step_counts(self.cases_for_search, StepModel)
 
     def link_case(self, case_id:int):
         """Link a test case to the current cycle."""
@@ -920,6 +937,15 @@ class AddCycleState(CycleState):
     """Handles the add-cycle form submission."""
 
     form_data:dict = {}
+    cycle_name_input: str = ""
+
+    def clear_form(self):
+        """Clear the add cycle form inputs."""
+        self.cycle_name_input = ""
+
+    def set_cycle_name(self, value: str):
+        """Update the cycle name input value."""
+        self.cycle_name_input = value
 
     def handle_submit(self, form_data):
         """Validate and create a new cycle from the form."""
@@ -927,6 +953,9 @@ class AddCycleState(CycleState):
         result = self.add_cycle(form_data)
         if result is None:
             return rx.toast.error("name and threshold cannot be empty")
+        if result != consts.RETURN_VALUE:
+            return result
+        self.cycle_name_input = ""
         return rx.redirect(routes.CYCLES)
 
 class EditCycleState(CycleState):
@@ -945,4 +974,6 @@ class EditCycleState(CycleState):
         result = self.save_cycle_edits(cycle_id, updated_data)
         if result is None:
             return rx.toast.error("name and threshold cannot be empty")
+        if result != consts.RETURN_VALUE:
+            return result
         return rx.redirect(routes.CYCLES)

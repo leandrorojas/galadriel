@@ -11,7 +11,7 @@ from galadriel.scenario.model import ScenarioModel, ScenarioCaseModel
 from galadriel.suite.model import SuiteModel, SuiteChildModel
 from galadriel.iteration.model import IterationModel, IterationStatusModel, IterationSnapshotModel
 from galadriel.utils import consts
-from conftest import init_state
+from conftest import init_state, LinkableEmptyCasesTests
 
 pytestmark = pytest.mark.integration
 
@@ -24,6 +24,8 @@ def _make_state(cycle_id_value=""):
         show_scenario_search=False, search_scenario_value="", scenarios_for_search=[],
         show_suite_search=False, search_suite_value="", suites_for_search=[],
         iteration_snapshot_items=[],
+        sort_by="", sort_asc=True,
+        search_sort_by="", search_sort_asc=True,
     )
     object.__setattr__(state, "_CycleState__fail_checkbox", False)
     type(state).cycle_id = PropertyMock(return_value=cycle_id_value)
@@ -67,6 +69,43 @@ class TestSaveCycleEdits:
         state = _make_state()
         result = state.save_cycle_edits(9999, {"name": "X", "threshold": "80"})
         assert result is None
+
+
+class TestUniqueNameValidation:
+    """Verify that cycle names must be unique."""
+
+    def test_add_cycle_duplicate_name_rejected(self, patch_rx_session, make_cycle):
+        """Adding a cycle with an existing name should be rejected."""
+        make_cycle(name="Sprint 1")
+        state = _make_state()
+        result = state.add_cycle({"name": "Sprint 1", "threshold": "80"})
+        assert result != 0  # toast error, not RETURN_VALUE
+        session = patch_rx_session
+        all_cycles = session.exec(select(CycleModel)).all()
+        assert len(all_cycles) == 1
+
+    def test_edit_cycle_duplicate_name_rejected(self, patch_rx_session, make_cycle):
+        """Editing a cycle to use another cycle's name should be rejected."""
+        make_cycle(name="Sprint 1")
+        cycle_b = make_cycle(name="Sprint 2")
+        state = _make_state(cycle_id_value=str(cycle_b.id))
+        result = state.save_cycle_edits(cycle_b.id, {"name": "Sprint 1", "threshold": "80"})
+        assert result != 0  # toast error
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(CycleModel).where(CycleModel.id == cycle_b.id)).first()
+        assert updated.name == "Sprint 2"
+
+    def test_edit_cycle_same_name_allowed(self, patch_rx_session, make_cycle):
+        """Saving a cycle with its own current name should succeed."""
+        cycle = make_cycle(name="Sprint 1")
+        state = _make_state(cycle_id_value=str(cycle.id))
+        result = state.save_cycle_edits(cycle.id, {"name": "Sprint 1", "threshold": "90"})
+        assert result == 0
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(CycleModel).where(CycleModel.id == cycle.id)).first()
+        assert updated.threshold == "90"
 
 
 class TestDuplicateCycle:
@@ -487,3 +526,16 @@ class TestFormatIterationStatus:
     def test_closed_status_returns_name(self):
         status = IterationStatusModel(id=consts.ITERATION_STATUS_CLOSED, name="closed")
         assert format_iteration_status(status, can_edit=True) == "closed"
+
+
+class TestLinkableAndEmptyCasesForSearch(LinkableEmptyCasesTests):
+    """Verify search results split into linkable and empty cases."""
+
+    def _make_and_load(self, patch_rx_session, make_case, make_step, cases):
+        for c in cases:
+            case = make_case(name=c["name"])
+            for i in range(c.get("steps", 0)):
+                make_step(case_id=case.id, order=i + 1, action=f"a{i}")
+        state = _make_state()
+        state.load_cases_for_search()
+        return state

@@ -10,6 +10,8 @@ def cycle_add_form() -> rx.Component:
             rx.input(
                 name="name",
                 placeholder="Cycle name",
+                value=AddCycleState.cycle_name_input,
+                on_change=AddCycleState.set_cycle_name,
                 width="100%",
             ),
             rx.input(
@@ -22,7 +24,7 @@ def cycle_add_form() -> rx.Component:
             rx.button("Add Cycle", type="submit", width="100%",),
         ),
         on_submit=AddCycleState.handle_submit,
-        reset_on_submit=True,
+        reset_on_submit=False,
     ),
 
 def cycle_edit_form() -> rx.Component:

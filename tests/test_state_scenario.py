@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from galadriel.scenario.state import ScenarioState
 from galadriel.scenario.model import ScenarioModel, ScenarioCaseModel
-from conftest import init_state
+from conftest import init_state, LinkableEmptyCasesTests
 
 pytestmark = pytest.mark.integration
 
@@ -17,6 +17,8 @@ def _make_state(scenario_id_value=""):
         scenarios=[], scenario=None,
         test_cases=[], test_cases_for_search=[],
         show_search=False, search_value="",
+        sort_by="", sort_asc=True,
+        search_sort_by="", search_sort_asc=True,
     )
     type(state).scenario_id = PropertyMock(return_value=scenario_id_value)
     return state
@@ -139,3 +141,16 @@ class TestMoveCase:
         session.expire_all()
         assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l1.id)).first().order == 2
         assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l2.id)).first().order == 1
+
+
+class TestLinkableAndEmptyCasesForSearch(LinkableEmptyCasesTests):
+    """Verify search results split into linkable and empty cases."""
+
+    def _make_and_load(self, patch_rx_session, make_case, make_step, cases):
+        for c in cases:
+            case = make_case(name=c["name"])
+            for i in range(c.get("steps", 0)):
+                make_step(case_id=case.id, order=i + 1, action=f"a{i}")
+        state = _make_state()
+        state.load_cases_for_search()
+        return state

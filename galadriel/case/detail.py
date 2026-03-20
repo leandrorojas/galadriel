@@ -3,7 +3,7 @@
 import reflex as rx
 from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge, Table, Button, Moment, MomentBadge
+from ..ui.components import Badge, Table, Button, Moment, MomentBadge, SearchTable
 from . import model, state
 from .forms import step_add_form
 from ..utils import consts
@@ -55,22 +55,24 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
 
 def __search_prerequisites_table() -> rx.Component:
     table_component = Table()
+    search_header = rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            Table.sortable_header("name", "fingerprint", "name", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
+            Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
+        ),
+    )
     return rx.fragment(
         rx.form(
             rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        table_component.header("", "ellipsis"),
-                        Table.sortable_header("name", "fingerprint", "name", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
-                        Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
-                    ),
-                ),
-                rx.table.body(rx.foreach(state.CaseState.sorted_cases_for_search, __show_case_as_prerequisite)),
+                search_header,
+                rx.table.body(rx.foreach(state.CaseState.linkable_cases_for_search, __show_case_as_prerequisite)),
                 variant="surface",
                 size="3",
                 width="100%",
                 on_mount=state.CaseState.load_cases,
             ),
+            SearchTable.empty_cases_section(state.CaseState.empty_cases_for_search),
         ),
     )
 

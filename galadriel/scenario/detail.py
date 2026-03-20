@@ -4,7 +4,7 @@ import reflex as rx
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button, MomentBadge, Moment
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment, SearchTable
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
@@ -56,22 +56,24 @@ def __show_test_cases_in_search(test_case:CaseModel):
 
 def __search_cases_table() -> rx.Component:
     table_component = Table()
+    search_header = rx.table.header(
+        rx.table.row(
+            table_component.header("", "ellipsis"),
+            Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
+            Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
+        ),
+    )
     return rx.fragment(
         rx.form(
             rx.table.root(
-                rx.table.header(
-                    rx.table.row(
-                        table_component.header("", "ellipsis"),
-                        Table.sortable_header("name", "fingerprint", "name", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
-                        Table.sortable_header("created", "calendar-check-2", "created", state.ScenarioState.search_sort_by, state.ScenarioState.search_sort_asc, state.ScenarioState.toggle_search_sort),
-                    ),
-                ),
-                rx.table.body(rx.foreach(state.ScenarioState.sorted_cases_for_search, __show_test_cases_in_search)),
+                search_header,
+                rx.table.body(rx.foreach(state.ScenarioState.linkable_cases_for_search, __show_test_cases_in_search)),
                 variant="surface",
                 size="3",
                 width="100%",
                 on_mount=state.ScenarioState.load_cases_for_search,
             ),
+            SearchTable.empty_cases_section(state.ScenarioState.empty_cases_for_search),
         ),
     )
 
