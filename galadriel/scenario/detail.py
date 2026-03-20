@@ -4,7 +4,7 @@ import reflex as rx
 from ..navigation import routes
 from . import state
 from .. pages import base_page
-from ..ui.components import Badge, Table, Button, MomentBadge, Moment
+from ..ui.components import Badge, Table, Button, MomentBadge, Moment, SearchTable
 from . import model
 from ..case.model import CaseModel
 from ..utils import consts
@@ -54,15 +54,6 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(moment_component.moment(test_case.created)),
     )
 
-def __show_empty_case_in_search(test_case:CaseModel):
-    moment_component = Moment()
-
-    return rx.table.row(
-            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
-            rx.table.cell(rx.text(test_case.name, color="var(--gray-8)")),
-            rx.table.cell(rx.text(moment_component.moment(test_case.created), color="var(--gray-8)")),
-    )
-
 def __search_cases_table() -> rx.Component:
     table_component = Table()
     search_header = rx.table.header(
@@ -82,19 +73,7 @@ def __search_cases_table() -> rx.Component:
                 width="100%",
                 on_mount=state.ScenarioState.load_cases_for_search,
             ),
-            rx.cond(
-                state.ScenarioState.empty_cases_for_search.length() > 0,
-                rx.vstack(
-                    rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
-                    rx.table.root(
-                        rx.table.body(rx.foreach(state.ScenarioState.empty_cases_for_search, __show_empty_case_in_search)),
-                        variant="surface",
-                        size="3",
-                        width="100%",
-                    ),
-                    width="100%",
-                ),
-            ),
+            SearchTable.empty_cases_section(state.ScenarioState.empty_cases_for_search),
         ),
     )
 

@@ -3,7 +3,7 @@
 import reflex as rx
 from ..navigation import routes
 from ..pages import base_page
-from ..ui.components import Badge, Table, Button, Moment, MomentBadge
+from ..ui.components import Badge, Table, Button, Moment, MomentBadge, SearchTable
 from . import model, state
 from .forms import step_add_form
 from ..utils import consts
@@ -53,15 +53,6 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
             rx.table.cell(moment_component.moment(prerequisite.created)),
     )
 
-def __show_empty_case_as_prerequisite(prerequisite:model.CaseModel):
-    moment_component = Moment()
-
-    return rx.table.row(
-            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
-            rx.table.cell(rx.text(prerequisite.name, color="var(--gray-8)")),
-            rx.table.cell(rx.text(moment_component.moment(prerequisite.created), color="var(--gray-8)")),
-    )
-
 def __search_prerequisites_table() -> rx.Component:
     table_component = Table()
     search_header = rx.table.header(
@@ -81,19 +72,7 @@ def __search_prerequisites_table() -> rx.Component:
                 width="100%",
                 on_mount=state.CaseState.load_cases,
             ),
-            rx.cond(
-                state.CaseState.empty_cases_for_search.length() > 0,
-                rx.vstack(
-                    rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
-                    rx.table.root(
-                        rx.table.body(rx.foreach(state.CaseState.empty_cases_for_search, __show_empty_case_as_prerequisite)),
-                        variant="surface",
-                        size="3",
-                        width="100%",
-                    ),
-                    width="100%",
-                ),
-            ),
+            SearchTable.empty_cases_section(state.CaseState.empty_cases_for_search),
         ),
     )
 

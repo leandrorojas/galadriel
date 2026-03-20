@@ -630,6 +630,33 @@ class SearchTable():
             return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3", color_scheme=color)
         return rx.badge(rx.icon(icon, size=16), text, radius="full", variant="soft", size="3")
 
+    @staticmethod
+    def empty_case_row(test_case) -> rx.Component:
+        """Render a greyed-out row for a case without steps."""
+        moment_component = Moment()
+        return rx.table.row(
+            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
+            rx.table.cell(rx.text(test_case.name, color="var(--gray-8)")),
+            rx.table.cell(rx.text(moment_component.moment(test_case.created), color="var(--gray-8)")),
+        )
+
+    @staticmethod
+    def empty_cases_section(empty_cases_var) -> rx.Component:
+        """Render a conditional section for cases without steps."""
+        return rx.cond(
+            empty_cases_var.length() > 0,
+            rx.vstack(
+                rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
+                rx.table.root(
+                    rx.table.body(rx.foreach(empty_cases_var, SearchTable.empty_case_row)),
+                    variant="surface",
+                    size="3",
+                    width="100%",
+                ),
+                width="100%",
+            ),
+        )
+
 class Moment():
     """Date display using relative time formatting."""
 
