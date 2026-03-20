@@ -635,9 +635,9 @@ class SearchTable():
         """Render a greyed-out row for a case without steps."""
         moment_component = Moment()
         return rx.table.row(
-            rx.table.cell(rx.icon("ban", size=16, color="var(--gray-8)")),
-            rx.table.cell(rx.text(test_case.name, color="var(--gray-8)")),
-            rx.table.cell(rx.text(moment_component.moment(test_case.created), color="var(--gray-8)")),
+            rx.table.cell(rx.icon("ban", size=16, color=consts.COLOR_MUTED)),
+            rx.table.cell(rx.text(test_case.name, color=consts.COLOR_MUTED)),
+            rx.table.cell(rx.text(moment_component.moment(test_case.created), color=consts.COLOR_MUTED)),
         )
 
     @staticmethod
@@ -647,7 +647,7 @@ class SearchTable():
         return rx.cond(
             empty_cases_var.length() > 0,
             rx.vstack(
-                rx.text("Cases without steps (not available to add)", size="2", color="var(--gray-8)", padding_top="1em"),
+                rx.text("Cases without steps (not available to add)", size="2", color=consts.COLOR_MUTED, padding_top="1em"),
                 rx.table.root(
                     rx.table.header(
                         rx.table.row(

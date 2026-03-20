@@ -4,6 +4,8 @@ CASE_MODEL_ID = "casemodel.id"
 
 RETURN_VALUE = 0
 
+COLOR_MUTED = "var(--gray-8)"
+
 
 def normalize_route(route: str) -> str:
     """Strip trailing slash from a route path."""
