@@ -20,7 +20,6 @@ def __search_table_header():
             table_component.header("", "ellipsis"),
             Table.sortable_header("name", "fingerprint", "name", state.SuiteState.search_sort_by, state.SuiteState.search_sort_asc, state.SuiteState.toggle_search_sort),
             Table.sortable_header("created", "calendar-check-2", "created", state.SuiteState.search_sort_by, state.SuiteState.search_sort_asc, state.SuiteState.toggle_search_sort),
-            table_component.header("selected_id", "search", hide_column=True),
         ),
     )
 
@@ -31,7 +30,6 @@ def __show_test_cases_in_search(test_case:CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_case(getattr(test_case, consts.FIELD_ID)))),
             rx.table.cell(test_case.name),
             rx.table.cell(moment_component.moment(test_case.created)),
-            rx.table.cell(rx.el.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, "")), hidden=True),
     )
 
 def __search_cases_table() -> rx.Component:
@@ -55,7 +53,6 @@ def __show_scenarios_in_search(scenario:ScenarioModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.SuiteState.link_scenario(getattr(scenario, consts.FIELD_ID)))),
             rx.table.cell(scenario.name),
             rx.table.cell(moment_component.moment(scenario.created)),
-            rx.table.cell(rx.el.input(type="hidden", name="scenario_id", value=rx.cond(scenario.id, scenario.id, "")), hidden=True),
     )
 
 def __search_scenarios_table() -> rx.Component:
@@ -162,7 +159,6 @@ def suite_detail_page() -> rx.Component:
             rx.cond(
                 state.SuiteState.show_scenario_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.suite_id), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Scenario to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.load_scenarios_for_search(value)),
                             __search_scenarios_table(),
@@ -180,7 +176,6 @@ def suite_detail_page() -> rx.Component:
             rx.cond(
                 state.SuiteState.show_case_search,
                 rx.box(
-                        rx.box(rx.input(type="hidden", name="suite_id", value=state.SuiteState.suite_id), display="none",),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add to the Suite", width="77vw", on_change=lambda value: state.SuiteState.load_cases_for_search(value)),
                             __search_cases_table(),

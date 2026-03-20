@@ -90,3 +90,30 @@ LocalUser → GaladrielUser → GaladrielUserRole
 - **Docstrings**: Always add docstrings to new modules, classes, and public functions/methods (one-liner style). Update existing docstrings when behavior changes.
 - **README**: Evaluate whether `README.md` needs updating (e.g., new features, changed behavior).
 - **CLAUDE.md**: Evaluate whether this file needs updating (e.g., new patterns, architecture changes).
+
+### Evaluating PR Review Comments (CodeRabbit, SonarQube, etc.)
+
+When the user shares comments from automated review tools, **verify each finding against the current code before making any change**.
+
+#### Triage Criteria
+
+1. **Is it real?** — Read the actual code at the referenced location. Automated tools sometimes flag code that was already fixed, moved, or doesn't exist in the current diff.
+2. **Is it relevant?** — Some suggestions target patterns that are intentional in this codebase (e.g., Reflex-specific conventions, `# NOSONAR` annotations, soft-delete patterns).
+3. **Is it correct?** — Verify the suggested fix is technically sound. Tools sometimes propose changes that break framework-specific behavior (e.g., suggesting standard HTML attributes when Reflex/React requires camelCase or different prop types).
+4. **Is it scoped?** — Only fix what the comment identifies. Don't expand the change to refactor surrounding code unless explicitly asked.
+
+#### What to Verify for Each Comment
+
+- Check the file and line number — confirm the flagged code still exists and matches the description.
+- Reproduce the issue mentally or via tests — understand *why* it's a problem before fixing.
+- If the suggestion involves a Reflex/Radix component, verify prop names and types against the actual framework API (e.g., `auto_complete` is a `bool` in `rx.input`, not a string).
+- If the suggestion involves HTML/React, remember React uses camelCase attributes (`autoComplete`, not `autocomplete`).
+- Run `pytest` after applying any fix.
+
+#### Non-Goals (Do Not Blindly Apply)
+
+- **Style-only suggestions** (rename variables, reorder imports) unless they fix a real readability problem.
+- **"Consider using X"** suggestions that add complexity without fixing a bug or measurable issue.
+- **Framework upgrade suggestions** (e.g., "use the new API") when the project pins a specific version.
+- **Overengineering fixes** — e.g., adding error handling for scenarios that cannot occur, or creating abstractions for one-time patterns.
+- **Suggestions that conflict with existing project patterns** — match what the codebase already does rather than introducing a new convention from one tool's opinion.

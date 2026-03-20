@@ -51,7 +51,6 @@ def __show_case_as_prerequisite(prerequisite:model.CaseModel):
             rx.table.cell(rx.button(rx.icon("plus"), on_click=lambda: state.CaseState.add_prerequisite(getattr(prerequisite, consts.FIELD_ID)))),
             rx.table.cell(prerequisite.name),
             rx.table.cell(moment_component.moment(prerequisite.created)),
-            rx.table.cell(rx.el.input(type="hidden", name="prerequisite_id", value=rx.cond(prerequisite.id, prerequisite.id, "")), hidden=True),
     )
 
 def __search_prerequisites_table() -> rx.Component:
@@ -64,7 +63,6 @@ def __search_prerequisites_table() -> rx.Component:
                         table_component.header("", "ellipsis"),
                         Table.sortable_header("name", "fingerprint", "name", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
                         Table.sortable_header("created", "calendar-check-2", "created", state.CaseState.search_sort_by, state.CaseState.search_sort_asc, state.CaseState.toggle_search_sort),
-                        table_component.header("selected_id", "search", hide_column=True),
                     ),
                 ),
                 rx.table.body(rx.foreach(state.CaseState.sorted_cases_for_search, __show_case_as_prerequisite)),
@@ -157,7 +155,6 @@ def case_detail_page() -> rx.Component:
             rx.cond(
                 state.CaseState.show_search,
                 rx.box(
-                        rx.box(rx.el.input(type="hidden", name="case_id", value=rx.cond(test_case.id, test_case.id, "")), display="none"),
                         rx.vstack(
                             rx.input(placeholder="start typing to search a Test Case to add as prerequisite", on_change=lambda value: state.CaseState.filter_cases(value), width="77vw"),
                             __search_prerequisites_table(),

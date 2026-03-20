@@ -608,7 +608,6 @@ class SearchTable():
                 table_component.header("", "ellipsis"),
                 table_component.header("name", "fingerprint"),
                 table_component.header("created", "calendar-check-2"),
-                table_component.header("selected_id", "search", hide_column=True),
             ),
         ),
 
