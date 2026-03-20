@@ -81,7 +81,6 @@ def scenario_detail_page() -> rx.Component:
     DISABLE_EDIT_MODE = ~Session.can_edit
 
     title_badge = Badge()
-    scenario = state.AddScenarioState.scenario
     button_component = Button()
     moment_badge_component = MomentBadge()
 

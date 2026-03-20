@@ -116,7 +116,6 @@ def __steps_table() -> rx.Component:
 def case_detail_page() -> rx.Component:
     """Render the test case detail page."""
     title_badge = Badge()
-    test_case = state.AddStepState.case
     button_component = Button()
     moment_badge_component = MomentBadge()
 
