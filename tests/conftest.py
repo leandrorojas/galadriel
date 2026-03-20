@@ -243,3 +243,40 @@ def init_state(state_cls, **field_values):
         setattr(state, name, value)
 
     return state
+
+
+# ---------------------------------------------------------------------------
+# Shared test helpers for linkable/empty cases search split
+# ---------------------------------------------------------------------------
+
+class LinkableEmptyCasesTests:
+    """Mixin with shared tests for the linkable/empty cases search split.
+
+    Subclasses must define ``_make_and_load(self, patch_rx_session, make_case, make_step, cases)``
+    that creates the given cases, calls the appropriate load method, and returns the state.
+    Each entry in ``cases`` is a dict with ``name`` and optional ``steps`` (int count).
+    """
+
+    def _make_and_load(self, patch_rx_session, make_case, make_step, cases):
+        raise NotImplementedError
+
+    def test_linkable_cases_have_steps(self, patch_rx_session, make_case, make_step):
+        """Cases with steps appear only in linkable list."""
+        state = self._make_and_load(patch_rx_session, make_case, make_step,
+                                    [{"name": "Has Steps", "steps": 1}])
+        assert len(state.linkable_cases_for_search) == 1
+        assert len(state.empty_cases_for_search) == 0
+
+    def test_empty_cases_have_no_steps(self, patch_rx_session, make_case, make_step):
+        """Cases without steps appear only in empty list."""
+        state = self._make_and_load(patch_rx_session, make_case, make_step,
+                                    [{"name": "No Steps"}])
+        assert len(state.empty_cases_for_search) == 1
+        assert len(state.linkable_cases_for_search) == 0
+
+    def test_mixed_cases_split(self, patch_rx_session, make_case, make_step):
+        """Mixed cases split correctly between linkable and empty."""
+        state = self._make_and_load(patch_rx_session, make_case, make_step,
+                                    [{"name": "With", "steps": 1}, {"name": "Without"}])
+        assert [c.name for c in state.linkable_cases_for_search] == ["With"]
+        assert [c.name for c in state.empty_cases_for_search] == ["Without"]

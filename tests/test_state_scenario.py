@@ -6,7 +6,7 @@ from sqlmodel import select
 
 from galadriel.scenario.state import ScenarioState
 from galadriel.scenario.model import ScenarioModel, ScenarioCaseModel
-from conftest import init_state
+from conftest import init_state, LinkableEmptyCasesTests
 
 pytestmark = pytest.mark.integration
 
@@ -143,32 +143,14 @@ class TestMoveCase:
         assert session.exec(select(ScenarioCaseModel).where(ScenarioCaseModel.id == l2.id)).first().order == 1
 
 
-class TestLinkableAndEmptyCasesForSearch:
+class TestLinkableAndEmptyCasesForSearch(LinkableEmptyCasesTests):
     """Verify search results split into linkable and empty cases."""
 
-    def test_linkable_cases_have_steps(self, patch_rx_session, make_case, make_step):
-        """Cases with steps appear only in linkable list."""
-        case = make_case(name="Has Steps")
-        make_step(case_id=case.id, order=1, action="a")
+    def _make_and_load(self, patch_rx_session, make_case, make_step, cases):
+        for c in cases:
+            case = make_case(name=c["name"])
+            for i in range(c.get("steps", 0)):
+                make_step(case_id=case.id, order=i + 1, action=f"a{i}")
         state = _make_state()
         state.load_cases_for_search()
-        assert len(state.linkable_cases_for_search) == 1
-        assert len(state.empty_cases_for_search) == 0
-
-    def test_empty_cases_have_no_steps(self, patch_rx_session, make_case):
-        """Cases without steps appear only in empty list."""
-        make_case(name="No Steps")
-        state = _make_state()
-        state.load_cases_for_search()
-        assert len(state.empty_cases_for_search) == 1
-        assert len(state.linkable_cases_for_search) == 0
-
-    def test_mixed_cases_split(self, patch_rx_session, make_case, make_step):
-        """Mixed cases split correctly between linkable and empty."""
-        case_with = make_case(name="With")
-        make_case(name="Without")
-        make_step(case_id=case_with.id, order=1, action="a")
-        state = _make_state()
-        state.load_cases_for_search()
-        assert [c.name for c in state.linkable_cases_for_search] == ["With"]
-        assert [c.name for c in state.empty_cases_for_search] == ["Without"]
+        return state
