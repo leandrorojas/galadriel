@@ -15,7 +15,7 @@ def case_add_form() -> rx.Component:
             rx.button("Add Case", type="submit", width="100%",),
         ),
         on_submit=AddCaseState.handle_submit,
-        reset_on_submit=True,
+        reset_on_submit=False,
     ),
 
 def case_edit_form() -> rx.Component:
