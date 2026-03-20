@@ -100,6 +100,10 @@ class TestUniqueNameValidation:
         state = _make_state(cycle_id_value=str(cycle.id))
         result = state.save_cycle_edits(cycle.id, {"name": "Sprint 1", "threshold": "90"})
         assert result == 0
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(CycleModel).where(CycleModel.id == cycle.id)).first()
+        assert updated.threshold == "90"
 
 
 class TestDuplicateCycle:
