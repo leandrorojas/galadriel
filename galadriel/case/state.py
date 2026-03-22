@@ -211,11 +211,14 @@ class CaseState(rx.State):
         
     def update_step_field(self, step_id: int, field: str, value: str):
         """Update a single field on a step when the user leaves the input."""
+        allowed_fields = {"action", "expected"}
+        if field not in allowed_fields:
+            return rx.toast.error("invalid field")
         value = value.strip()
         if field == "action" and not value:
             return rx.toast.error("action cannot be empty")
         with rx.session() as session:
-            step = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            step = session.exec(StepModel.select().where(StepModel.id == step_id, StepModel.case_id == self.case_id)).first()
             if step is None:
                 return rx.toast.error("step not found")
             if getattr(step, field) == value:

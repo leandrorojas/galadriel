@@ -157,6 +157,18 @@ class TestSteps:
         unchanged = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
         assert unchanged.action == "Keep me"
 
+    def test_update_step_invalid_field_rejected(self, patch_rx_session, make_case, make_step):
+        """Attempting to update a non-editable field should be rejected."""
+        case = make_case(name="C")
+        step = make_step(case_id=case.id, order=1, action="Action", expected="Expected")
+        state = _make_state(case_id_value=case.id)
+        result = state.update_step_field(step.id, "case_id", "999")
+        assert result is not None  # toast error
+        session = patch_rx_session
+        session.expire_all()
+        unchanged = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
+        assert unchanged.case_id == case.id
+
     def test_update_step_same_value_skips(self, patch_rx_session, make_case, make_step):
         """Blurring without changing the value should not trigger a save."""
         case = make_case(name="C")
