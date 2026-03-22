@@ -123,6 +123,48 @@ class TestSteps:
         assert len(steps) == 2
         assert steps[1].order == 2
 
+    def test_update_step_action(self, patch_rx_session, make_case, make_step):
+        """Updating a step action should persist the new value."""
+        case = make_case(name="C")
+        step = make_step(case_id=case.id, order=1, action="Old action", expected="Expected")
+        state = _make_state(case_id_value=case.id)
+        state.update_step_field(step.id, "action", "New action")
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
+        assert updated.action == "New action"
+
+    def test_update_step_expected(self, patch_rx_session, make_case, make_step):
+        """Updating a step expected field should persist the new value."""
+        case = make_case(name="C")
+        step = make_step(case_id=case.id, order=1, action="Action", expected="Old expected")
+        state = _make_state(case_id_value=case.id)
+        state.update_step_field(step.id, "expected", "New expected")
+        session = patch_rx_session
+        session.expire_all()
+        updated = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
+        assert updated.expected == "New expected"
+
+    def test_update_step_empty_action_rejected(self, patch_rx_session, make_case, make_step):
+        """Clearing the action field should be rejected."""
+        case = make_case(name="C")
+        step = make_step(case_id=case.id, order=1, action="Keep me", expected="Expected")
+        state = _make_state(case_id_value=case.id)
+        result = state.update_step_field(step.id, "action", "")
+        assert result is not None  # toast error
+        session = patch_rx_session
+        session.expire_all()
+        unchanged = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
+        assert unchanged.action == "Keep me"
+
+    def test_update_step_same_value_skips(self, patch_rx_session, make_case, make_step):
+        """Blurring without changing the value should not trigger a save."""
+        case = make_case(name="C")
+        step = make_step(case_id=case.id, order=1, action="Same", expected="Same")
+        state = _make_state(case_id_value=case.id)
+        result = state.update_step_field(step.id, "action", "Same")
+        assert result is None  # no-op
+
     def test_add_step_empty_action_rejected(self, patch_rx_session, make_case):
         case = make_case(name="C")
         state = _make_state(case_id_value=case.id)
