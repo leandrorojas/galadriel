@@ -158,6 +158,9 @@ class SideBar():
     X_PADDING = "0.5rem"
     Y_PADDING = "0.75rem"
     BORDER_RADIUS = "0.5em"
+    COLLAPSED_WIDTH = "3.5em"
+    EXPANDED_WIDTH = "16em"
+    TRANSITION = "width 0.2s ease-in-out"
 
     def __sidebar_user_item(self) -> rx.Component:
         auth_user_info = Session.user_info
@@ -167,6 +170,7 @@ class SideBar():
                 rx.icon("user"),
                 size="3",
                 radius="full",
+                flex_shrink="0",
             ),
             rx.vstack(
                 rx.box(
@@ -174,11 +178,13 @@ class SideBar():
                         f"{Session.username}",
                         size="3",
                         weight="bold",
+                        white_space="nowrap",
                     ),
                     rx.text(
                         f"{auth_user_info.email}",
                         size="2",
                         weight="medium",
+                        white_space="nowrap",
                     ),
                     width="100%",
                 ),
@@ -187,21 +193,23 @@ class SideBar():
                 justify="start",
                 width="100%",
             ),
-            padding_x= self.X_PADDING,
+            padding_x=self.X_PADDING,
             align="center",
             justify="start",
             width="100%",
-        ),    
+            overflow="hidden",
+        ),
 
     def __sidebar_item(self, text: str, icon: str, href: str) -> rx.Component:
         return rx.link(
             rx.hstack(
-                rx.icon(icon),
-                rx.text(text, size="4"),
+                rx.icon(icon, flex_shrink="0"),
+                rx.text(text, size="4", white_space="nowrap"),
                 width="100%",
-                padding_x= self.X_PADDING,
+                padding_x=self.X_PADDING,
                 padding_y=self.Y_PADDING,
                 align="center",
+                overflow="hidden",
                 style={
                     "_hover": {
                         "bg": rx.color("accent", 4),
@@ -220,19 +228,22 @@ class SideBar():
         return rx.box(
             rx.hstack(
                 rx.color_mode_cond(
-                    light=rx.icon("moon"),
-                    dark=rx.icon("sun"),
+                    light=rx.icon("moon", flex_shrink="0"),
+                    dark=rx.icon("sun", flex_shrink="0"),
                 ),
                 rx.text(
                     rx.color_mode_cond(
                         light="Dark Mode",
                         dark="Light Mode",
                     ),
-                    size="4"),
+                    size="4",
+                    white_space="nowrap",
+                ),
                 width="100%",
-                padding_x= self.X_PADDING,
-                padding_y= self.Y_PADDING,
+                padding_x=self.X_PADDING,
+                padding_y=self.Y_PADDING,
                 align="center",
+                overflow="hidden",
                 style={
                     "_hover": {
                         "cursor": "pointer",
@@ -253,12 +264,13 @@ class SideBar():
     def __sidebar_logout_item(self) -> rx.Component:
         return rx.box(
             rx.hstack(
-                rx.icon("log-out"),
-                rx.text("Logout", size="4"),
+                rx.icon("log-out", flex_shrink="0"),
+                rx.text("Logout", size="4", white_space="nowrap"),
                 width="100%",
                 padding_x=self.X_PADDING,
                 padding_y=self.Y_PADDING,
                 align="center",
+                overflow="hidden",
                 style={
                     "_hover": {
                         "cursor": "pointer",
@@ -276,7 +288,7 @@ class SideBar():
             width="100%",
         )
 
-    def __galadriel_sidebar_items(self) -> rx.Component: 
+    def __galadriel_sidebar_items(self) -> rx.Component:
         return rx.vstack(
             self.__sidebar_item("Dashboard", "layout-dashboard", navigation.routes.DASHBOARD),
             self.__sidebar_item("Cycles", "flask-round", navigation.routes.CYCLES),
@@ -285,39 +297,72 @@ class SideBar():
             self.__sidebar_item("Scenarios", "route", navigation.routes.SCENARIOS),
             self.__sidebar_item("Cases", consts.ICON_TEST_TUBES, navigation.routes.CASES),
             spacing="1",
-            width=
-            "100%",
+            width="100%",
         )
-    
-    def __backoffice_sidebar_items(self) -> rx.Component: 
+
+    def __backoffice_sidebar_items(self) -> rx.Component:
         return rx.vstack(
             self.__sidebar_item("Users", "users", navigation.routes.USERS),
-            self.__sidebar_item("[to do] Settings", "settings", "/#"),            
+            self.__sidebar_item("[to do] Settings", "settings", "/#"),
             spacing="1",
+            width="100%",
+        )
+
+    def __sidebar_toggle_button(self) -> rx.Component:
+        collapsed = navigation.NavigationState.sidebar_collapsed
+
+        return rx.box(
+            rx.hstack(
+                rx.cond(collapsed, rx.icon("panel-left-open", flex_shrink="0"), rx.icon("panel-left-close", flex_shrink="0")),
+                width="100%",
+                padding_x=self.X_PADDING,
+                padding_y=self.Y_PADDING,
+                align="center",
+                overflow="hidden",
+                style={
+                    "_hover": {
+                        "cursor": "pointer",
+                        "bg": rx.color("accent", 4),
+                        "color": rx.color("accent", 11),
+                    },
+                    "color": rx.color("accent", 11),
+                    "border_radius": self.BORDER_RADIUS,
+                },
+            ),
+            on_click=navigation.NavigationState.toggle_sidebar,
+            as_='button',
+            underline="none",
+            weight="medium",
             width="100%",
         )
 
     def sidebar(self, show_backoffice:bool=True) -> rx.Component:
         """Render the sidebar with navigation items."""
+        collapsed = navigation.NavigationState.sidebar_collapsed
+
         return rx.box(
             rx.desktop_only(
                 rx.vstack(
-                    rx.hstack(
-                        rx.image(
-                            src=config.img_src,
-                            width="2.25em",
-                            height="auto",
-                            border_radius="25%",
-                        ),
-                        rx.link(
-                            rx.heading(
-                                "galadriel", size="7", weight="bold"
+                    rx.link(
+                        rx.hstack(
+                            rx.image(
+                                src=config.img_src,
+                                width="2.25em",
+                                height="auto",
+                                border_radius="25%",
+                                flex_shrink="0",
                             ),
-                            href=navigation.routes.ABOUT,
+                            rx.heading(
+                                "galadriel", size="7", weight="bold", white_space="nowrap",
+                            ),
+                            align="center",
+                            justify="start",
+                            padding_x=self.X_PADDING,
+                            width="100%",
+                            overflow="hidden",
                         ),
-                        align="center",
-                        justify="start",
-                        padding_x=self.X_PADDING,
+                        href=navigation.routes.ABOUT,
+                        underline="none",
                         width="100%",
                     ),
                     rx.cond(show_backoffice,
@@ -327,6 +372,7 @@ class SideBar():
                     rx.spacer(),
                     rx.vstack(
                         rx.vstack(
+                            self.__sidebar_toggle_button(),
                             self.__sidebar_color_mode_toggle_item(),
                             self.__sidebar_logout_item(),
                             spacing="1",
@@ -338,12 +384,14 @@ class SideBar():
                         spacing="5",
                     ),
                     spacing="5",
-                    padding_x="1em",
+                    padding_x="0.5em",
                     padding_y="1.5em",
                     bg=rx.color("accent", 3),
                     align="start",
                     height="100vh",
-                    width="16em",
+                    width=rx.cond(collapsed, self.COLLAPSED_WIDTH, self.EXPANDED_WIDTH),
+                    overflow="hidden",
+                    transition=self.TRANSITION,
                 ),
             ),
             rx.mobile_and_tablet(
