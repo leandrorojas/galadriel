@@ -4,7 +4,6 @@ import reflex as rx
 import logging
 from typing import List
 from datetime import datetime, timedelta, timezone
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +15,6 @@ from ..utils import jira, timing, consts
 from rxconfig import config
 
 MAX_LINKED_BUGS = 5
-
-
-def _fetch_issue(issue_key: str) -> dict | None:
-    """Fetch a single Jira issue. Designed to run in a thread pool."""
-    return jira.get_issue(issue_key)
 
 
 class DashboardState(rx.State):
@@ -186,16 +180,7 @@ class DashboardState(rx.State):
 
             unique_keys = list(dict.fromkeys(bug.issue_key for bug in all_linked_bugs))
 
-            results = {}
-            with ThreadPoolExecutor(max_workers=MAX_LINKED_BUGS) as executor:
-                futures = {executor.submit(_fetch_issue, key): key for key in unique_keys}
-                for future in as_completed(futures):
-                    key = futures[future]
-                    try:
-                        results[key] = future.result()
-                    except Exception:
-                        logger.exception("Failed to fetch Jira issue %s", key)
-                        results[key] = None
+            results = jira.bulk_fetch_issues(unique_keys)
 
             bugs = []
             for linked_bug in all_linked_bugs:

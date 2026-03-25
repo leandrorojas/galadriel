@@ -16,6 +16,7 @@ REQUEST_POST = "POST"
 REQUEST_GET = "GET"
 API_ISSUE = "/rest/api/3/issue"
 API_ISSUE_STATUS = "/{issueIdOrKey}"
+API_ISSUE_BULK_FETCH = "/rest/api/3/issue/bulkfetch"
 
 def __jira_hit(type:str, url:str, payload:str = None):
     debug.set_log(False)
@@ -208,3 +209,24 @@ def get_issue(issue_key):
     if raw_response is None:
         return None
     return json.loads(raw_response.text)
+
+def bulk_fetch_issues(issue_keys: list[str], fields: list[str] | None = None) -> dict[str, dict]:
+    """Fetch multiple Jira issues in a single request, returning a dict keyed by issue key."""
+    if not issue_keys:
+        return {}
+
+    payload = json.dumps({
+        "issueIdsOrKeys": issue_keys,
+        "fields": fields or ["summary", "status", "updated"],
+    })
+
+    response = __jira_hit(REQUEST_POST, API_ISSUE_BULK_FETCH, payload)
+    if response is None:
+        return {}
+
+    try:
+        data = json.loads(response.text)
+    except (json.JSONDecodeError, AttributeError):
+        return {}
+
+    return {issue["key"]: issue for issue in data.get("issues", [])}
