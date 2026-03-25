@@ -21,32 +21,46 @@ def mock_config():
         yield fake_config
 
 
+@pytest.fixture(autouse=True)
+def fresh_client():
+    """Reset the singleton client session before each test."""
+    from galadriel.utils.jira import _client
+    _client._session = None
+    yield
+    _client._session = None
+
+
+@pytest.fixture
+def mock_session():
+    """Patch requests.Session so the client uses a mock session."""
+    mock_sess = MagicMock()
+    with patch("galadriel.utils.jira.requests.Session", return_value=mock_sess):
+        yield mock_sess
+
+
 class TestCreateIssue:
-    @patch("galadriel.utils.jira.requests.request")
-    def test_successful_creation(self, mock_request):
+    def test_successful_creation(self, mock_session):
         mock_response = MagicMock()
         mock_response.status_code = 201
         mock_response.json.return_value = {"key": "PROJ-123"}
-        mock_request.return_value = mock_response
+        mock_session.request.return_value = mock_response
 
         from galadriel.utils.jira import create_issue
         result = create_issue("Bug title", description="Bug description")
         assert result == "PROJ-123"
 
-    @patch("galadriel.utils.jira.requests.request")
-    def test_non_201_raises(self, mock_request):
+    def test_non_201_raises(self, mock_session):
         mock_response = MagicMock()
         mock_response.status_code = 400
         mock_response.text = "Bad Request"
-        mock_request.return_value = mock_response
+        mock_session.request.return_value = mock_response
 
         from galadriel.utils.jira import create_issue
         with pytest.raises(HTTPError):
             create_issue("title", description="desc")
 
-    @patch("galadriel.utils.jira.requests.request")
-    def test_connection_error_raises(self, mock_request):
-        mock_request.side_effect = Exception("connection refused")
+    def test_connection_error_raises(self, mock_session):
+        mock_session.request.side_effect = Exception("connection refused")
 
         from galadriel.utils.jira import create_issue
         with pytest.raises(ConnectionError):
@@ -54,54 +68,128 @@ class TestCreateIssue:
 
 
 class TestGetIssue:
-    @patch("galadriel.utils.jira.requests.request")
-    def test_returns_parsed_json(self, mock_request):
+    def test_returns_parsed_json(self, mock_session):
         mock_response = MagicMock()
         mock_response.text = json.dumps({"key": "PROJ-1", "fields": {"summary": "s"}})
-        mock_request.return_value = mock_response
+        mock_session.request.return_value = mock_response
 
         from galadriel.utils.jira import get_issue
         result = get_issue("PROJ-1")
         assert result["key"] == "PROJ-1"
 
-    @patch("galadriel.utils.jira.requests.request")
-    def test_connection_error_returns_none(self, mock_request):
-        mock_request.side_effect = Exception("timeout")
+    def test_connection_error_returns_none(self, mock_session):
+        mock_session.request.side_effect = Exception("timeout")
+
+        from galadriel.utils.jira import get_issue
+        result = get_issue("PROJ-1")
+        assert result is None
+
+    def test_malformed_json_returns_none(self, mock_session):
+        """Malformed JSON response should return None instead of raising."""
+        mock_response = MagicMock()
+        mock_response.text = "<html>Server Error</html>"
+        mock_session.request.return_value = mock_response
 
         from galadriel.utils.jira import get_issue
         result = get_issue("PROJ-1")
         assert result is None
 
 
+class TestBulkFetchIssues:
+    def test_returns_dict_keyed_by_issue_key(self, mock_session):
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            "issues": [
+                {"key": "PROJ-1", "fields": {"summary": "a"}},
+                {"key": "PROJ-2", "fields": {"summary": "b"}},
+            ]
+        })
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import bulk_fetch_issues
+        result = bulk_fetch_issues(["PROJ-1", "PROJ-2"])
+        assert "PROJ-1" in result
+        assert "PROJ-2" in result
+
+    def test_empty_keys_returns_empty_dict(self, mock_session):
+        from galadriel.utils.jira import bulk_fetch_issues
+        result = bulk_fetch_issues([])
+        assert result == {}
+        mock_session.request.assert_not_called()
+
+    def test_connection_error_returns_empty_dict(self, mock_session):
+        mock_session.request.side_effect = Exception("timeout")
+
+        from galadriel.utils.jira import bulk_fetch_issues
+        result = bulk_fetch_issues(["PROJ-1"])
+        assert result == {}
+
+    def test_malformed_json_returns_empty_dict(self, mock_session):
+        mock_response = MagicMock()
+        mock_response.text = "not json"
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import bulk_fetch_issues
+        result = bulk_fetch_issues(["PROJ-1"])
+        assert result == {}
+
+    def test_sends_requested_fields(self, mock_session):
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({"issues": []})
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import bulk_fetch_issues
+        bulk_fetch_issues(["PROJ-1"], fields=["summary"])
+        payload = json.loads(mock_session.request.call_args.kwargs.get("data", mock_session.request.call_args[0][2] if len(mock_session.request.call_args[0]) > 2 else "{}"))
+        assert payload["fields"] == ["summary"]
+
+
+class TestSessionReuse:
+    def test_reuses_session_across_calls(self, mock_session):
+        """Multiple calls should reuse the same session (connection keep-alive)."""
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({"key": "PROJ-1", "fields": {}})
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import get_issue
+        get_issue("PROJ-1")
+        get_issue("PROJ-2")
+        assert mock_session.request.call_count == 2
+
+
 class TestCreateIssueWithAdfNodes:
-    @patch("galadriel.utils.jira.requests.request")
-    def test_adf_nodes_passed_directly(self, mock_request):
+    def test_adf_nodes_passed_directly(self, mock_session):
         """ADF nodes passed via description_adf_nodes go straight into the payload."""
         mock_response = MagicMock()
         mock_response.status_code = 201
         mock_response.json.return_value = {"key": "PROJ-99"}
-        mock_request.return_value = mock_response
+        mock_session.request.return_value = mock_response
 
         from galadriel.utils.jira import create_issue, paragraph, text_node
         nodes = [paragraph([text_node("hello")])]
         result = create_issue("title", description_adf_nodes=nodes)
         assert result == "PROJ-99"
 
-        payload = json.loads(mock_request.call_args.kwargs.get("data", mock_request.call_args[1].get("data", "")))
+        call_kwargs = mock_session.request.call_args.kwargs
+        call_args = mock_session.request.call_args.args
+        data = call_kwargs.get("data") or (call_args[2] if len(call_args) > 2 else None)
+        payload = json.loads(data)
         assert payload["fields"]["description"]["content"] == nodes
 
-    @patch("galadriel.utils.jira.requests.request")
-    def test_no_description_uses_empty_paragraph(self, mock_request):
+    def test_no_description_uses_empty_paragraph(self, mock_session):
         """When no description is given, content should be a single empty paragraph."""
         mock_response = MagicMock()
         mock_response.status_code = 201
         mock_response.json.return_value = {"key": "PROJ-1"}
-        mock_request.return_value = mock_response
+        mock_session.request.return_value = mock_response
 
         from galadriel.utils.jira import create_issue
         create_issue("title")
 
-        payload = json.loads(mock_request.call_args.kwargs.get("data", mock_request.call_args[1].get("data", "")))
+        call_kwargs = mock_session.request.call_args.kwargs
+        call_args = mock_session.request.call_args.args
+        data = call_kwargs.get("data") or (call_args[2] if len(call_args) > 2 else None)
+        payload = json.loads(data)
         content = payload["fields"]["description"]["content"]
         assert len(content) == 1
         assert content[0]["type"] == "paragraph"
@@ -187,7 +275,6 @@ class TestHtmlToAdfNodes:
         nodes = html_to_adf_nodes("line1<br>line2")
         content = nodes[0]["content"]
         assert any(n["type"] == "hardBreak" for n in content)
-
 
     def test_space_between_adjacent_inline_tags(self):
         from galadriel.utils.jira import html_to_adf_nodes

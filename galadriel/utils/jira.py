@@ -12,41 +12,117 @@ from ..utils import debug
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
 
-REQUEST_POST = "POST"
-REQUEST_GET = "GET"
 API_ISSUE = "/rest/api/3/issue"
-API_ISSUE_STATUS = "/{issueIdOrKey}"
+API_ISSUE_BY_KEY = "/rest/api/3/issue/{issueIdOrKey}"
 API_ISSUE_BULK_FETCH = "/rest/api/3/issue/bulkfetch"
 
-def __jira_hit(type:str, url:str, payload:str = None):
-    debug.set_log(False)
-    debug.set_module("JIRA")
 
-    url = config.jira_url + url
-    auth = HTTPBasicAuth(config.jira_user, config.jira_token)
+class JiraClient:
+    """Jira REST API client with persistent HTTP connection."""
 
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
+    def __init__(self):
+        self._session: requests.Session | None = None
 
-    debug.log(f"JIRA URL: {url}")
-    
-    try:
-        if payload is None:
-            response = requests.request(type, url, headers=headers, auth=auth, timeout=30)
+    def _get_session(self) -> requests.Session:
+        """Return the shared session, creating it on first use."""
+        if self._session is None:
+            self._session = requests.Session()
+            self._session.auth = HTTPBasicAuth(config.jira_user, config.jira_token)
+            self._session.headers.update({
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            })
+        return self._session
+
+    def _request(self, method: str, path: str, payload: str = None):
+        """Send a request to Jira using the persistent session."""
+        debug.set_log(False)
+        debug.set_module("JIRA")
+
+        url = config.jira_url + path
+        debug.log(f"JIRA URL: {url}")
+
+        try:
+            session = self._get_session()
+            if payload is None:
+                response = session.request(method, url, timeout=30)
+            else:
+                debug.log(f"JIRA Payload: {payload}")
+                response = session.request(method, url, data=payload, timeout=30)
+        except Exception as err:
+            debug.log(f"Error [_request]: {err}")
+            response = None
+
+        debug.log(f"JIRA response: {response}")
+        return response
+
+    def create_issue(self, summary: str, description_adf_nodes: Optional[list] = None, description: Optional[str] = None) -> str:
+        """Create a Jira issue and return its key."""
+        if description_adf_nodes is not None:
+            content = description_adf_nodes
+        elif description is not None:
+            content = plain_text_to_adf_nodes(description)
         else:
-            debug.log(f"JIRA Payload: {payload}")
-            response = requests.request(type, url, data=payload, headers=headers, auth=auth, timeout=30)
-    except Exception as err:
-        debug.log(f"Error [jira_hit]: {err}")
-        response = None
+            content = [paragraph([text_node("")])]
 
-    debug.log(f"JIRA response: {response}")
-    return response
+        payload = json.dumps({
+            "fields": {
+                "project": {"key": config.jira_project},
+                "summary": summary,
+                "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": content,
+                },
+                "issuetype": {"name": config.jira_issue_type},
+            }
+        })
 
-def __get_issue_api_url(issue_key) -> str:
-    return API_ISSUE + API_ISSUE_STATUS.format(issueIdOrKey=issue_key)
+        response = self._request("POST", API_ISSUE, payload)
+
+        if response is None:
+            raise ConnectionError("Jira request failed: no response received")
+
+        if response.status_code != 201:
+            raise HTTPError(f"Error: {response.status_code} - {response.text}")
+
+        return response.json()["key"]
+
+    def get_issue(self, issue_key: str) -> dict | None:
+        """Fetch a Jira issue by key and return its parsed JSON."""
+        response = self._request("GET", API_ISSUE_BY_KEY.format(issueIdOrKey=issue_key))
+        if response is None:
+            return None
+        try:
+            return json.loads(response.text)
+        except (json.JSONDecodeError, AttributeError):
+            return None
+
+    def bulk_fetch_issues(self, issue_keys: list[str], fields: list[str] | None = None) -> dict[str, dict]:
+        """Fetch multiple Jira issues in a single request, returning a dict keyed by issue key."""
+        if not issue_keys:
+            return {}
+
+        payload = json.dumps({
+            "issueIdsOrKeys": issue_keys,
+            "fields": fields or ["summary", "status", "updated"],
+        })
+
+        response = self._request("POST", API_ISSUE_BULK_FETCH, payload)
+        if response is None:
+            return {}
+
+        try:
+            data = json.loads(response.text)
+        except (json.JSONDecodeError, AttributeError):
+            return {}
+
+        return {issue["key"]: issue for issue in data.get("issues", [])}
+
+
+# Singleton client — reuses TCP/TLS connection across calls
+_client = JiraClient()
+
 
 def text_node(text: str, marks: Optional[list[str]] = None) -> dict:
     """Build an ADF text node with optional marks."""
@@ -162,42 +238,10 @@ def plain_text_to_adf_nodes(text: str) -> list:
     return nodes
 
 
+# Module-level functions — delegate to singleton client
 def create_issue(summary: str, description_adf_nodes: Optional[list] = None, description: Optional[str] = None) -> str:
-    """Create a Jira issue and return its key.
-
-    Accepts either pre-built ADF nodes or a plain text description.
-    """
-    if description_adf_nodes is not None:
-        content = description_adf_nodes
-    elif description is not None:
-        content = plain_text_to_adf_nodes(description)
-    else:
-        content = [paragraph([text_node("")])]
-
-    payload = json.dumps(
-        {
-        "fields": {
-            "project": {"key": config.jira_project},
-            "summary": summary,
-            "description": {
-            "type": "doc",
-            "version": 1,
-            "content": content
-            },
-            "issuetype": {"name": config.jira_issue_type}
-        }
-        }
-    )
-
-    response = __jira_hit(REQUEST_POST, API_ISSUE, payload)
-
-    if response is None:
-        raise ConnectionError("Jira request failed: no response received")
-
-    if (response.status_code != 201):
-        raise HTTPError(f"Error: {response.status_code} - {response.text}")
-
-    return response.json()["key"]
+    """Create a Jira issue and return its key."""
+    return _client.create_issue(summary, description_adf_nodes, description)
 
 def get_issue_url(issue_key) -> str:
     """Return the browsable URL for a Jira issue."""
@@ -205,28 +249,8 @@ def get_issue_url(issue_key) -> str:
 
 def get_issue(issue_key):
     """Fetch a Jira issue by key and return its parsed JSON."""
-    raw_response = __jira_hit(REQUEST_GET, __get_issue_api_url(issue_key))
-    if raw_response is None:
-        return None
-    return json.loads(raw_response.text)
+    return _client.get_issue(issue_key)
 
 def bulk_fetch_issues(issue_keys: list[str], fields: list[str] | None = None) -> dict[str, dict]:
     """Fetch multiple Jira issues in a single request, returning a dict keyed by issue key."""
-    if not issue_keys:
-        return {}
-
-    payload = json.dumps({
-        "issueIdsOrKeys": issue_keys,
-        "fields": fields or ["summary", "status", "updated"],
-    })
-
-    response = __jira_hit(REQUEST_POST, API_ISSUE_BULK_FETCH, payload)
-    if response is None:
-        return {}
-
-    try:
-        data = json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError):
-        return {}
-
-    return {issue["key"]: issue for issue in data.get("issues", [])}
+    return _client.bulk_fetch_issues(issue_keys, fields)
