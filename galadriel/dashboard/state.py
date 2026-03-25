@@ -190,7 +190,8 @@ class DashboardState(rx.State):
                 if raw_issue is None:
                     continue
                 if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
-                    bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"]])
+                    status_color = raw_issue["fields"]["status"].get("statusCategory", {}).get("colorName", "")
+                    bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"], status_color])
 
             async with self:
                 self._loading_bugs = False
