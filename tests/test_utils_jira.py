@@ -3,7 +3,7 @@
 import pytest
 import json
 from unittest.mock import patch, MagicMock
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ConnectionError as RequestsConnectionError
 
 pytestmark = pytest.mark.unit
 
@@ -60,7 +60,7 @@ class TestCreateIssue:
             create_issue("title", description="desc")
 
     def test_connection_error_raises(self, mock_session):
-        mock_session.request.side_effect = Exception("connection refused")
+        mock_session.request.side_effect = RequestsConnectionError("connection refused")
 
         from galadriel.utils.jira import create_issue
         with pytest.raises(ConnectionError):
@@ -78,7 +78,7 @@ class TestGetIssue:
         assert result["key"] == "PROJ-1"
 
     def test_connection_error_returns_none(self, mock_session):
-        mock_session.request.side_effect = Exception("timeout")
+        mock_session.request.side_effect = RequestsConnectionError("timeout")
 
         from galadriel.utils.jira import get_issue
         result = get_issue("PROJ-1")
@@ -118,7 +118,7 @@ class TestBulkFetchIssues:
         mock_session.request.assert_not_called()
 
     def test_connection_error_returns_empty_dict(self, mock_session):
-        mock_session.request.side_effect = Exception("timeout")
+        mock_session.request.side_effect = RequestsConnectionError("timeout")
 
         from galadriel.utils.jira import bulk_fetch_issues
         result = bulk_fetch_issues(["PROJ-1"])
@@ -145,16 +145,19 @@ class TestBulkFetchIssues:
 
 
 class TestSessionReuse:
-    def test_reuses_session_across_calls(self, mock_session):
+    def test_reuses_session_across_calls(self):
         """Multiple calls should reuse the same session (connection keep-alive)."""
+        mock_sess = MagicMock()
         mock_response = MagicMock()
         mock_response.text = json.dumps({"key": "PROJ-1", "fields": {}})
-        mock_session.request.return_value = mock_response
+        mock_sess.request.return_value = mock_response
 
-        from galadriel.utils.jira import get_issue
-        get_issue("PROJ-1")
-        get_issue("PROJ-2")
-        assert mock_session.request.call_count == 2
+        with patch("galadriel.utils.jira.requests.Session", return_value=mock_sess) as mock_session_cls:
+            from galadriel.utils.jira import get_issue
+            get_issue("PROJ-1")
+            get_issue("PROJ-2")
+            assert mock_sess.request.call_count == 2
+            assert mock_session_cls.call_count == 1
 
 
 class TestCreateIssueWithAdfNodes:

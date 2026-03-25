@@ -49,7 +49,7 @@ class JiraClient:
             else:
                 debug.log(f"JIRA Payload: {payload}")
                 response = session.request(method, url, data=payload, timeout=30)
-        except Exception as err:
+        except requests.RequestException as err:
             debug.log(f"Error [_request]: {err}")
             response = None
 
