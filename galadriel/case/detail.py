@@ -79,16 +79,33 @@ def __search_prerequisites_table() -> rx.Component:
 #steps
 def __show_step(test_step:model.StepModel):
     DISABLE_EDIT_MODE = ~Session.can_edit
+    step_id = getattr(test_step, consts.FIELD_ID)
 
     return rx.table.row(
         rx.table.cell(test_step.order),
-        rx.table.cell(test_step.action),
-        rx.table.cell(test_step.expected),
+        rx.table.cell(
+            rx.input(
+                default_value=test_step.action,
+                on_blur=lambda val: state.CaseState.update_step_field(step_id, "action", val),
+                disabled=DISABLE_EDIT_MODE,
+                variant="soft",
+                width="100%",
+            ),
+        ),
+        rx.table.cell(
+            rx.input(
+                default_value=test_step.expected,
+                on_blur=lambda val: state.CaseState.update_step_field(step_id, "expected", val),
+                disabled=DISABLE_EDIT_MODE,
+                variant="soft",
+                width="100%",
+            ),
+        ),
         rx.table.cell(
             rx.flex(
-                rx.button(rx.icon("arrow-big-up"), disabled=(DISABLE_EDIT_MODE | (test_step.order == 1)), on_click=lambda: state.CaseState.move_step_up(getattr(test_step, consts.FIELD_ID))),  # NOSONAR - Reflex event handler; self is implicit
-                rx.button(rx.icon("arrow-big-down"), disabled=(DISABLE_EDIT_MODE | (test_step.order == state.CaseState.step_count)), on_click=lambda: state.CaseState.move_step_down(getattr(test_step, consts.FIELD_ID))),  # NOSONAR
-                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.CaseState.delete_step(getattr(test_step, consts.FIELD_ID))),  # NOSONAR
+                rx.button(rx.icon("arrow-big-up"), disabled=(DISABLE_EDIT_MODE | (test_step.order == 1)), on_click=lambda: state.CaseState.move_step_up(step_id)),  # NOSONAR - Reflex event handler; self is implicit
+                rx.button(rx.icon("arrow-big-down"), disabled=(DISABLE_EDIT_MODE | (test_step.order == state.CaseState.step_count)), on_click=lambda: state.CaseState.move_step_down(step_id)),  # NOSONAR
+                rx.button(rx.icon("trash-2"), disabled=DISABLE_EDIT_MODE, color_scheme="red", on_click=lambda: state.CaseState.delete_step(step_id)),  # NOSONAR
                 spacing="2",
             )
         ),

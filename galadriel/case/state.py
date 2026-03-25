@@ -209,6 +209,25 @@ class CaseState(rx.State):
 
         return rx.toast.success("step added!")
         
+    def update_step_field(self, step_id: int, field: str, value: str):
+        """Update a single field on a step when the user leaves the input."""
+        allowed_fields = {"action", "expected"}
+        if field not in allowed_fields:
+            return rx.toast.error("invalid field")
+        value = value.strip()
+        if field == "action" and not value:
+            return rx.toast.error("action cannot be empty")
+        with rx.session() as session:
+            step = session.exec(StepModel.select().where(StepModel.id == step_id, StepModel.case_id == self.case_id)).first()
+            if step is None:
+                return rx.toast.error("step not found")
+            if getattr(step, field) == value:
+                return
+            setattr(step, field, value)
+            session.add(step)
+            session.commit()
+        self.load_steps()
+
     def delete_step(self, step_id:int):
         """Delete a step and reorder remaining steps."""
         toast = reorder_delete(StepModel, step_id, "case_id", self.case_id, "step", min_count=1)
