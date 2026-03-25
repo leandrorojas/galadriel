@@ -12,8 +12,26 @@ from ..auth.state import require_login
 
 TEXT_CASES = " Case(s)"
 
+def __status_badge(status_name: rx.Var[str], color_name: rx.Var[str]) -> rx.Component:
+    """Render a Jira status as a colored badge."""
+    color = rx.match(
+        color_name,
+        ("blue-gray", "blue"),
+        ("yellow", "yellow"),
+        ("green", "green"),
+        ("medium-gray", "gray"),
+        "gray",
+    )
+    return rx.badge(status_name, color_scheme=color, variant="soft", size="2")
+
+
 def __show_linked_bug(linked_bug: List[str]) -> rx.Component:
-    return rx.table.row(rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1], is_external=True)), rx.table.cell(linked_bug[2]), rx.table.cell(linked_bug[3]), rx.table.cell(linked_bug[4][0:10]),),
+    return rx.table.row(
+        rx.table.cell(rx.link(linked_bug[0], href=linked_bug[1], is_external=True)),
+        rx.table.cell(linked_bug[2]),
+        rx.table.cell(__status_badge(linked_bug[3], linked_bug[5])),
+        rx.table.cell(linked_bug[4][0:10]),
+    )
 
 def __table() -> rx.Component:
     table_component = Table()
