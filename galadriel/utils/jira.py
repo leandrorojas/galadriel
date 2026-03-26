@@ -98,6 +98,23 @@ class JiraClient:
         except (json.JSONDecodeError, AttributeError):
             return None
 
+    def check_connection(self) -> tuple[bool, str]:
+        """Verify the Jira connection by calling /rest/api/3/myself."""
+        response = self._request("GET", "/rest/api/3/myself")
+        if response is None:
+            return False, "Connection failed: no response from Jira"
+        if response.status_code == 200:
+            try:
+                data = json.loads(response.text)
+                return True, f"Connected as {data.get('displayName', data.get('emailAddress', 'unknown'))}"
+            except (json.JSONDecodeError, AttributeError):
+                return True, "Connected (could not parse user info)"
+        if response.status_code == 401:
+            return False, "Authentication failed: invalid credentials"
+        if response.status_code == 403:
+            return False, "Authorization failed: insufficient permissions"
+        return False, f"Unexpected response: {response.status_code}"
+
     def bulk_fetch_issues(self, issue_keys: list[str], fields: list[str] | None = None) -> dict[str, dict]:
         """Fetch multiple Jira issues in a single request, returning a dict keyed by issue key."""
         if not issue_keys:
@@ -242,6 +259,10 @@ def plain_text_to_adf_nodes(text: str) -> list:
 def create_issue(summary: str, description_adf_nodes: Optional[list] = None, description: Optional[str] = None) -> str:
     """Create a Jira issue and return its key."""
     return _client.create_issue(summary, description_adf_nodes, description)
+
+def check_connection() -> tuple[bool, str]:
+    """Verify the Jira connection and return (success, message)."""
+    return _client.check_connection()
 
 def get_issue_url(issue_key) -> str:
     """Return the browsable URL for a Jira issue."""

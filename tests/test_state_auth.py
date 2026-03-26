@@ -111,6 +111,39 @@ class TestRequireAdminGuard:
         assert self._redirect_path(result) == "/users"
 
 
+class TestRequireSuperAdminGuard:
+    """Tests for Session.require_super_admin server-side on_load guard."""
+
+    @staticmethod
+    def _redirect_path(event_spec):
+        """Extract the redirect path from an rx.redirect EventSpec."""
+        return event_spec.args[0][1]._var_value
+
+    def _make_session_state(self, *, is_super_admin):
+        """Create a mock state with the given super admin status."""
+        state = MagicMock()
+        state.is_super_admin = is_super_admin
+        return state
+
+    def test_require_super_admin_allows_admin(self):
+        """Admin users should not be redirected."""
+        state = self._make_session_state(is_super_admin=True)
+        result = Session.require_super_admin.fn(state)
+        assert result is None
+
+    def test_require_super_admin_redirects_user_admin_to_dashboard(self):
+        """User admin users should be redirected to /dashboard."""
+        state = self._make_session_state(is_super_admin=False)
+        result = Session.require_super_admin.fn(state)
+        assert self._redirect_path(result) == "/dashboard"
+
+    def test_require_super_admin_redirects_non_admin_to_dashboard(self):
+        """Non-admin users should be redirected to /dashboard."""
+        state = self._make_session_state(is_super_admin=False)
+        result = Session.require_super_admin.fn(state)
+        assert self._redirect_path(result) == "/dashboard"
+
+
 class TestRequireEditorGuard:
     """Tests for Session.require_editor server-side on_load guard."""
 

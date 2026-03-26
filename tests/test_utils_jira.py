@@ -144,6 +144,51 @@ class TestBulkFetchIssues:
         assert payload["fields"] == ["summary"]
 
 
+class TestCheckConnection:
+    def test_successful_connection(self, mock_session):
+        """Successful /myself call returns True with display name."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.text = json.dumps({"displayName": "Test User", "emailAddress": "test@example.com"})
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is True
+        assert "Test User" in message
+
+    def test_auth_failure(self, mock_session):
+        """401 response returns False with auth error message."""
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is False
+        assert "Authentication failed" in message
+
+    def test_connection_error(self, mock_session):
+        """Connection error returns False."""
+        mock_session.request.side_effect = RequestsConnectionError("timeout")
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is False
+        assert "no response" in message
+
+    def test_forbidden(self, mock_session):
+        """403 response returns False with authorization error."""
+        mock_response = MagicMock()
+        mock_response.status_code = 403
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is False
+        assert "Authorization failed" in message
+
+
 class TestSessionReuse:
     def test_reuses_session_across_calls(self):
         """Multiple calls should reuse the same session (connection keep-alive)."""
