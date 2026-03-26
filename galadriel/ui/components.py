@@ -158,6 +158,7 @@ class SideBar():
     X_PADDING = "0.5rem"
     Y_PADDING = "0.75rem"
     BORDER_RADIUS = "0.5em"
+    SIDEBAR_PADDING = "0.5em"
     COLLAPSED_WIDTH = "3.5em"
     EXPANDED_WIDTH = "16em"
     TRANSITION = "width 0.2s ease-in-out"
@@ -313,6 +314,7 @@ class SideBar():
             on_click=navigation.NavigationState.toggle_sidebar,
             as_='button',
             cursor="pointer",
+            aria_label=rx.cond(collapsed, "Open sidebar", "Close sidebar"),
             position="absolute",
             right="0",
             top="50%",
@@ -378,9 +380,9 @@ class SideBar():
                         spacing="2",
                     ),
                     spacing="5",
-                    padding_x="0.5em",
+                    padding_x=self.SIDEBAR_PADDING,
                     padding_top="1.5em",
-                    padding_bottom="0.5em",
+                    padding_bottom=self.SIDEBAR_PADDING,
                     bg=rx.color("accent", 3),
                     align="start",
                     height="100vh",
