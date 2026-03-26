@@ -317,6 +317,7 @@ class SideBar():
             right="0",
             top="50%",
             transform="translateY(-50%)",
+            bg=rx.color("accent", 3),
         )
 
     def sidebar(self, show_backoffice:bool=True) -> rx.Component:
@@ -346,6 +347,8 @@ class SideBar():
                             href=navigation.routes.ABOUT,
                             underline="none",
                             pointer_events=rx.cond(collapsed, "none", "auto"),
+                            opacity=rx.cond(collapsed, "0", "1"),
+                            transition="opacity 0.2s ease-in-out",
                             white_space="nowrap",
                         ),
                         self.__sidebar_toggle_button(),
