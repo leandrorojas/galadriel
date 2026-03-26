@@ -312,20 +312,28 @@ class SideBar():
         collapsed = navigation.NavigationState.sidebar_collapsed
 
         return rx.box(
-            rx.cond(collapsed, rx.icon("panel-left-open", size=18), rx.icon("panel-left-close", size=18)),
+            rx.hstack(
+                rx.cond(collapsed, rx.icon("panel-left-open", flex_shrink="0"), rx.icon("panel-left-close", flex_shrink="0")),
+                width=rx.cond(collapsed, "100%", "auto"),
+                padding_x=self.X_PADDING,
+                padding_y=self.Y_PADDING,
+                align="center",
+                justify="center",
+                overflow="hidden",
+                style={
+                    "_hover": {
+                        "bg": rx.color("accent", 4),
+                        "color": rx.color("accent", 11),
+                    },
+                    "color": rx.color("accent", 11),
+                    "border_radius": self.BORDER_RADIUS,
+                },
+            ),
             on_click=navigation.NavigationState.toggle_sidebar,
             as_='button',
             cursor="pointer",
             flex_shrink="0",
-            padding="0.35rem",
-            style={
-                "_hover": {
-                    "bg": rx.color("accent", 4),
-                    "color": rx.color("accent", 11),
-                },
-                "color": rx.color("accent", 11),
-                "border_radius": self.BORDER_RADIUS,
-            },
+            width=rx.cond(collapsed, "100%", "auto"),
         )
 
     def sidebar(self, show_backoffice:bool=True) -> rx.Component:
@@ -350,15 +358,16 @@ class SideBar():
                                 ),
                                 align="center",
                                 gap="2",
+                                flex_wrap="nowrap",
                             ),
                             href=navigation.routes.ABOUT,
                             underline="none",
                             opacity=rx.cond(collapsed, "0", "1"),
                             pointer_events=rx.cond(collapsed, "none", "auto"),
-                            max_width=rx.cond(collapsed, "0", "14em"),
-                            transition="opacity 0.2s ease-in-out, max-width 0.2s ease-in-out",
-                            min_width="0",
+                            transition="opacity 0.2s ease-in-out",
                             overflow="hidden",
+                            flex_shrink="1",
+                            min_width="0",
                         ),
                         self.__sidebar_toggle_button(),
                         align="center",
