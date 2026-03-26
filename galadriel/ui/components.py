@@ -181,7 +181,7 @@ class SideBar():
                 "color": rx.color("accent", 11),
                 "border_radius": self.BORDER_RADIUS,
             },
-        ),
+        )
 
     def __sidebar_item(self, text: str, icon: str, href: str) -> rx.Component:
         return rx.link(
