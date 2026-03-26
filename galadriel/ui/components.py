@@ -166,38 +166,34 @@ class SideBar():
         auth_user_info = Session.user_info
 
         return rx.hstack(
-            rx.icon_button(
-                rx.icon("user"),
-                size="2",
-                radius="full",
-                flex_shrink="0",
-            ),
+            rx.icon("user", flex_shrink="0"),
             rx.vstack(
-                rx.box(
-                    rx.text(
-                        f"{Session.username}",
-                        size="3",
-                        weight="bold",
-                        white_space="nowrap",
-                    ),
-                    rx.text(
-                        f"{auth_user_info.email}",
-                        size="2",
-                        weight="medium",
-                        white_space="nowrap",
-                    ),
-                    width="100%",
+                rx.text(
+                    f"{Session.username}",
+                    size="4",
+                    weight="bold",
+                    white_space="nowrap",
+                ),
+                rx.text(
+                    f"{auth_user_info.email}",
+                    size="2",
+                    weight="medium",
+                    white_space="nowrap",
                 ),
                 spacing="0",
                 align="start",
-                justify="start",
-                width="100%",
+                min_width="0",
+                overflow="hidden",
             ),
-            padding_x=self.X_PADDING,
-            align="center",
-            justify=rx.cond(navigation.NavigationState.sidebar_collapsed, "center", "start"),
             width="100%",
+            padding_x=self.X_PADDING,
+            padding_y=self.Y_PADDING,
+            align="center",
             overflow="hidden",
+            style={
+                "color": rx.color("accent", 11),
+                "border_radius": self.BORDER_RADIUS,
+            },
         ),
 
     def __sidebar_item(self, text: str, icon: str, href: str) -> rx.Component:
