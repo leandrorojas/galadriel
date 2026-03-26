@@ -374,7 +374,7 @@ class SideBar():
                         rx.divider(),
                         self.__sidebar_user_item(),
                         width="100%",
-                        spacing="5",
+                        spacing="2",
                     ),
                     spacing="5",
                     padding_x="0.5em",
