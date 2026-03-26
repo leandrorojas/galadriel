@@ -349,7 +349,7 @@ class SideBar():
                             href=navigation.routes.ABOUT,
                             underline="none",
                             pointer_events=rx.cond(collapsed, "none", "auto"),
-                            tab_index=rx.cond(collapsed, "-1", "0"),
+                            tab_index=rx.cond(collapsed, -1, 0),
                             aria_hidden=rx.cond(collapsed, "true", "false"),
                             opacity=rx.cond(collapsed, "0", "1"),
                             transition="opacity 0.2s ease-in-out",
