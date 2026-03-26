@@ -163,27 +163,13 @@ class SideBar():
     TRANSITION = "width 0.2s ease-in-out"
 
     def __sidebar_user_item(self) -> rx.Component:
-        auth_user_info = Session.user_info
-
         return rx.hstack(
             rx.icon("user", flex_shrink="0"),
-            rx.vstack(
-                rx.text(
-                    f"{Session.username}",
-                    size="4",
-                    weight="bold",
-                    white_space="nowrap",
-                ),
-                rx.text(
-                    f"{auth_user_info.email}",
-                    size="2",
-                    weight="medium",
-                    white_space="nowrap",
-                ),
-                spacing="0",
-                align="start",
-                min_width="0",
-                overflow="hidden",
+            rx.text(
+                f"{Session.username}",
+                size="4",
+                weight="bold",
+                white_space="nowrap",
             ),
             width="100%",
             padding_x=self.X_PADDING,
