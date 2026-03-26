@@ -6,6 +6,12 @@ from . import routes
 class NavigationState(rx.State):
     """Provides redirect event handlers for all application routes."""
 
+    sidebar_collapsed: bool = False
+
+    def toggle_sidebar(self):
+        """Toggle the sidebar between expanded and collapsed states."""
+        self.sidebar_collapsed = not self.sidebar_collapsed
+
     def to_home(self):
         """Redirect to the home page."""
         return rx.redirect(routes.HOME)
