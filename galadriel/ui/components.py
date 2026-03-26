@@ -296,7 +296,6 @@ class SideBar():
         return rx.box(
             rx.hstack(
                 rx.cond(collapsed, rx.icon("panel-left-open", flex_shrink="0"), rx.icon("panel-left-close", flex_shrink="0")),
-                width=rx.cond(collapsed, "100%", "auto"),
                 padding_x=self.X_PADDING,
                 padding_y=self.Y_PADDING,
                 align="center",
@@ -314,8 +313,10 @@ class SideBar():
             on_click=navigation.NavigationState.toggle_sidebar,
             as_='button',
             cursor="pointer",
-            flex_shrink="0",
-            width=rx.cond(collapsed, "100%", "auto"),
+            position="absolute",
+            right="0",
+            top="50%",
+            transform="translateY(-50%)",
         )
 
     def sidebar(self, show_backoffice:bool=True) -> rx.Component:
@@ -325,7 +326,7 @@ class SideBar():
         return rx.box(
             rx.desktop_only(
                 rx.vstack(
-                    rx.hstack(
+                    rx.box(
                         rx.link(
                             rx.hstack(
                                 rx.image(
@@ -344,20 +345,17 @@ class SideBar():
                             ),
                             href=navigation.routes.ABOUT,
                             underline="none",
-                            opacity=rx.cond(collapsed, "0", "1"),
                             pointer_events=rx.cond(collapsed, "none", "auto"),
-                            transition="opacity 0.2s ease-in-out",
-                            overflow="hidden",
-                            flex_shrink="1",
-                            min_width="0",
+                            white_space="nowrap",
                         ),
                         self.__sidebar_toggle_button(),
-                        align="center",
-                        justify=rx.cond(collapsed, "center", "start"),
-                        padding_x=rx.cond(collapsed, "0", self.X_PADDING),
-                        gap=rx.cond(collapsed, "0", "3"),
+                        position="relative",
                         width="100%",
                         overflow="hidden",
+                        white_space="nowrap",
+                        display="flex",
+                        align_items="center",
+                        padding_left=self.X_PADDING,
                     ),
                     rx.cond(show_backoffice,
                         self.__backoffice_sidebar_items(),
