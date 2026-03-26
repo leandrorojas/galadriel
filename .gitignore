@@ -9,5 +9,6 @@ alembic.ini
 alembic/
 assets/external/
 galadriel.yaml
+.env
 .vscode/
 .sonarlint/

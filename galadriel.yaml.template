@@ -4,7 +4,6 @@ galadriel:
 jira:
   url: https://instance.atlassian.net #without last slash
   user: yourmail@server.com
-  token: <api_token> #https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/
   project: "TEST"
   issue_type: "Bug"
   done_status: "Done"
