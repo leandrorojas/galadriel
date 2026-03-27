@@ -8,17 +8,23 @@ from requests.exceptions import HTTPError, ConnectionError as RequestsConnection
 pytestmark = pytest.mark.unit
 
 
+FAKE_SETTINGS = {
+    "jira_url": "https://jira.example.com",
+    "jira_user": "user@example.com",
+    "jira_project": "PROJ",
+    "jira_issue_type": "Bug",
+}
+
+
 @pytest.fixture(autouse=True)
-def mock_config():
-    """Provide a fake rxconfig.config for all jira tests."""
-    fake_config = MagicMock()
-    fake_config.jira_url = "https://jira.example.com"
-    fake_config.jira_user = "user@example.com"
-    fake_config.jira_token = "fake-token"
-    fake_config.jira_project = "PROJ"
-    fake_config.jira_issue_type = "Bug"
-    with patch("galadriel.utils.jira.config", fake_config):
-        yield fake_config
+def mock_settings():
+    """Provide fake DB settings and env token for all jira tests."""
+    def fake_get_setting(name, default=""):
+        return FAKE_SETTINGS.get(name, default)
+
+    with patch("galadriel.utils.jira.get_setting", side_effect=fake_get_setting), \
+         patch.dict("os.environ", {"GALADRIEL_JIRA_TOKEN": "fake-token"}):
+        yield
 
 
 @pytest.fixture(autouse=True)

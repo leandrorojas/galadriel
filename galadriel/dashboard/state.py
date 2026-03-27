@@ -12,7 +12,7 @@ from ..iteration.model import IterationSnapshotModel, IterationSnapshotLinkedIss
 
 from sqlmodel import select, col, desc
 from ..utils import jira, timing, consts
-from rxconfig import config
+from ..config.helpers import get_setting, JIRA_DONE_STATUS
 
 MAX_LINKED_BUGS = 5
 
@@ -189,7 +189,7 @@ class DashboardState(rx.State):
                 raw_issue = results.get(linked_bug.issue_key)
                 if raw_issue is None:
                     continue
-                if raw_issue["fields"]["status"]["name"] != config.jira_done_status:
+                if raw_issue["fields"]["status"]["name"] != get_setting(JIRA_DONE_STATUS):
                     status_color = raw_issue["fields"]["status"].get("statusCategory", {}).get("colorName", "")
                     bugs.append([raw_issue["key"], jira.get_issue_url(raw_issue["key"]), raw_issue["fields"]["summary"], raw_issue["fields"]["status"]["name"], raw_issue["fields"]["updated"], status_color])
 

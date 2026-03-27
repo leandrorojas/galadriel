@@ -1,7 +1,6 @@
 """Settings page for application configuration (admin-only)."""
 
 import reflex as rx
-from rxconfig import config
 
 from ..pages import base_page
 from ..ui.components import Badge
@@ -26,11 +25,15 @@ def __setting_row(name: str, description: str, action: rx.Component) -> rx.Compo
     )
 
 
-def __config_field(label: str, value: str) -> rx.Component:
-    """Render a read-only config field with label and value."""
+def __config_field(label: str, value: rx.Var[str], on_change, editing: rx.Var[bool]) -> rx.Component:
+    """Render a config field that switches between read-only text and input."""
     return rx.hstack(
         rx.text(label, weight="bold", size="2", min_width="8em"),
-        rx.text(value or "—", size="2", color_scheme="gray"),
+        rx.cond(
+            editing,
+            rx.input(value=value, on_change=on_change, size="2", width="100%"),
+            rx.text(rx.cond(value, value, "—"), size="2", color_scheme="gray"),
+        ),
         width="100%",
         align="center",
     )
@@ -38,6 +41,8 @@ def __config_field(label: str, value: str) -> rx.Component:
 
 def __jira_section() -> rx.Component:
     """Render the Jira configuration accordion section."""
+    editing = SettingsState.jira_editing
+
     return rx.accordion.root(
         rx.accordion.item(
             header=rx.hstack(
@@ -47,13 +52,38 @@ def __jira_section() -> rx.Component:
                 spacing="2",
             ),
             content=rx.vstack(
-                __config_field("URL", config.jira_url),
-                __config_field("User", config.jira_user),
-                __config_field("Project", config.jira_project),
-                __config_field("Issue type", config.jira_issue_type),
-                __config_field("Done status", config.jira_done_status),
+                __config_field("URL", SettingsState.jira_url, SettingsState.set_jira_url, editing),
+                __config_field("User", SettingsState.jira_user, SettingsState.set_jira_user, editing),
+                __config_field("Project", SettingsState.jira_project, SettingsState.set_jira_project, editing),
+                __config_field("Issue type", SettingsState.jira_issue_type, SettingsState.set_jira_issue_type, editing),
+                __config_field("Done status", SettingsState.jira_done_status, SettingsState.set_jira_done_status, editing),
                 rx.separator(),
                 rx.hstack(
+                    rx.cond(
+                        editing,
+                        rx.hstack(
+                            rx.button(
+                                "Cancel",
+                                on_click=SettingsState.toggle_jira_editing,
+                                variant="soft",
+                                size="2",
+                            ),
+                            rx.button(
+                                rx.icon("save", size=16),
+                                "Save",
+                                on_click=SettingsState.save_jira_settings,
+                                size="2",
+                            ),
+                            spacing="2",
+                        ),
+                        rx.button(
+                            rx.icon("pencil", size=16),
+                            "Edit",
+                            on_click=SettingsState.toggle_jira_editing,
+                            variant="outline",
+                            size="2",
+                        ),
+                    ),
                     rx.spacer(),
                     rx.button(
                         rx.cond(
