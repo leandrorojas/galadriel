@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import AsyncMock, PropertyMock, patch
 from sqlmodel import select
 
-from galadriel.suite.state import SuiteState
+from galadriel.suite.state import SuiteState, AddSuiteState, EditSuiteState
 from galadriel.suite.model import SuiteModel, SuiteChildModel
 from galadriel.utils import consts
 from conftest import init_state
@@ -29,14 +29,26 @@ def _run(coro):
     return asyncio.run(coro)
 
 
+_PARENT_FIELDS = dict(
+    suites=[], suite=None, children=[], child=None,
+    cases_for_search=[], show_case_search=False, search_case_value="",
+    scenarios_for_search=[], show_scenario_search=False, search_scenario_value="",
+)
+
+
 def _make_state(suite_id_value=""):
-    state = init_state(
-        SuiteState,
-        suites=[], suite=None, children=[], child=None,
-        cases_for_search=[], show_case_search=False, search_case_value="",
-        scenarios_for_search=[], show_scenario_search=False, search_scenario_value="",
-    )
+    state = init_state(SuiteState, **_PARENT_FIELDS)
     type(state).suite_id = PropertyMock(return_value=suite_id_value)
+    return state
+
+
+def _make_child_state(child_cls, suite_id_value="", **extra):
+    """Create a child state (AddSuiteState/EditSuiteState) with a wired parent."""
+    parent = init_state(SuiteState, **_PARENT_FIELDS)
+    state = init_state(child_cls, **extra)
+    object.__setattr__(state, "parent_state", parent)
+    if suite_id_value:
+        type(state).suite_id = PropertyMock(return_value=suite_id_value)
     return state
 
 
@@ -161,3 +173,44 @@ class TestSuiteChildren:
         session.commit()
         state = _make_state(suite_id_value=str(suite.id))
         assert state.get_max_child_order(5, consts.SUITE_CHILD_TYPE_SCENARIO) is None
+
+
+class TestAddSuiteHandleSubmit:
+    """Tests for AddSuiteState.handle_submit with audit logging."""
+
+    def test_creates_suite_and_logs(self, patch_rx_session):
+        """handle_submit should create the suite and call log_action."""
+        state = _make_child_state(AddSuiteState, form_data={})
+        with patch("galadriel.suite.state.log_action") as mock_log:
+            _run(state.handle_submit({"name": "New Suite"}))
+            assert state.parent_state.suite is not None
+            assert state.parent_state.suite.name == "New Suite"
+            mock_log.assert_called_once_with(0, "test", "created", "suite", "New Suite")
+
+    def test_empty_name_does_not_log(self, patch_rx_session):
+        """handle_submit with empty name should not call log_action."""
+        state = _make_child_state(AddSuiteState, form_data={})
+        with patch("galadriel.suite.state.log_action") as mock_log:
+            _run(state.handle_submit({"name": ""}))
+            mock_log.assert_not_called()
+
+
+class TestEditSuiteHandleSubmit:
+    """Tests for EditSuiteState.handle_submit with audit logging."""
+
+    def test_edits_suite_and_logs(self, patch_rx_session, make_suite):
+        """handle_submit should save edits and call log_action."""
+        suite = make_suite(name="Old")
+        state = _make_child_state(EditSuiteState, suite_id_value=str(suite.id), form_data={})
+        with patch("galadriel.suite.state.log_action") as mock_log:
+            _run(state.handle_submit({"suite_id": suite.id, "name": "Renamed"}))
+            assert state.parent_state.suite.name == "Renamed"
+            mock_log.assert_called_once_with(0, "test", "updated", "suite", "Renamed")
+
+    def test_empty_name_does_not_log(self, patch_rx_session, make_suite):
+        """handle_submit with empty name should not call log_action."""
+        suite = make_suite(name="S")
+        state = _make_child_state(EditSuiteState, suite_id_value=str(suite.id), form_data={})
+        with patch("galadriel.suite.state.log_action") as mock_log:
+            _run(state.handle_submit({"suite_id": suite.id, "name": ""}))
+            mock_log.assert_not_called()

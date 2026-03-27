@@ -42,7 +42,7 @@ class SuiteState(rx.State):
     async def _get_user_info(self) -> tuple[int, str]:
         """Return (user_id, username) from the current session."""
         session_state = await self.get_state(Session)
-        return session_state.authenticated_user.id, session_state.authenticated_user.username
+        return session_state.user_id or 0, session_state.username or "unknown"
 
     @rx.var(cache=True)
     def suite_id(self) -> str:
@@ -244,13 +244,13 @@ class SuiteState(rx.State):
             session.add(case_to_add)
             session.commit()
             session.refresh(case_to_add)
-            case_name = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
+            case_obj = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
         self.search_case_value = ""
         self.collapse_searches()
         self.load_children()
 
         user_id, username = await self._get_user_info()
-        log_action(user_id, username, "linked", "suite", self.suite.name if self.suite else "", f"case '{case_name.name if case_name else 'unknown'}'")
+        log_action(user_id, username, "linked", "suite", self.suite.name if self.suite else "", f"case '{case_obj.name if case_obj else 'unknown'}'")
 
         return rx.toast.success("case added!")
 
