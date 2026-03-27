@@ -5,7 +5,8 @@ import reflex_local_auth
 
 from .. import cycle, iteration, suite, user
 
-from ..config import ConfigModel
+from ..config.helpers import set_setting, JIRA_URL, JIRA_USER, JIRA_PROJECT, JIRA_ISSUE_TYPE, JIRA_DONE_STATUS
+from ..utils import yaml
 
 cycle_child_types: cycle.CycleChildTypeModel = []
 cycle_status: cycle.CycleStatusModel = []
@@ -65,12 +66,8 @@ galadriel_users = [
     {"id":0, "email":"no_email", "user_id":0, "user_role":0, "active":True},
 ]
 
-def is_first_run() -> bool:
-    """Return True if the database has not been seeded yet."""
-    with rx.session() as session:
-        to_return = session.exec(ConfigModel.select().where(ConfigModel.name == "first_run")).one_or_none()
-        return (to_return == None)
-    
+
+
 def seed_db():
     """Clear existing seed data and insert fresh seed records."""
     __clear_seed_data()
@@ -122,11 +119,18 @@ def __insert_seed_data():
 
         session.commit()
 
-def set_first_run():
-    """Mark the database as seeded so seeding does not repeat."""
-    first_run:dict = {"name":"first_run", "value": "1"}
+def seed_jira_settings():
+    """Migrate Jira settings from galadriel.yaml to the database."""
+    yaml_map = {
+        JIRA_URL: "url",
+        JIRA_USER: "user",
+        JIRA_PROJECT: "project",
+        JIRA_ISSUE_TYPE: "issue_type",
+        JIRA_DONE_STATUS: "done_status",
+    }
+    for db_key, yaml_key in yaml_map.items():
+        value = yaml.read_setting("galadriel.yaml", "jira", yaml_key)
+        if value is not None:
+            set_setting(db_key, str(value))
 
-    with rx.session() as session:
-        to_add = ConfigModel(**first_run)
-        session.add(to_add)
-        session.commit()
+

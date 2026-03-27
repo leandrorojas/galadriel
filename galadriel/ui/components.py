@@ -284,9 +284,13 @@ class SideBar():
         )
 
     def __backoffice_sidebar_items(self) -> rx.Component:
+        """Render backoffice sidebar items (Settings visible only to admin)."""
         return rx.vstack(
             self.__sidebar_item("Users", "users", navigation.routes.USERS),
-            self.__sidebar_item("[to do] Settings", "settings", "/#"),
+            rx.cond(
+                Session.is_super_admin,
+                self.__sidebar_item("Settings", "settings", navigation.routes.SETTINGS),
+            ),
             spacing="1",
             width="100%",
         )

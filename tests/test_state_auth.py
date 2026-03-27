@@ -73,6 +73,40 @@ class TestSessionRole:
         assert UserRole(found.user_role) == UserRole.USER_ADMIN
 
 
+class TestIsSuperAdmin:
+    """Tests for the is_super_admin role check logic."""
+
+    def test_admin_is_super_admin(self, patch_rx_session, seeded_db):
+        """Admin role (0) should be considered super admin."""
+        session = patch_rx_session
+        user = GaladrielUser(email="admin@test.com", user_id=10, user_role=UserRole.ADMIN.value)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(select(GaladrielUser).where(GaladrielUser.user_id == 10)).one_or_none()
+        assert found.user_role == UserRole.ADMIN.value
+
+    def test_user_admin_is_not_super_admin(self, patch_rx_session, seeded_db):
+        """User admin role (3) should NOT be considered super admin."""
+        session = patch_rx_session
+        user = GaladrielUser(email="useradmin@test.com", user_id=11, user_role=UserRole.USER_ADMIN.value)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(select(GaladrielUser).where(GaladrielUser.user_id == 11)).one_or_none()
+        assert found.user_role != UserRole.ADMIN.value
+
+    def test_editor_is_not_super_admin(self, patch_rx_session, seeded_db):
+        """Editor role should NOT be considered super admin."""
+        session = patch_rx_session
+        user = GaladrielUser(email="editor@test.com", user_id=12, user_role=UserRole.EDITOR.value)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(select(GaladrielUser).where(GaladrielUser.user_id == 12)).one_or_none()
+        assert found.user_role != UserRole.ADMIN.value
+
+
 class TestRequireAdminGuard:
     """Tests for Session.require_admin server-side on_load guard."""
 
@@ -109,6 +143,39 @@ class TestRequireAdminGuard:
         state = self._make_session_state(is_admin=True)
         result = Session.require_non_admin.fn(state)
         assert self._redirect_path(result) == "/users"
+
+
+class TestRequireSuperAdminGuard:
+    """Tests for Session.require_super_admin server-side on_load guard."""
+
+    @staticmethod
+    def _redirect_path(event_spec):
+        """Extract the redirect path from an rx.redirect EventSpec."""
+        return event_spec.args[0][1]._var_value
+
+    def _make_session_state(self, *, is_super_admin):
+        """Create a mock state with the given super admin status."""
+        state = MagicMock()
+        state.is_super_admin = is_super_admin
+        return state
+
+    def test_require_super_admin_allows_admin(self):
+        """Admin users should not be redirected."""
+        state = self._make_session_state(is_super_admin=True)
+        result = Session.require_super_admin.fn(state)
+        assert result is None
+
+    def test_require_super_admin_redirects_user_admin_to_dashboard(self):
+        """User admin users should be redirected to /dashboard."""
+        state = self._make_session_state(is_super_admin=False)
+        result = Session.require_super_admin.fn(state)
+        assert self._redirect_path(result) == "/dashboard"
+
+    def test_require_super_admin_redirects_non_admin_to_dashboard(self):
+        """Non-admin users should be redirected to /dashboard."""
+        state = self._make_session_state(is_super_admin=False)
+        result = Session.require_super_admin.fn(state)
+        assert self._redirect_path(result) == "/dashboard"
 
 
 class TestRequireEditorGuard:

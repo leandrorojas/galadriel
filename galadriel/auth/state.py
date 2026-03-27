@@ -71,6 +71,23 @@ def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     admin_page.__name__ = page.__name__
     return admin_page
 
+
+def require_super_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
+    """Wrap a page so only admin users see it; user_admin and others get a spinner then redirect."""
+    def super_admin_page():
+        return rx.fragment(
+            rx.cond(
+                LoginState.is_hydrated & LoginState.is_authenticated & Session.is_super_admin,
+                page(),
+                rx.center(
+                    rx.spinner(size="3"),
+                    min_height="100vh",
+                ),
+            )
+        )
+    super_admin_page.__name__ = page.__name__
+    return super_admin_page
+
 PENDING_APPROVAL_MESSAGE = "Registration successful! Your account is pending admin approval. You will be able to log in once an administrator activates your account."
 
 class Login(LoginState):
@@ -166,6 +183,17 @@ class Session(reflex_local_auth.LocalAuthState):
             return galadriel_user.user_role in (UserRole.ADMIN.value, UserRole.USER_ADMIN.value)
 
     @rx.var(cache=True)
+    def is_super_admin(self) -> bool:
+        """True only for the admin role (excludes user_admin)."""
+        with rx.session() as session:
+            if self.authenticated_user.id < 0:
+                return False
+            galadriel_user = session.exec(GaladrielUser.select().where(GaladrielUser.user_id == self.user_id)).one_or_none()
+            if not galadriel_user:
+                return False
+            return galadriel_user.user_role == UserRole.ADMIN.value
+
+    @rx.var(cache=True)
     def role(self) -> UserRole:
         with rx.session() as session:
             if self.authenticated_user.id < 0:
@@ -182,6 +210,11 @@ class Session(reflex_local_auth.LocalAuthState):
     def require_admin(self):
         """Redirect non-admin/user_admin users to the dashboard."""
         if not self.is_admin:
+            return rx.redirect("/dashboard")
+
+    def require_super_admin(self):
+        """Redirect non-admin users (including user_admin) to the dashboard."""
+        if not self.is_super_admin:
             return rx.redirect("/dashboard")
 
     def require_non_admin(self):

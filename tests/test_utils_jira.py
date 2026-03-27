@@ -8,17 +8,23 @@ from requests.exceptions import HTTPError, ConnectionError as RequestsConnection
 pytestmark = pytest.mark.unit
 
 
+FAKE_SETTINGS = {
+    "jira_url": "https://jira.example.com",
+    "jira_user": "user@example.com",
+    "jira_project": "PROJ",
+    "jira_issue_type": "Bug",
+}
+
+
 @pytest.fixture(autouse=True)
-def mock_config():
-    """Provide a fake rxconfig.config for all jira tests."""
-    fake_config = MagicMock()
-    fake_config.jira_url = "https://jira.example.com"
-    fake_config.jira_user = "user@example.com"
-    fake_config.jira_token = "fake-token"
-    fake_config.jira_project = "PROJ"
-    fake_config.jira_issue_type = "Bug"
-    with patch("galadriel.utils.jira.config", fake_config):
-        yield fake_config
+def mock_settings():
+    """Provide fake DB settings and env token for all jira tests."""
+    def fake_get_setting(name, default=""):
+        return FAKE_SETTINGS.get(name, default)
+
+    with patch("galadriel.utils.jira.get_setting", side_effect=fake_get_setting), \
+         patch.dict("os.environ", {"GALADRIEL_JIRA_TOKEN": "fake-token"}):
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -144,6 +150,51 @@ class TestBulkFetchIssues:
         assert payload["fields"] == ["summary"]
 
 
+class TestCheckConnection:
+    def test_successful_connection(self, mock_session):
+        """Successful /myself call returns True with display name."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.text = json.dumps({"displayName": "Test User", "emailAddress": "test@example.com"})
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is True
+        assert "Test User" in message
+
+    def test_auth_failure(self, mock_session):
+        """401 response returns False with auth error message."""
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is False
+        assert "Authentication failed" in message
+
+    def test_connection_error(self, mock_session):
+        """Connection error returns False."""
+        mock_session.request.side_effect = RequestsConnectionError("timeout")
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is False
+        assert "no response" in message
+
+    def test_forbidden(self, mock_session):
+        """403 response returns False with authorization error."""
+        mock_response = MagicMock()
+        mock_response.status_code = 403
+        mock_session.request.return_value = mock_response
+
+        from galadriel.utils.jira import check_connection
+        success, message = check_connection()
+        assert success is False
+        assert "Authorization failed" in message
+
+
 class TestSessionReuse:
     def test_reuses_session_across_calls(self):
         """Multiple calls should reuse the same session (connection keep-alive)."""
@@ -158,6 +209,16 @@ class TestSessionReuse:
             get_issue("PROJ-2")
             assert mock_sess.request.call_count == 2
             assert mock_session_cls.call_count == 1
+
+
+class TestResetSession:
+    def test_clears_cached_session(self):
+        """reset_session should clear the cached HTTP session."""
+        from galadriel.utils.jira import _client, reset_session
+        _client._session = MagicMock()
+        assert _client._session is not None
+        reset_session()
+        assert _client._session is None
 
 
 class TestCreateIssueWithAdfNodes:

@@ -1,7 +1,6 @@
 """Jira REST API integration for creating and retrieving issues."""
 
-from rxconfig import config
-
+import os
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError
@@ -9,6 +8,7 @@ import json
 from html.parser import HTMLParser
 from typing import ClassVar, Optional
 from ..utils import debug
+from ..config.helpers import get_setting, JIRA_URL, JIRA_USER, JIRA_PROJECT, JIRA_ISSUE_TYPE
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
 
@@ -27,11 +27,14 @@ class JiraClient:
         """Return the shared session, creating it on first use."""
         if self._session is None:
             self._session = requests.Session()
-            self._session.auth = HTTPBasicAuth(config.jira_user, config.jira_token)
             self._session.headers.update({
                 "Accept": "application/json",
                 "Content-Type": "application/json",
             })
+        self._session.auth = HTTPBasicAuth(
+            get_setting(JIRA_USER),
+            os.environ.get("GALADRIEL_JIRA_TOKEN", ""),
+        )
         return self._session
 
     def _request(self, method: str, path: str, payload: str = None):
@@ -39,7 +42,7 @@ class JiraClient:
         debug.set_log(False)
         debug.set_module("JIRA")
 
-        url = config.jira_url + path
+        url = get_setting(JIRA_URL) + path
         debug.log(f"JIRA URL: {url}")
 
         try:
@@ -67,14 +70,14 @@ class JiraClient:
 
         payload = json.dumps({
             "fields": {
-                "project": {"key": config.jira_project},
+                "project": {"key": get_setting(JIRA_PROJECT)},
                 "summary": summary,
                 "description": {
                     "type": "doc",
                     "version": 1,
                     "content": content,
                 },
-                "issuetype": {"name": config.jira_issue_type},
+                "issuetype": {"name": get_setting(JIRA_ISSUE_TYPE)},
             }
         })
 
@@ -97,6 +100,23 @@ class JiraClient:
             return json.loads(response.text)
         except (json.JSONDecodeError, AttributeError):
             return None
+
+    def check_connection(self) -> tuple[bool, str]:
+        """Verify the Jira connection by calling /rest/api/3/myself."""
+        response = self._request("GET", "/rest/api/3/myself")
+        if response is None:
+            return False, "Connection failed: no response from Jira"
+        if response.status_code == 200:
+            try:
+                data = json.loads(response.text)
+                return True, f"Connected as {data.get('displayName', data.get('emailAddress', 'unknown'))}"
+            except (json.JSONDecodeError, AttributeError):
+                return True, "Connected (could not parse user info)"
+        if response.status_code == 401:
+            return False, "Authentication failed: invalid credentials"
+        if response.status_code == 403:
+            return False, "Authorization failed: insufficient permissions"
+        return False, f"Unexpected response: {response.status_code}"
 
     def bulk_fetch_issues(self, issue_keys: list[str], fields: list[str] | None = None) -> dict[str, dict]:
         """Fetch multiple Jira issues in a single request, returning a dict keyed by issue key."""
@@ -243,9 +263,13 @@ def create_issue(summary: str, description_adf_nodes: Optional[list] = None, des
     """Create a Jira issue and return its key."""
     return _client.create_issue(summary, description_adf_nodes, description)
 
+def check_connection() -> tuple[bool, str]:
+    """Verify the Jira connection and return (success, message)."""
+    return _client.check_connection()
+
 def get_issue_url(issue_key) -> str:
     """Return the browsable URL for a Jira issue."""
-    return f"{config.jira_url}/browse/{issue_key}"
+    return f"{get_setting(JIRA_URL)}/browse/{issue_key}"
 
 def get_issue(issue_key):
     """Fetch a Jira issue by key and return its parsed JSON."""

@@ -11,6 +11,7 @@ from . import cycle
 from . import install
 from . import dashboard
 from . import user
+from . import settings
 from .utils import consts
 from .utils import yaml  # local yaml.py with PyYAML helpers
 
@@ -58,10 +59,19 @@ if not(yaml.read_setting("galadriel.yaml", "galadriel", "first_run")):
     try: # reflex db init run fails, this should run after the db is initialized
         seed = install.seed
         seed.seed_db()
-        seed.set_first_run()
+        seed.seed_jira_settings()
         yaml.write_setting("galadriel.yaml", "galadriel", "first_run", 1)
     except Exception as e:
         print(f"[galadriel] seed failed: {e}")
+else:
+    # One-time migration: move Jira settings from YAML to DB for existing installs
+    try:
+        from .config import get_setting, JIRA_URL, JIRA_USER, JIRA_PROJECT, JIRA_ISSUE_TYPE, JIRA_DONE_STATUS
+        required = [JIRA_URL, JIRA_USER, JIRA_PROJECT, JIRA_ISSUE_TYPE, JIRA_DONE_STATUS]
+        if any(not get_setting(key) for key in required):
+            install.seed.seed_jira_settings()
+    except Exception as e:
+        print(f"[galadriel] Jira settings migration skipped: {e}")
 
 app.add_page(index, title="galadriel")
 
@@ -98,6 +108,9 @@ app.add_page(cycle.iteration_page, route=navigation.routes.CYCLE_ITERATION_DETAI
 
 #Dashboard
 app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD, on_load=[Session.on_load, Session.require_non_admin, dashboard.DashboardState.load_dashboard])
+
+# Settings
+app.add_page(settings.settings_page, route=navigation.routes.SETTINGS, on_load=[Session.on_load, Session.require_super_admin, settings.SettingsState.load_jira_settings])
 
 # Users
 app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=[Session.on_load, Session.require_admin, user.UserState.load_users])

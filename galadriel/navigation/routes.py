@@ -39,6 +39,8 @@ CYCLE_ITERATION_DETAIL = "/cycles/[id]/iteration"
 #dashboard
 DASHBOARD = "/dashboard"
 
+SETTINGS = "/settings"
+
 USERS = "/users"
 USER_ADD = "/users/add"
 USER_DETAIL = "/users/[id]"
