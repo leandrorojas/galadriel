@@ -141,19 +141,31 @@ def action_log_page() -> rx.Component:
                 size="2",
                 width="100%",
             ),
-            rx.flex(
-                rx.box(
-                    __entry_table(),
-                    flex="2",
+            rx.desktop_only(
+                rx.flex(
+                    rx.box(
+                        __entry_table(),
+                        flex="2",
+                    ),
+                    rx.box(
+                        __detail_panel(),
+                        flex="1",
+                    ),
+                    direction="row",
+                    spacing="4",
+                    width="100%",
+                    height="100%",
                 ),
-                rx.box(
-                    __detail_panel(),
-                    flex="1",
-                ),
-                direction="row",
-                spacing="4",
                 width="100%",
-                height="100%",
+            ),
+            rx.mobile_and_tablet(
+                rx.vstack(
+                    __entry_table(),
+                    __detail_panel(),
+                    spacing="4",
+                    width="100%",
+                ),
+                width="100%",
             ),
             spacing="5",
             align="center",

@@ -4,7 +4,6 @@ import reflex as rx
 from sqlmodel import select, col
 
 from .model import ActionLogModel, ActionLogDisplay
-from ..utils.mixins import TimestampMixin
 
 
 class ActionLogState(rx.State):
@@ -19,7 +18,7 @@ class ActionLogState(rx.State):
         with rx.session() as session:
             query = select(ActionLogModel).order_by(col(ActionLogModel.created).desc())
             if self.search_value:
-                pattern = f"%{self.search_value.lower()}%"
+                pattern = f"%{self.search_value}%"
                 query = query.where(
                     col(ActionLogModel.username).ilike(pattern)
                     | col(ActionLogModel.action).ilike(pattern)

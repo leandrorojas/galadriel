@@ -1,7 +1,6 @@
 """Tests for galadriel.audit — action log model, helpers, and state."""
 
 import pytest
-from datetime import datetime, timezone
 from sqlmodel import select
 
 from galadriel.audit.model import ActionLogModel

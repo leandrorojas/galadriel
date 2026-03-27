@@ -6,9 +6,9 @@ from .pages import action_log_page
 from .state import ActionLogState
 
 __all__ = [
-    "ActionLogModel",
     "ActionLogDisplay",
-    "action_log_page",
+    "ActionLogModel",
     "ActionLogState",
+    "action_log_page",
     "log_action",
 ]
