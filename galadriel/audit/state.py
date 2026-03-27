@@ -47,6 +47,7 @@ class ActionLogState(rx.State):
             if entry.log_id == log_id:
                 self.selected_entry = entry
                 return
+        self.selected_entry = None
 
     def clear_selection(self) -> None:
         """Clear the selected entry."""
