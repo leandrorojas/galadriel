@@ -8,6 +8,8 @@ from ..navigation import routes
 from ..case.model import CaseModel, StepModel
 from ..scenario.model import ScenarioModel
 
+from ..audit.helpers import log_action
+from ..auth.state import Session
 from ..utils import consts
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, get_max_child_order as _get_max_child_order, toggle_sort_field, sort_items, filter_and_load, populate_step_counts
 
@@ -37,16 +39,21 @@ class SuiteState(rx.State):
     search_sort_by: str = ""
     search_sort_asc: bool = True
 
+    async def _get_user_info(self) -> tuple[int, str]:
+        """Return (user_id, username) from the current session."""
+        session_state = await self.get_state(Session)
+        return session_state.authenticated_user.id, session_state.authenticated_user.username
+
     @rx.var(cache=True)
     def suite_id(self) -> str:
         return self.router._page.params.get(consts.FIELD_ID, "")
-    
+
     @rx.var(cache=True)
     def suite_url(self) -> str:
         if not self.suite:
             return f"{SUITES_ROUTE}"
         return f"{SUITES_ROUTE}/{self.suite.id}"
-    
+
     @rx.var(cache=True)
     def suite_edit_url(self) -> str:
         if not self.suite:
@@ -112,11 +119,11 @@ class SuiteState(rx.State):
             self.suite = suite
 
             return consts.RETURN_VALUE
-    
+
     def save_suite_edits(self, suite_id:int, updated_data:dict):
         """Persist edits to an existing suite."""
         if updated_data["name"] == "": return None
-        with rx.session() as session:        
+        with rx.session() as session:
             suite = session.exec(SuiteModel.select().where(SuiteModel.id == suite_id)).one_or_none()
 
             if (suite is None):
@@ -138,7 +145,7 @@ class SuiteState(rx.State):
         if edit_page:
             return rx.redirect(self.suite_edit_url)
         return rx.redirect(self.suite_url)
-    
+
     def collapse_searches(self):
         """Hide all child search panels."""
         self.show_case_search = False
@@ -167,26 +174,43 @@ class SuiteState(rx.State):
             self.children = results
             self.child_count = len(results)
 
-    def unlink_child(self, suite_child_id:int):
+    def _find_child_info(self, suite_child_id: int) -> tuple[str, str]:
+        """Return (child_type, child_name) for a suite child by its id."""
+        for child in self.children:
+            if child.id == suite_child_id:
+                child_type = "scenario" if child.child_type_id == consts.SUITE_CHILD_TYPE_SCENARIO else "case"
+                return child_type, getattr(child, "child_name", "unknown")
+        return "child", "unknown"
+
+    async def unlink_child(self, suite_child_id:int):
         """Remove a child from this suite and reorder siblings."""
+        child_type, child_name = self._find_child_info(suite_child_id)
         toast = reorder_delete(SuiteChildModel, suite_child_id, "suite_id", self.suite_id, "child")
         self.load_children()
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "unlinked", "suite", self.suite.name if self.suite else "", f"{child_type} '{child_name}'")
         return toast
 
-    def move_child_up(self, child_id:int):
+    async def move_child_up(self, child_id:int):
         """Move a suite child one position up."""
+        child_type, child_name = self._find_child_info(child_id)
         toast = reorder_move_up(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
         if toast is None:
             self.load_children()
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "suite", self.suite.name if self.suite else "", f"moved {child_type} '{child_name}' up")
         return toast
 
-    def move_child_down(self, child_id:int):
+    async def move_child_down(self, child_id:int):
         """Move a suite child one position down."""
+        child_type, child_name = self._find_child_info(child_id)
         toast = reorder_move_down(SuiteChildModel, child_id, "suite_id", self.suite_id, "child")
         if toast is None:
             self.load_children()
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "suite", self.suite.name if self.suite else "", f"moved {child_type} '{child_name}' down")
         return toast
-    
+
     def get_max_child_order(self, child_id:int, child_type_id:int):
         """Return the next order value for a new suite child."""
         return _get_max_child_order(SuiteChildModel, "suite_id", self.suite_id, child_id, child_type_id)
@@ -196,7 +220,7 @@ class SuiteState(rx.State):
         filter_and_load(self, CaseModel, "search_case_value", "cases_for_search", search_case_value)
         self.cases_for_search = populate_step_counts(self.cases_for_search, StepModel)
 
-    def link_case(self, case_id:int):
+    async def link_case(self, case_id:int):
         """Link a test case to the current suite."""
         if not _has_steps(StepModel, case_id):
             return rx.toast.error("test case must have at least one step")
@@ -220,12 +244,16 @@ class SuiteState(rx.State):
             session.add(case_to_add)
             session.commit()
             session.refresh(case_to_add)
+            case_name = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
         self.search_case_value = ""
         self.collapse_searches()
         self.load_children()
-        
+
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "linked", "suite", self.suite.name if self.suite else "", f"case '{case_name.name if case_name else 'unknown'}'")
+
         return rx.toast.success("case added!")
-    
+
     def toggle_scenario_search(self):
         """Toggle the scenario search panel visibility."""
         self.show_scenario_search = not self.show_scenario_search
@@ -238,7 +266,7 @@ class SuiteState(rx.State):
         """Set the scenario search filter (if given) and reload matching scenarios."""
         filter_and_load(self, ScenarioModel, "search_scenario_value", "scenarios_for_search", search_scenario_value)
 
-    def link_scenario(self, scenario_id:int):
+    async def link_scenario(self, scenario_id:int):
         """Link a scenario to the current suite."""
         suite_scenario_data:dict = {"suite_id":""}
         new_scenario_order = 1
@@ -259,23 +287,29 @@ class SuiteState(rx.State):
             session.add(scenario_to_add)
             session.commit()
             session.refresh(scenario_to_add)
+            scenario = session.exec(ScenarioModel.select().where(ScenarioModel.id == scenario_id)).first()
         self.search_scenario_value = ""
         self.collapse_searches()
         self.load_children()
-        
+
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "linked", "suite", self.suite.name if self.suite else "", f"scenario '{scenario.name if scenario else 'unknown'}'")
+
         return rx.toast.success("scenario added!")
-    
+
 class AddSuiteState(SuiteState):
     """Handles the add-suite form submission."""
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and create a new suite from the form."""
         self.form_data = form_data
         result = self.add_suite(form_data)
-        
+
         if result is None: return rx.toast.error("name cannot be empty")
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "created", "suite", form_data["name"])
         return rx.redirect(routes.SUITES)
 
 class EditSuiteState(SuiteState):
@@ -283,7 +317,7 @@ class EditSuiteState(SuiteState):
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and save suite edits from the form."""
         self.form_data = form_data
         try:
@@ -294,4 +328,6 @@ class EditSuiteState(SuiteState):
         result = self.save_suite_edits(suite_id, updated_data)
 
         if result is None: return rx.toast.error("name cannot be empty")
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "updated", "suite", form_data["name"])
         return rx.redirect(routes.SUITES)

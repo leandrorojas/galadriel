@@ -1,7 +1,8 @@
 """Tests for galadriel.suite.state — SuiteState business logic."""
 
+import asyncio
 import pytest
-from unittest.mock import PropertyMock
+from unittest.mock import AsyncMock, PropertyMock, patch
 from sqlmodel import select
 
 from galadriel.suite.state import SuiteState
@@ -10,6 +11,22 @@ from galadriel.utils import consts
 from conftest import init_state
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.fixture(autouse=True)
+def mock_audit():
+    """Patch async user info lookup and log_action for all suite tests."""
+    async def fake_get_user_info(self):
+        return (0, "test")
+
+    with patch.object(SuiteState, "_get_user_info", fake_get_user_info), \
+         patch("galadriel.suite.state.log_action"):
+        yield
+
+
+def _run(coro):
+    """Run an async event handler synchronously."""
+    return asyncio.run(coro)
 
 
 def _make_state(suite_id_value=""):
@@ -56,7 +73,7 @@ class TestSuiteChildren:
         suite = make_suite(name="S")
         case = make_case(name="No Steps")
         state = _make_state(suite_id_value=str(suite.id))
-        result = state.link_case(case.id)
+        result = _run(state.link_case(case.id))
         assert result is not None
 
     def test_link_case_success(self, patch_rx_session, make_suite, make_case, make_step):
@@ -65,7 +82,7 @@ class TestSuiteChildren:
         make_step(case_id=case.id, order=1)
         state = _make_state(suite_id_value=str(suite.id))
         state.cases_for_search = []
-        state.link_case(case.id)
+        _run(state.link_case(case.id))
         session = patch_rx_session
         children = session.exec(select(SuiteChildModel).where(SuiteChildModel.suite_id == suite.id)).all()
         assert len(children) == 1
@@ -77,7 +94,7 @@ class TestSuiteChildren:
         scenario = make_scenario(name="SC")
         state = _make_state(suite_id_value=str(suite.id))
         state.scenarios_for_search = []
-        state.link_scenario(scenario.id)
+        _run(state.link_scenario(scenario.id))
         session = patch_rx_session
         children = session.exec(select(SuiteChildModel).where(SuiteChildModel.suite_id == suite.id)).all()
         assert len(children) == 1
@@ -94,7 +111,7 @@ class TestSuiteChildren:
         session.refresh(c1)
 
         state = _make_state(suite_id_value=str(suite.id))
-        state.unlink_child(c1.id)
+        _run(state.unlink_child(c1.id))
 
         remaining = session.exec(
             select(SuiteChildModel).where(SuiteChildModel.suite_id == suite.id).order_by(SuiteChildModel.order)
@@ -114,7 +131,7 @@ class TestSuiteChildren:
         session.refresh(c2)
 
         state = _make_state(suite_id_value=str(suite.id))
-        state.move_child_up(c2.id)
+        _run(state.move_child_up(c2.id))
 
         session.expire_all()
         assert session.exec(select(SuiteChildModel).where(SuiteChildModel.id == c2.id)).first().order == 1
@@ -131,7 +148,7 @@ class TestSuiteChildren:
         session.refresh(c2)
 
         state = _make_state(suite_id_value=str(suite.id))
-        state.move_child_down(c1.id)
+        _run(state.move_child_down(c1.id))
 
         session.expire_all()
         assert session.exec(select(SuiteChildModel).where(SuiteChildModel.id == c1.id)).first().order == 2
