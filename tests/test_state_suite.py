@@ -29,11 +29,11 @@ def _run(coro):
     return asyncio.run(coro)
 
 
-_PARENT_FIELDS = dict(
-    suites=[], suite=None, children=[], child=None,
-    cases_for_search=[], show_case_search=False, search_case_value="",
-    scenarios_for_search=[], show_scenario_search=False, search_scenario_value="",
-)
+_PARENT_FIELDS = {
+    "suites": [], "suite": None, "children": [], "child": None,
+    "cases_for_search": [], "show_case_search": False, "search_case_value": "",
+    "scenarios_for_search": [], "show_scenario_search": False, "search_scenario_value": "",
+}
 
 
 def _make_state(suite_id_value=""):
