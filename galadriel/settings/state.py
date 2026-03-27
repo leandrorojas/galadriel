@@ -1,6 +1,8 @@
 """Settings state management."""
 
+import logging
 import reflex as rx
+from requests.exceptions import RequestException
 from ..utils import jira
 from ..config.helpers import (
     get_setting, set_setting,
@@ -42,7 +44,7 @@ class SettingsState(rx.State):
         set_setting(JIRA_PROJECT, self.jira_project)
         set_setting(JIRA_ISSUE_TYPE, self.jira_issue_type)
         set_setting(JIRA_DONE_STATUS, self.jira_done_status)
-        jira._client._session = None
+        jira.reset_session()
         self.jira_editing = False
         return rx.toast.success("Jira settings saved")
 
@@ -56,7 +58,8 @@ class SettingsState(rx.State):
                 yield rx.toast.success(message)
             else:
                 yield rx.toast.error(message)
-        except Exception:
-            yield rx.toast.error("Unexpected error while checking Jira connection")
+        except (RequestException, ValueError):
+            logging.getLogger(__name__).exception("Jira connection check failed")
+            yield rx.toast.error("Connection check failed — see server logs for details")
         finally:
             self.jira_checking = False

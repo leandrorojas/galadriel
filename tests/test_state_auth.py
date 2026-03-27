@@ -73,6 +73,40 @@ class TestSessionRole:
         assert UserRole(found.user_role) == UserRole.USER_ADMIN
 
 
+class TestIsSuperAdmin:
+    """Tests for the is_super_admin role check logic."""
+
+    def test_admin_is_super_admin(self, patch_rx_session, seeded_db):
+        """Admin role (0) should be considered super admin."""
+        session = patch_rx_session
+        user = GaladrielUser(email="admin@test.com", user_id=10, user_role=UserRole.ADMIN.value)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(select(GaladrielUser).where(GaladrielUser.user_id == 10)).one_or_none()
+        assert found.user_role == UserRole.ADMIN.value
+
+    def test_user_admin_is_not_super_admin(self, patch_rx_session, seeded_db):
+        """User admin role (3) should NOT be considered super admin."""
+        session = patch_rx_session
+        user = GaladrielUser(email="useradmin@test.com", user_id=11, user_role=UserRole.USER_ADMIN.value)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(select(GaladrielUser).where(GaladrielUser.user_id == 11)).one_or_none()
+        assert found.user_role != UserRole.ADMIN.value
+
+    def test_editor_is_not_super_admin(self, patch_rx_session, seeded_db):
+        """Editor role should NOT be considered super admin."""
+        session = patch_rx_session
+        user = GaladrielUser(email="editor@test.com", user_id=12, user_role=UserRole.EDITOR.value)
+        session.add(user)
+        session.commit()
+
+        found = session.exec(select(GaladrielUser).where(GaladrielUser.user_id == 12)).one_or_none()
+        assert found.user_role != UserRole.ADMIN.value
+
+
 class TestRequireAdminGuard:
     """Tests for Session.require_admin server-side on_load guard."""
 

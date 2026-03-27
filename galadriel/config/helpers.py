@@ -32,5 +32,4 @@ def set_setting(name: str, value: str) -> None:
             session.add(ConfigModel(name=name, value=value))
         else:
             row.value = value
-            session.add(row)
         session.commit()

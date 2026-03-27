@@ -211,6 +211,16 @@ class TestSessionReuse:
             assert mock_session_cls.call_count == 1
 
 
+class TestResetSession:
+    def test_clears_cached_session(self):
+        """reset_session should clear the cached HTTP session."""
+        from galadriel.utils.jira import _client, reset_session
+        _client._session = MagicMock()
+        assert _client._session is not None
+        reset_session()
+        assert _client._session is None
+
+
 class TestCreateIssueWithAdfNodes:
     def test_adf_nodes_passed_directly(self, mock_session):
         """ADF nodes passed via description_adf_nodes go straight into the payload."""

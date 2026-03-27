@@ -66,11 +66,12 @@ if not(yaml.read_setting("galadriel.yaml", "galadriel", "first_run")):
 else:
     # One-time migration: move Jira settings from YAML to DB for existing installs
     try:
-        from .config import get_setting, JIRA_URL
-        if not get_setting(JIRA_URL):
+        from .config import get_setting, JIRA_URL, JIRA_USER, JIRA_PROJECT, JIRA_ISSUE_TYPE, JIRA_DONE_STATUS
+        required = [JIRA_URL, JIRA_USER, JIRA_PROJECT, JIRA_ISSUE_TYPE, JIRA_DONE_STATUS]
+        if any(not get_setting(key) for key in required):
             install.seed.seed_jira_settings()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[galadriel] Jira settings migration skipped: {e}")
 
 app.add_page(index, title="galadriel")
 
