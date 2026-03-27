@@ -26,6 +26,7 @@ from galadriel.iteration.model import (
 )
 from galadriel.user.model import GaladrielUser, GaladrielUserRole
 from galadriel.config.model import ConfigModel
+from galadriel.audit.model import ActionLogModel
 
 
 # ---------------------------------------------------------------------------

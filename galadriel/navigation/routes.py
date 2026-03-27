@@ -40,6 +40,7 @@ CYCLE_ITERATION_DETAIL = "/cycles/[id]/iteration"
 DASHBOARD = "/dashboard"
 
 SETTINGS = "/settings"
+ACTION_LOG = "/action-log"
 
 USERS = "/users"
 USER_ADD = "/users/add"

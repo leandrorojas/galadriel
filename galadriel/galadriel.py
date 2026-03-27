@@ -12,6 +12,7 @@ from . import install
 from . import dashboard
 from . import user
 from . import settings
+from . import audit
 from .utils import consts
 from .utils import yaml  # local yaml.py with PyYAML helpers
 
@@ -111,6 +112,9 @@ app.add_page(dashboard.dashboard_page, route=navigation.routes.DASHBOARD, on_loa
 
 # Settings
 app.add_page(settings.settings_page, route=navigation.routes.SETTINGS, on_load=[Session.on_load, Session.require_super_admin, settings.SettingsState.load_jira_settings])
+
+# Action Log
+app.add_page(audit.action_log_page, route=navigation.routes.ACTION_LOG, on_load=[Session.on_load, Session.require_super_admin, audit.ActionLogState.load_entries])
 
 # Users
 app.add_page(user_add_edit_list.users_list_page, route=navigation.routes.USERS, on_load=[Session.on_load, Session.require_admin, user.UserState.load_users])

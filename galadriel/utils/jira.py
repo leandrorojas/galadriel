@@ -139,6 +139,10 @@ class JiraClient:
 
         return {issue["key"]: issue for issue in data.get("issues", [])}
 
+    def reset_session(self) -> None:
+        """Clear the cached HTTP session so the next call creates a fresh one."""
+        self._session = None
+
 
 # Singleton client — reuses TCP/TLS connection across calls
 _client = JiraClient()
@@ -278,3 +282,7 @@ def get_issue(issue_key):
 def bulk_fetch_issues(issue_keys: list[str], fields: list[str] | None = None) -> dict[str, dict]:
     """Fetch multiple Jira issues in a single request, returning a dict keyed by issue key."""
     return _client.bulk_fetch_issues(issue_keys, fields)
+
+def reset_session() -> None:
+    """Clear the cached HTTP session so the next call creates a fresh one."""
+    _client.reset_session()
