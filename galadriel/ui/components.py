@@ -284,12 +284,15 @@ class SideBar():
         )
 
     def __backoffice_sidebar_items(self) -> rx.Component:
-        """Render backoffice sidebar items (Settings visible only to admin)."""
+        """Render backoffice sidebar items (Settings/Action Log visible only to admin)."""
         return rx.vstack(
             self.__sidebar_item("Users", "users", navigation.routes.USERS),
             rx.cond(
                 Session.is_super_admin,
-                self.__sidebar_item("Settings", "settings", navigation.routes.SETTINGS),
+                rx.fragment(
+                    self.__sidebar_item("Action Log", "scroll-text", navigation.routes.ACTION_LOG),
+                    self.__sidebar_item("Settings", "settings", navigation.routes.SETTINGS),
+                ),
             ),
             spacing="1",
             width="100%",
