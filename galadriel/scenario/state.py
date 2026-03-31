@@ -4,6 +4,8 @@ from typing import List, Optional
 import reflex as rx
 from .model import ScenarioModel, ScenarioCaseModel
 from ..navigation import routes
+from ..audit.helpers import log_action
+from ..auth.state import Session
 from ..utils import consts
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name, populate_step_counts
 
@@ -30,6 +32,18 @@ class ScenarioState(rx.State):
 
     search_sort_by: str = ""
     search_sort_asc: bool = True
+
+    async def _get_user_info(self) -> tuple[int, str]:
+        """Return (user_id, username) from the current session."""
+        session_state = await self.get_state(Session)
+        return session_state.user_id or 0, session_state.username or "unknown"
+
+    def _find_case_info(self, scenario_case_id: int) -> str:
+        """Return the case name for a scenario-case link by its id."""
+        for tc in self.test_cases:
+            if tc.id == scenario_case_id:
+                return getattr(tc, "case_name", "unknown")
+        return "unknown"
 
     @rx.var(cache=True)
     def scenario_id(self) -> str:
@@ -153,7 +167,7 @@ class ScenarioState(rx.State):
         """Load cases matching the current search filter, with step counts."""
         self.test_cases_for_search = populate_step_counts(search_by_name(CaseModel, self.search_value), StepModel)
 
-    def link_case(self, case_id:int):
+    async def link_case(self, case_id:int):
         """Link a test case to the current scenario."""
         if not self.has_steps(case_id): return rx.toast.error("test case must have at least one step")
 
@@ -181,29 +195,42 @@ class ScenarioState(rx.State):
             session.add(case_to_add)
             session.commit()
             session.refresh(case_to_add)
+            case_obj = session.exec(CaseModel.select().where(CaseModel.id == case_id)).first()
         self.search_value = ""
         self.load_cases()
 
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "linked", "scenario", self.scenario.name if self.scenario else "", f"case '{case_obj.name if case_obj else 'unknown'}'")
+
         return rx.toast.success("case added!")
     
-    def unlink_case(self, scenario_case_id:int):
+    async def unlink_case(self, scenario_case_id:int):
         """Remove a case from the scenario and reorder remaining cases."""
+        case_name = self._find_case_info(scenario_case_id)
         toast = reorder_delete(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         self.load_cases()
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "unlinked", "scenario", self.scenario.name if self.scenario else "", f"case '{case_name}'")
         return toast
 
-    def move_case_up(self, scenario_case_id:int):
+    async def move_case_up(self, scenario_case_id:int):
         """Move a case one position up in the order."""
+        case_name = self._find_case_info(scenario_case_id)
         toast = reorder_move_up(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         if toast is None:
             self.load_cases()
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "scenario", self.scenario.name if self.scenario else "", f"moved case '{case_name}' up")
         return toast
 
-    def move_case_down(self, scenario_case_id:int):
+    async def move_case_down(self, scenario_case_id:int):
         """Move a case one position down in the order."""
+        case_name = self._find_case_info(scenario_case_id)
         toast = reorder_move_down(ScenarioCaseModel, scenario_case_id, "scenario_id", self.scenario_id, "case")
         if toast is None:
             self.load_cases()
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "scenario", self.scenario.name if self.scenario else "", f"moved case '{case_name}' down")
         return toast
 
     def has_steps(self, case_id:int) -> bool:
@@ -215,12 +242,14 @@ class AddScenarioState(ScenarioState):
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and create a new scenario from the form."""
         self.form_data = form_data
         result = self.add_scenario(form_data)
 
         if result is None: return rx.toast.error("name cannot be empty")
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "created", "scenario", form_data["name"])
         return rx.redirect(routes.SCENARIOS)
 
 class EditScenarioState(ScenarioState):
@@ -228,7 +257,7 @@ class EditScenarioState(ScenarioState):
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and save scenario edits from the form."""
         self.form_data = form_data
         try:
@@ -239,4 +268,6 @@ class EditScenarioState(ScenarioState):
         result = self.save_scenario_edits(scenario_id, updated_data)
 
         if result is None: return rx.toast.error("name cannot be empty")
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "updated", "scenario", form_data["name"])
         return rx.redirect(routes.SCENARIOS)
