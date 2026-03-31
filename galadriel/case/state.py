@@ -237,15 +237,13 @@ class CaseState(rx.State):
     def move_step_up(self, step_id:int):
         """Move a step one position up in the order."""
         toast = reorder_move_up(StepModel, step_id, "case_id", self.case_id, "step")
-        if toast is None:
-            self.load_steps()
+        self.load_steps()
         return toast
 
     def move_step_down(self, step_id:int):
         """Move a step one position down in the order."""
         toast = reorder_move_down(StepModel, step_id, "case_id", self.case_id, "step")
-        if toast is None:
-            self.load_steps()
+        self.load_steps()
         return toast
 
     def load_prerequisites(self):

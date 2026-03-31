@@ -109,6 +109,7 @@ def __show_step(test_step:model.StepModel):
                 spacing="2",
             )
         ),
+        key=step_id,
     )
 
 def __steps_table() -> rx.Component:
