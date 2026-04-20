@@ -22,4 +22,5 @@ config = rx.Config(
     db_url="sqlite:///galadriel.db",
     img_src="/galadriel.320x320.jpg",
     tailwind=None,
+    frontend_packages=["suneditor@^2.44.10"],
 )

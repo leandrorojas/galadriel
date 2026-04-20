@@ -1,14 +1,31 @@
 """Tests for galadriel.case.state — CaseState business logic."""
 
+import asyncio
 import pytest
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, patch
 from sqlmodel import select
 
-from galadriel.case.state import CaseState
+from galadriel.case.state import CaseState, AddCaseState, EditCaseState
 from galadriel.case.model import CaseModel, StepModel, PrerequisiteModel
 from conftest import init_state, LinkableEmptyCasesTests
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.fixture(autouse=True)
+def mock_audit():
+    """Patch async user info lookup and log_action for all case tests."""
+    async def fake_get_user_info(self):
+        return (0, "test")
+
+    with patch.object(CaseState, "_get_user_info", fake_get_user_info), \
+         patch("galadriel.case.state.log_action"):
+        yield
+
+
+def _run(coro):
+    """Run an async event handler synchronously."""
+    return asyncio.run(coro)
 
 
 def _make_state(case_id_value=0):
@@ -106,7 +123,7 @@ class TestSteps:
     def test_add_step(self, patch_rx_session, make_case):
         case = make_case(name="C")
         state = _make_state(case_id_value=case.id)
-        state.add_step(case.id, {"action": "Click button", "expected": "Page loads"})
+        _run(state.add_step(case.id, {"action": "Click button", "expected": "Page loads"}))
         session = patch_rx_session
         steps = session.exec(select(StepModel).where(StepModel.case_id == case.id)).all()
         assert len(steps) == 1
@@ -117,7 +134,7 @@ class TestSteps:
         make_step(case_id=case.id, order=1)
         state = _make_state(case_id_value=case.id)
         state.steps = [StepModel(case_id=case.id, order=1, action="a", expected="e")]
-        state.add_step(case.id, {"action": "Second", "expected": "result"})
+        _run(state.add_step(case.id, {"action": "Second", "expected": "result"}))
         session = patch_rx_session
         steps = session.exec(select(StepModel).where(StepModel.case_id == case.id).order_by(StepModel.order)).all()
         assert len(steps) == 2
@@ -128,7 +145,7 @@ class TestSteps:
         case = make_case(name="C")
         step = make_step(case_id=case.id, order=1, action="Old action", expected="Expected")
         state = _make_state(case_id_value=case.id)
-        state.update_step_field(step.id, "action", "New action")
+        _run(state.update_step_field(step.id, "action", "New action"))
         session = patch_rx_session
         session.expire_all()
         updated = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
@@ -139,7 +156,7 @@ class TestSteps:
         case = make_case(name="C")
         step = make_step(case_id=case.id, order=1, action="Action", expected="Old expected")
         state = _make_state(case_id_value=case.id)
-        state.update_step_field(step.id, "expected", "New expected")
+        _run(state.update_step_field(step.id, "expected", "New expected"))
         session = patch_rx_session
         session.expire_all()
         updated = session.exec(select(StepModel).where(StepModel.id == step.id)).first()
@@ -150,7 +167,7 @@ class TestSteps:
         case = make_case(name="C")
         step = make_step(case_id=case.id, order=1, action="Keep me", expected="Expected")
         state = _make_state(case_id_value=case.id)
-        result = state.update_step_field(step.id, "action", "")
+        result = _run(state.update_step_field(step.id, "action", ""))
         assert result is not None  # toast error
         session = patch_rx_session
         session.expire_all()
@@ -162,7 +179,7 @@ class TestSteps:
         case = make_case(name="C")
         step = make_step(case_id=case.id, order=1, action="Action", expected="Expected")
         state = _make_state(case_id_value=case.id)
-        result = state.update_step_field(step.id, "case_id", "999")
+        result = _run(state.update_step_field(step.id, "case_id", "999"))
         assert result is not None  # toast error
         session = patch_rx_session
         session.expire_all()
@@ -174,13 +191,13 @@ class TestSteps:
         case = make_case(name="C")
         step = make_step(case_id=case.id, order=1, action="Same", expected="Same")
         state = _make_state(case_id_value=case.id)
-        result = state.update_step_field(step.id, "action", "Same")
+        result = _run(state.update_step_field(step.id, "action", "Same"))
         assert result is None  # no-op
 
     def test_add_step_empty_action_rejected(self, patch_rx_session, make_case):
         case = make_case(name="C")
         state = _make_state(case_id_value=case.id)
-        result = state.add_step(case.id, {"action": "", "expected": "e"})
+        result = _run(state.add_step(case.id, {"action": "", "expected": "e"}))
         assert result is not None
 
     def test_delete_step_reorders(self, patch_rx_session, make_case, make_step):
@@ -190,7 +207,7 @@ class TestSteps:
         make_step(case_id=case.id, order=3, action="third")
 
         state = _make_state(case_id_value=case.id)
-        state.delete_step(s1.id)
+        _run(state.delete_step(s1.id))
 
         session = patch_rx_session
         remaining = session.exec(select(StepModel).where(StepModel.case_id == case.id).order_by(StepModel.order)).all()
@@ -202,7 +219,7 @@ class TestSteps:
         case = make_case(name="C")
         s = make_step(case_id=case.id, order=1)
         state = _make_state(case_id_value=case.id)
-        state.delete_step(s.id)
+        _run(state.delete_step(s.id))
         session = patch_rx_session
         steps = session.exec(select(StepModel).where(StepModel.case_id == case.id)).all()
         assert len(steps) == 1
@@ -213,7 +230,7 @@ class TestSteps:
         s2 = make_step(case_id=case.id, order=2, action="second")
 
         state = _make_state(case_id_value=case.id)
-        state.move_step_up(s2.id)
+        _run(state.move_step_up(s2.id))
 
         session = patch_rx_session
         session.expire_all()
@@ -228,7 +245,7 @@ class TestSteps:
         s2 = make_step(case_id=case.id, order=2, action="second")
 
         state = _make_state(case_id_value=case.id)
-        state.move_step_down(s1.id)
+        _run(state.move_step_down(s1.id))
 
         session = patch_rx_session
         session.expire_all()
@@ -246,7 +263,7 @@ class TestPrerequisites:
 
         state = _make_state(case_id_value=case_a.id)
         state.prerequisites = []
-        state.add_prerequisite(case_b.id)
+        _run(state.add_prerequisite(case_b.id))
 
         session = patch_rx_session
         prereqs = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
@@ -256,7 +273,7 @@ class TestPrerequisites:
     def test_self_prerequisite_rejected(self, patch_rx_session, make_case):
         case = make_case(name="Self")
         state = _make_state(case_id_value=case.id)
-        result = state.add_prerequisite(case.id)
+        result = _run(state.add_prerequisite(case.id))
         assert result is not None
 
     def test_prerequisite_without_steps_rejected(self, patch_rx_session, make_case):
@@ -264,7 +281,7 @@ class TestPrerequisites:
         case_b = make_case(name="B (no steps)")
 
         state = _make_state(case_id_value=case_a.id)
-        result = state.add_prerequisite(case_b.id)
+        result = _run(state.add_prerequisite(case_b.id))
         assert result is not None
 
     def test_duplicate_prerequisite_rejected(self, patch_rx_session, make_case, make_step):
@@ -274,9 +291,9 @@ class TestPrerequisites:
 
         state = _make_state(case_id_value=case_a.id)
         state.prerequisites = []
-        state.add_prerequisite(case_b.id)
+        _run(state.add_prerequisite(case_b.id))
         state.load_prerequisites()
-        result = state.add_prerequisite(case_b.id)
+        result = _run(state.add_prerequisite(case_b.id))
         assert result is not None
 
     def test_redundant_prerequisite_rejected(self, patch_rx_session, make_case, make_step):
@@ -291,14 +308,14 @@ class TestPrerequisites:
         # B depends on A
         state_b = _make_state(case_id_value=case_b.id)
         state_b.prerequisites = []
-        state_b.add_prerequisite(case_a.id)
+        _run(state_b.add_prerequisite(case_a.id))
         prereqs_b = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_b.id)).all()
         assert len(prereqs_b) == 1
 
         # Now try to make A depend on B — should be rejected (circular: A→B→A)
         state_a = _make_state(case_id_value=case_a.id)
         state_a.prerequisites = []
-        state_a.add_prerequisite(case_b.id)
+        _run(state_a.add_prerequisite(case_b.id))
 
         prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
         assert len(prereqs_a) == 0
@@ -317,21 +334,21 @@ class TestPrerequisites:
         # B depends on A
         state_b = _make_state(case_id_value=case_b.id)
         state_b.prerequisites = []
-        state_b.add_prerequisite(case_a.id)
+        _run(state_b.add_prerequisite(case_a.id))
         prereqs_b = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_b.id)).all()
         assert len(prereqs_b) == 1
 
         # C depends on B
         state_c = _make_state(case_id_value=case_c.id)
         state_c.prerequisites = []
-        state_c.add_prerequisite(case_b.id)
+        _run(state_c.add_prerequisite(case_b.id))
         prereqs_c = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_c.id)).all()
         assert len(prereqs_c) == 1
 
         # Now try to make A depend on C — should be rejected (circular: A→C→B→A)
         state_a = _make_state(case_id_value=case_a.id)
         state_a.prerequisites = []
-        state_a.add_prerequisite(case_c.id)
+        _run(state_a.add_prerequisite(case_c.id))
 
         prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
         assert len(prereqs_a) == 0
@@ -349,14 +366,14 @@ class TestPrerequisites:
         # C depends on B
         state_c = _make_state(case_id_value=case_c.id)
         state_c.prerequisites = []
-        state_c.add_prerequisite(case_b.id)
+        _run(state_c.add_prerequisite(case_b.id))
         prereqs_c = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_c.id)).all()
         assert len(prereqs_c) == 1
 
         # A depends on C — should be allowed (no cycle back to A)
         state_a = _make_state(case_id_value=case_a.id)
         state_a.prerequisites = []
-        state_a.add_prerequisite(case_c.id)
+        _run(state_a.add_prerequisite(case_c.id))
 
         prereqs_a = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id)).all()
         assert len(prereqs_a) == 1
@@ -371,15 +388,15 @@ class TestPrerequisites:
 
         state = _make_state(case_id_value=case_a.id)
         state.prerequisites = []
-        state.add_prerequisite(case_b.id)
+        _run(state.add_prerequisite(case_b.id))
         state.load_prerequisites()
-        state.add_prerequisite(case_c.id)
+        _run(state.add_prerequisite(case_c.id))
         state.load_prerequisites()
 
         session = patch_rx_session
         prereqs = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id).order_by(PrerequisiteModel.order)).all()
         first_id = prereqs[0].id
-        state.delete_prerequisite(first_id)
+        _run(state.delete_prerequisite(first_id))
 
         remaining = session.exec(select(PrerequisiteModel).where(PrerequisiteModel.case_id == case_a.id).order_by(PrerequisiteModel.order)).all()
         assert len(remaining) == 1
@@ -452,9 +469,9 @@ class TestLoadCasesCounts:
 
         state = _make_state(case_id_value=case_a.id)
         state.prerequisites = []
-        state.add_prerequisite(case_b.id)
+        _run(state.add_prerequisite(case_b.id))
         state.load_prerequisites()
-        state.add_prerequisite(case_c.id)
+        _run(state.add_prerequisite(case_c.id))
 
         state2 = _make_state()
         state2.load_cases()
@@ -600,3 +617,63 @@ class TestLinkableAndEmptyCases(LinkableEmptyCasesTests):
         state = _make_state()
         state.load_cases()
         return state
+
+
+_PARENT_FIELDS = {
+    "cases": [], "case": None, "steps": [], "prerequisites": [],
+    "search_value": "", "show_search": False,
+    "sort_by": "created", "sort_asc": False,
+    "search_sort_by": "", "search_sort_asc": True,
+    "case_name_input": "", "navigate_to_edit": False,
+}
+
+
+def _make_child_state(child_cls, case_id_value=0, **extra):
+    """Create a child state (AddCaseState/EditCaseState) with a wired parent."""
+    parent = init_state(CaseState, **_PARENT_FIELDS)
+    state = init_state(child_cls, **extra)
+    object.__setattr__(state, "parent_state", parent)
+    if case_id_value:
+        type(state).case_id = PropertyMock(return_value=case_id_value)
+    return state
+
+
+class TestAddCaseHandleSubmit:
+    """Tests for AddCaseState.handle_submit with audit logging."""
+
+    def test_creates_case_and_logs(self, patch_rx_session):
+        """handle_submit should create the case and call log_action."""
+        state = _make_child_state(AddCaseState, form_data={})
+        with patch("galadriel.case.state.log_action") as mock_log:
+            _run(state.handle_submit({"name": "New Case"}))
+            assert state.parent_state.case is not None
+            assert state.parent_state.case.name == "New Case"
+            mock_log.assert_called_once_with(0, "test", "created", "case", "New Case")
+
+    def test_empty_name_does_not_log(self, patch_rx_session):
+        """handle_submit with empty name should not call log_action."""
+        state = _make_child_state(AddCaseState, form_data={})
+        with patch("galadriel.case.state.log_action") as mock_log:
+            _run(state.handle_submit({"name": ""}))
+            mock_log.assert_not_called()
+
+
+class TestEditCaseHandleSubmit:
+    """Tests for EditCaseState.handle_submit with audit logging."""
+
+    def test_edits_case_and_logs(self, patch_rx_session, make_case):
+        """handle_submit should save edits and call log_action."""
+        case = make_case(name="Old")
+        state = _make_child_state(EditCaseState, case_id_value=case.id, form_data={})
+        with patch("galadriel.case.state.log_action") as mock_log:
+            _run(state.handle_submit({"case_id": str(case.id), "name": "Renamed"}))
+            assert state.parent_state.case.name == "Renamed"
+            mock_log.assert_called_once_with(0, "test", "updated", "case", "Renamed")
+
+    def test_empty_name_does_not_log(self, patch_rx_session, make_case):
+        """handle_submit with empty name should not call log_action."""
+        case = make_case(name="S")
+        state = _make_child_state(EditCaseState, case_id_value=case.id, form_data={})
+        with patch("galadriel.case.state.log_action") as mock_log:
+            _run(state.handle_submit({"case_id": str(case.id), "name": ""}))
+            mock_log.assert_not_called()

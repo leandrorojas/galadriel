@@ -5,6 +5,8 @@ import sqlmodel
 
 from typing import List, Optional
 from .model import CaseModel, StepModel, PrerequisiteModel
+from ..audit.helpers import log_action
+from ..auth.state import Session
 from ..navigation import routes
 from ..utils import consts, timing
 from ..utils.mixins import reorder_move_up, reorder_move_down, reorder_delete, has_steps as _has_steps, toggle_sort_field, sort_items, search_by_name
@@ -37,6 +39,20 @@ class CaseState(rx.State):
 
     search_sort_by: str = ""
     search_sort_asc: bool = True
+
+    async def _get_user_info(self) -> tuple[int, str]:
+        """Return (user_id, username) from the current session."""
+        session_state = await self.get_state(Session)
+        return session_state.user_id or 0, session_state.username or "unknown"
+
+    def _find_prerequisite_info(self, prerequisite_record_id: int) -> str:
+        """Return the prerequisite case name by its record id."""
+        with rx.session() as session:
+            prereq = session.exec(PrerequisiteModel.select().where(PrerequisiteModel.id == prerequisite_record_id)).first()
+            if prereq:
+                case = session.exec(CaseModel.select().where(CaseModel.id == prereq.prerequisite_id)).first()
+                return case.name if case else "unknown"
+        return "unknown"
 
     @rx.var(cache=True)
     def case_id(self) -> int:
@@ -183,7 +199,7 @@ class CaseState(rx.State):
             self.steps = results
             self.step_count = len(results)
 
-    def add_step(self, case_id:int, form_data:dict):
+    async def add_step(self, case_id:int, form_data:dict):
         """Add a new step to the specified case."""
         if (form_data["action"] == ""):
             return rx.toast.error("action cannot be empty")
@@ -207,9 +223,12 @@ class CaseState(rx.State):
             session.refresh(step_to_add)
         self.load_steps()
 
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "updated", "case", self.case.name if self.case else "", f"added step #{new_step_order}")
+
         return rx.toast.success("step added!")
         
-    def update_step_field(self, step_id: int, field: str, value: str):
+    async def update_step_field(self, step_id: int, field: str, value: str):
         """Update a single field on a step when the user leaves the input."""
         allowed_fields = {"action", "expected"}
         if field not in allowed_fields:
@@ -217,33 +236,62 @@ class CaseState(rx.State):
         value = value.strip()
         if field == "action" and not value:
             return rx.toast.error("action cannot be empty")
+        step_order = None
         with rx.session() as session:
             step = session.exec(StepModel.select().where(StepModel.id == step_id, StepModel.case_id == self.case_id)).first()
             if step is None:
                 return rx.toast.error("step not found")
             if getattr(step, field) == value:
                 return
+            step_order = step.order
             setattr(step, field, value)
             session.add(step)
             session.commit()
         self.load_steps()
+        if step_order is not None:
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "updated", "case", self.case.name if self.case else "", f"updated step #{step_order} {field}")
 
-    def delete_step(self, step_id:int):
+    async def delete_step(self, step_id:int):
         """Delete a step and reorder remaining steps."""
+        print(f"[DEBUG delete_step] step_id={step_id!r} type={type(step_id).__name__}, case_id={self.case_id!r} type={type(self.case_id).__name__}")
+        with rx.session() as session:
+            step = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            print(f"[DEBUG delete_step] step found={step is not None}, order={step.order if step else 'N/A'}")
+            step_order = step.order if step else None
         toast = reorder_delete(StepModel, step_id, "case_id", self.case_id, "step", min_count=1)
+        print(f"[DEBUG delete_step] toast={toast!r}, step_order={step_order!r}, case={self.case!r}")
         self.load_steps()
+        if toast is None and step_order is not None:
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "updated", "case", self.case.name if self.case else "", f"removed step #{step_order}")
+            print(f"[DEBUG delete_step] logged action")
+        else:
+            print(f"[DEBUG delete_step] SKIPPED logging: toast={toast!r}, step_order={step_order!r}")
         return toast
-    
-    def move_step_up(self, step_id:int):
+
+    async def move_step_up(self, step_id:int):
         """Move a step one position up in the order."""
+        with rx.session() as session:
+            step = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            step_order = step.order if step else None
         toast = reorder_move_up(StepModel, step_id, "case_id", self.case_id, "step")
         self.load_steps()
+        if toast is None and step_order is not None:
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "case", self.case.name if self.case else "", f"moved step #{step_order} up")
         return toast
 
-    def move_step_down(self, step_id:int):
+    async def move_step_down(self, step_id:int):
         """Move a step one position down in the order."""
+        with rx.session() as session:
+            step = session.exec(StepModel.select().where(StepModel.id == step_id)).first()
+            step_order = step.order if step else None
         toast = reorder_move_down(StepModel, step_id, "case_id", self.case_id, "step")
         self.load_steps()
+        if toast is None and step_order is not None:
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "case", self.case.name if self.case else "", f"moved step #{step_order} down")
         return toast
 
     def load_prerequisites(self):
@@ -284,16 +332,16 @@ class CaseState(rx.State):
                     return True
         return False
 
-    def add_prerequisite(self, prerequisite_id:int):
+    async def add_prerequisite(self, prerequisite_id:int):
         """Link a prerequisite case to the current case."""
         if (int(self.case_id) == prerequisite_id): return rx.toast.error("self cannot be prerequisite")
-        
+
         if self.has_any_prerequisites(prerequisite_id):
             if self.is_prerequisite_redundant(prerequisite_id, self.case_id):
                 return rx.toast.error("cannot add redundant prerequisite")
-            
+
         if not self.has_steps(prerequisite_id): return rx.toast.error("prerequisite must have at least one step")
-        
+
         with rx.session() as session:
             new_prerequisite_order = 1
             if (len(self.prerequisites) > 0):
@@ -317,8 +365,12 @@ class CaseState(rx.State):
             session.add(prerequisite_to_add)
             session.commit()
             session.refresh(prerequisite_to_add)
+            prereq_case = session.exec(CaseModel.select().where(CaseModel.id == prerequisite_id)).first()
         self.search_value = ""
         self.load_prerequisites()
+
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "linked", "case", self.case.name if self.case else "", f"prerequisite '{prereq_case.name if prereq_case else 'unknown'}'")
 
         return rx.toast.success("prerequisite added!")
 
@@ -326,24 +378,34 @@ class CaseState(rx.State):
         """Toggle the search panel visibility."""
         self.show_search = not(self.show_search)
 
-    def delete_prerequisite(self, prerequisite_id:int):
+    async def delete_prerequisite(self, prerequisite_id:int):
         """Delete a prerequisite and reorder remaining ones."""
+        prereq_name = self._find_prerequisite_info(prerequisite_id)
         toast = reorder_delete(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         self.load_prerequisites()
+        if toast is None:
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "unlinked", "case", self.case.name if self.case else "", f"prerequisite '{prereq_name}'")
         return toast
 
-    def move_prerequisite_up(self, prerequisite_id:int):
+    async def move_prerequisite_up(self, prerequisite_id:int):
         """Move a prerequisite one position up in the order."""
+        prereq_name = self._find_prerequisite_info(prerequisite_id)
         toast = reorder_move_up(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         if toast is None:
             self.load_prerequisites()
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "case", self.case.name if self.case else "", f"moved prerequisite '{prereq_name}' up")
         return toast
 
-    def move_prerequisite_down(self, prerequisite_id:int):
+    async def move_prerequisite_down(self, prerequisite_id:int):
         """Move a prerequisite one position down in the order."""
+        prereq_name = self._find_prerequisite_info(prerequisite_id)
         toast = reorder_move_down(PrerequisiteModel, prerequisite_id, "case_id", self.case_id, "prerequisite")
         if toast is None:
             self.load_prerequisites()
+            user_id, username = await self._get_user_info()
+            log_action(user_id, username, "reordered", "case", self.case.name if self.case else "", f"moved prerequisite '{prereq_name}' down")
         return toast
             
 class AddCaseState(CaseState):
@@ -351,7 +413,7 @@ class AddCaseState(CaseState):
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and create a new case from the form."""
         self.form_data = form_data
         result = self.add_case(form_data)
@@ -361,6 +423,8 @@ class AddCaseState(CaseState):
         if result != consts.RETURN_VALUE:
             self.navigate_to_edit = False
             return result
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "created", "case", form_data["name"])
         self.case_name_input = ""
         if self.navigate_to_edit:
             self.navigate_to_edit = False
@@ -372,7 +436,7 @@ class EditCaseState(CaseState):
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and save case edits from the form."""
         try:
             case_id = int(form_data.pop("case_id"))
@@ -383,6 +447,8 @@ class EditCaseState(CaseState):
         result = self.save_case_edits(case_id, updated_data)
         if result is None: return rx.toast.error("name cannot be empty")
         if result != consts.RETURN_VALUE: return result
+        user_id, username = await self._get_user_info()
+        log_action(user_id, username, "updated", "case", form_data["name"])
         return rx.redirect(self.case_url)
     
     def get_detail_url(self, id:int):
@@ -394,7 +460,7 @@ class AddStepState(CaseState):
 
     form_data:dict = {}
 
-    def handle_submit(self, form_data):
+    async def handle_submit(self, form_data):
         """Validate and add a new step from the form."""
         try:
             case_id = int(form_data.pop("case_id"))
@@ -402,5 +468,5 @@ class AddStepState(CaseState):
             return rx.toast.error("Invalid case ID")
         self.form_data = form_data
         updated_data = {**form_data}
-        result = self.add_step(case_id, updated_data)
+        result = await self.add_step(case_id, updated_data)
         return [result, rx.call_script("document.getElementById('step-action-input').focus()")]

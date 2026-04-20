@@ -40,9 +40,10 @@ class ScenarioState(rx.State):
 
     def _find_case_info(self, scenario_case_id: int) -> str:
         """Return the case name for a scenario-case link by its id."""
-        for tc in self.test_cases:
-            if tc.id == scenario_case_id:
-                return getattr(tc, "case_name", "unknown")
+        with rx.session() as session:
+            link = session.exec(ScenarioCaseModel.select().where(ScenarioCaseModel.id == scenario_case_id)).first()
+            if link:
+                return link.case_name or "unknown"
         return "unknown"
 
     @rx.var(cache=True)
